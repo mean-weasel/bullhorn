@@ -25,14 +25,14 @@ export function IOSToggleSwitch({
 }: IOSToggleSwitchProps) {
   const sizeConfig = {
     sm: {
-      track: 'w-8 h-5',
+      track: 'w-9 h-5',
       thumb: 'w-3.5 h-3.5',
-      thumbOffset: checked ? 'translate-x-3.5' : 'translate-x-0.5',
+      thumbOffset: checked ? 'translate-x-4' : 'translate-x-0.5',
     },
     md: {
-      track: 'w-11 h-6',
+      track: 'w-12 h-7',
       thumb: 'w-5 h-5',
-      thumbOffset: checked ? 'translate-x-5' : 'translate-x-0.5',
+      thumbOffset: checked ? 'translate-x-5' : 'translate-x-1',
     },
     lg: {
       track: 'w-14 h-8',
@@ -53,11 +53,12 @@ export function IOSToggleSwitch({
       disabled={disabled}
       className={cn(
         'relative inline-flex shrink-0 cursor-pointer rounded-full',
-        'transition-colors duration-200 ease-in-out',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--gold))]/50 focus-visible:ring-offset-2',
+        'transition-all duration-200 ease-in-out',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
+        'border-2 border-border',
         config.track,
         checked
-          ? 'bg-[hsl(var(--gold))]'
+          ? 'bg-sticker-green'
           : 'bg-muted',
         disabled && 'opacity-50 cursor-not-allowed',
         !label && !description && className
@@ -67,9 +68,9 @@ export function IOSToggleSwitch({
       <span
         aria-hidden="true"
         className={cn(
-          'pointer-events-none inline-block rounded-full bg-white shadow-lg',
+          'pointer-events-none inline-block rounded-full bg-white',
           'transform ring-0 transition-transform duration-200 ease-in-out',
-          'absolute top-0.5',
+          'absolute top-0.5 border-2 border-border shadow-sm',
           config.thumb,
           config.thumbOffset
         )}
@@ -97,7 +98,7 @@ export function IOSToggleSwitch({
     >
       <div className="flex-1 min-w-0">
         {label && (
-          <p className="font-medium text-sm text-foreground">{label}</p>
+          <p className="font-bold text-sm text-foreground">{label}</p>
         )}
         {description && (
           <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
@@ -106,19 +107,20 @@ export function IOSToggleSwitch({
       <div
         className={cn(
           'relative inline-flex shrink-0 rounded-full',
-          'transition-colors duration-200 ease-in-out',
+          'transition-all duration-200 ease-in-out',
+          'border-2 border-border',
           config.track,
           checked
-            ? 'bg-[hsl(var(--gold))]'
+            ? 'bg-sticker-green'
             : 'bg-muted'
         )}
       >
         <span
           aria-hidden="true"
           className={cn(
-            'pointer-events-none inline-block rounded-full bg-white shadow-lg',
+            'pointer-events-none inline-block rounded-full bg-white',
             'transform ring-0 transition-transform duration-200 ease-in-out',
-            'absolute top-0.5',
+            'absolute top-0.5 border-2 border-border shadow-sm',
             config.thumb,
             config.thumbOffset
           )}

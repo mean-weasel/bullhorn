@@ -62,9 +62,11 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white',
-          'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-          'hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
+          'w-9 h-9 rounded-md flex items-center justify-center text-xs font-bold text-white',
+          'bg-sticker-purple',
+          'border-2 border-border',
+          'hover:translate-y-[-1px] transition-all',
+          'focus:outline-none focus:ring-2 focus:ring-primary/50'
         )}
         aria-label="User menu"
         aria-expanded={isOpen}
@@ -76,13 +78,14 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
         <div
           className={cn(
             'absolute right-0 mt-2 w-56 py-2',
-            'bg-card rounded-xl border border-border shadow-lg',
+            'bg-card rounded-md border-[3px] border-border',
+            'shadow-[4px_4px_0_hsl(var(--border))]',
             'animate-slide-up z-50'
           )}
         >
           {/* User info */}
-          <div className="px-4 py-2 border-b border-border">
-            <p className="text-sm font-medium truncate">
+          <div className="px-4 py-3 border-b-2 border-border">
+            <p className="text-sm font-bold truncate">
               {displayName || 'User'}
             </p>
             <p className="text-xs text-muted-foreground truncate">{email}</p>
@@ -94,8 +97,8 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
               href="/profile"
               onClick={() => setIsOpen(false)}
               className={cn(
-                'flex items-center gap-3 px-4 py-2 text-sm',
-                'text-foreground hover:bg-accent transition-colors'
+                'flex items-center gap-3 px-4 py-2.5 text-sm font-medium',
+                'text-foreground hover:bg-secondary transition-colors'
               )}
             >
               <User className="w-4 h-4" />
@@ -106,7 +109,7 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
               onClick={handleLogout}
               disabled={isLoggingOut}
               className={cn(
-                'flex items-center gap-3 px-4 py-2 text-sm w-full text-left',
+                'flex items-center gap-3 px-4 py-2.5 text-sm w-full text-left font-medium',
                 'text-destructive hover:bg-destructive/10 transition-colors',
                 isLoggingOut && 'opacity-50 cursor-not-allowed'
               )}

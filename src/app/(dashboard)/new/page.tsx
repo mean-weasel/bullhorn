@@ -587,15 +587,15 @@ export default function EditorPage() {
       <div className="p-4 md:p-8 max-w-2xl animate-slide-up">
         <div className="mb-4 md:mb-6">
           <div className="flex items-center gap-3 mb-1 md:mb-2">
-            <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">
-              {isNew ? 'Create Post' : 'Edit Post'}
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+              {isNew ? '✏️ Create Post' : '📝 Edit Post'}
             </h1>
             <AutoSaveIndicator status={autoSaveStatus} />
           </div>
           <p className="text-sm md:text-base text-muted-foreground">
             Compose your message and schedule it across multiple platforms.
           </p>
-          <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
+          <div className="h-1 w-16 gradient-bar mt-2 rounded-full" />
         </div>
 
         {/* Platform selector (single selection) */}
@@ -608,15 +608,16 @@ export default function EditorPage() {
                 key={platform}
                 onClick={() => setPlatform(platform)}
                 className={cn(
-                  'flex items-center gap-2 px-3 md:px-4 py-2.5 md:py-3 rounded-xl border-2 transition-all',
-                  'font-medium text-sm min-h-[44px]', // 44px minimum touch target
+                  'flex items-center gap-2 px-3 md:px-4 py-2.5 md:py-3 rounded-md transition-all',
+                  'font-bold text-sm min-h-[44px]',
+                  'border-[3px] border-border',
                   isActive
                     ? platform === 'twitter'
-                      ? 'border-twitter bg-twitter-soft text-twitter'
+                      ? 'bg-twitter/10 text-twitter shadow-[3px_3px_0_hsl(var(--twitter))]'
                       : platform === 'linkedin'
-                        ? 'border-linkedin bg-linkedin-soft text-linkedin'
-                        : 'border-reddit bg-reddit-soft text-reddit'
-                    : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-accent'
+                        ? 'bg-linkedin/10 text-linkedin shadow-[3px_3px_0_hsl(var(--linkedin))]'
+                        : 'bg-reddit/10 text-reddit shadow-[3px_3px_0_hsl(var(--reddit))]'
+                    : 'bg-card text-muted-foreground shadow-[2px_2px_0_hsl(var(--border))] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]'
                 )}
               >
                 <PlatformIcon platform={platform} />
@@ -632,14 +633,15 @@ export default function EditorPage() {
           <button
             onClick={() => setShowCampaignDropdown(!showCampaignDropdown)}
             className={cn(
-              'flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all w-full',
+              'flex items-center gap-2 px-4 py-2.5 rounded-md transition-all w-full',
+              'border-[3px] border-border',
               post.campaignId
-                ? 'border-[hsl(var(--gold))]/30 bg-[hsl(var(--gold))]/5'
-                : 'border-border bg-card hover:border-[hsl(var(--gold))]/30'
+                ? 'bg-primary/5 shadow-[3px_3px_0_hsl(var(--primary)/0.3)]'
+                : 'bg-card shadow-[2px_2px_0_hsl(var(--border))] hover:shadow-[3px_3px_0_hsl(var(--border))]'
             )}
           >
-            <FolderOpen className="w-4 h-4 text-[hsl(var(--gold-dark))]" />
-            <span className="text-sm font-medium flex-1 text-left truncate">
+            <FolderOpen className="w-4 h-4 text-primary" />
+            <span className="text-sm font-bold flex-1 text-left truncate">
               {post.campaignId
                 ? campaigns.find((c) => c.id === post.campaignId)?.name || 'Unknown Campaign'
                 : 'No Campaign'}
@@ -649,15 +651,15 @@ export default function EditorPage() {
           {showCampaignDropdown && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowCampaignDropdown(false)} />
-              <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-card border border-border rounded-xl shadow-lg py-1 max-h-[200px] overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] py-1 max-h-[200px] overflow-y-auto">
                 <button
                   onClick={() => {
                     setPost((prev) => ({ ...prev, campaignId: undefined }))
                     setShowCampaignDropdown(false)
                   }}
                   className={cn(
-                    'w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-accent transition-colors text-left',
-                    !post.campaignId && 'bg-[hsl(var(--gold))]/10 text-[hsl(var(--gold-dark))]'
+                    'w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors text-left',
+                    !post.campaignId && 'bg-primary/10 text-primary font-bold'
                   )}
                 >
                   <X className="w-4 h-4" />
@@ -671,8 +673,8 @@ export default function EditorPage() {
                       setShowCampaignDropdown(false)
                     }}
                     className={cn(
-                      'w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-accent transition-colors text-left',
-                      post.campaignId === campaign.id && 'bg-[hsl(var(--gold))]/10 text-[hsl(var(--gold-dark))]'
+                      'w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium hover:bg-accent transition-colors text-left',
+                      post.campaignId === campaign.id && 'bg-primary/10 text-primary font-bold'
                     )}
                   >
                     <FolderOpen className="w-4 h-4" />
@@ -736,19 +738,20 @@ export default function EditorPage() {
 
         {/* Content textarea */}
         <div className="mb-4 md:mb-6">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Content
+          <label className="block text-xs font-extrabold uppercase tracking-wider text-muted-foreground mb-2">
+            ✍️ Content
           </label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="What's on your mind? Share your thoughts, announce something exciting, or start a conversation..."
             className={cn(
-              'w-full min-h-[150px] md:min-h-[200px] p-3 md:p-4 rounded-xl',
-              'bg-card border border-border',
+              'w-full min-h-[150px] md:min-h-[200px] p-3 md:p-4 rounded-md',
+              'bg-card border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
               'text-base leading-relaxed',
               'placeholder:text-muted-foreground',
-              'focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10',
+              'focus:outline-none focus:ring-2 focus:ring-primary/50',
               'resize-y transition-all'
             )}
           />
@@ -1339,11 +1342,15 @@ export default function EditorPage() {
             disabled={isSaving}
             title="Save Draft (⌘S)"
             className={cn(
-              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-              'bg-secondary text-secondary-foreground border border-border',
-              'font-medium text-sm',
-              'hover:bg-accent transition-colors',
-              'disabled:opacity-50',
+              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-md min-h-[44px]',
+              'bg-secondary text-secondary-foreground',
+              'font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+              'disabled:opacity-50 disabled:hover:translate-y-0',
+              'transition-all',
               'flex-shrink-0',
               !isNew && 'sm:ml-auto'
             )}
@@ -1357,11 +1364,15 @@ export default function EditorPage() {
             disabled={isSaving || !canSchedule}
             title={canSchedule ? "Schedule Post (⌘↵)" : "Select a date and time to schedule"}
             className={cn(
-              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-              'bg-gradient-to-r from-twitter to-[#0d8bd9] text-white',
-              'font-medium text-sm',
-              'hover:opacity-90 transition-opacity',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-md min-h-[44px]',
+              'bg-sticker-blue text-white',
+              'font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
+              'transition-all',
               'flex-shrink-0'
             )}
           >
@@ -1407,10 +1418,10 @@ export default function EditorPage() {
       </div>
 
       {/* Preview panel - hidden on mobile */}
-      <div className="hidden lg:block border-l border-border bg-card p-6 overflow-y-auto">
+      <div className="hidden lg:block border-l-[3px] border-border bg-card p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Live Preview
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
+            👁️ Live Preview
           </h3>
         </div>
 

@@ -27,10 +27,10 @@ import { useAnalyticsStore, useAnalyticsConnections } from '@/lib/analyticsStore
 import { ConnectAnalyticsModal } from '@/components/analytics/ConnectAnalyticsModal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
-const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun }[] = [
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'system', label: 'System', icon: Monitor },
+const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun; emoji: string }[] = [
+  { value: 'light', label: 'Light', icon: Sun, emoji: '☀️' },
+  { value: 'dark', label: 'Dark', icon: Moon, emoji: '🌙' },
+  { value: 'system', label: 'System', icon: Monitor, emoji: '💻' },
 ]
 
 export default function SettingsPage() {
@@ -141,28 +141,28 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-8 animate-fade-in">
-      <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight mb-2">Settings</h1>
+    <div className="max-w-2xl mx-auto p-4 md:p-8 animate-fade-in">
+      <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">⚙️ Settings</h1>
       <p className="text-muted-foreground mb-2">
         Configure your preferences.
       </p>
-      <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mb-8 rounded-full" />
+      <div className="h-1 w-20 gradient-bar mb-8 rounded-full" />
 
       {/* Status messages */}
       {success && (
-        <div className="flex items-center gap-2 p-4 rounded-lg bg-green-500/10 text-green-500 mb-6 animate-slide-up">
+        <div className="flex items-center gap-2 p-4 rounded-md bg-sticker-green/10 text-sticker-green border-2 border-sticker-green/30 mb-6 animate-slide-up font-bold">
           <Check className="w-4 h-4" />
           {success}
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive mb-6 animate-slide-up">
+        <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30 mb-6 animate-slide-up font-medium">
           <AlertCircle className="w-4 h-4" />
           {error}
           <button
             onClick={() => setError(null)}
-            className="ml-auto text-sm hover:underline"
+            className="ml-auto text-sm font-bold hover:underline"
           >
             Dismiss
           </button>
@@ -170,31 +170,30 @@ export default function SettingsPage() {
       )}
 
       {/* Theme */}
-      <div className="p-6 rounded-xl border border-border bg-card mb-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Appearance
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
+          🎨 Appearance
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
           Choose your preferred color scheme.
         </p>
         <div className="flex gap-2">
           {THEME_OPTIONS.map((option) => {
-            const Icon = option.icon
             const isActive = theme === option.value
             return (
               <button
                 key={option.value}
                 onClick={() => setTheme(option.value)}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg',
-                  'text-sm font-medium transition-all',
-                  'border-2',
+                  'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md',
+                  'text-sm font-bold transition-all',
+                  'border-[3px]',
                   isActive
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                    ? 'border-border bg-primary text-primary-foreground shadow-[3px_3px_0_hsl(var(--border))]'
+                    : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-secondary shadow-[2px_2px_0_hsl(var(--border))]'
                 )}
               >
-                <Icon className="w-4 h-4" />
+                <span>{option.emoji}</span>
                 {option.label}
               </button>
             )
@@ -203,19 +202,19 @@ export default function SettingsPage() {
       </div>
 
       {/* Notifications */}
-      <div className="p-6 rounded-xl border border-border bg-card mb-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Notifications
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
+          🔔 Notifications
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
           Get notified when your scheduled posts are due.
         </p>
 
         {notificationPermission === 'denied' ? (
-          <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive">
+          <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30">
             <AlertCircle className="w-4 h-4" />
             <div>
-              <p className="font-medium">Notifications blocked</p>
+              <p className="font-bold">Notifications blocked</p>
               <p className="text-sm opacity-80">
                 Please enable notifications in your browser settings.
               </p>
@@ -225,9 +224,12 @@ export default function SettingsPage() {
           <button
             onClick={handleRequestPermission}
             className={cn(
-              'flex items-center gap-2 px-4 py-3 rounded-lg w-full',
-              'bg-primary text-primary-foreground font-medium text-sm',
-              'hover:opacity-90 transition-opacity'
+              'flex items-center gap-2 px-4 py-3 rounded-md w-full',
+              'bg-primary text-primary-foreground font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'transition-all'
             )}
           >
             <Bell className="w-4 h-4" />
@@ -235,13 +237,13 @@ export default function SettingsPage() {
           </button>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-green-500">
+            <div className="flex items-center gap-2 text-sm text-sticker-green font-bold">
               <Check className="w-4 h-4" />
               Browser notifications enabled
             </div>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-border bg-background">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-md border-2 border-border bg-card">
               {notificationsEnabled ? (
-                <Bell className="w-5 h-5 text-[hsl(var(--gold))] flex-shrink-0" />
+                <Bell className="w-5 h-5 text-primary flex-shrink-0" />
               ) : (
                 <BellOff className="w-5 h-5 text-muted-foreground flex-shrink-0" />
               )}
@@ -257,9 +259,9 @@ export default function SettingsPage() {
       </div>
 
       {/* Analytics */}
-      <div className="p-6 rounded-xl border border-border bg-card mb-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Analytics
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
+          📊 Analytics
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
           Connect Google Analytics to view website metrics in your dashboard.
@@ -274,23 +276,23 @@ export default function SettingsPage() {
             {connections.map((connection) => (
               <div
                 key={connection.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-border bg-background"
+                className="flex items-center justify-between p-3 rounded-md border-2 border-border bg-card"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                    <BarChart3 className="w-5 h-5 text-blue-500" />
+                  <div className="w-10 h-10 rounded-md bg-sticker-blue/10 flex items-center justify-center border-2 border-sticker-blue/30">
+                    <BarChart3 className="w-5 h-5 text-sticker-blue" />
                   </div>
                   <div>
-                    <div className="font-medium">
+                    <div className="font-bold">
                       {connection.propertyName || `Property ${connection.propertyId}`}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       ID: {connection.propertyId}
                       {connection.syncStatus === 'error' && (
-                        <span className="ml-2 text-destructive">Sync error</span>
+                        <span className="ml-2 text-destructive font-bold">Sync error</span>
                       )}
                       {connection.syncStatus === 'success' && (
-                        <span className="ml-2 text-green-500">Connected</span>
+                        <span className="ml-2 text-sticker-green font-bold">Connected</span>
                       )}
                     </div>
                   </div>
@@ -298,9 +300,9 @@ export default function SettingsPage() {
                 <button
                   onClick={() => setConnectionToDelete(connection.id)}
                   className={cn(
-                    'p-2 rounded-lg',
+                    'p-2 rounded-md',
                     'text-muted-foreground hover:text-destructive',
-                    'hover:bg-destructive/10 transition-colors'
+                    'hover:bg-destructive/10 border-2 border-transparent hover:border-destructive/30 transition-all'
                   )}
                   title="Remove connection"
                 >
@@ -312,9 +314,9 @@ export default function SettingsPage() {
             <button
               onClick={handleConnectAnalytics}
               className={cn(
-                'flex items-center gap-2 px-4 py-2.5 rounded-lg w-full',
-                'border border-dashed border-border',
-                'text-muted-foreground hover:text-foreground',
+                'flex items-center gap-2 px-4 py-2.5 rounded-md w-full',
+                'border-2 border-dashed border-border',
+                'text-muted-foreground hover:text-foreground font-medium',
                 'hover:border-primary/50 transition-all'
               )}
             >
@@ -326,9 +328,12 @@ export default function SettingsPage() {
           <button
             onClick={handleConnectAnalytics}
             className={cn(
-              'flex items-center gap-2 px-4 py-3 rounded-lg w-full',
-              'bg-blue-500 text-white font-medium text-sm',
-              'hover:bg-blue-600 transition-colors'
+              'flex items-center gap-2 px-4 py-3 rounded-md w-full',
+              'bg-sticker-blue text-white font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'transition-all'
             )}
           >
             <BarChart3 className="w-4 h-4" />
@@ -338,25 +343,25 @@ export default function SettingsPage() {
       </div>
 
       {/* About */}
-      <div className="p-6 rounded-xl border border-border bg-card">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          About
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))]">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
+          ℹ️ About
         </h2>
         <ul className="space-y-3 text-sm text-muted-foreground">
           <li className="flex items-start gap-3">
-            <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
+            <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
               1
             </span>
             <span>Create and organize your social media post ideas.</span>
           </li>
           <li className="flex items-start gap-3">
-            <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
+            <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
               2
             </span>
             <span>Schedule posts and get reminded when they&apos;re due.</span>
           </li>
           <li className="flex items-start gap-3">
-            <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium flex-shrink-0 mt-0.5">
+            <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
               3
             </span>
             <span>All data is stored locally in your browser.</span>

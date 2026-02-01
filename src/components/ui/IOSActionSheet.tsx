@@ -80,11 +80,11 @@ export function IOSActionSheet<T = string>({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Options container */}
-        <div className="bg-card/95 backdrop-blur-xl rounded-2xl overflow-hidden shadow-xl border border-border/50">
+        <div className="bg-card border-[3px] border-border rounded-lg overflow-hidden shadow-[4px_4px_0_hsl(var(--border))]">
           {/* Title */}
           {title && (
-            <div className="px-4 py-3 text-center border-b border-border/50">
-              <span className="text-sm font-medium text-muted-foreground">
+            <div className="px-4 py-3 text-center border-b-2 border-border bg-secondary">
+              <span className="text-sm font-bold text-foreground">
                 {title}
               </span>
             </div>
@@ -98,11 +98,11 @@ export function IOSActionSheet<T = string>({
                 type="button"
                 onClick={() => handleSelect(option)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-4 py-3.5',
+                  'w-full flex items-center gap-3 px-4 py-4',
                   'text-left transition-colors',
-                  'active:bg-accent/80',
-                  'hover:bg-accent/50',
-                  index !== options.length - 1 && 'border-b border-border/30',
+                  'active:bg-primary/20',
+                  'hover:bg-secondary',
+                  index !== options.length - 1 && 'border-b-2 border-border',
                   option.destructive && 'text-destructive'
                 )}
               >
@@ -119,7 +119,7 @@ export function IOSActionSheet<T = string>({
                 {/* Label and description */}
                 <div className="flex-1 min-w-0">
                   <span className={cn(
-                    'text-base font-medium block',
+                    'text-base font-bold block',
                     option.destructive ? 'text-destructive' : 'text-foreground'
                   )}>
                     {option.label}
@@ -133,7 +133,7 @@ export function IOSActionSheet<T = string>({
 
                 {/* Checkmark for selected */}
                 {selectedValue === option.value && (
-                  <Check className="w-5 h-5 text-[hsl(var(--gold))] flex-shrink-0" />
+                  <Check className="w-5 h-5 text-sticker-green flex-shrink-0" />
                 )}
               </button>
             ))}
@@ -145,11 +145,12 @@ export function IOSActionSheet<T = string>({
           type="button"
           onClick={onClose}
           className={cn(
-            'w-full mt-2 px-4 py-3.5',
-            'bg-card/95 backdrop-blur-xl rounded-2xl',
-            'text-base font-semibold text-[hsl(var(--gold))]',
-            'active:bg-accent/80 transition-colors',
-            'shadow-xl border border-border/50'
+            'w-full mt-3 px-4 py-4',
+            'bg-card border-[3px] border-border rounded-lg',
+            'text-base font-bold text-primary',
+            'active:bg-primary/20 transition-colors',
+            'shadow-[4px_4px_0_hsl(var(--border))]',
+            'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]'
           )}
         >
           {cancelText}

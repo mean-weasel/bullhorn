@@ -117,22 +117,22 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => router.back()}
-          className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent border-2 border-transparent hover:border-border transition-all"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-2xl font-display font-bold tracking-tight">
-            {isEditing ? 'Edit Launch Post' : 'New Launch Post'}
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            {isEditing ? '📝 Edit Launch Post' : '🚀 New Launch Post'}
           </h1>
-          <div className="h-1 w-12 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-1 rounded-full" />
+          <div className="h-1 w-12 gradient-bar mt-1 rounded-full" />
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Platform Selection */}
-        <div className="bg-card border border-border rounded-xl p-4 md:p-6">
-          <label className="block text-sm font-medium mb-3">
+        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6">
+          <label className="block text-sm font-bold mb-3">
             Platform <span className="text-destructive">*</span>
           </label>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -143,10 +143,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                   type="button"
                   onClick={() => setPlatform(key)}
                   className={cn(
-                    'flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm transition-all',
+                    'flex items-center gap-2 px-3 py-2.5 rounded-md text-sm transition-all',
+                    'border-[3px] border-border font-medium',
                     platform === key
-                      ? 'border-[hsl(var(--gold))] bg-[hsl(var(--gold))]/10 text-foreground'
-                      : 'border-border hover:border-[hsl(var(--gold))]/50 hover:bg-accent'
+                      ? 'bg-primary/10 text-foreground shadow-[3px_3px_0_hsl(var(--primary)/0.3)]'
+                      : 'bg-card shadow-[2px_2px_0_hsl(var(--border))] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]'
                   )}
                 >
                   <span
@@ -169,7 +170,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
             href={platformUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-1.5 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
           >
             <ExternalLink className="w-3 h-3" />
             Open {platformInfo.name} submission page
@@ -177,15 +178,15 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         </div>
 
         {/* Main Fields */}
-        <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4">
+        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
           {/* Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-2">
+            <label htmlFor="title" className="block text-sm font-bold mb-2">
               Title <span className="text-destructive">*</span>
               {charLimits.title && (
                 <span
                   className={cn(
-                    'ml-2 text-xs',
+                    'ml-2 text-xs font-medium',
                     title.length > charLimits.title ? 'text-destructive' : 'text-muted-foreground'
                   )}
                 >
@@ -207,16 +208,17 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                     : 'Enter post title...'
               }
               className={cn(
-                'w-full px-3 py-2.5 rounded-lg',
-                'bg-background border border-border',
-                'text-foreground placeholder:text-muted-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                'w-full px-4 py-3 rounded-md',
+                'bg-card text-foreground placeholder-muted-foreground',
+                'border-[3px] border-border',
+                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'focus:outline-none focus:ring-2 focus:ring-primary/50',
                 'transition-all'
               )}
               required
             />
             {platform.startsWith('hacker_news') && (
-              <p className="text-xs text-muted-foreground mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5 font-medium">
                 {platform === 'hacker_news_show' && 'Start with "Show HN:" followed by your product name'}
                 {platform === 'hacker_news_ask' && 'Start with "Ask HN:" followed by your question'}
                 {platform === 'hacker_news_link' && 'Keep the title factual and avoid clickbait'}
@@ -226,10 +228,10 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
           {/* URL */}
           <div>
-            <label htmlFor="url" className="block text-sm font-medium mb-2">
+            <label htmlFor="url" className="block text-sm font-bold mb-2">
               URL {platformRequiresUrl && <span className="text-destructive">*</span>}
               {!platformRequiresUrl && (
-                <span className="text-xs text-muted-foreground ml-2">(optional for Ask HN)</span>
+                <span className="text-xs text-muted-foreground ml-2 font-medium">(optional for Ask HN)</span>
               )}
             </label>
             <input
@@ -239,10 +241,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://your-product.com"
               className={cn(
-                'w-full px-3 py-2.5 rounded-lg',
-                'bg-background border border-border',
-                'text-foreground placeholder:text-muted-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                'w-full px-4 py-3 rounded-md',
+                'bg-card text-foreground placeholder-muted-foreground',
+                'border-[3px] border-border',
+                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'focus:outline-none focus:ring-2 focus:ring-primary/50',
                 'transition-all'
               )}
               required={platformRequiresUrl}
@@ -251,12 +254,12 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium mb-2">
+            <label htmlFor="description" className="block text-sm font-bold mb-2">
               Description
               {charLimits.description && (
                 <span
                   className={cn(
-                    'ml-2 text-xs',
+                    'ml-2 text-xs font-medium',
                     description.length > charLimits.description
                       ? 'text-destructive'
                       : 'text-muted-foreground'
@@ -273,10 +276,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
               placeholder="Describe your product or what makes it unique..."
               rows={4}
               className={cn(
-                'w-full px-3 py-2.5 rounded-lg',
-                'bg-background border border-border',
-                'text-foreground placeholder:text-muted-foreground',
-                'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                'w-full px-4 py-3 rounded-md',
+                'bg-card text-foreground placeholder-muted-foreground',
+                'border-[3px] border-border',
+                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'focus:outline-none focus:ring-2 focus:ring-primary/50',
                 'resize-none transition-all'
               )}
             />
@@ -285,8 +289,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
         {/* Platform-Specific Fields */}
         {platform === 'product_hunt' && (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4">
-            <h3 className="font-medium text-sm flex items-center gap-2">
+          <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+            <h3 className="font-bold text-sm flex items-center gap-2">
               <span className={cn('w-5 h-5 rounded flex items-center justify-center text-xs font-bold', platformInfo.bgColor, platformInfo.color)}>
                 P
               </span>
@@ -295,9 +299,9 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* Tagline */}
             <div>
-              <label htmlFor="tagline" className="block text-sm font-medium mb-2">
+              <label htmlFor="tagline" className="block text-sm font-bold mb-2">
                 Tagline
-                <span className={cn('ml-2 text-xs', getPlatformFieldString('tagline').length > 60 ? 'text-destructive' : 'text-muted-foreground')}>
+                <span className={cn('ml-2 text-xs font-medium', getPlatformFieldString('tagline').length > 60 ? 'text-destructive' : 'text-muted-foreground')}>
                   {getPlatformFieldString('tagline').length}/60
                 </span>
               </label>
@@ -309,10 +313,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 placeholder="A short, catchy description (60 chars max)"
                 maxLength={60}
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -320,14 +325,14 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* Pricing */}
             <div>
-              <label htmlFor="pricing" className="block text-sm font-medium mb-2">
+              <label htmlFor="pricing" className="block text-sm font-bold mb-2">
                 Pricing Model
               </label>
               <select
                 id="pricing"
                 value={getPlatformFieldString('pricing') || 'free'}
                 onChange={(e) => updatePlatformField('pricing', e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm"
+                className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-sm font-medium"
               >
                 <option value="free">Free</option>
                 <option value="freemium">Freemium</option>
@@ -337,7 +342,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* First Comment */}
             <div>
-              <label htmlFor="firstComment" className="block text-sm font-medium mb-2">
+              <label htmlFor="firstComment" className="block text-sm font-bold mb-2">
                 First Comment (Maker&apos;s Introduction)
               </label>
               <textarea
@@ -347,14 +352,15 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 placeholder="Introduce yourself and share the story behind your product..."
                 rows={4}
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'resize-none transition-all'
                 )}
               />
-              <p className="text-xs text-muted-foreground mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5 font-medium">
                 This is the critical first comment you&apos;ll post as the maker
               </p>
             </div>
@@ -362,8 +368,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         )}
 
         {platform === 'hacker_news_ask' && (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4">
-            <h3 className="font-medium text-sm flex items-center gap-2">
+          <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+            <h3 className="font-bold text-sm flex items-center gap-2">
               <span className={cn('w-5 h-5 rounded flex items-center justify-center text-xs font-bold', platformInfo.bgColor, platformInfo.color)}>
                 Y
               </span>
@@ -372,7 +378,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* Question Body */}
             <div>
-              <label htmlFor="text" className="block text-sm font-medium mb-2">
+              <label htmlFor="text" className="block text-sm font-bold mb-2">
                 Question Body
               </label>
               <textarea
@@ -382,10 +388,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 placeholder="Provide more context for your question..."
                 rows={6}
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'resize-none transition-all'
                 )}
               />
@@ -394,8 +401,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         )}
 
         {platform === 'beta_list' && (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4">
-            <h3 className="font-medium text-sm flex items-center gap-2">
+          <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+            <h3 className="font-bold text-sm flex items-center gap-2">
               <span className={cn('w-5 h-5 rounded flex items-center justify-center text-xs font-bold', platformInfo.bgColor, platformInfo.color)}>
                 B
               </span>
@@ -404,9 +411,9 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* One Sentence Pitch */}
             <div>
-              <label htmlFor="pitch" className="block text-sm font-medium mb-2">
+              <label htmlFor="pitch" className="block text-sm font-bold mb-2">
                 One-Sentence Pitch
-                <span className={cn('ml-2 text-xs', getPlatformFieldString('oneSentencePitch').length > 140 ? 'text-destructive' : 'text-muted-foreground')}>
+                <span className={cn('ml-2 text-xs font-medium', getPlatformFieldString('oneSentencePitch').length > 140 ? 'text-destructive' : 'text-muted-foreground')}>
                   {getPlatformFieldString('oneSentencePitch').length}/140
                 </span>
               </label>
@@ -418,14 +425,15 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 placeholder="One sentence that explains what your product does..."
                 maxLength={140}
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
-              <p className="text-xs text-muted-foreground mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5 font-medium">
                 This is used when sharing on Twitter
               </p>
             </div>
@@ -433,8 +441,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         )}
 
         {platform === 'indie_hackers' && (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4">
-            <h3 className="font-medium text-sm flex items-center gap-2">
+          <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+            <h3 className="font-bold text-sm flex items-center gap-2">
               <span className={cn('w-5 h-5 rounded flex items-center justify-center text-xs font-bold', platformInfo.bgColor, platformInfo.color)}>
                 IH
               </span>
@@ -443,7 +451,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* Short Description */}
             <div>
-              <label htmlFor="shortDesc" className="block text-sm font-medium mb-2">
+              <label htmlFor="shortDesc" className="block text-sm font-bold mb-2">
                 Short Description
               </label>
               <input
@@ -453,10 +461,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 onChange={(e) => updatePlatformField('shortDescription', e.target.value)}
                 placeholder="Brief product description..."
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -464,7 +473,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* Revenue */}
             <div>
-              <label htmlFor="revenue" className="block text-sm font-medium mb-2">
+              <label htmlFor="revenue" className="block text-sm font-bold mb-2">
                 Monthly Revenue (optional)
               </label>
               <input
@@ -474,10 +483,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 onChange={(e) => updatePlatformField('revenue', e.target.value)}
                 placeholder="e.g., $1,000/mo"
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -486,8 +496,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         )}
 
         {platform === 'dev_hunt' && (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4">
-            <h3 className="font-medium text-sm flex items-center gap-2">
+          <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+            <h3 className="font-bold text-sm flex items-center gap-2">
               <span className={cn('w-5 h-5 rounded flex items-center justify-center text-xs font-bold', platformInfo.bgColor, platformInfo.color)}>
                 D
               </span>
@@ -496,7 +506,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* GitHub URL */}
             <div>
-              <label htmlFor="github" className="block text-sm font-medium mb-2">
+              <label htmlFor="github" className="block text-sm font-bold mb-2">
                 GitHub URL
               </label>
               <input
@@ -506,10 +516,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 onChange={(e) => updatePlatformField('githubUrl', e.target.value)}
                 placeholder="https://github.com/username/repo"
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -517,7 +528,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
             {/* Founder Story */}
             <div>
-              <label htmlFor="founderStory" className="block text-sm font-medium mb-2">
+              <label htmlFor="founderStory" className="block text-sm font-bold mb-2">
                 Founder Story
               </label>
               <textarea
@@ -527,10 +538,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 placeholder="Share the story behind building this tool..."
                 rows={4}
                 className={cn(
-                  'w-full px-3 py-2.5 rounded-lg',
-                  'bg-background border border-border',
-                  'text-foreground placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'resize-none transition-all'
                 )}
               />
@@ -539,30 +551,30 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         )}
 
         {/* Status & Scheduling */}
-        <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4">
-          <h3 className="font-medium text-sm">Status & Scheduling</h3>
+        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+          <h3 className="font-bold text-sm">📅 Status & Scheduling</h3>
 
           <div className="grid sm:grid-cols-2 gap-4">
             {/* Status */}
             <div>
-              <label htmlFor="status" className="block text-sm font-medium mb-2">
+              <label htmlFor="status" className="block text-sm font-bold mb-2">
                 Status
               </label>
               <select
                 id="status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as LaunchPostStatus)}
-                className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm"
+                className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-sm font-medium"
               >
-                <option value="draft">Draft</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="posted">Posted</option>
+                <option value="draft">📝 Draft</option>
+                <option value="scheduled">📅 Scheduled</option>
+                <option value="posted">✅ Posted</option>
               </select>
             </div>
 
             {/* Scheduled Date */}
             <div>
-              <label htmlFor="scheduledAt" className="block text-sm font-medium mb-2">
+              <label htmlFor="scheduledAt" className="block text-sm font-bold mb-2">
                 Scheduled Date
               </label>
               <input
@@ -570,16 +582,16 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 type="datetime-local"
                 value={scheduledAt ? scheduledAt.slice(0, 16) : ''}
                 onChange={(e) => setScheduledAt(e.target.value ? new Date(e.target.value).toISOString() : '')}
-                className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-sm"
+                className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Notes */}
-        <div className="bg-card border border-border rounded-xl p-4 md:p-6">
-          <label htmlFor="notes" className="block text-sm font-medium mb-2">
-            Internal Notes
+        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6">
+          <label htmlFor="notes" className="block text-sm font-bold mb-2">
+            📝 Internal Notes
           </label>
           <textarea
             id="notes"
@@ -588,10 +600,11 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
             placeholder="Add any internal notes or reminders..."
             rows={3}
             className={cn(
-              'w-full px-3 py-2.5 rounded-lg',
-              'bg-background border border-border',
-              'text-foreground placeholder:text-muted-foreground',
-              'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+              'w-full px-4 py-3 rounded-md',
+              'bg-card text-foreground placeholder-muted-foreground',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'focus:outline-none focus:ring-2 focus:ring-primary/50',
               'resize-none transition-all'
             )}
           />
@@ -599,7 +612,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
         {/* Error */}
         {error && (
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-destructive/10 text-destructive">
+          <div className="flex items-center gap-3 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30 font-medium">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
             <p className="text-sm">{error}</p>
           </div>
@@ -610,7 +623,14 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-4 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors"
+            className={cn(
+              'px-4 py-2.5 rounded-md',
+              'bg-secondary text-secondary-foreground font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'transition-all'
+            )}
           >
             Cancel
           </button>
@@ -618,11 +638,14 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
             type="submit"
             disabled={!title.trim() || isSubmitting}
             className={cn(
-              'flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg',
-              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-              'text-white font-medium text-sm',
-              'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none'
+              'flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-md',
+              'bg-sticker-green text-white font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
+              'transition-all'
             )}
           >
             {isSubmitting ? (

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { cn } from '@/lib/utils'
-import { Upload, X, Image as ImageIcon, Film, AlertCircle } from 'lucide-react'
+import { X, Image as ImageIcon, Film, AlertCircle } from 'lucide-react'
 import { UploadProgress } from './UploadProgress'
 import {
   uploadMedia,
@@ -134,9 +134,9 @@ export function MediaUpload({
     <div className={cn('space-y-3', className)}>
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm border-2 border-destructive/30">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{error}</span>
+          <span className="font-medium">{error}</span>
           <button
             onClick={() => setError(null)}
             className="ml-auto p-1 hover:bg-destructive/20 rounded"
@@ -150,7 +150,7 @@ export function MediaUpload({
       {existingMedia.length > 0 && (
         <div
           className={cn(
-            'grid gap-2',
+            'grid gap-3',
             maxFiles === 1 ? 'grid-cols-1 max-w-xs' : 'grid-cols-2'
           )}
         >
@@ -181,13 +181,15 @@ export function MediaUpload({
           onDrop={handleDrop}
           onClick={handleDropZoneClick}
           className={cn(
-            'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200',
+            'border-[3px] border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200',
+            'shadow-[3px_3px_0_hsl(var(--border))]',
             isDragging
               ? platform === 'twitter'
-                ? 'border-twitter bg-twitter/5'
-                : 'border-linkedin bg-linkedin/5'
-              : 'border-border hover:border-muted-foreground/50',
-            disabled && 'opacity-50 cursor-not-allowed'
+                ? 'border-twitter bg-twitter-soft'
+                : 'border-linkedin bg-linkedin-soft'
+              : 'border-border hover:border-primary bg-card',
+            'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
+            disabled && 'opacity-50 cursor-not-allowed hover:translate-y-0'
           )}
         >
           <input
@@ -198,20 +200,13 @@ export function MediaUpload({
             className="hidden"
             disabled={disabled}
           />
-          <Upload
-            className={cn(
-              'w-8 h-8 mx-auto mb-2',
-              isDragging
-                ? platform === 'twitter'
-                  ? 'text-twitter'
-                  : 'text-linkedin'
-                : 'text-muted-foreground'
-            )}
-          />
-          <p className="text-sm font-medium">
-            {isDragging ? 'Drop to upload' : 'Drag & drop or click to upload'}
+          <div className="text-4xl mb-3">
+            {isDragging ? '📥' : '📸'}
+          </div>
+          <p className="text-sm font-bold">
+            {isDragging ? 'Drop to upload!' : 'Drag & drop or click to upload'}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-2">
             Images (JPG, PNG, GIF, WebP) up to {MAX_IMAGE_SIZE / (1024 * 1024)}MB
           </p>
           <p className="text-xs text-muted-foreground">
@@ -236,7 +231,7 @@ function MediaPreviewItem({ filename, index, onRemove }: MediaPreviewItemProps) 
 
   return (
     <div className="relative group">
-      <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+      <div className="aspect-video rounded-md overflow-hidden bg-muted border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
         {hasError ? (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             {isVideo ? <Film className="w-8 h-8" /> : <ImageIcon className="w-8 h-8" />}
@@ -260,7 +255,13 @@ function MediaPreviewItem({ filename, index, onRemove }: MediaPreviewItemProps) 
       </div>
       <button
         onClick={onRemove}
-        className="absolute top-1 right-1 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+        className={cn(
+          'absolute -top-2 -right-2 p-1.5 rounded-full',
+          'bg-destructive text-white border-2 border-border',
+          'opacity-0 group-hover:opacity-100 transition-opacity',
+          'shadow-[2px_2px_0_hsl(var(--border))]',
+          'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]'
+        )}
         title="Remove media"
       >
         <X className="w-3 h-3" />

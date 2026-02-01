@@ -35,9 +35,9 @@ export function LaunchPostCard({
   const platformUrl = LAUNCH_PLATFORM_URLS[post.platform]
 
   const statusConfig = {
-    draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
-    scheduled: { label: 'Scheduled', icon: Clock, color: 'text-amber-600' },
-    posted: { label: 'Posted', icon: CheckCircle2, color: 'text-emerald-600' },
+    draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground', emoji: '📝' },
+    scheduled: { label: 'Scheduled', icon: Clock, color: 'text-sticker-orange', emoji: '📅' },
+    posted: { label: 'Posted', icon: CheckCircle2, color: 'text-sticker-green', emoji: '✅' },
   }
 
   const status = statusConfig[post.status]
@@ -66,8 +66,11 @@ export function LaunchPostCard({
     <div
       data-testid="launch-post-card"
       className={cn(
-        'p-3 md:p-4 bg-card border border-border rounded-xl group',
-        'hover:border-[hsl(var(--gold))]/50 hover:shadow-md transition-all',
+        'p-3 md:p-4 bg-card rounded-md group',
+        'border-[3px] border-border',
+        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
+        'transition-all',
         'animate-slide-up'
       )}
       style={{ animationDelay: `${index * 30}ms` }}
@@ -76,8 +79,9 @@ export function LaunchPostCard({
         {/* Platform Icon */}
         <div
           className={cn(
-            'w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center flex-shrink-0',
+            'w-10 h-10 md:w-12 md:h-12 rounded-md flex items-center justify-center flex-shrink-0',
             'font-bold text-sm md:text-base',
+            'border-2',
             platformInfo.bgColor,
             platformInfo.color
           )}
@@ -90,20 +94,20 @@ export function LaunchPostCard({
           <div className="flex items-center gap-2 mb-1">
             <span
               className={cn(
-                'text-xs font-medium px-2 py-0.5 rounded-full',
+                'text-xs font-bold px-2 py-0.5 rounded-full border',
                 platformInfo.bgColor,
                 platformInfo.color
               )}
             >
               {platformInfo.label}
             </span>
-            <span className={cn('text-xs flex items-center gap-1', status.color)}>
-              <status.icon className="w-3 h-3" />
+            <span className={cn('text-xs font-bold flex items-center gap-1', status.color)}>
+              <span>{status.emoji}</span>
               {status.label}
             </span>
           </div>
 
-          <h3 className="font-semibold mb-1 line-clamp-1">{post.title}</h3>
+          <h3 className="font-bold mb-1 line-clamp-1">{post.title}</h3>
 
           {post.description && (
             <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
@@ -111,7 +115,7 @@ export function LaunchPostCard({
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground font-medium">
             {post.url && (
               <a
                 href={post.url}
@@ -133,7 +137,7 @@ export function LaunchPostCard({
             )}
 
             {post.postedAt && (
-              <span className="flex items-center gap-1 text-emerald-600">
+              <span className="flex items-center gap-1 text-sticker-green font-bold">
                 <CheckCircle2 className="w-3 h-3" />
                 Posted {format(new Date(post.postedAt), 'MMM d')}
               </span>
@@ -149,7 +153,7 @@ export function LaunchPostCard({
               e.stopPropagation()
               setShowMenu(!showMenu)
             }}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent border-2 border-transparent hover:border-border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
           >
             <MoreVertical className="w-4 h-4" />
           </button>
@@ -157,7 +161,7 @@ export function LaunchPostCard({
           {showMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 z-20 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[160px]">
+              <div className="absolute right-0 top-full mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] py-1 min-w-[160px]">
                 {onEdit && (
                   <button
                     onClick={(e) => {
@@ -166,7 +170,7 @@ export function LaunchPostCard({
                       setShowMenu(false)
                       onEdit()
                     }}
-                    className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors w-full text-left"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium hover:bg-accent transition-colors w-full text-left"
                   >
                     <Edit2 className="w-4 h-4" />
                     Edit
@@ -175,7 +179,7 @@ export function LaunchPostCard({
 
                 <button
                   onClick={handleCopyFields}
-                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors w-full text-left"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium hover:bg-accent transition-colors w-full text-left"
                 >
                   <Copy className="w-4 h-4" />
                   Copy Fields
@@ -183,7 +187,7 @@ export function LaunchPostCard({
 
                 <button
                   onClick={handleOpenPlatform}
-                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors w-full text-left"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium hover:bg-accent transition-colors w-full text-left"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open {platformInfo.name}
@@ -197,7 +201,7 @@ export function LaunchPostCard({
                       setShowMenu(false)
                       onDelete()
                     }}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-accent transition-colors w-full text-left"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-destructive hover:bg-accent transition-colors w-full text-left"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete

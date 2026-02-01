@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import PasswordStrength from '@/components/ui/PasswordStrength'
 
 export default function ResetPasswordPage() {
@@ -72,8 +73,11 @@ export default function ResetPasswordPage() {
   // Loading state while checking session
   if (isValidSession === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 right-0 h-1 gradient-bar" />
+        </div>
+        <div className="text-muted-foreground font-medium">⏳ Loading...</div>
       </div>
     )
   }
@@ -81,20 +85,36 @@ export default function ResetPasswordPage() {
   // No valid session - show error
   if (!isValidSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-md w-full space-y-8 p-8 text-center">
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-            <h2 className="text-xl font-semibold text-red-800 dark:text-red-200 mb-2">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 right-0 h-1 gradient-bar" />
+        </div>
+        <div className="w-full max-w-md">
+          <div className="bg-card rounded-lg border-[3px] border-border shadow-[6px_6px_0_hsl(var(--border))] p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-destructive/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
+              ⚠️
+            </div>
+            <h2 className="text-xl font-extrabold text-foreground mb-2">
               Invalid or expired link
             </h2>
-            <p className="text-red-700 dark:text-red-300">
+            <p className="text-muted-foreground mb-4">
               This password reset link is invalid or has expired.
               Please request a new one.
             </p>
+            <Link
+              href="/forgot-password"
+              className={cn(
+                'inline-flex items-center gap-2 px-4 py-2.5 rounded-md',
+                'bg-primary text-primary-foreground font-bold text-sm',
+                'border-[3px] border-border',
+                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+                'transition-all'
+              )}
+            >
+              Request new reset link
+            </Link>
           </div>
-          <Link href="/forgot-password" className="text-amber-600 hover:text-amber-500 font-medium">
-            Request new reset link
-          </Link>
         </div>
       </div>
     )
@@ -103,92 +123,144 @@ export default function ResetPasswordPage() {
   // Success state
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-md w-full space-y-8 p-8 text-center">
-          <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <h2 className="text-xl font-semibold text-green-800 dark:text-green-200 mb-2">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="fixed inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 right-0 h-1 gradient-bar" />
+        </div>
+        <div className="w-full max-w-md">
+          <div className="bg-card rounded-lg border-[3px] border-border shadow-[6px_6px_0_hsl(var(--border))] p-8 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-green/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
+              ✅
+            </div>
+            <h2 className="text-xl font-extrabold text-foreground mb-2">
               Password updated
             </h2>
-            <p className="text-green-700 dark:text-green-300">
+            <p className="text-muted-foreground mb-4">
               Your password has been successfully reset.
               Redirecting you to sign in...
             </p>
+            <Link
+              href="/login"
+              className={cn(
+                'inline-flex items-center gap-2 px-4 py-2.5 rounded-md',
+                'bg-sticker-green text-white font-bold text-sm',
+                'border-[3px] border-border',
+                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+                'transition-all'
+              )}
+            >
+              Sign in now
+            </Link>
           </div>
-          <Link href="/login" className="text-amber-600 hover:text-amber-500 font-medium">
-            Sign in now
-          </Link>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-md w-full space-y-8 p-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Set new password
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            Enter your new password below
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      {/* Decorative gradient */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-1 gradient-bar" />
+      </div>
+
+      <div className="w-full max-w-md">
+        {/* Card */}
+        <div className="bg-card rounded-lg border-[3px] border-border shadow-[6px_6px_0_hsl(var(--border))] p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-purple/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
+              🔐
+            </div>
+            <h1 className="text-3xl font-extrabold text-foreground">
+              Set new password
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Enter your new password below
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="p-4 text-sm font-medium text-destructive bg-destructive/10 rounded-md border-2 border-destructive/30">
+                ⚠️ {error}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-bold text-foreground mb-2">
+                New Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className={cn(
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                  'transition-all duration-200'
+                )}
+                placeholder="••••••••"
+              />
+              <PasswordStrength password={password} />
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-bold text-foreground mb-2">
+                Confirm New Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+                className={cn(
+                  'w-full px-4 py-3 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                  'transition-all duration-200'
+                )}
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={cn(
+                'w-full px-4 py-3.5 rounded-md',
+                'bg-sticker-purple text-white font-bold',
+                'border-[3px] border-border',
+                'shadow-[4px_4px_0_hsl(var(--border))]',
+                'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
+                'active:translate-y-[2px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+                'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
+                'transition-all duration-200'
+              )}
+            >
+              {loading ? '⏳ Updating...' : '🔒 Update password'}
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Remember your password?{' '}
+            <Link href="/login" className="text-primary hover:text-primary/80 font-bold">
+              Sign in
+            </Link>
           </p>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              New Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-              placeholder="••••••••"
-            />
-            <PasswordStrength password={password} />
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Confirm New Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              minLength={6}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-4 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-          >
-            {loading ? 'Updating...' : 'Update password'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-          Remember your password?{' '}
-          <Link href="/login" className="text-amber-600 hover:text-amber-500 font-medium">
-            Sign in
-          </Link>
-        </p>
       </div>
     </div>
   )

@@ -120,10 +120,12 @@ export function IOSDateTimePicker({
           }}
           disabled={disabled}
           className={cn(
-            'flex items-center gap-2 px-3 py-2.5 rounded-lg border w-full',
-            'bg-background text-foreground text-sm text-left',
-            'border-border hover:border-primary/50 transition-colors',
-            disabled && 'opacity-50 cursor-not-allowed',
+            'flex items-center gap-2 px-4 py-3 rounded-md border-[3px] w-full',
+            'bg-card text-foreground text-sm text-left font-medium',
+            'border-border shadow-[3px_3px_0_hsl(var(--border))]',
+            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'transition-all duration-200',
+            disabled && 'opacity-50 cursor-not-allowed hover:translate-y-0',
             !value && 'text-muted-foreground'
           )}
         >
@@ -181,9 +183,10 @@ export function IOSDateTimePicker({
         onClick={() => !disabled && setIsOpen(true)}
         disabled={disabled}
         className={cn(
-          'flex items-center gap-2 px-3 py-2.5 rounded-lg border w-full',
-          'bg-background text-foreground text-sm text-left',
-          'border-border hover:border-primary/50 transition-colors',
+          'flex items-center gap-2 px-4 py-3 rounded-md border-[3px] w-full',
+          'bg-card text-foreground text-sm text-left font-medium',
+          'border-border shadow-[3px_3px_0_hsl(var(--border))]',
+          'transition-all duration-200',
           disabled && 'opacity-50 cursor-not-allowed',
           !value && 'text-muted-foreground',
           className
@@ -209,27 +212,27 @@ export function IOSDateTimePicker({
             aria-label="Select date and time"
             className={cn(
               'relative z-10 w-full max-w-lg',
-              'bg-card border-t border-border rounded-t-2xl shadow-xl',
+              'bg-card border-[3px] border-b-0 border-border rounded-t-lg',
               'animate-in slide-in-from-bottom duration-300 ease-out'
             )}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <div className="flex items-center justify-between px-4 py-3 border-b-2 border-border bg-secondary">
               <button
                 type="button"
                 onClick={handleClear}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
               >
                 Clear
               </button>
-              <span className="text-sm font-semibold">
-                {mode === 'time' ? 'Select Time' : mode === 'date' ? 'Select Date' : 'Select Date & Time'}
+              <span className="text-sm font-extrabold">
+                {mode === 'time' ? '🕐 Select Time' : mode === 'date' ? '📅 Select Date' : '📅 Select Date & Time'}
               </span>
               <button
                 type="button"
                 onClick={handleConfirm}
-                className="text-sm font-semibold text-[hsl(var(--gold))] hover:text-[hsl(var(--gold-dark))] transition-colors"
+                className="text-sm font-bold text-primary hover:text-primary/80 transition-colors"
               >
                 Done
               </button>
@@ -240,11 +243,11 @@ export function IOSDateTimePicker({
               {/* Date picker */}
               {(mode === 'date' || mode === 'datetime') && (
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
                     Date
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="date"
                       value={tempDate}
@@ -252,10 +255,11 @@ export function IOSDateTimePicker({
                       max={maxDate ? format(maxDate, 'yyyy-MM-dd') : undefined}
                       onChange={(e) => setTempDate(e.target.value)}
                       className={cn(
-                        'w-full pl-11 pr-4 py-3 rounded-xl',
-                        'bg-background border border-border',
-                        'text-base text-foreground',
-                        'focus:outline-none focus:border-[hsl(var(--gold))] focus:ring-2 focus:ring-[hsl(var(--gold))]/20'
+                        'w-full pl-12 pr-4 py-3 rounded-md',
+                        'bg-card border-[3px] border-border',
+                        'text-base text-foreground font-medium',
+                        'shadow-[3px_3px_0_hsl(var(--border))]',
+                        'focus:outline-none focus:ring-2 focus:ring-primary/50'
                       )}
                     />
                   </div>
@@ -265,20 +269,21 @@ export function IOSDateTimePicker({
               {/* Time picker */}
               {(mode === 'time' || mode === 'datetime') && (
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
                     Time
                   </label>
                   <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <input
                       type="time"
                       value={tempTime}
                       onChange={(e) => setTempTime(e.target.value)}
                       className={cn(
-                        'w-full pl-11 pr-4 py-3 rounded-xl',
-                        'bg-background border border-border',
-                        'text-base text-foreground',
-                        'focus:outline-none focus:border-[hsl(var(--gold))] focus:ring-2 focus:ring-[hsl(var(--gold))]/20'
+                        'w-full pl-12 pr-4 py-3 rounded-md',
+                        'bg-card border-[3px] border-border',
+                        'text-base text-foreground font-medium',
+                        'shadow-[3px_3px_0_hsl(var(--border))]',
+                        'focus:outline-none focus:ring-2 focus:ring-primary/50'
                       )}
                     />
                   </div>
@@ -288,7 +293,7 @@ export function IOSDateTimePicker({
               {/* Preview */}
               {tempDate && (
                 <div className="pt-2 text-center">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="inline-block px-4 py-2 bg-primary/10 rounded-md text-sm font-bold text-foreground">
                     {mode === 'date' && format(new Date(`${tempDate}T12:00:00`), 'EEEE, MMMM d, yyyy')}
                     {mode === 'time' && tempTime && format(new Date(`2024-01-01T${tempTime}:00`), 'h:mm a')}
                     {mode === 'datetime' && tempTime && format(new Date(`${tempDate}T${tempTime}:00`), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}

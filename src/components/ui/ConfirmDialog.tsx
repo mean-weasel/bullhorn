@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, ReactNode } from 'react'
-import { AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   ResponsiveDialog,
@@ -45,20 +44,16 @@ export function ConfirmDialog({
   const iconWrapper = (
     <div
       className={cn(
-        'w-12 h-12 rounded-full flex items-center justify-center',
+        'w-14 h-14 rounded-lg flex items-center justify-center text-3xl',
+        'border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]',
         variant === 'danger' && 'bg-destructive/10',
-        variant === 'warning' && 'bg-yellow-500/10',
+        variant === 'warning' && 'bg-sticker-orange/10',
         variant === 'default' && 'bg-primary/10'
       )}
     >
-      <AlertTriangle
-        className={cn(
-          'w-6 h-6',
-          variant === 'danger' && 'text-destructive',
-          variant === 'warning' && 'text-yellow-500',
-          variant === 'default' && 'text-primary'
-        )}
-      />
+      {variant === 'danger' && '🚨'}
+      {variant === 'warning' && '⚠️'}
+      {variant === 'default' && '🤔'}
     </div>
   )
 
@@ -88,11 +83,15 @@ export function ConfirmDialog({
           ref={confirmButtonRef}
           onClick={onConfirm}
           className={cn(
-            'flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-colors',
-            'md:py-2.5 py-3.5 min-h-[48px] md:min-h-0',
-            variant === 'danger' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-            variant === 'warning' && 'bg-yellow-500 text-white hover:bg-yellow-600',
-            variant === 'default' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+            'flex-1 px-4 py-3 rounded-md font-bold text-sm transition-all',
+            'border-[3px] border-border',
+            'md:py-3 py-3.5 min-h-[52px] md:min-h-0',
+            'shadow-[3px_3px_0_hsl(var(--border))]',
+            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+            variant === 'danger' && 'bg-destructive text-destructive-foreground',
+            variant === 'warning' && 'bg-sticker-orange text-white',
+            variant === 'default' && 'bg-primary text-primary-foreground'
           )}
         >
           {confirmText}

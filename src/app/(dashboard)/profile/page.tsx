@@ -216,59 +216,59 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto p-8 animate-fade-in">
+      <div className="max-w-2xl mx-auto p-4 md:p-8 animate-fade-in">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 w-32 bg-muted rounded" />
-          <div className="h-4 w-48 bg-muted rounded" />
-          <div className="h-64 bg-muted rounded-xl" />
+          <div className="h-8 w-32 bg-muted rounded-md" />
+          <div className="h-4 w-48 bg-muted rounded-md" />
+          <div className="h-64 bg-muted rounded-md" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-8 animate-fade-in">
-      <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight mb-2">Profile</h1>
+    <div className="max-w-2xl mx-auto p-4 md:p-8 animate-fade-in">
+      <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">👤 Profile</h1>
       <p className="text-muted-foreground mb-2">
         Manage your account settings.
       </p>
-      <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mb-8 rounded-full" />
+      <div className="h-1 w-20 gradient-bar mb-8 rounded-full" />
 
       {/* Status messages */}
       {success && (
-        <div className="flex items-center gap-2 p-4 rounded-lg bg-green-500/10 text-green-500 mb-6 animate-slide-up">
+        <div className="flex items-center gap-2 p-4 rounded-md bg-sticker-green/10 text-sticker-green border-2 border-sticker-green/30 mb-6 animate-slide-up font-bold">
           <Check className="w-4 h-4" />
           {success}
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive mb-6 animate-slide-up">
+        <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30 mb-6 animate-slide-up font-medium">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
       )}
 
       {/* Profile Information */}
-      <div className="p-6 rounded-xl border border-border bg-card mb-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Profile Information
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
+          👋 Profile Information
         </h2>
 
         {/* Avatar */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] flex items-center justify-center text-xl font-semibold text-white">
+          <div className="w-16 h-16 rounded-lg bg-sticker-purple flex items-center justify-center text-xl font-bold text-white border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
             {initials}
           </div>
           <div>
-            <p className="text-sm font-medium">{displayName || 'No display name set'}</p>
+            <p className="text-sm font-bold">{displayName || 'No display name set'}</p>
             <p className="text-xs text-muted-foreground">{email}</p>
           </div>
         </div>
 
         {/* Display Name */}
         <div className="space-y-2">
-          <label htmlFor="displayName" className="block text-sm font-medium">
+          <label htmlFor="displayName" className="block text-sm font-bold">
             Display Name
           </label>
           <input
@@ -278,9 +278,11 @@ export default function ProfilePage() {
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Enter your display name"
             className={cn(
-              'w-full px-4 py-3 rounded-lg',
-              'bg-background border border-border',
-              'focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10',
+              'w-full px-4 py-3 rounded-md',
+              'bg-card text-foreground placeholder-muted-foreground',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'focus:outline-none focus:ring-2 focus:ring-primary/50',
               'transition-all'
             )}
           />
@@ -294,30 +296,34 @@ export default function ProfilePage() {
           onClick={handleSaveProfile}
           disabled={!hasProfileChanges || saving}
           className={cn(
-            'mt-4 px-4 py-2.5 rounded-lg',
-            'bg-primary text-primary-foreground font-medium text-sm',
-            'hover:opacity-90 transition-opacity',
-            'disabled:opacity-50 disabled:cursor-not-allowed'
+            'mt-4 px-4 py-2.5 rounded-md',
+            'bg-primary text-primary-foreground font-bold text-sm',
+            'border-[3px] border-border',
+            'shadow-[3px_3px_0_hsl(var(--border))]',
+            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'active:translate-y-[2px] active:shadow-[1px_1px_0_hsl(var(--border))]',
+            'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
+            'transition-all'
           )}
         >
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? '⏳ Saving...' : '💾 Save Changes'}
         </button>
       </div>
 
       {/* Account */}
-      <div className="p-6 rounded-xl border border-border bg-card mb-6">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-          Account
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
+          🔐 Account
         </h2>
 
         {/* Email (read-only) */}
         <div className="space-y-2 mb-6">
-          <label className="block text-sm font-medium">
+          <label className="block text-sm font-bold">
             Email Address
           </label>
           <div className={cn(
-            'w-full px-4 py-3 rounded-lg',
-            'bg-muted/50 border border-border text-muted-foreground'
+            'w-full px-4 py-3 rounded-md',
+            'bg-muted/50 border-2 border-border text-muted-foreground'
           )}>
             {email}
           </div>
@@ -327,18 +333,18 @@ export default function ProfilePage() {
         </div>
 
         {/* Password Change */}
-        <div className="border-t border-border pt-6">
-          <h3 className="text-sm font-medium mb-4">Change Password</h3>
+        <div className="border-t-2 border-border pt-6">
+          <h3 className="text-sm font-bold mb-4">🔑 Change Password</h3>
 
           {passwordSuccess && (
-            <div className="flex items-center gap-2 p-4 rounded-lg bg-green-500/10 text-green-500 mb-4 animate-slide-up">
+            <div className="flex items-center gap-2 p-4 rounded-md bg-sticker-green/10 text-sticker-green border-2 border-sticker-green/30 mb-4 animate-slide-up font-bold">
               <Check className="w-4 h-4" />
               {passwordSuccess}
             </div>
           )}
 
           {passwordError && (
-            <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 text-destructive mb-4 animate-slide-up">
+            <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30 mb-4 animate-slide-up font-medium">
               <AlertCircle className="w-4 h-4" />
               {passwordError}
             </div>
@@ -347,7 +353,7 @@ export default function ProfilePage() {
           <div className="space-y-4">
             {/* New Password */}
             <div className="space-y-2">
-              <label htmlFor="newPassword" className="block text-sm font-medium">
+              <label htmlFor="newPassword" className="block text-sm font-bold">
                 New Password
               </label>
               <div className="relative">
@@ -358,16 +364,18 @@ export default function ProfilePage() {
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
                   className={cn(
-                    'w-full px-4 py-3 pr-10 rounded-lg',
-                    'bg-background border border-border',
-                    'focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10',
+                    'w-full px-4 py-3 pr-10 rounded-md',
+                    'bg-card text-foreground placeholder-muted-foreground',
+                    'border-[3px] border-border',
+                    'shadow-[3px_3px_0_hsl(var(--border))]',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/50',
                     'transition-all'
                   )}
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
                 >
                   {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -377,7 +385,7 @@ export default function ProfilePage() {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium">
+              <label htmlFor="confirmPassword" className="block text-sm font-bold">
                 Confirm New Password
               </label>
               <div className="relative">
@@ -388,16 +396,18 @@ export default function ProfilePage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm new password"
                   className={cn(
-                    'w-full px-4 py-3 pr-10 rounded-lg',
-                    'bg-background border border-border',
-                    'focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10',
+                    'w-full px-4 py-3 pr-10 rounded-md',
+                    'bg-card text-foreground placeholder-muted-foreground',
+                    'border-[3px] border-border',
+                    'shadow-[3px_3px_0_hsl(var(--border))]',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/50',
                     'transition-all'
                   )}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -408,22 +418,26 @@ export default function ProfilePage() {
               onClick={handleChangePassword}
               disabled={!newPassword || !confirmPassword || changingPassword}
               className={cn(
-                'px-4 py-2.5 rounded-lg',
-                'bg-primary text-primary-foreground font-medium text-sm',
-                'hover:opacity-90 transition-opacity',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'px-4 py-2.5 rounded-md',
+                'bg-sticker-blue text-white font-bold text-sm',
+                'border-[3px] border-border',
+                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+                'active:translate-y-[2px] active:shadow-[1px_1px_0_hsl(var(--border))]',
+                'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
+                'transition-all'
               )}
             >
-              {changingPassword ? 'Updating...' : 'Update Password'}
+              {changingPassword ? '⏳ Updating...' : '🔒 Update Password'}
             </button>
           </div>
         </div>
       </div>
 
       {/* Danger Zone */}
-      <div className="p-6 rounded-xl border border-destructive/30 bg-card">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-destructive mb-4">
-          Danger Zone
+      <div className="p-6 rounded-md border-[3px] border-destructive/50 bg-card shadow-[4px_4px_0_hsl(var(--destructive)/0.3)]">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-destructive mb-4">
+          ⚠️ Danger Zone
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
           Once you delete your account, there is no going back. All your data will be permanently removed.
@@ -431,9 +445,12 @@ export default function ProfilePage() {
         <button
           onClick={() => setShowDeleteDialog(true)}
           className={cn(
-            'flex items-center gap-2 px-4 py-2.5 rounded-lg',
-            'bg-destructive text-destructive-foreground font-medium text-sm',
-            'hover:bg-destructive/90 transition-colors'
+            'flex items-center gap-2 px-4 py-2.5 rounded-md',
+            'bg-destructive text-destructive-foreground font-bold text-sm',
+            'border-[3px] border-border',
+            'shadow-[3px_3px_0_hsl(var(--border))]',
+            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'transition-all'
           )}
         >
           <Trash2 className="w-4 h-4" />

@@ -37,19 +37,19 @@ export function IOSSegmentedControl<T extends string = string>({
   const visibleOptions = options.filter((opt) => !opt.hidden)
 
   const sizeClasses = {
-    sm: 'h-8 text-xs',
-    md: 'h-10 text-sm',
-    lg: 'h-12 text-base',
+    sm: 'h-9 text-xs',
+    md: 'h-11 text-sm',
+    lg: 'h-13 text-base',
   }
 
   const paddingClasses = {
-    sm: 'px-2 md:px-3',
-    md: 'px-3 md:px-4',
-    lg: 'px-4 md:px-5',
+    sm: 'px-3 md:px-4',
+    md: 'px-4 md:px-5',
+    lg: 'px-5 md:px-6',
   }
 
   const iconSizeClasses = {
-    sm: 'w-3 h-3',
+    sm: 'w-3.5 h-3.5',
     md: 'w-4 h-4',
     lg: 'w-5 h-5',
   }
@@ -59,7 +59,8 @@ export function IOSSegmentedControl<T extends string = string>({
       role="tablist"
       aria-label="Filter options"
       className={cn(
-        'inline-flex gap-1 p-1 bg-card border border-border rounded-xl',
+        'inline-flex gap-1 p-1.5 bg-card border-[3px] border-border rounded-lg',
+        'shadow-[3px_3px_0_hsl(var(--border))]',
         fullWidth && 'w-full',
         disabled && 'opacity-50 pointer-events-none',
         className
@@ -77,14 +78,14 @@ export function IOSSegmentedControl<T extends string = string>({
             disabled={disabled}
             className={cn(
               'relative flex items-center justify-center gap-1.5',
-              'rounded-lg font-medium transition-all duration-200',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--gold))]/50',
+              'rounded-md font-bold transition-all duration-200',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
               sizeClasses[size],
               paddingClasses[size],
               fullWidth && 'flex-1',
               isActive
-                ? 'bg-[hsl(var(--gold))]/20 text-[hsl(var(--gold-dark))] shadow-sm'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                ? 'bg-primary text-primary-foreground shadow-[2px_2px_0_hsl(var(--border))]'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
             )}
           >
             {/* Icon */}
@@ -108,11 +109,12 @@ export function IOSSegmentedControl<T extends string = string>({
             {showCounts && option.count !== undefined && (
               <span
                 className={cn(
-                  'opacity-60',
-                  size === 'sm' ? 'text-[10px]' : 'text-xs'
+                  'bg-foreground/10 px-1.5 py-0.5 rounded-full',
+                  size === 'sm' ? 'text-[10px]' : 'text-xs',
+                  isActive && 'bg-primary-foreground/20'
                 )}
               >
-                ({option.count})
+                {option.count}
               </span>
             )}
           </button>

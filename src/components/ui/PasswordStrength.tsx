@@ -7,13 +7,14 @@ interface PasswordStrengthProps {
 interface StrengthResult {
   score: number // 0-4
   label: string
+  emoji: string
   color: string
   bgColor: string
 }
 
 function calculateStrength(password: string): StrengthResult {
   if (!password) {
-    return { score: 0, label: '', color: '', bgColor: 'bg-gray-200 dark:bg-gray-700' }
+    return { score: 0, label: '', emoji: '', color: '', bgColor: 'bg-muted' }
   }
 
   let score = 0
@@ -32,11 +33,11 @@ function calculateStrength(password: string): StrengthResult {
   score = Math.min(score, 4)
 
   const strengthMap: Record<number, Omit<StrengthResult, 'score'>> = {
-    0: { label: '', color: '', bgColor: 'bg-gray-200 dark:bg-gray-700' },
-    1: { label: 'Weak', color: 'text-red-600 dark:text-red-400', bgColor: 'bg-red-500' },
-    2: { label: 'Fair', color: 'text-orange-600 dark:text-orange-400', bgColor: 'bg-orange-500' },
-    3: { label: 'Good', color: 'text-yellow-600 dark:text-yellow-400', bgColor: 'bg-yellow-500' },
-    4: { label: 'Strong', color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-500' },
+    0: { label: '', emoji: '', color: '', bgColor: 'bg-muted' },
+    1: { label: 'Weak', emoji: '😰', color: 'text-destructive', bgColor: 'bg-destructive' },
+    2: { label: 'Fair', emoji: '😐', color: 'text-sticker-orange', bgColor: 'bg-sticker-orange' },
+    3: { label: 'Good', emoji: '😊', color: 'text-sticker-yellow', bgColor: 'bg-sticker-yellow' },
+    4: { label: 'Strong', emoji: '💪', color: 'text-sticker-green', bgColor: 'bg-sticker-green' },
   }
 
   return { score, ...strengthMap[score] }
@@ -50,14 +51,14 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
   }
 
   return (
-    <div className="mt-2 space-y-1">
+    <div className="mt-3 space-y-2">
       {/* Strength bars */}
-      <div className="flex gap-1">
+      <div className="flex gap-1.5">
         {[1, 2, 3, 4].map((level) => (
           <div
             key={level}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              level <= strength.score ? strength.bgColor : 'bg-gray-200 dark:bg-gray-700'
+            className={`h-2 flex-1 rounded-full transition-colors border border-border ${
+              level <= strength.score ? strength.bgColor : 'bg-muted'
             }`}
           />
         ))}
@@ -65,14 +66,14 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
 
       {/* Strength label */}
       {strength.label && (
-        <p className={`text-xs font-medium ${strength.color}`}>
-          {strength.label}
+        <p className={`text-xs font-bold ${strength.color}`}>
+          {strength.emoji} {strength.label}
         </p>
       )}
 
       {/* Helpful tips for weak passwords */}
       {strength.score > 0 && strength.score < 3 && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-muted-foreground">
           Try adding {strength.score < 2 ? 'more characters, ' : ''}
           {!/[A-Z]/.test(password) ? 'uppercase letters, ' : ''}
           {!/\d/.test(password) ? 'numbers, ' : ''}
