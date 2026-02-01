@@ -1418,7 +1418,7 @@ export default function EditorPage() {
       </div>
 
       {/* Preview panel - hidden on mobile */}
-      <div className="hidden lg:block border-l-[3px] border-border bg-card p-6 overflow-y-auto">
+      <div data-testid="preview-panel" className="hidden lg:block border-l-[3px] border-border bg-card p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
             👁️ Live Preview

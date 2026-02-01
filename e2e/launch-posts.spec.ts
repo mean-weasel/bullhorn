@@ -118,8 +118,8 @@ test.describe('Launch Posts', () => {
       test('should create a Show HN launch post', async ({ page }) => {
         await goToNewLaunchPost(page)
 
-        // Show HN should be selected by default
-        await expect(page.getByRole('button', { name: 'Show HN' })).toHaveClass(/border-\[hsl/)
+        // Show HN should be selected by default (selected button has bg-primary)
+        await expect(page.getByRole('button', { name: 'Show HN' })).toHaveClass(/bg-primary/)
 
         await fillLaunchPostTitle(page, 'Show HN: My Awesome Product')
         await fillLaunchPostUrl(page, 'https://my-product.com')
@@ -511,17 +511,17 @@ test.describe('Launch Posts', () => {
     test('should switch between platforms', async ({ page }) => {
       await goToNewLaunchPost(page)
 
-      // Start with Show HN (default)
-      await expect(page.getByRole('button', { name: 'Show HN' })).toHaveClass(/border-\[hsl/)
+      // Start with Show HN (default) - selected button has bg-primary
+      await expect(page.getByRole('button', { name: 'Show HN' })).toHaveClass(/bg-primary/)
 
       // Switch to Product Hunt
       await selectLaunchPlatform(page, 'product_hunt')
-      await expect(page.getByRole('button', { name: 'Product Hunt' })).toHaveClass(/border-\[hsl/)
+      await expect(page.getByRole('button', { name: 'Product Hunt' })).toHaveClass(/bg-primary/)
       await expect(page.getByText('Product Hunt Fields')).toBeVisible()
 
       // Switch to Ask HN
       await selectLaunchPlatform(page, 'hacker_news_ask')
-      await expect(page.getByRole('button', { name: 'Ask HN' })).toHaveClass(/border-\[hsl/)
+      await expect(page.getByRole('button', { name: 'Ask HN' })).toHaveClass(/bg-primary/)
       await expect(page.getByText('Ask HN Fields')).toBeVisible()
 
       // Product Hunt fields should no longer be visible

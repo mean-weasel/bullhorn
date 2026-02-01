@@ -207,7 +207,7 @@ test.describe('Create Post', () => {
     test('should switch between platforms', async ({ page }) => {
       await goToNewPost(page)
 
-      const previewPanel = page.locator('.border-l.border-border')
+      const previewPanel = page.locator('[data-testid="preview-panel"]')
 
       // Select Twitter
       await selectPlatform(page, 'twitter')
@@ -328,7 +328,7 @@ test.describe('Create Post', () => {
       })
 
       // Check preview panel shows both subreddits
-      const previewPanel = page.locator('.border-l.border-border')
+      const previewPanel = page.locator('[data-testid="preview-panel"]')
       await expect(previewPanel).toContainText('r/startups')
       await expect(previewPanel).toContainText('r/SaaS')
     })

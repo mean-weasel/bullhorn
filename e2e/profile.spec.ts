@@ -15,21 +15,21 @@ test.describe('User Profile Page', () => {
     test('should display profile page with all sections', async ({ page }) => {
       await goToProfile(page)
 
-      // Verify page heading
-      await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible()
+      // Verify page heading (contains emoji)
+      await expect(page.getByRole('heading', { name: /Profile/ }).first()).toBeVisible()
       await expect(page.getByText('Manage your account settings')).toBeVisible()
 
-      // Verify Profile Information section
-      await expect(page.getByText('Profile Information')).toBeVisible()
+      // Verify Profile Information section (contains emoji)
+      await expect(page.getByText(/Profile Information/)).toBeVisible()
       await expect(page.getByLabel('Display Name')).toBeVisible()
 
-      // Verify Account section (use heading role to be specific)
-      await expect(page.getByRole('heading', { name: 'Account', exact: true })).toBeVisible()
+      // Verify Account section (contains emoji)
+      await expect(page.getByRole('heading', { name: /Account/ })).toBeVisible()
       await expect(page.getByText('Email Address')).toBeVisible()
       await expect(page.getByText('Change Password')).toBeVisible()
 
-      // Verify Danger Zone section
-      await expect(page.getByText('Danger Zone')).toBeVisible()
+      // Verify Danger Zone section (contains emoji)
+      await expect(page.getByText(/Danger Zone/)).toBeVisible()
       await expect(page.getByRole('button', { name: /delete account/i })).toBeVisible()
     })
 
@@ -37,8 +37,8 @@ test.describe('User Profile Page', () => {
       await goToProfile(page)
 
       // Avatar should show initials (T for Test User in E2E mode)
-      // Use a more specific selector for the avatar div
-      const avatar = page.locator('.w-16.h-16.rounded-full.bg-gradient-to-br')
+      // Use a more specific selector for the avatar div (Sticker Bomb design uses rounded-lg)
+      const avatar = page.locator('.w-16.h-16.rounded-lg')
       await expect(avatar).toBeVisible()
       await expect(avatar).toContainText('T')
     })
