@@ -3,63 +3,59 @@
 @tailwind utilities;
 
 @layer base {
-  /* Light mode - Bold Editorial Theme */
+  /* Light mode - Sticker Bomb Theme */
   :root {
-    /* Rich cream paper background */
-    --background: 45 40% 95%;
-    --foreground: 25 30% 10%;
-    /* Antique white card surfaces */
-    --card: 45 50% 98%;
-    --card-foreground: 25 30% 10%;
-    --popover: 45 50% 98%;
-    --popover-foreground: 25 30% 10%;
-    /* Rich burgundy primary */
-    --primary: 350 65% 35%;
-    --primary-foreground: 45 50% 98%;
-    --secondary: 40 30% 88%;
-    --secondary-foreground: 25 30% 10%;
-    --muted: 40 25% 85%;
-    --muted-foreground: 25 15% 40%;
-    /* Bold gold accent */
-    --accent: 42 85% 55%;
-    --accent-foreground: 25 30% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    /* Warm sepia borders */
-    --border: 35 30% 75%;
-    --input: 35 30% 75%;
-    --ring: 350 65% 35%;
-    --radius: 0.5rem;
-    /* Editorial gold for highlights */
-    --gold: 42 85% 55%;
-    --gold-dark: 38 70% 45%;
+    /* Warm yellow-tinted background */
+    --background: 48 100% 96%;
+    --foreground: 220 20% 15%;
+    /* Clean white card surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+    /* Vibrant yellow primary */
+    --primary: 43 96% 56%;
+    --primary-foreground: 220 20% 15%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 15%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 10% 45%;
+    /* Pink accent */
+    --accent: 330 80% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    /* Strong black borders */
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 43 96% 56%;
+    --radius: 12px;
   }
 
-  /* Dark mode - Luxe Editorial Theme */
+  /* Dark mode - Sticker Bomb Dark */
   .dark {
-    --background: 220 25% 6%;
-    --foreground: 45 30% 92%;
-    --card: 220 20% 10%;
-    --card-foreground: 45 30% 92%;
-    --popover: 220 20% 10%;
-    --popover-foreground: 45 30% 92%;
-    /* Bright gold primary in dark mode */
-    --primary: 42 90% 50%;
-    --primary-foreground: 220 25% 6%;
-    --secondary: 220 18% 15%;
-    --secondary-foreground: 45 30% 92%;
-    --muted: 220 18% 15%;
-    --muted-foreground: 220 15% 60%;
-    /* Rich gold accent */
-    --accent: 42 80% 45%;
-    --accent-foreground: 45 30% 92%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 18% 18%;
-    --input: 220 18% 18%;
-    --ring: 42 90% 50%;
-    --gold: 42 90% 50%;
-    --gold-dark: 42 80% 40%;
+    --background: 220 20% 10%;
+    --foreground: 0 0% 95%;
+    --card: 220 18% 14%;
+    --card-foreground: 0 0% 95%;
+    --popover: 220 18% 14%;
+    --popover-foreground: 0 0% 95%;
+    /* Keep vibrant yellow */
+    --primary: 43 96% 56%;
+    --primary-foreground: 220 20% 10%;
+    --secondary: 220 18% 20%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 220 18% 18%;
+    --muted-foreground: 220 10% 60%;
+    /* Pink accent */
+    --accent: 330 80% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    /* Lighter borders for dark mode */
+    --border: 220 15% 35%;
+    --input: 220 15% 35%;
+    --ring: 43 96% 56%;
   }
 
   * {
@@ -67,53 +63,106 @@
   }
 
   body {
-    @apply bg-background text-foreground font-serif antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-weight: 500;
+  }
+}
+
+/* Sticker utility classes */
+@layer utilities {
+  .sticker-card {
+    @apply bg-card border-[3px] border-border rounded-lg;
+    box-shadow: 4px 4px 0 hsl(var(--border));
+  }
+
+  .sticker-card-hover {
+    @apply sticker-card transition-all duration-200;
+  }
+
+  .sticker-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 6px 6px 0 hsl(var(--border));
+  }
+
+  .sticker-button {
+    @apply border-[3px] border-border rounded-md font-bold;
+    box-shadow: 3px 3px 0 hsl(var(--border));
+  }
+
+  .sticker-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 4px 4px 0 hsl(var(--border));
+  }
+
+  .sticker-button:active {
+    transform: translateY(1px);
+    box-shadow: 2px 2px 0 hsl(var(--border));
+  }
+
+  .sticker-input {
+    @apply border-[3px] border-border rounded-md bg-card;
+    box-shadow: 3px 3px 0 hsl(var(--border));
+  }
+
+  .sticker-input:focus {
+    @apply ring-2 ring-primary ring-offset-2;
+    box-shadow: 2px 2px 0 hsl(var(--border));
+  }
+
+  .sticker-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-pill font-bold text-sm border-2 border-border;
+  }
+
+  .gradient-bar {
+    background: linear-gradient(90deg, #fbbf24, #ec4899, #8b5cf6, #22c55e, #0ea5e9, #f97316);
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-background;
+  @apply bg-muted rounded-full;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-border rounded-full;
+  @apply bg-border rounded-full border-2 border-muted;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/50;
+  @apply bg-foreground/50;
 }
 
-/* Selection */
+/* Selection - Pink highlight */
 ::selection {
-  @apply bg-primary text-primary-foreground;
+  @apply bg-sticker-pink text-white;
 }
 
-/* Focus visible */
+/* Focus visible - Yellow ring */
 :focus-visible {
-  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
 }
 
-/* FullCalendar overrides */
+/* FullCalendar overrides - Sticker style */
 .fc {
   --fc-border-color: hsl(var(--border));
   --fc-page-bg-color: transparent;
   --fc-neutral-bg-color: hsl(var(--muted));
-  --fc-list-event-hover-bg-color: hsl(var(--accent));
-  --fc-today-bg-color: hsl(var(--accent) / 0.5);
+  --fc-list-event-hover-bg-color: hsl(var(--primary) / 0.2);
+  --fc-today-bg-color: hsl(var(--primary) / 0.15);
 }
 
 .fc .fc-button-primary {
-  @apply bg-secondary text-secondary-foreground border-border;
+  @apply bg-card text-foreground border-[3px] border-border font-bold rounded-md;
+  box-shadow: 3px 3px 0 hsl(var(--border));
 }
 
 .fc .fc-button-primary:hover {
-  @apply bg-accent;
+  @apply bg-primary text-primary-foreground;
+  transform: translateY(-1px);
 }
 
 .fc .fc-button-primary:disabled {
@@ -122,27 +171,28 @@
 
 .fc .fc-button-primary:not(:disabled).fc-button-active {
   @apply bg-primary text-primary-foreground;
+  box-shadow: 2px 2px 0 hsl(var(--border));
 }
 
 .fc-theme-standard td,
 .fc-theme-standard th {
-  @apply border-border;
+  @apply border-border border-2;
 }
 
 .fc .fc-daygrid-day-number {
-  @apply text-foreground p-2;
+  @apply text-foreground p-2 font-bold;
 }
 
 .fc .fc-col-header-cell-cushion {
-  @apply text-muted-foreground uppercase text-xs tracking-wider py-3;
+  @apply text-foreground uppercase text-xs tracking-wider py-3 font-extrabold;
 }
 
 .fc .fc-daygrid-day.fc-day-today {
-  @apply bg-accent/30;
+  @apply bg-primary/20;
 }
 
 .fc .fc-daygrid-day:hover {
-  @apply bg-accent/20;
+  @apply bg-primary/10;
 }
 
 /* Date and time input styling */

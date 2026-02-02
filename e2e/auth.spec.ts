@@ -195,7 +195,7 @@ test.describe('Authentication', () => {
 
     test('should display forgot password page with all elements', async ({ page }) => {
       // Check heading
-      await expect(page.getByRole('heading', { name: 'Reset your password' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Reset password' })).toBeVisible()
       await expect(page.getByText("Enter your email and we'll send you a reset link")).toBeVisible()
 
       // Check form
@@ -271,7 +271,7 @@ test.describe('Authentication', () => {
       // Go to forgot password
       await page.getByRole('link', { name: 'Forgot password?' }).click()
       await expect(page).toHaveURL('/forgot-password')
-      await expect(page.getByRole('heading', { name: 'Reset your password' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Reset password' })).toBeVisible()
 
       // Go back to login
       await page.getByRole('link', { name: 'Sign in' }).click()

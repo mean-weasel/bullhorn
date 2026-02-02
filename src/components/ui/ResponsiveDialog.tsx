@@ -66,7 +66,7 @@ export function ResponsiveDialog({
       <div
         className={cn(
           'absolute inset-0 animate-in fade-in duration-200',
-          isMobile ? 'bg-black/40 backdrop-blur-sm' : 'bg-black/50 backdrop-blur-sm'
+          'bg-black/40 backdrop-blur-sm'
         )}
       />
 
@@ -81,16 +81,18 @@ export function ResponsiveDialog({
           'relative z-10 w-full',
           isMobile ? [
             'max-w-lg mx-0',
-            'rounded-t-2xl rounded-b-none',
+            'rounded-t-lg rounded-b-none',
             'animate-in slide-in-from-bottom duration-300 ease-out',
-            'max-h-[90vh] overflow-hidden flex flex-col'
+            'max-h-[90vh] overflow-hidden flex flex-col',
+            'border-[3px] border-b-0 border-border'
           ] : [
             'max-w-md',
-            'rounded-2xl',
-            'animate-in zoom-in-95 fade-in duration-200'
+            'rounded-lg',
+            'animate-in zoom-in-95 fade-in duration-200',
+            'border-[3px] border-border',
+            'shadow-[4px_4px_0_hsl(var(--border))]'
           ],
-          'bg-card border border-border shadow-xl',
-          isMobile && 'border-b-0',
+          'bg-card',
           className
         )}
         onClick={(e) => e.stopPropagation()}
@@ -98,7 +100,7 @@ export function ResponsiveDialog({
         {/* Drag indicator for mobile */}
         {isMobile && (
           <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-            <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            <div className="w-12 h-1.5 rounded-full bg-border" />
           </div>
         )}
 
@@ -107,7 +109,9 @@ export function ResponsiveDialog({
           <button
             onClick={onClose}
             className={cn(
-              'absolute p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors',
+              'absolute p-2 rounded-md text-muted-foreground',
+              'hover:text-foreground hover:bg-secondary transition-colors',
+              'border-2 border-transparent hover:border-border',
               isMobile ? 'top-3 right-3' : 'top-4 right-4'
             )}
           >
@@ -135,8 +139,8 @@ export function ResponsiveDialog({
             <h2
               id={titleId}
               className={cn(
-                'font-semibold text-foreground',
-                isMobile ? 'text-lg mb-1' : 'text-lg mb-2'
+                'font-extrabold text-foreground',
+                isMobile ? 'text-xl mb-2' : 'text-xl mb-3'
               )}
             >
               {title}
@@ -188,7 +192,7 @@ export function ResponsiveDialogActions({
     <div
       className={cn(
         'flex gap-3',
-        isMobile ? 'flex-col-reverse pt-4' : 'pt-2',
+        isMobile ? 'flex-col-reverse pt-4' : 'pt-3',
         className
       )}
     >
@@ -220,22 +224,34 @@ export function ResponsiveDialogButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'flex-1 rounded-lg font-medium text-sm transition-all',
-        isMobile ? 'px-4 py-3.5 min-h-[48px]' : 'px-4 py-2.5',
+        'flex-1 rounded-md font-bold text-sm transition-all',
+        'border-[3px] border-border',
+        isMobile ? 'px-4 py-3.5 min-h-[52px]' : 'px-4 py-3',
         variant === 'primary' && [
-          'bg-gradient-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-          'text-black hover:opacity-90'
+          'bg-primary text-primary-foreground',
+          'shadow-[3px_3px_0_hsl(var(--border))]',
+          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]'
         ],
         variant === 'secondary' && [
-          'bg-secondary text-secondary-foreground hover:bg-accent'
+          'bg-secondary text-secondary-foreground',
+          'shadow-[3px_3px_0_hsl(var(--border))]',
+          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]'
         ],
         variant === 'danger' && [
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+          'bg-destructive text-destructive-foreground',
+          'shadow-[3px_3px_0_hsl(var(--border))]',
+          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]'
         ],
         variant === 'warning' && [
-          'bg-yellow-500 text-white hover:bg-yellow-600'
+          'bg-sticker-orange text-white',
+          'shadow-[3px_3px_0_hsl(var(--border))]',
+          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]'
         ],
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
         className
       )}
     >

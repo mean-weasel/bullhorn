@@ -132,7 +132,7 @@ test.describe('Media Features', () => {
       await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
 
       // Check preview panel shows media (in the preview area with dark background)
-      const previewPanel = page.locator('.border-l.border-border')
+      const previewPanel = page.locator('[data-testid="preview-panel"]')
       await expect(previewPanel.locator('img[alt="Media 1"]')).toBeVisible()
     })
   })
@@ -183,7 +183,7 @@ test.describe('Media Features', () => {
       await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
 
       // Check preview panel shows media
-      const previewPanel = page.locator('.border-l.border-border')
+      const previewPanel = page.locator('[data-testid="preview-panel"]')
       await expect(previewPanel.locator('img[alt="LinkedIn media"]')).toBeVisible()
     })
   })
@@ -230,7 +230,7 @@ test.describe('Media Features', () => {
       await page.locator('input[placeholder*="youtube.com"]').fill('https://example.com/article')
 
       // Preview should show "(Link Post)" indicator
-      const previewPanel = page.locator('.border-l.border-border')
+      const previewPanel = page.locator('[data-testid="preview-panel"]')
       await expect(previewPanel.getByText('(Link Post)')).toBeVisible()
     })
 
@@ -247,7 +247,7 @@ test.describe('Media Features', () => {
       await fillContent(page, 'Just curious what everyone thinks!')
 
       // Preview should show "(Text Post)" indicator
-      const previewPanel = page.locator('.border-l.border-border')
+      const previewPanel = page.locator('[data-testid="preview-panel"]')
       await expect(previewPanel.getByText('(Text Post)')).toBeVisible()
     })
 
@@ -264,7 +264,7 @@ test.describe('Media Features', () => {
       await page.locator('input[placeholder*="youtube.com"]').fill(videoUrl)
 
       // Preview should show the link
-      const previewPanel = page.locator('.border-l.border-border')
+      const previewPanel = page.locator('[data-testid="preview-panel"]')
       await expect(previewPanel.getByText(videoUrl)).toBeVisible()
     })
   })

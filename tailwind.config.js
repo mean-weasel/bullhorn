@@ -24,7 +24,7 @@ export default {
           foreground: 'hsl(var(--popover-foreground))',
         },
 
-        // Primary action color
+        // Primary action color (Yellow)
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
@@ -59,33 +59,49 @@ export default {
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
 
-        // Platform colors
+        // Sticker bomb color palette
+        sticker: {
+          yellow: '#fbbf24',
+          pink: '#ec4899',
+          purple: '#8b5cf6',
+          green: '#22c55e',
+          blue: '#0ea5e9',
+          orange: '#f97316',
+          black: '#1f2937',
+        },
+
+        // Platform colors with soft backgrounds
         twitter: {
           DEFAULT: '#1DA1F2',
-          soft: 'rgba(29, 161, 242, 0.1)',
-          glow: 'rgba(29, 161, 242, 0.15)',
+          soft: '#e8f6fe',
+          border: '#1DA1F2',
         },
         linkedin: {
           DEFAULT: '#0A66C2',
-          soft: 'rgba(10, 102, 194, 0.1)',
-          glow: 'rgba(10, 102, 194, 0.15)',
+          soft: '#e6f0f9',
+          border: '#0A66C2',
         },
         reddit: {
           DEFAULT: '#FF4500',
-          soft: 'rgba(255, 69, 0, 0.1)',
-          glow: 'rgba(255, 69, 0, 0.15)',
+          soft: '#fff0eb',
+          border: '#FF4500',
         },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        lg: '16px',
+        md: '12px',
+        sm: '10px',
+        pill: '50px',
       },
       fontFamily: {
-        sans: ['Crimson Pro', 'Georgia', 'serif'],
-        serif: ['Crimson Pro', 'Georgia', 'serif'],
-        display: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['Nunito', 'system-ui', 'sans-serif'],
+        display: ['Nunito', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'SF Mono', 'monospace'],
+      },
+      boxShadow: {
+        'sticker': '4px 4px 0 hsl(var(--border))',
+        'sticker-sm': '3px 3px 0 hsl(var(--border))',
+        'sticker-hover': '2px 2px 0 hsl(var(--border))',
       },
       keyframes: {
         'fade-in': {
@@ -100,16 +116,17 @@ export default {
           '0%': { opacity: '0', transform: 'translateX(-10px)' },
           '100%': { opacity: '1', transform: 'translateX(0)' },
         },
-        'pulse-glow': {
-          '0%, 100%': { boxShadow: '0 0 30px rgba(29, 161, 242, 0.15)' },
-          '50%': { boxShadow: '0 0 50px rgba(29, 161, 242, 0.3)' },
+        'bounce-in': {
+          '0%': { opacity: '0', transform: 'scale(0.9)' },
+          '50%': { transform: 'scale(1.02)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
       },
       animation: {
         'fade-in': 'fade-in 0.2s ease-out',
         'slide-up': 'slide-up 0.3s ease-out',
         'slide-in': 'slide-in 0.3s ease-out',
-        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
+        'bounce-in': 'bounce-in 0.3s ease-out',
       },
     },
   },

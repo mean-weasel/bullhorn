@@ -21,9 +21,17 @@
     "test:e2e:debug": "NODE_ENV=test playwright test --debug",
     "clean": "rm -rf .next node_modules/.cache",
     "knip": "knip",
-    "knip:fix": "knip --fix"
+    "knip:fix": "knip --fix",
+    "cap:sync": "npx cap sync ios",
+    "cap:open": "npx cap open ios",
+    "cap:run": "npx cap run ios",
+    "ios": "npm run cap:sync && npm run cap:open",
+    "ios:dev": "CAPACITOR_SERVER_URL=http://localhost:3000 npm run cap:sync && npm run cap:run"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/ios": "^8.0.2",
     "@octokit/rest": "^20.0.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.90.1",

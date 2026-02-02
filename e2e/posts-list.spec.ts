@@ -22,9 +22,9 @@ test.describe('Posts List', () => {
     test('should show all posts by default', async ({ page }) => {
       await goToPosts(page)
 
-      // All tab should be active (has gold highlight class)
+      // All tab should be active (has primary background)
       const allTab = page.getByRole('button', { name: /^all/i })
-      await expect(allTab).toHaveClass(/bg-\[hsl\(var\(--gold\)\)\]/)
+      await expect(allTab).toHaveClass(/bg-primary/)
     })
 
     test('should filter to drafts', async ({ page }, testInfo) => {
@@ -97,10 +97,11 @@ test.describe('Posts List', () => {
 
       const firstCard = (await getPostCards(page)).first()
 
-      // Should have colored dots for platforms
-      const dots = firstCard.locator('.rounded-full')
-      const dotCount = await dots.count()
-      expect(dotCount).toBeGreaterThan(0)
+      // Should have platform indicator (icon box with platform symbol)
+      // Twitter shows "𝕏", LinkedIn shows "in", Reddit shows "r/"
+      const platformIndicator = firstCard.locator('.rounded-md').filter({ hasText: /𝕏|in|r\// })
+      const indicatorCount = await platformIndicator.count()
+      expect(indicatorCount).toBeGreaterThan(0)
     })
 
     test('should display content preview', async ({ page }, testInfo) => {

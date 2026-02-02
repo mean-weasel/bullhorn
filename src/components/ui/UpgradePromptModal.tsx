@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { Sparkles, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import {
   ResponsiveDialog,
   ResponsiveDialogDescription,
@@ -43,8 +43,8 @@ export function UpgradePromptModal({
   }, [open])
 
   const iconWrapper = (
-    <div className="w-12 h-12 rounded-full bg-[hsl(var(--gold))]/10 flex items-center justify-center">
-      <Sparkles className="w-6 h-6 text-[hsl(var(--gold))]" />
+    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-3xl border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+      ✨
     </div>
   )
 
@@ -62,16 +62,16 @@ export function UpgradePromptModal({
       </ResponsiveDialogDescription>
 
       {/* Usage indicator */}
-      <div className="mb-6 p-3 rounded-lg bg-accent/50">
-        <div className="flex items-center justify-between text-sm mb-2">
-          <span className="text-muted-foreground">Projects used</span>
-          <span className="font-medium text-foreground">
+      <div className="mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+        <div className="flex items-center justify-between text-sm mb-3">
+          <span className="text-muted-foreground font-medium">📊 Projects used</span>
+          <span className="font-bold text-foreground">
             {currentCount} / {limit}
           </span>
         </div>
-        <div className="h-2 bg-accent rounded-full overflow-hidden">
+        <div className="h-3 bg-muted rounded-full overflow-hidden border-2 border-border">
           <div
-            className="h-full bg-[hsl(var(--gold))] rounded-full transition-all"
+            className="h-full bg-gradient-to-r from-sticker-yellow via-sticker-pink to-sticker-purple rounded-full transition-all"
             style={{ width: `${Math.min((currentCount / limit) * 100, 100)}%` }}
           />
         </div>
@@ -79,14 +79,16 @@ export function UpgradePromptModal({
 
       {/* Pro features */}
       <div className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-          Upgrade to Pro
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+          🚀 Upgrade to Pro
         </p>
         <ul className="space-y-2">
           {PRO_FEATURES.map((feature) => (
-            <li key={feature} className="flex items-center gap-2 text-sm">
-              <Check className="w-4 h-4 text-[hsl(var(--gold))]" />
-              <span className="text-foreground">{feature}</span>
+            <li key={feature} className="flex items-center gap-3 text-sm">
+              <div className="w-5 h-5 rounded-full bg-sticker-green/20 flex items-center justify-center">
+                <Check className="w-3 h-3 text-sticker-green" />
+              </div>
+              <span className="text-foreground font-medium">{feature}</span>
             </li>
           ))}
         </ul>
@@ -97,7 +99,7 @@ export function UpgradePromptModal({
         <button
           ref={dismissButtonRef}
           onClick={onDismiss}
-          className="flex-1 px-4 py-2.5 md:py-2.5 py-3.5 min-h-[48px] md:min-h-0 rounded-lg bg-secondary text-secondary-foreground font-medium text-sm hover:bg-accent transition-colors"
+          className="flex-1 px-4 py-3 md:py-3 py-3.5 min-h-[52px] md:min-h-0 rounded-md bg-secondary text-secondary-foreground font-bold text-sm border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))] transition-all"
         >
           Maybe Later
         </button>
@@ -108,7 +110,7 @@ export function UpgradePromptModal({
           }}
           variant="primary"
         >
-          Upgrade Now
+          Upgrade Now ✨
         </ResponsiveDialogButton>
       </ResponsiveDialogActions>
     </ResponsiveDialog>

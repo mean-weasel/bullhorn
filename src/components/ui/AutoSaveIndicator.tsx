@@ -12,28 +12,31 @@ export function AutoSaveIndicator({ status, className }: AutoSaveIndicatorProps)
   return (
     <div
       className={cn(
-        'flex items-center gap-1.5 text-xs transition-opacity duration-200',
+        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all duration-200',
+        'border-2 border-border',
         status === 'idle' && 'opacity-0',
-        status !== 'idle' && 'opacity-100',
+        status === 'saving' && 'bg-muted text-muted-foreground opacity-100',
+        status === 'saved' && 'bg-sticker-green/10 text-sticker-green border-sticker-green/30 opacity-100',
+        status === 'error' && 'bg-destructive/10 text-destructive border-destructive/30 opacity-100',
         className
       )}
     >
       {status === 'saving' && (
         <>
-          <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin" />
-          <span className="text-muted-foreground">Saving...</span>
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <span>Saving...</span>
         </>
       )}
       {status === 'saved' && (
         <>
-          <Check className="w-3.5 h-3.5 text-green-500" />
-          <span className="text-green-500">Saved</span>
+          <Check className="w-3.5 h-3.5" />
+          <span>Saved!</span>
         </>
       )}
       {status === 'error' && (
         <>
-          <CloudOff className="w-3.5 h-3.5 text-destructive" />
-          <span className="text-destructive">Failed to save</span>
+          <CloudOff className="w-3.5 h-3.5" />
+          <span>Failed to save</span>
         </>
       )}
     </div>

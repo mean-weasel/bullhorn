@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, formatDistanceToNow } from 'date-fns'
-import { Calendar, FileText, Clock, ChevronRight, Plus, Sparkles, FolderOpen, CheckCircle, FolderKanban } from 'lucide-react'
+import { Calendar, FileText, Clock, ChevronRight, Plus, FolderOpen, CheckCircle, FolderKanban } from 'lucide-react'
 import { usePostsStore } from '@/lib/storage'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { useProjectsStore } from '@/lib/projects'
@@ -44,8 +44,10 @@ function PostCard({ post, showSchedule = false }: { post: Post; showSchedule?: b
     <Link
       href={`/edit/${post.id}`}
       className={cn(
-        'block p-4 rounded-xl border border-border bg-card',
-        'hover:border-[hsl(var(--gold))]/50 hover:shadow-md',
+        'block p-4 rounded-md bg-card',
+        'border-[3px] border-border',
+        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
         'transition-all duration-200',
         'group'
       )}
@@ -54,10 +56,10 @@ function PostCard({ post, showSchedule = false }: { post: Post; showSchedule?: b
       <div className="flex items-center gap-2 mb-3">
         <div
           className={cn(
-            'flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium',
-            post.platform === 'twitter' && 'bg-twitter/10 text-twitter',
-            post.platform === 'linkedin' && 'bg-linkedin/10 text-linkedin',
-            post.platform === 'reddit' && 'bg-reddit/10 text-reddit'
+            'flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border-2',
+            post.platform === 'twitter' && 'bg-twitter-soft text-twitter border-twitter/30',
+            post.platform === 'linkedin' && 'bg-linkedin-soft text-linkedin border-linkedin/30',
+            post.platform === 'reddit' && 'bg-reddit-soft text-reddit border-reddit/30'
           )}
         >
           <PlatformIcon platform={post.platform} />
@@ -66,12 +68,12 @@ function PostCard({ post, showSchedule = false }: { post: Post; showSchedule?: b
       </div>
 
       {/* Content preview */}
-      <p className="text-sm leading-relaxed line-clamp-2 mb-3 group-hover:text-foreground transition-colors">
+      <p className="text-sm leading-relaxed line-clamp-2 mb-3 group-hover:text-foreground transition-colors font-medium">
         {previewText || <span className="text-muted-foreground italic">No content yet...</span>}
       </p>
 
       {/* Meta info */}
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
         <Clock className="w-3.5 h-3.5" />
         {showSchedule && post.scheduledAt ? (
           <span>{format(new Date(post.scheduledAt), 'MMM d, h:mm a')}</span>
@@ -86,10 +88,10 @@ function PostCard({ post, showSchedule = false }: { post: Post; showSchedule?: b
 
 // Campaign status badge colors
 const CAMPAIGN_STATUS_STYLES: Record<string, string> = {
-  draft: 'bg-muted text-muted-foreground',
-  active: 'bg-green-500/10 text-green-600 dark:text-green-400',
-  completed: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  archived: 'bg-gray-500/10 text-gray-500',
+  draft: 'bg-muted text-muted-foreground border-border',
+  active: 'bg-sticker-green/10 text-sticker-green border-sticker-green/30',
+  completed: 'bg-sticker-blue/10 text-sticker-blue border-sticker-blue/30',
+  archived: 'bg-muted text-muted-foreground border-border',
 }
 
 // Mini project card for dashboard
@@ -98,24 +100,26 @@ function ProjectMiniCard({ project, campaignCount }: { project: Project; campaig
     <Link
       href={`/projects/${project.id}`}
       className={cn(
-        'block p-4 rounded-xl border border-border bg-card',
-        'hover:border-[hsl(var(--gold))]/50 hover:shadow-md',
+        'block p-4 rounded-md bg-card',
+        'border-[3px] border-border',
+        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
         'transition-all duration-200',
         'group'
       )}
     >
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-[hsl(var(--gold))]/10 flex items-center justify-center flex-shrink-0">
-          <FolderKanban className="w-5 h-5 text-[hsl(var(--gold-dark))]" />
+        <div className="w-10 h-10 rounded-md bg-sticker-purple/10 flex items-center justify-center flex-shrink-0 border-2 border-sticker-purple/30">
+          <FolderKanban className="w-5 h-5 text-sticker-purple" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm truncate group-hover:text-[hsl(var(--gold-dark))] transition-colors">
+          <h3 className="font-bold text-sm truncate group-hover:text-primary transition-colors">
             {project.name}
           </h3>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
             <span>{campaignCount} campaign{campaignCount !== 1 ? 's' : ''}</span>
             {project.hashtags.length > 0 && (
-              <span className="text-[hsl(var(--gold-dark))]">#{project.hashtags.length} tags</span>
+              <span className="text-sticker-pink">#{project.hashtags.length} tags</span>
             )}
           </div>
         </div>
@@ -131,8 +135,10 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
     <Link
       href={`/campaigns/${campaign.id}`}
       className={cn(
-        'block p-4 rounded-xl border border-border bg-card',
-        'hover:border-[hsl(var(--gold))]/50 hover:shadow-md',
+        'block p-4 rounded-md bg-card',
+        'border-[3px] border-border',
+        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
         'transition-all duration-200',
         'group'
       )}
@@ -140,14 +146,14 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
       {/* Campaign header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <FolderOpen className="w-4 h-4 text-[hsl(var(--gold-dark))]" />
-          <h3 className="font-semibold text-sm truncate group-hover:text-[hsl(var(--gold-dark))] transition-colors">
+          <FolderOpen className="w-4 h-4 text-sticker-orange" />
+          <h3 className="font-bold text-sm truncate group-hover:text-primary transition-colors">
             {campaign.name || 'Untitled Campaign'}
           </h3>
         </div>
         <span
           className={cn(
-            'text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full',
+            'text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-md border-2',
             CAMPAIGN_STATUS_STYLES[campaign.status]
           )}
         >
@@ -157,13 +163,13 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
 
       {/* Description */}
       {campaign.description && (
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 font-medium">
           {campaign.description}
         </p>
       )}
 
       {/* Meta info */}
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
         <Clock className="w-3.5 h-3.5" />
         <span>Updated {formatDistanceToNow(new Date(campaign.updatedAt), { addSuffix: true })}</span>
         <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -199,17 +205,17 @@ function Section({
       {/* Section header */}
       <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="p-2 rounded-lg bg-[hsl(var(--gold))]/10 shrink-0">
-            <Icon className="w-4 h-4 text-[hsl(var(--gold-dark))]" />
+          <div className="p-2 rounded-md bg-primary/10 shrink-0 border-2 border-primary/30">
+            <Icon className="w-4 h-4 text-primary" />
           </div>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-[hsl(var(--gold-dark))] truncate">
+          <h2 className="text-sm font-extrabold uppercase tracking-widest text-foreground truncate">
             {title}
           </h2>
         </div>
         {!isEmpty && (
           <Link
             href={viewAllLink}
-            className="text-xs font-medium text-muted-foreground hover:text-[hsl(var(--gold-dark))] transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
+            className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 whitespace-nowrap shrink-0"
           >
             {viewAllLabel}
             <ChevronRight className="w-3.5 h-3.5" />
@@ -219,13 +225,13 @@ function Section({
 
       {/* Content or empty state */}
       {isEmpty ? (
-        <div className="text-center py-8 px-4 rounded-xl border border-dashed border-border bg-card/50">
+        <div className="text-center py-8 px-4 rounded-md border-[3px] border-dashed border-border bg-card">
           {EmptyIcon && (
-            <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-[hsl(var(--gold))]/10 flex items-center justify-center">
-              <EmptyIcon className="w-6 h-6 text-[hsl(var(--gold-dark))]" />
+            <div className="w-14 h-14 mx-auto mb-3 rounded-md bg-primary/10 flex items-center justify-center border-2 border-primary/30">
+              <EmptyIcon className="w-6 h-6 text-primary" />
             </div>
           )}
-          <p className="text-sm font-medium mb-1">{emptyTitle}</p>
+          <p className="text-sm font-bold mb-1">{emptyTitle}</p>
           <p className="text-xs text-muted-foreground">{emptyDescription}</p>
         </div>
       ) : (
@@ -351,41 +357,41 @@ export default function DashboardPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] p-4 md:p-6 max-w-5xl mx-auto">
       {/* Stats bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-xl bg-gradient-to-r from-[hsl(var(--gold))]/5 via-transparent to-[hsl(var(--gold))]/5 border border-[hsl(var(--gold))]/20">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))]">
         <div className="flex-1 flex items-center gap-4 sm:gap-6 overflow-x-auto">
           <div className="text-center flex-shrink-0">
-            <div className="text-2xl font-display font-bold text-[hsl(var(--gold-dark))]">
+            <div className="text-2xl font-extrabold text-sticker-blue">
               {stats.scheduled}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
-              Scheduled
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              📅 Scheduled
             </div>
           </div>
           <div className="w-px h-8 bg-border flex-shrink-0" />
           <div className="text-center flex-shrink-0">
-            <div className="text-2xl font-display font-bold text-[hsl(var(--gold-dark))]">
+            <div className="text-2xl font-extrabold text-sticker-orange">
               {stats.drafts}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
-              Drafts
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              📝 Drafts
             </div>
           </div>
           <div className="w-px h-8 bg-border flex-shrink-0" />
           <div className="text-center flex-shrink-0">
-            <div className="text-2xl font-display font-bold text-[hsl(var(--gold-dark))]">
+            <div className="text-2xl font-extrabold text-sticker-green">
               {stats.published}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
-              Published
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              ✅ Published
             </div>
           </div>
           <div className="w-px h-8 bg-border hidden sm:block flex-shrink-0" />
           <div className="text-center hidden sm:block flex-shrink-0">
-            <div className="text-2xl font-display font-bold text-[hsl(var(--gold-dark))]">
+            <div className="text-2xl font-extrabold text-sticker-purple">
               {stats.projects}
             </div>
-            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
-              Projects
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              📁 Projects
             </div>
           </div>
         </div>
@@ -401,10 +407,11 @@ export default function DashboardPage() {
           <Link
             href="/new"
             className={cn(
-              'hidden md:flex items-center gap-2 px-4 py-2.5 rounded-lg',
-              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-              'text-white font-medium text-sm',
-              'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30',
+              'hidden md:flex items-center gap-2 px-4 py-2.5 rounded-md',
+              'bg-primary text-primary-foreground font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
               'transition-all duration-200'
             )}
           >
@@ -417,20 +424,21 @@ export default function DashboardPage() {
       {/* Empty state when no posts at all */}
       {hasNoPosts ? (
         <div className="text-center py-16 px-4 animate-fade-in">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-[hsl(var(--gold))]/20 to-[hsl(var(--gold))]/5 flex items-center justify-center">
-            <Sparkles className="w-10 h-10 text-[hsl(var(--gold-dark))]" />
+          <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-4xl">
+            🎉
           </div>
-          <h2 className="text-2xl font-display font-bold mb-2">Welcome to Bullhorn</h2>
+          <h2 className="text-2xl font-extrabold mb-2">Welcome to Bullhorn</h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Create your first post to get started. Schedule content for Twitter, LinkedIn, and Reddit all in one place.
           </p>
           <Link
             href="/new"
             className={cn(
-              'inline-flex items-center gap-2 px-6 py-3 rounded-xl',
-              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-              'text-white font-semibold',
-              'hover:shadow-xl hover:shadow-[hsl(var(--gold))]/30',
+              'inline-flex items-center gap-2 px-6 py-3.5 rounded-md',
+              'bg-primary text-primary-foreground font-bold',
+              'border-[3px] border-border',
+              'shadow-[4px_4px_0_hsl(var(--border))]',
+              'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
               'transition-all duration-200'
             )}
           >

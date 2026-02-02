@@ -27,12 +27,12 @@ import { cn } from '@/lib/utils'
 type FilterStatus = 'all' | PostStatus
 type ViewMode = 'list' | 'calendar'
 
-const STATUS_CONFIG: Record<PostStatus, { label: string; icon: typeof FileText; color: string }> = {
-  draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground' },
-  scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-blue-400' },
-  published: { label: 'Published', icon: CheckCircle, color: 'text-green-400' },
-  failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive' },
-  archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
+const STATUS_CONFIG: Record<PostStatus, { label: string; icon: typeof FileText; color: string; emoji: string }> = {
+  draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground', emoji: '📝' },
+  scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-sticker-blue', emoji: '📅' },
+  published: { label: 'Published', icon: CheckCircle, color: 'text-sticker-green', emoji: '✅' },
+  failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive', emoji: '❌' },
+  archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground', emoji: '📦' },
 }
 
 export default function PostsPage() {
@@ -115,21 +115,21 @@ export default function PostsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">All Posts</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight">📋 All Posts</h1>
           <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
             Manage your drafts, scheduled, and published posts.
           </p>
-          <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
+          <div className="h-1 w-16 gradient-bar mt-2 rounded-full" />
         </div>
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="flex p-1 bg-card border border-border rounded-lg">
+          <div className="flex p-1 bg-card border-[3px] border-border rounded-md shadow-[2px_2px_0_hsl(var(--border))]">
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                'p-2 rounded-md transition-colors',
+                'p-2 rounded transition-all',
                 viewMode === 'list'
-                  ? 'bg-[hsl(var(--gold))]/20 text-[hsl(var(--gold-dark))]'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
               title="List view"
@@ -139,9 +139,9 @@ export default function PostsPage() {
             <button
               onClick={() => setViewMode('calendar')}
               className={cn(
-                'p-2 rounded-md transition-colors',
+                'p-2 rounded transition-all',
                 viewMode === 'calendar'
-                  ? 'bg-[hsl(var(--gold))]/20 text-[hsl(var(--gold-dark))]'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
               title="Calendar view"
@@ -152,10 +152,12 @@ export default function PostsPage() {
           <Link
             href="/new"
             className={cn(
-              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-              'text-white font-medium text-sm',
-              'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-md min-h-[44px]',
+              'bg-primary text-primary-foreground font-bold text-sm',
+              'border-[3px] border-border',
+              'shadow-[3px_3px_0_hsl(var(--border))]',
+              'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
+              'transition-all'
             )}
           >
             <Plus className="w-4 h-4" />
@@ -177,10 +179,11 @@ export default function PostsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={cn(
-                  'w-full pl-10 pr-10 py-2.5 rounded-lg',
-                  'bg-card border border-border',
-                  'text-sm placeholder:text-muted-foreground',
-                  'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+                  'w-full pl-10 pr-10 py-2.5 rounded-md',
+                  'bg-card text-foreground placeholder-muted-foreground',
+                  'border-[3px] border-border',
+                  'shadow-[3px_3px_0_hsl(var(--border))]',
+                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -194,25 +197,25 @@ export default function PostsPage() {
               )}
             </div>
             {searchQuery && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Found {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'} matching "{searchQuery}"
+              <p className="text-xs text-muted-foreground mt-2 font-medium">
+                Found {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'} matching &quot;{searchQuery}&quot;
               </p>
             )}
           </div>
 
           {/* Filter tabs - horizontally scrollable on mobile */}
           <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 mb-4 md:mb-6">
-            <div className="flex gap-1 p-1 bg-card border border-border rounded-xl min-w-max md:min-w-0">
+            <div className="flex gap-1 p-1.5 bg-card border-[3px] border-border rounded-md shadow-[3px_3px_0_hsl(var(--border))] min-w-max md:min-w-0">
               <button
                 onClick={() => setFilter('all')}
                 className={cn(
-                  'flex-1 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap min-h-[40px]',
+                  'flex-1 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
                   filter === 'all'
-                    ? 'bg-[hsl(var(--gold))]/20 text-[hsl(var(--gold-dark))]'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                 )}
               >
-                All <span className="ml-1 text-xs opacity-60">({counts.all})</span>
+                All <span className="ml-1 text-xs opacity-70">({counts.all})</span>
               </button>
               {(['draft', 'scheduled', 'published', 'failed', 'archived'] as PostStatus[]).map((status) => {
                 const config = STATUS_CONFIG[status]
@@ -224,15 +227,15 @@ export default function PostsPage() {
                     key={status}
                     onClick={() => setFilter(status)}
                     className={cn(
-                      'flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap min-h-[40px]',
+                      'flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
                       filter === status
-                        ? 'bg-[hsl(var(--gold))]/20 text-[hsl(var(--gold-dark))]'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                     )}
                   >
-                    <config.icon className={cn('w-4 h-4', filter === status && config.color)} />
+                    <span>{config.emoji}</span>
                     <span className="hidden sm:inline">{config.label}</span>
-                    <span className="text-xs opacity-60">({count})</span>
+                    <span className="text-xs opacity-70">({count})</span>
                   </button>
                 )
               })}
@@ -241,11 +244,11 @@ export default function PostsPage() {
 
           {/* Posts list */}
           {sortedPosts.length === 0 ? (
-            <div className="text-center py-12 md:py-16 bg-card border border-border rounded-xl">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[hsl(var(--gold))]/10 flex items-center justify-center">
-                <FileText className="w-8 h-8 text-[hsl(var(--gold-dark))]" />
+            <div className="text-center py-12 md:py-16 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))]">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-3xl">
+                📝
               </div>
-              <h3 className="text-lg font-semibold mb-2">
+              <h3 className="text-lg font-extrabold mb-2">
                 {filter === 'all' ? 'No posts yet' : `No ${filter} posts`}
               </h3>
               <p className="text-muted-foreground mb-6 max-w-sm mx-auto px-4">
@@ -264,10 +267,12 @@ export default function PostsPage() {
               <Link
                 href="/new"
                 className={cn(
-                  'inline-flex items-center gap-2 px-5 py-3 rounded-xl',
-                  'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                  'text-white font-medium text-sm',
-                  'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+                  'inline-flex items-center gap-2 px-5 py-3 rounded-md',
+                  'bg-primary text-primary-foreground font-bold text-sm',
+                  'border-[3px] border-border',
+                  'shadow-[4px_4px_0_hsl(var(--border))]',
+                  'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
+                  'transition-all'
                 )}
               >
                 <Plus className="w-4 h-4" />
@@ -295,15 +300,16 @@ export default function PostsPage() {
 
 function PostCard({ post, index }: { post: Post; index: number }) {
   const statusConfig = STATUS_CONFIG[post.status]
-  const StatusIcon = statusConfig.icon
 
   return (
     <Link
       href={`/edit/${post.id}`}
       className={cn(
-        'block p-3 md:p-4 bg-card border border-border rounded-xl',
-        'hover:border-[hsl(var(--gold))]/50 hover:shadow-md transition-all',
-        'active:scale-[0.99]',
+        'block p-3 md:p-4 bg-card border-[3px] border-border rounded-md',
+        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
+        'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+        'transition-all',
         'animate-slide-up'
       )}
       style={{ animationDelay: `${index * 30}ms` }}
@@ -313,24 +319,28 @@ function PostCard({ post, index }: { post: Post; index: number }) {
         <div className="flex flex-col gap-1.5 pt-1">
           <span
             className={cn(
-              'w-2.5 h-2.5 rounded-full',
-              post.platform === 'twitter' && 'bg-twitter shadow-[0_0_8px_rgba(29,161,242,0.4)]',
-              post.platform === 'linkedin' && 'bg-linkedin shadow-[0_0_8px_rgba(10,102,194,0.4)]',
-              post.platform === 'reddit' && 'bg-reddit shadow-[0_0_8px_rgba(255,69,0,0.4)]'
+              'w-8 h-8 rounded-md flex items-center justify-center border-2 font-bold text-xs',
+              post.platform === 'twitter' && 'bg-twitter/10 border-twitter/30 text-twitter',
+              post.platform === 'linkedin' && 'bg-linkedin/10 border-linkedin/30 text-linkedin',
+              post.platform === 'reddit' && 'bg-reddit/10 border-reddit/30 text-reddit'
             )}
             title={PLATFORM_INFO[post.platform].name}
-          />
+          >
+            {post.platform === 'twitter' && '𝕏'}
+            {post.platform === 'linkedin' && 'in'}
+            {post.platform === 'reddit' && 'r/'}
+          </span>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm leading-relaxed line-clamp-2 mb-2">
+          <p className="text-sm leading-relaxed line-clamp-2 mb-2 font-medium">
             {getPostPreviewText(post) || <span className="text-muted-foreground italic">No content</span>}
           </p>
           <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
             {/* Status */}
-            <span className={cn('flex items-center gap-1.5', statusConfig.color)}>
-              <StatusIcon className="w-3.5 h-3.5" />
+            <span className={cn('flex items-center gap-1.5 font-bold', statusConfig.color)}>
+              <span>{statusConfig.emoji}</span>
               {statusConfig.label}
             </span>
 
@@ -367,7 +377,11 @@ function PostCard({ post, index }: { post: Post; index: number }) {
         </div>
 
         {/* Edit button */}
-        <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center">
+        <button className={cn(
+          'p-2 rounded-md text-muted-foreground hover:text-foreground',
+          'hover:bg-accent border-2 border-transparent hover:border-border',
+          'transition-all min-w-[40px] min-h-[40px] flex items-center justify-center'
+        )}>
           <Edit2 className="w-4 h-4" />
         </button>
       </div>
@@ -409,29 +423,43 @@ function CalendarView({
   }
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] overflow-hidden">
       {/* Calendar header */}
-      <div className="flex items-center justify-between p-4 border-b-2 border-[hsl(var(--gold))]">
+      <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-primary/5">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-bold font-display tracking-tight text-[hsl(var(--gold-dark))]">
-            {format(currentDate, 'MMMM yyyy')}
+          <h2 className="text-xl font-extrabold tracking-tight">
+            📆 {format(currentDate, 'MMMM yyyy')}
           </h2>
           <div className="flex items-center gap-1">
             <button
               onClick={() => navigateMonth(-1)}
-              className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              className={cn(
+                'p-1.5 rounded-md',
+                'text-muted-foreground hover:text-foreground',
+                'hover:bg-accent border-2 border-transparent hover:border-border',
+                'transition-all'
+              )}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => onDateChange(new Date())}
-              className="px-3 py-1.5 text-xs font-medium rounded hover:bg-accent transition-colors"
+              className={cn(
+                'px-3 py-1.5 text-xs font-bold rounded-md',
+                'hover:bg-accent border-2 border-transparent hover:border-border',
+                'transition-all'
+              )}
             >
               Today
             </button>
             <button
               onClick={() => navigateMonth(1)}
-              className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              className={cn(
+                'p-1.5 rounded-md',
+                'text-muted-foreground hover:text-foreground',
+                'hover:bg-accent border-2 border-transparent hover:border-border',
+                'transition-all'
+              )}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -443,11 +471,11 @@ function CalendarView({
       <div className="overflow-x-auto">
         <div className="min-w-[560px]">
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 border-b-2 border-[hsl(var(--gold))]/20 bg-[hsl(var(--gold))]/5">
+          <div className="grid grid-cols-7 border-b-2 border-border bg-secondary/50">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
                 key={day}
-                className="py-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-[hsl(var(--gold-dark))]"
+                className="py-3 text-center text-xs font-extrabold uppercase tracking-wider text-muted-foreground"
               >
                 {day}
               </div>
@@ -486,17 +514,17 @@ function CalendarView({
                   className={cn(
                     'min-h-[80px] md:min-h-[100px] p-1.5 md:p-2 border-r border-b border-border',
                     'flex flex-col gap-1 transition-colors',
-                    !isPastDate && 'cursor-pointer hover:bg-accent/50',
+                    !isPastDate && 'cursor-pointer hover:bg-primary/5',
                     isPastDate && 'cursor-default',
                     !isCurrentMonth && 'opacity-30',
-                    isCurrentDay && 'bg-[hsl(var(--gold))]/10'
+                    isCurrentDay && 'bg-primary/10'
                   )}
                 >
                   <span
                     className={cn(
-                      'text-sm font-medium text-muted-foreground',
+                      'text-sm font-bold text-muted-foreground',
                       isCurrentDay &&
-                        'w-6 h-6 rounded-full bg-[hsl(var(--gold))] text-white flex items-center justify-center'
+                        'w-6 h-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center'
                     )}
                   >
                     {format(day, 'd')}
@@ -506,10 +534,10 @@ function CalendarView({
                       <div
                         key={post.id}
                         className={cn(
-                          'flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium truncate',
-                          post.platform === 'twitter' && 'bg-twitter/10 text-twitter',
-                          post.platform === 'linkedin' && 'bg-linkedin/10 text-linkedin',
-                          post.platform === 'reddit' && 'bg-reddit/10 text-reddit'
+                          'flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold truncate border',
+                          post.platform === 'twitter' && 'bg-twitter/10 text-twitter border-twitter/30',
+                          post.platform === 'linkedin' && 'bg-linkedin/10 text-linkedin border-linkedin/30',
+                          post.platform === 'reddit' && 'bg-reddit/10 text-reddit border-reddit/30'
                         )}
                         onClick={(e) => handlePostClick(e, post.id)}
                       >
@@ -518,7 +546,7 @@ function CalendarView({
                       </div>
                     ))}
                     {dayPosts.length > 3 && (
-                      <span className="text-[10px] text-muted-foreground">+{dayPosts.length - 3} more</span>
+                      <span className="text-[10px] text-muted-foreground font-medium">+{dayPosts.length - 3} more</span>
                     )}
                   </div>
                 </div>

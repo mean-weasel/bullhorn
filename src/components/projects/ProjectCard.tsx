@@ -44,15 +44,18 @@ export function ProjectCard({
       <Link
         href={`/projects/${project.id}`}
         className={cn(
-          'block p-4 bg-card border border-border rounded-xl',
-          'hover:border-[hsl(var(--gold))]/50 hover:shadow-md transition-all',
-          'active:scale-[0.99]',
+          'block p-4 bg-card rounded-md',
+          'border-[3px] border-border',
+          'shadow-[3px_3px_0_hsl(var(--border))]',
+          'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
+          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'transition-all',
           'animate-slide-up'
         )}
         style={{ animationDelay: `${index * 30}ms` }}
       >
         {/* Logo or placeholder */}
-        <div className="relative aspect-[2/1] mb-4 rounded-lg overflow-hidden bg-accent/30 flex items-center justify-center">
+        <div className="relative aspect-[2/1] mb-4 rounded-md overflow-hidden bg-accent/30 flex items-center justify-center border-2 border-border">
           {hasLogo ? (
             <Image
               src={getMediaUrl(project.logoUrl!)}
@@ -65,7 +68,7 @@ export function ProjectCard({
               }}
             />
           ) : (
-            <FolderKanban className="w-12 h-12 text-[hsl(var(--gold-dark))]/30" />
+            <FolderKanban className="w-12 h-12 text-sticker-purple/30" />
           )}
 
           {/* Brand color indicators */}
@@ -73,21 +76,21 @@ export function ProjectCard({
             <div className="absolute bottom-2 right-2 flex gap-1">
               {project.brandColors.primary && (
                 <div
-                  className="w-4 h-4 rounded-full border border-white/30 shadow-sm"
+                  className="w-4 h-4 rounded-full border-2 border-border shadow-sm"
                   style={{ backgroundColor: project.brandColors.primary }}
                   title="Primary color"
                 />
               )}
               {project.brandColors.secondary && (
                 <div
-                  className="w-4 h-4 rounded-full border border-white/30 shadow-sm"
+                  className="w-4 h-4 rounded-full border-2 border-border shadow-sm"
                   style={{ backgroundColor: project.brandColors.secondary }}
                   title="Secondary color"
                 />
               )}
               {project.brandColors.accent && (
                 <div
-                  className="w-4 h-4 rounded-full border border-white/30 shadow-sm"
+                  className="w-4 h-4 rounded-full border-2 border-border shadow-sm"
                   style={{ backgroundColor: project.brandColors.accent }}
                   title="Accent color"
                 />
@@ -97,19 +100,19 @@ export function ProjectCard({
         </div>
 
         {/* Content */}
-        <h3 className="font-semibold mb-1 truncate">{project.name}</h3>
+        <h3 className="font-bold mb-1 truncate">{project.name}</h3>
         {project.description && (
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{project.description}</p>
         )}
 
         {/* Meta */}
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground font-medium">
+          <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-sticker-purple/10 text-sticker-purple border border-sticker-purple/30">
             <FolderOpen className="w-3.5 h-3.5" />
             {campaignCount} campaign{campaignCount !== 1 ? 's' : ''}
           </span>
           {hasHashtags && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-sticker-blue/10 text-sticker-blue border border-sticker-blue/30">
               <Hash className="w-3 h-3" />
               {project.hashtags.length}
             </span>
@@ -126,7 +129,7 @@ export function ProjectCard({
                   e.stopPropagation()
                   onEdit(e)
                 }}
-                className="p-2 rounded-lg bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                className="p-2 rounded-md bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:bg-accent border-2 border-border transition-colors"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
@@ -138,7 +141,7 @@ export function ProjectCard({
                   e.stopPropagation()
                   onDelete(e)
                 }}
-                className="p-2 rounded-lg bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive hover:bg-accent transition-colors"
+                className="p-2 rounded-md bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive hover:bg-accent border-2 border-border transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -154,16 +157,19 @@ export function ProjectCard({
     <Link
       href={`/projects/${project.id}`}
       className={cn(
-        'block p-3 md:p-4 bg-card border border-border rounded-xl group',
-        'hover:border-[hsl(var(--gold))]/50 hover:shadow-md transition-all',
-        'active:scale-[0.99]',
+        'block p-3 md:p-4 bg-card rounded-md group',
+        'border-[3px] border-border',
+        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
+        'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+        'transition-all',
         'animate-slide-up'
       )}
       style={{ animationDelay: `${index * 30}ms` }}
     >
       <div className="flex items-start gap-3 md:gap-4">
         {/* Logo/Icon */}
-        <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[hsl(var(--gold))]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-md bg-sticker-purple/10 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-sticker-purple/30">
           {hasLogo ? (
             <Image
               src={getMediaUrl(project.logoUrl!)}
@@ -178,25 +184,25 @@ export function ProjectCard({
               }}
             />
           ) : null}
-          <FolderKanban className={cn('w-5 h-5 md:w-6 md:h-6 text-[hsl(var(--gold-dark))]', hasLogo && 'hidden')} />
+          <FolderKanban className={cn('w-5 h-5 md:w-6 md:h-6 text-sticker-purple', hasLogo && 'hidden')} />
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold mb-1 truncate">{project.name}</h3>
+          <h3 className="font-bold mb-1 truncate">{project.name}</h3>
           {project.description && (
             <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{project.description}</p>
           )}
-          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs text-muted-foreground font-medium">
             {/* Campaign count */}
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-sticker-purple/10 text-sticker-purple border border-sticker-purple/30">
               <FolderOpen className="w-3.5 h-3.5" />
               {campaignCount} campaign{campaignCount !== 1 ? 's' : ''}
             </span>
 
             {/* Hashtags indicator */}
             {hasHashtags && (
-              <span className="flex items-center gap-1.5 text-[hsl(var(--gold-dark))]">
+              <span className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-sticker-blue/10 text-sticker-blue border border-sticker-blue/30">
                 <Hash className="w-3.5 h-3.5" />
                 {project.hashtags.length} hashtag{project.hashtags.length !== 1 ? 's' : ''}
               </span>
@@ -209,19 +215,19 @@ export function ProjectCard({
                 <span className="flex gap-0.5">
                   {project.brandColors.primary && (
                     <span
-                      className="w-3 h-3 rounded-full border border-border"
+                      className="w-3 h-3 rounded-full border-2 border-border"
                       style={{ backgroundColor: project.brandColors.primary }}
                     />
                   )}
                   {project.brandColors.secondary && (
                     <span
-                      className="w-3 h-3 rounded-full border border-border"
+                      className="w-3 h-3 rounded-full border-2 border-border"
                       style={{ backgroundColor: project.brandColors.secondary }}
                     />
                   )}
                   {project.brandColors.accent && (
                     <span
-                      className="w-3 h-3 rounded-full border border-border"
+                      className="w-3 h-3 rounded-full border-2 border-border"
                       style={{ backgroundColor: project.brandColors.accent }}
                     />
                   )}
@@ -244,17 +250,17 @@ export function ProjectCard({
               e.stopPropagation()
               setShowMenu(!showMenu)
             }}
-            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+            className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent border-2 border-transparent hover:border-border transition-all min-w-[40px] min-h-[40px] flex items-center justify-center"
           >
             <MoreVertical className="w-4 h-4" />
           </button>
           {showMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 z-20 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[140px]">
+              <div className="absolute right-0 top-full mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] py-1 min-w-[140px]">
                 <Link
                   href={`/projects/${project.id}`}
-                  className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -266,7 +272,7 @@ export function ProjectCard({
                       setShowMenu(false)
                       onDelete(e)
                     }}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-accent transition-colors w-full text-left"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-destructive hover:bg-accent transition-colors w-full text-left"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete

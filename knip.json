@@ -11,6 +11,8 @@
     "src/app/**/*"
   ],
   "ignoreDependencies": [
+    "@capacitor/core",
+    "@capacitor/ios",
     "@octokit/rest",
     "gh-pages",
     "tsx"

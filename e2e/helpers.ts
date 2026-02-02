@@ -45,7 +45,8 @@ export async function enterDemoMode(page: Page) {
 
   await page.goto('/')
   // Wait for the dashboard to load - look for the header
-  await expect(page.getByRole('link', { name: 'Bullhorn', exact: true })).toBeVisible()
+  // The link contains emoji + text, so use regex to match "Bullhorn"
+  await expect(page.getByRole('link', { name: /Bullhorn/ })).toBeVisible()
 }
 
 /**
@@ -675,7 +676,8 @@ export async function deleteCampaign(page: Page) {
  */
 export async function goToProfile(page: Page) {
   await page.goto('/profile')
-  await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible()
+  // Main heading contains emoji + "Profile" - use first() to avoid matching section headings
+  await expect(page.getByRole('heading', { name: /Profile/ }).first()).toBeVisible()
 }
 
 /**
