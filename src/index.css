@@ -30,6 +30,8 @@
     --input: 220 20% 20%;
     --ring: 43 96% 56%;
     --radius: 12px;
+    --gold: 43 96% 56%;
+    --gold-dark: 38 89% 45%;
   }
 
   /* Dark mode - Sticker Bomb Dark */
@@ -56,6 +58,8 @@
     --border: 220 15% 35%;
     --input: 220 15% 35%;
     --ring: 43 96% 56%;
+    --gold: 43 96% 56%;
+    --gold-dark: 38 89% 45%;
   }
 
   * {
