@@ -14,6 +14,7 @@ import {
   Plus,
   Trash2,
   Loader2,
+  Key,
 } from 'lucide-react'
 import { useTheme, Theme } from '@/lib/theme'
 import {
@@ -26,6 +27,7 @@ import { IOSToggleSwitch } from '@/components/ui/IOSToggleSwitch'
 import { useAnalyticsStore, useAnalyticsConnections } from '@/lib/analyticsStore'
 import { ConnectAnalyticsModal } from '@/components/analytics/ConnectAnalyticsModal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { ApiKeyManager } from '@/components/ui/ApiKeyManager'
 
 const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun; emoji: string }[] = [
   { value: 'light', label: 'Light', icon: Sun, emoji: '☀️' },
@@ -45,12 +47,15 @@ export default function SettingsPage() {
 
   // Analytics state
   const [showConnectModal, setShowConnectModal] = useState(false)
-  const [authData, setAuthData] = useState<{
-    accessToken: string
-    refreshToken: string
-    tokenExpiresAt: string
-    scopes: string[]
-  } | undefined>(undefined)
+  const [authData, setAuthData] = useState<
+    | {
+        accessToken: string
+        refreshToken: string
+        tokenExpiresAt: string
+        scopes: string[]
+      }
+    | undefined
+  >(undefined)
   const [connectionToDelete, setConnectionToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -70,9 +75,7 @@ export default function SettingsPage() {
 
     if (analyticsAuth === 'success' && authDataParam) {
       try {
-        const decoded = JSON.parse(
-          Buffer.from(authDataParam, 'base64url').toString()
-        )
+        const decoded = JSON.parse(Buffer.from(authDataParam, 'base64url').toString())
         setAuthData(decoded)
         setShowConnectModal(true)
 
@@ -143,9 +146,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl mx-auto p-4 md:p-8 animate-fade-in">
       <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">⚙️ Settings</h1>
-      <p className="text-muted-foreground mb-2">
-        Configure your preferences.
-      </p>
+      <p className="text-muted-foreground mb-2">Configure your preferences.</p>
       <div className="h-1 w-20 gradient-bar mb-8 rounded-full" />
 
       {/* Status messages */}
@@ -174,9 +175,7 @@ export default function SettingsPage() {
         <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
           🎨 Appearance
         </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Choose your preferred color scheme.
-        </p>
+        <p className="text-sm text-muted-foreground mb-4">Choose your preferred color scheme.</p>
         <div className="flex gap-2">
           {THEME_OPTIONS.map((option) => {
             const isActive = theme === option.value
@@ -340,6 +339,17 @@ export default function SettingsPage() {
             Connect Google Analytics
           </button>
         )}
+      </div>
+
+      {/* API Keys */}
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
+          <Key className="w-4 h-4 inline-block mr-1 -mt-0.5" /> API Keys
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Create API keys for the Bullhorn MCP server or external integrations.
+        </p>
+        <ApiKeyManager />
       </div>
 
       {/* About */}

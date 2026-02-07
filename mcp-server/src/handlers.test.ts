@@ -1,24 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock the storage module
-vi.mock('./storage.js', () => ({
-  createPost: vi.fn(),
-  getPost: vi.fn(),
-  updatePost: vi.fn(),
-  deletePost: vi.fn(),
-  archivePost: vi.fn(),
-  restorePost: vi.fn(),
-  listPosts: vi.fn(),
-  createCampaign: vi.fn(),
-  getCampaign: vi.fn(),
-  updateCampaign: vi.fn(),
-  deleteCampaign: vi.fn(),
-  listCampaigns: vi.fn(),
-  addPostToCampaign: vi.fn(),
-  removePostFromCampaign: vi.fn(),
+// Shared mock client methods — these persist across tests
+const mockGet = vi.fn()
+const mockPost = vi.fn()
+const mockPatch = vi.fn()
+const mockDelete = vi.fn()
+
+// Mock the client module — storage functions call through to BullhornClient
+vi.mock('./client.js', () => ({
+  BullhornClient: class {
+    get = mockGet
+    post = mockPost
+    patch = mockPatch
+    delete = mockDelete
+  },
 }))
 
 import * as storage from './storage.js'
+import { _resetClient } from './storage.js'
 
 // Helper to simulate tool handler logic
 // We extract the handler logic here to test it independently of the MCP server
@@ -188,7 +187,9 @@ async function handleCreateRedditCrossposts(args: {
   for (const sub of args.subreddits) {
     if (!sub.subreddit || !sub.title) {
       return {
-        content: [{ type: 'text', text: 'Error: Each subreddit entry requires subreddit and title' }],
+        content: [
+          { type: 'text', text: 'Error: Each subreddit entry requires subreddit and title' },
+        ],
         isError: true,
       }
     }
@@ -222,12 +223,16 @@ async function handleCreateRedditCrossposts(args: {
     content: [
       {
         type: 'text',
-        text: JSON.stringify({
-          success: true,
-          groupId,
-          count: createdPosts.length,
-          posts: createdPosts,
-        }, null, 2),
+        text: JSON.stringify(
+          {
+            success: true,
+            groupId,
+            count: createdPosts.length,
+            posts: createdPosts,
+          },
+          null,
+          2
+        ),
       },
     ],
   }
@@ -235,7 +240,11 @@ async function handleCreateRedditCrossposts(args: {
 
 describe('Tool Handlers', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
   })
 
   describe('Campaign Tools', () => {
@@ -254,7 +263,7 @@ describe('Tool Handlers', () => {
 
       it('should create campaign with trimmed name', async () => {
         const mockCampaign = { id: 'campaign-1', name: 'Test', status: 'draft' }
-        vi.mocked(storage.createCampaign).mockResolvedValueOnce(mockCampaign as storage.Campaign)
+        mockPost.mockResolvedValueOnce({ campaign: mockCampaign })
 
         const result = await handleCreateCampaign({ name: '  Test  ' })
         expect(result.isError).toBeUndefined()
@@ -263,16 +272,21 @@ describe('Tool Handlers', () => {
         expect(response.success).toBe(true)
         expect(response.campaign).toEqual(mockCampaign)
 
-        expect(storage.createCampaign).toHaveBeenCalledWith({
+        expect(mockPost).toHaveBeenCalledWith('/campaigns', {
           name: 'Test',
-          description: undefined,
+          description: null,
           status: 'draft',
         })
       })
 
       it('should pass description and status when provided', async () => {
-        const mockCampaign = { id: 'campaign-1', name: 'Test', description: 'Desc', status: 'active' }
-        vi.mocked(storage.createCampaign).mockResolvedValueOnce(mockCampaign as storage.Campaign)
+        const mockCampaign = {
+          id: 'campaign-1',
+          name: 'Test',
+          description: 'Desc',
+          status: 'active',
+        }
+        mockPost.mockResolvedValueOnce({ campaign: mockCampaign })
 
         await handleCreateCampaign({
           name: 'Test',
@@ -280,7 +294,7 @@ describe('Tool Handlers', () => {
           status: 'active',
         })
 
-        expect(storage.createCampaign).toHaveBeenCalledWith({
+        expect(mockPost).toHaveBeenCalledWith('/campaigns', {
           name: 'Test',
           description: 'Desc',
           status: 'active',
@@ -291,7 +305,7 @@ describe('Tool Handlers', () => {
     describe('list_campaigns', () => {
       it('should return campaigns list', async () => {
         const mockCampaigns = [{ id: 'c1' }, { id: 'c2' }]
-        vi.mocked(storage.listCampaigns).mockResolvedValueOnce(mockCampaigns as storage.Campaign[])
+        mockGet.mockResolvedValueOnce({ campaigns: mockCampaigns })
 
         const result = await handleListCampaigns({})
         const response = JSON.parse(result.content[0].text)
@@ -302,31 +316,25 @@ describe('Tool Handlers', () => {
       })
 
       it('should use default limit of 50', async () => {
-        vi.mocked(storage.listCampaigns).mockResolvedValueOnce([])
+        mockGet.mockResolvedValueOnce({ campaigns: [] })
 
         await handleListCampaigns({})
 
-        expect(storage.listCampaigns).toHaveBeenCalledWith({
-          status: undefined,
-          limit: 50,
-        })
+        expect(mockGet).toHaveBeenCalledWith('/campaigns', { limit: '50' })
       })
 
       it('should pass custom limit', async () => {
-        vi.mocked(storage.listCampaigns).mockResolvedValueOnce([])
+        mockGet.mockResolvedValueOnce({ campaigns: [] })
 
         await handleListCampaigns({ limit: 10 })
 
-        expect(storage.listCampaigns).toHaveBeenCalledWith({
-          status: undefined,
-          limit: 10,
-        })
+        expect(mockGet).toHaveBeenCalledWith('/campaigns', { limit: '10' })
       })
     })
 
     describe('get_campaign', () => {
       it('should return error when campaign not found', async () => {
-        vi.mocked(storage.getCampaign).mockResolvedValueOnce(undefined)
+        mockGet.mockRejectedValueOnce(new Error('Not found'))
 
         const result = await handleGetCampaign({ id: 'nonexistent' })
         expect(result.isError).toBe(true)
@@ -338,7 +346,7 @@ describe('Tool Handlers', () => {
           campaign: { id: 'c1', name: 'Test' },
           posts: [{ id: 'p1' }],
         }
-        vi.mocked(storage.getCampaign).mockResolvedValueOnce(mockResult as { campaign: storage.Campaign; posts: storage.Post[] })
+        mockGet.mockResolvedValueOnce(mockResult)
 
         const result = await handleGetCampaign({ id: 'c1' })
         const response = JSON.parse(result.content[0].text)
@@ -351,7 +359,7 @@ describe('Tool Handlers', () => {
 
     describe('delete_campaign', () => {
       it('should return error when campaign not found', async () => {
-        vi.mocked(storage.deleteCampaign).mockResolvedValueOnce(false)
+        mockDelete.mockRejectedValueOnce(new Error('Not found'))
 
         const result = await handleDeleteCampaign({ id: 'nonexistent' })
         expect(result.isError).toBe(true)
@@ -359,7 +367,7 @@ describe('Tool Handlers', () => {
       })
 
       it('should return success message when deleted', async () => {
-        vi.mocked(storage.deleteCampaign).mockResolvedValueOnce(true)
+        mockDelete.mockResolvedValueOnce({})
 
         const result = await handleDeleteCampaign({ id: 'c1' })
         const response = JSON.parse(result.content[0].text)
@@ -371,7 +379,8 @@ describe('Tool Handlers', () => {
 
     describe('add_post_to_campaign', () => {
       it('should return error when campaign or post not found', async () => {
-        vi.mocked(storage.addPostToCampaign).mockResolvedValueOnce(undefined)
+        // addPostToCampaign calls updatePost which calls client.patch
+        mockPatch.mockRejectedValueOnce(new Error('Not found'))
 
         const result = await handleAddPostToCampaign({
           campaignId: 'c1',
@@ -382,8 +391,8 @@ describe('Tool Handlers', () => {
       })
 
       it('should return updated post when successful', async () => {
-        const mockPost = { id: 'p1', campaignId: 'c1' }
-        vi.mocked(storage.addPostToCampaign).mockResolvedValueOnce(mockPost as storage.Post)
+        const mockPostData = { id: 'p1', campaignId: 'c1' }
+        mockPatch.mockResolvedValueOnce({ post: mockPostData })
 
         const result = await handleAddPostToCampaign({
           campaignId: 'c1',
@@ -392,13 +401,13 @@ describe('Tool Handlers', () => {
         const response = JSON.parse(result.content[0].text)
 
         expect(response.success).toBe(true)
-        expect(response.post).toEqual(mockPost)
+        expect(response.post).toEqual(mockPostData)
       })
     })
 
     describe('remove_post_from_campaign', () => {
       it('should return error when post not found', async () => {
-        vi.mocked(storage.removePostFromCampaign).mockResolvedValueOnce(undefined)
+        mockPatch.mockRejectedValueOnce(new Error('Not found'))
 
         const result = await handleRemovePostFromCampaign({
           campaignId: 'c1',
@@ -409,8 +418,8 @@ describe('Tool Handlers', () => {
       })
 
       it('should return updated post when successful', async () => {
-        const mockPost = { id: 'p1', campaignId: undefined }
-        vi.mocked(storage.removePostFromCampaign).mockResolvedValueOnce(mockPost as storage.Post)
+        const mockPostData = { id: 'p1', campaignId: undefined }
+        mockPatch.mockResolvedValueOnce({ post: mockPostData })
 
         const result = await handleRemovePostFromCampaign({
           campaignId: 'c1',
@@ -419,7 +428,7 @@ describe('Tool Handlers', () => {
         const response = JSON.parse(result.content[0].text)
 
         expect(response.success).toBe(true)
-        expect(response.post).toEqual(mockPost)
+        expect(response.post).toEqual(mockPostData)
       })
     })
   })
@@ -434,7 +443,9 @@ describe('Tool Handlers', () => {
 
       it('should return error when subreddits is undefined', async () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await handleCreateRedditCrossposts({ subreddits: undefined as unknown as any[] })
+        const result = await handleCreateRedditCrossposts({
+          subreddits: undefined as unknown as any[],
+        })
         expect(result.isError).toBe(true)
         expect(result.content[0].text).toContain('At least one subreddit is required')
       })
@@ -444,7 +455,9 @@ describe('Tool Handlers', () => {
           subreddits: [{ subreddit: '', title: 'Test' }],
         })
         expect(result.isError).toBe(true)
-        expect(result.content[0].text).toContain('Each subreddit entry requires subreddit and title')
+        expect(result.content[0].text).toContain(
+          'Each subreddit entry requires subreddit and title'
+        )
       })
 
       it('should return error when subreddit entry missing title', async () => {
@@ -452,7 +465,9 @@ describe('Tool Handlers', () => {
           subreddits: [{ subreddit: 'test', title: '' }],
         })
         expect(result.isError).toBe(true)
-        expect(result.content[0].text).toContain('Each subreddit entry requires subreddit and title')
+        expect(result.content[0].text).toContain(
+          'Each subreddit entry requires subreddit and title'
+        )
       })
 
       it('should create posts for each subreddit with shared groupId', async () => {
@@ -460,9 +475,9 @@ describe('Tool Handlers', () => {
           { id: 'p1', platform: 'reddit', content: { subreddit: 'startups', title: 'Test' } },
           { id: 'p2', platform: 'reddit', content: { subreddit: 'SaaS', title: 'Test' } },
         ]
-        vi.mocked(storage.createPost)
-          .mockResolvedValueOnce(mockPosts[0] as storage.Post)
-          .mockResolvedValueOnce(mockPosts[1] as storage.Post)
+        mockPost
+          .mockResolvedValueOnce({ post: mockPosts[0] })
+          .mockResolvedValueOnce({ post: mockPosts[1] })
 
         const result = await handleCreateRedditCrossposts({
           subreddits: [
@@ -478,19 +493,20 @@ describe('Tool Handlers', () => {
         expect(response.posts).toHaveLength(2)
 
         // Verify both posts were created with the same groupId
-        expect(storage.createPost).toHaveBeenCalledTimes(2)
+        expect(mockPost).toHaveBeenCalledTimes(2)
 
-        const firstCall = vi.mocked(storage.createPost).mock.calls[0][0]
-        const secondCall = vi.mocked(storage.createPost).mock.calls[1][0]
+        const firstCall = mockPost.mock.calls[0]
+        const secondCall = mockPost.mock.calls[1]
 
-        expect(firstCall.groupId).toBe('test-group-id')
-        expect(secondCall.groupId).toBe('test-group-id')
-        expect(firstCall.groupType).toBe('reddit-crosspost')
-        expect(secondCall.groupType).toBe('reddit-crosspost')
+        // client.post is called with (path, body)
+        expect(firstCall[1].groupId).toBe('test-group-id')
+        expect(secondCall[1].groupId).toBe('test-group-id')
+        expect(firstCall[1].groupType).toBe('reddit-crosspost')
+        expect(secondCall[1].groupType).toBe('reddit-crosspost')
       })
 
       it('should use per-subreddit scheduledAt when provided', async () => {
-        vi.mocked(storage.createPost).mockResolvedValue({ id: 'p1' } as storage.Post)
+        mockPost.mockResolvedValue({ post: { id: 'p1' } })
 
         await handleCreateRedditCrossposts({
           subreddits: [
@@ -500,25 +516,25 @@ describe('Tool Handlers', () => {
           defaultScheduledAt: '2024-01-01T08:00:00Z',
         })
 
-        const calls = vi.mocked(storage.createPost).mock.calls
-        expect(calls[0][0].scheduledAt).toBe('2024-01-01T10:00:00Z')
-        expect(calls[1][0].scheduledAt).toBe('2024-01-01T12:00:00Z')
+        const calls = mockPost.mock.calls
+        expect(calls[0][1].scheduledAt).toBe('2024-01-01T10:00:00Z')
+        expect(calls[1][1].scheduledAt).toBe('2024-01-01T12:00:00Z')
       })
 
       it('should use defaultScheduledAt when subreddit has no scheduledAt', async () => {
-        vi.mocked(storage.createPost).mockResolvedValue({ id: 'p1' } as storage.Post)
+        mockPost.mockResolvedValue({ post: { id: 'p1' } })
 
         await handleCreateRedditCrossposts({
           subreddits: [{ subreddit: 'sub1', title: 'T1' }],
           defaultScheduledAt: '2024-01-01T08:00:00Z',
         })
 
-        const call = vi.mocked(storage.createPost).mock.calls[0][0]
-        expect(call.scheduledAt).toBe('2024-01-01T08:00:00Z')
+        const call = mockPost.mock.calls[0]
+        expect(call[1].scheduledAt).toBe('2024-01-01T08:00:00Z')
       })
 
       it('should pass campaignId to all posts', async () => {
-        vi.mocked(storage.createPost).mockResolvedValue({ id: 'p1' } as storage.Post)
+        mockPost.mockResolvedValue({ post: { id: 'p1' } })
 
         await handleCreateRedditCrossposts({
           subreddits: [
@@ -528,13 +544,13 @@ describe('Tool Handlers', () => {
           campaignId: 'campaign-123',
         })
 
-        const calls = vi.mocked(storage.createPost).mock.calls
-        expect(calls[0][0].campaignId).toBe('campaign-123')
-        expect(calls[1][0].campaignId).toBe('campaign-123')
+        const calls = mockPost.mock.calls
+        expect(calls[0][1].campaignId).toBe('campaign-123')
+        expect(calls[1][1].campaignId).toBe('campaign-123')
       })
 
       it('should include body, url, and flairText when provided', async () => {
-        vi.mocked(storage.createPost).mockResolvedValue({ id: 'p1' } as storage.Post)
+        mockPost.mockResolvedValue({ post: { id: 'p1' } })
 
         await handleCreateRedditCrossposts({
           subreddits: [
@@ -548,8 +564,8 @@ describe('Tool Handlers', () => {
           ],
         })
 
-        const call = vi.mocked(storage.createPost).mock.calls[0][0]
-        const content = call.content as { body?: string; url?: string; flairText?: string }
+        const call = mockPost.mock.calls[0]
+        const content = call[1].content as { body?: string; url?: string; flairText?: string }
         expect(content.body).toBe('Post body')
         expect(content.url).toBe('https://example.com')
         expect(content.flairText).toBe('Discussion')

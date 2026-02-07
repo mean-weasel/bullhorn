@@ -1,3 +1,5 @@
+import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
+import { headers } from 'next/headers'
 import { createClient } from './supabase/server'
 
 /**
@@ -14,8 +16,85 @@ export function isTestMode(): boolean {
 }
 
 /**
+ * Check if the current request is authenticated via API key (Bearer bh_*).
+ * Reads the Authorization header from the incoming request.
+ */
+export async function getApiKeyFromHeaders(): Promise<string | null> {
+  try {
+    const hdrs = await headers()
+    const auth = hdrs.get('authorization')
+    if (auth && auth.startsWith('Bearer bh_')) {
+      return auth.slice('Bearer '.length)
+    }
+  } catch {
+    // headers() can throw in some contexts (e.g. static generation)
+  }
+  return null
+}
+
+/**
+ * Resolve a raw API key to a user ID.
+ * Validates the key format, looks up the hash, checks expiry/revocation,
+ * and updates last_used_at.
+ */
+export async function resolveApiKey(rawKey: string): Promise<{ userId: string }> {
+  if (!rawKey.startsWith('bh_') || rawKey.length < 20) {
+    throw new Error('Unauthorized')
+  }
+
+  // SHA-256 hash the raw key
+  const encoder = new TextEncoder()
+  const data = encoder.encode(rawKey)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const keyHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+
+  // Look up key via service role client (no session exists for API key requests)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error('Unauthorized')
+  }
+
+  const serviceClient = createSupabaseJsClient(supabaseUrl, serviceKey)
+
+  const { data: apiKey, error } = await serviceClient
+    .from('api_keys')
+    .select('id, user_id, expires_at, revoked_at')
+    .eq('key_hash', keyHash)
+    .single()
+
+  if (error || !apiKey) {
+    throw new Error('Unauthorized')
+  }
+
+  // Check revocation
+  if (apiKey.revoked_at) {
+    throw new Error('Unauthorized')
+  }
+
+  // Check expiration
+  if (apiKey.expires_at && new Date(apiKey.expires_at) < new Date()) {
+    throw new Error('Unauthorized')
+  }
+
+  // Fire-and-forget update to last_used_at
+  serviceClient
+    .from('api_keys')
+    .update({ last_used_at: new Date().toISOString() })
+    .eq('id', apiKey.id)
+    .then(() => {})
+
+  return { userId: apiKey.user_id }
+}
+
+/**
  * Require authentication for API routes.
  * Returns the authenticated user's ID or throws a 401-style error.
+ *
+ * Supports two auth methods:
+ * 1. Bearer bh_* API key in Authorization header
+ * 2. Supabase session cookie (standard browser auth)
  *
  * In test mode (non-production only), returns a test user ID.
  *
@@ -30,8 +109,18 @@ export async function requireAuth(): Promise<{ userId: string }> {
     return { userId: TEST_USER_ID }
   }
 
+  // Check for API key auth first
+  const apiKey = await getApiKeyFromHeaders()
+  if (apiKey) {
+    return resolveApiKey(apiKey)
+  }
+
+  // Fall through to cookie-based session auth
   const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
 
   if (error || !user) {
     throw new Error('Unauthorized')
@@ -50,7 +139,9 @@ export async function getOptionalAuth(): Promise<{ userId: string | null }> {
   }
 
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   return { userId: user?.id || null }
 }
@@ -111,7 +202,7 @@ export async function validateCampaignOwnership(
   return {
     id: campaign.id,
     name: campaign.name,
-    projectId: campaign.project_id
+    projectId: campaign.project_id,
   }
 }
 
@@ -142,7 +233,7 @@ export async function validatePostOwnership(
 
   return {
     id: post.id,
-    campaignId: post.campaign_id
+    campaignId: post.campaign_id,
   }
 }
 
@@ -173,6 +264,6 @@ export async function validateBlogDraftOwnership(
 
   return {
     id: draft.id,
-    title: draft.title
+    title: draft.title,
   }
 }
