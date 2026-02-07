@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "supabase": {
+      "command": "doppler",
+      "args": [
+        "run",
+        "--project",
+        "bullhorn",
+        "--config",
+        "dev",
+        "--",
+        "npx",
+        "-y",
+        "@supabase/mcp-server-supabase@latest"
+      ],
+      "env": {
+        "SUPABASE_PROJECT_REF": "jvoppjybagyeffklbohr"
+      }
+    }
+  }
+}
