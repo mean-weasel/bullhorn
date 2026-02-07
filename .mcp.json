@@ -28,6 +28,13 @@
       "env": {
         "SUPABASE_PROJECT_REF": "jvoppjybagyeffklbohr"
       }
+    },
+    "bullhorn": {
+      "command": "npx",
+      "args": ["-y", "@neonwatty/bullhorn-mcp"],
+      "env": {
+        "BULLHORN_API_URL": "https://bullhorn.to"
+      }
     }
   }
 }

@@ -1,26 +1,37 @@
 {
-  "name": "@bullhorn/mcp-server",
-  "version": "1.0.0",
-  "description": "MCP server for Bullhorn post management",
+  "name": "@neonwatty/bullhorn-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Bullhorn — manage posts, campaigns, projects, and more",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "bullhorn-mcp": "dist/index.js"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
     "dev": "CI=true tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "vitest run --config vitest.e2e.config.ts"
   },
+  "keywords": ["mcp", "bullhorn", "social-media", "scheduler", "claude"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neonwatty/bullhorn",
+    "directory": "mcp-server"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "@supabase/supabase-js": "^2.49.1",
-    "dotenv": "^16.3.1"
+    "@modelcontextprotocol/sdk": "^1.0.0"
   },
   "devDependencies": {
-    "@types/cross-spawn": "^6.0.6",
     "@types/node": "^20.11.5",
-    "cross-spawn": "^7.0.6",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^4.0.16"

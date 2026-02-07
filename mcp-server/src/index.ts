@@ -1,19 +1,8 @@
 #!/usr/bin/env node
 
-// Load environment variables first
-import * as dotenv from 'dotenv'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: resolve(__dirname, '../../.env.local') })
-
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 
 import {
   createPost,
@@ -55,6 +44,12 @@ import {
   getProjectAccounts,
   moveCampaignToProject,
   listCampaignsByProject,
+  // Launch post functions
+  createLaunchPost,
+  getLaunchPost,
+  updateLaunchPost,
+  deleteLaunchPost,
+  listLaunchPosts,
   type Platform,
   type PostStatus,
   type Post,
@@ -64,6 +59,7 @@ import {
   type BlogDraft,
   type BlogDraftStatus,
   type Project,
+  type LaunchPost,
 } from './storage.js'
 
 // Create MCP server
@@ -94,7 +90,8 @@ const TOOLS = [
         },
         content: {
           type: 'object',
-          description: 'Content for the post. Structure depends on platform: twitter={text, mediaUrls?}, linkedin={text, visibility?, mediaUrl?}, reddit={subreddit, title, body?, url?, flairText?}',
+          description:
+            'Content for the post. Structure depends on platform: twitter={text, mediaUrls?}, linkedin={text, visibility?, mediaUrl?}, reddit={subreddit, title, body?, url?, flairText?}',
         },
         scheduledAt: {
           type: 'string',
@@ -185,7 +182,8 @@ const TOOLS = [
   },
   {
     name: 'delete_post',
-    description: 'Permanently delete a post. This action cannot be undone. Please confirm with the user before calling this.',
+    description:
+      'Permanently delete a post. This action cannot be undone. Please confirm with the user before calling this.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -200,7 +198,8 @@ const TOOLS = [
   },
   {
     name: 'archive_post',
-    description: 'Archive a post (soft delete). Archived posts can be restored. Please confirm with the user before calling this.',
+    description:
+      'Archive a post (soft delete). Archived posts can be restored. Please confirm with the user before calling this.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -257,13 +256,15 @@ const TOOLS = [
   },
   {
     name: 'search_posts',
-    description: 'Search posts by content, notes, platform, or campaign name. Excludes archived posts.',
+    description:
+      'Search posts by content, notes, platform, or campaign name. Excludes archived posts.',
     inputSchema: {
       type: 'object' as const,
       properties: {
         query: {
           type: 'string',
-          description: 'Search query to match against post content, notes, platform, or campaign name',
+          description:
+            'Search query to match against post content, notes, platform, or campaign name',
         },
         limit: {
           type: 'number',
@@ -346,7 +347,8 @@ const TOOLS = [
   },
   {
     name: 'delete_campaign',
-    description: 'Delete a campaign. Posts linked to the campaign will have their campaignId cleared but will not be deleted.',
+    description:
+      'Delete a campaign. Posts linked to the campaign will have their campaignId cleared but will not be deleted.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -382,7 +384,8 @@ const TOOLS = [
   // Reddit cross-posting tool
   {
     name: 'create_reddit_crossposts',
-    description: 'Create multiple Reddit posts to different subreddits with a shared groupId. Each subreddit can have its own title, body, and schedule time.',
+    description:
+      'Create multiple Reddit posts to different subreddits with a shared groupId. Each subreddit can have its own title, body, and schedule time.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -392,11 +395,20 @@ const TOOLS = [
             type: 'object',
             properties: {
               subreddit: { type: 'string', description: 'Subreddit name (without r/)' },
-              title: { type: 'string', description: 'Post title for this subreddit (max 300 chars)' },
+              title: {
+                type: 'string',
+                description: 'Post title for this subreddit (max 300 chars)',
+              },
               body: { type: 'string', description: 'Post body text (optional)' },
               url: { type: 'string', description: 'Link URL for link posts (optional)' },
-              flairText: { type: 'string', description: 'Flair text for this subreddit (optional)' },
-              scheduledAt: { type: 'string', description: 'ISO 8601 datetime for scheduling this specific post (optional)' },
+              flairText: {
+                type: 'string',
+                description: 'Flair text for this subreddit (optional)',
+              },
+              scheduledAt: {
+                type: 'string',
+                description: 'ISO 8601 datetime for scheduling this specific post (optional)',
+              },
             },
             required: ['subreddit', 'title'],
           },
@@ -426,7 +438,8 @@ const TOOLS = [
   // Blog draft management tools
   {
     name: 'create_blog_draft',
-    description: 'Create a new blog post draft with markdown content. Claude will help write the content from scratch or based on a topic/outline.',
+    description:
+      'Create a new blog post draft with markdown content. Claude will help write the content from scratch or based on a topic/outline.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -476,7 +489,8 @@ const TOOLS = [
   },
   {
     name: 'update_blog_draft',
-    description: 'Update an existing blog draft. Can update title, content, date, notes, status, or campaign.',
+    description:
+      'Update an existing blog draft. Can update title, content, date, notes, status, or campaign.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -498,7 +512,8 @@ const TOOLS = [
   },
   {
     name: 'delete_blog_draft',
-    description: 'Permanently delete a blog draft. This action cannot be undone. Please confirm with the user before calling this.',
+    description:
+      'Permanently delete a blog draft. This action cannot be undone. Please confirm with the user before calling this.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -513,7 +528,8 @@ const TOOLS = [
   },
   {
     name: 'archive_blog_draft',
-    description: 'Archive a blog draft (soft delete). Archived drafts can be restored. Please confirm with the user before calling this.',
+    description:
+      'Archive a blog draft (soft delete). Archived drafts can be restored. Please confirm with the user before calling this.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -539,7 +555,8 @@ const TOOLS = [
   },
   {
     name: 'list_blog_drafts',
-    description: 'List blog drafts with optional filters. Returns title, status, and date for each draft.',
+    description:
+      'List blog drafts with optional filters. Returns title, status, and date for each draft.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -579,7 +596,8 @@ const TOOLS = [
   },
   {
     name: 'add_image_to_draft',
-    description: 'Copy an image from a file path to the blog media folder and attach it to a draft. Returns markdown syntax to embed the image.',
+    description:
+      'Copy an image from a file path to the blog media folder and attach it to a draft. Returns markdown syntax to embed the image.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -614,7 +632,8 @@ const TOOLS = [
   // ==================
   {
     name: 'create_project',
-    description: 'Create a new project to organize campaigns. Projects can have a brand kit (hashtags, colors, logo) and preferred social accounts.',
+    description:
+      'Create a new project to organize campaigns. Projects can have a brand kit (hashtags, colors, logo) and preferred social accounts.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -679,7 +698,8 @@ const TOOLS = [
   },
   {
     name: 'delete_project',
-    description: 'Delete a project. Campaigns in the project will become unassigned (not deleted). Please confirm with the user before calling this.',
+    description:
+      'Delete a project. Campaigns in the project will become unassigned (not deleted). Please confirm with the user before calling this.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -768,7 +788,8 @@ const TOOLS = [
   },
   {
     name: 'move_campaign_to_project',
-    description: 'Move a campaign to a different project or make it unassigned. Note: project defaults will not apply retroactively to existing posts.',
+    description:
+      'Move a campaign to a different project or make it unassigned. Note: project defaults will not apply retroactively to existing posts.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -783,7 +804,8 @@ const TOOLS = [
   },
   {
     name: 'list_campaigns_by_project',
-    description: 'List campaigns filtered by project. Use projectId=null to get unassigned campaigns.',
+    description:
+      'List campaigns filtered by project. Use projectId=null to get unassigned campaigns.',
     inputSchema: {
       type: 'object' as const,
       properties: {
@@ -804,6 +826,102 @@ const TOOLS = [
       required: ['projectId'],
     },
   },
+  // ==================
+  // Launch post tools
+  // ==================
+  {
+    name: 'create_launch_post',
+    description: 'Create a new launch post for tracking a product launch on a specific platform',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        platform: {
+          type: 'string',
+          enum: ['twitter', 'linkedin', 'reddit', 'producthunt', 'hackernews', 'other'],
+          description: 'Target platform',
+        },
+        title: { type: 'string', description: 'Launch post title' },
+        url: { type: 'string', description: 'URL for the launch post (optional)' },
+        description: { type: 'string', description: 'Description (optional)' },
+        platformFields: {
+          type: 'object',
+          description: 'Platform-specific fields (optional)',
+        },
+        campaignId: { type: 'string', description: 'Campaign ID (optional)' },
+        scheduledAt: { type: 'string', description: 'ISO 8601 schedule datetime (optional)' },
+        notes: { type: 'string', description: 'Private notes (optional)' },
+        status: {
+          type: 'string',
+          enum: ['draft', 'scheduled', 'posted'],
+          description: 'Status (default: draft)',
+        },
+      },
+      required: ['platform', 'title'],
+    },
+  },
+  {
+    name: 'get_launch_post',
+    description: 'Get a single launch post by ID',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        id: { type: 'string', description: 'Launch post ID' },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'update_launch_post',
+    description: 'Update an existing launch post',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        id: { type: 'string', description: 'Launch post ID to update' },
+        platform: { type: 'string', description: 'Updated platform' },
+        title: { type: 'string', description: 'Updated title' },
+        url: { type: 'string', description: 'Updated URL' },
+        description: { type: 'string', description: 'Updated description' },
+        platformFields: { type: 'object', description: 'Updated platform-specific fields' },
+        campaignId: { type: 'string', description: 'Campaign ID' },
+        scheduledAt: { type: 'string', description: 'Schedule datetime' },
+        notes: { type: 'string', description: 'Private notes' },
+        status: { type: 'string', description: 'Updated status' },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'delete_launch_post',
+    description: 'Delete a launch post. Please confirm with the user before calling this.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        id: { type: 'string', description: 'Launch post ID to delete' },
+        confirmed: {
+          type: 'boolean',
+          description: 'Set to true to confirm deletion',
+        },
+      },
+      required: ['id', 'confirmed'],
+    },
+  },
+  {
+    name: 'list_launch_posts',
+    description: 'List launch posts with optional filters',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        platform: { type: 'string', description: 'Filter by platform' },
+        status: {
+          type: 'string',
+          enum: ['all', 'draft', 'scheduled', 'posted'],
+          description: 'Filter by status (default: all)',
+        },
+        campaignId: { type: 'string', description: 'Filter by campaign ID' },
+        limit: { type: 'number', description: 'Max results (default: 50)' },
+      },
+    },
+  },
 ]
 
 // Handle list tools request
@@ -818,21 +936,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case 'create_post': {
-        const { platform, content, scheduledAt, status, notes, campaignId, groupId, groupType } = args as {
-          platform: Platform
-          content: Post['content']
-          scheduledAt?: string
-          status?: 'draft' | 'scheduled'
-          notes?: string
-          campaignId?: string
-          groupId?: string
-          groupType?: GroupType
-        }
+        const { platform, content, scheduledAt, status, notes, campaignId, groupId, groupType } =
+          args as {
+            platform: Platform
+            content: Post['content']
+            scheduledAt?: string
+            status?: 'draft' | 'scheduled'
+            notes?: string
+            campaignId?: string
+            groupId?: string
+            groupType?: GroupType
+          }
 
         const validPlatforms = ['twitter', 'linkedin', 'reddit']
         if (!platform || !validPlatforms.includes(platform)) {
           return {
-            content: [{ type: 'text', text: 'Error: platform is required and must be one of: twitter, linkedin, reddit' }],
+            content: [
+              {
+                type: 'text',
+                text: 'Error: platform is required and must be one of: twitter, linkedin, reddit',
+              },
+            ],
             isError: true,
           }
         }
@@ -912,7 +1036,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         if (!confirmed) {
           return {
-            content: [{ type: 'text', text: 'Error: Deletion not confirmed. Please set confirmed=true after confirming with the user.' }],
+            content: [
+              {
+                type: 'text',
+                text: 'Error: Deletion not confirmed. Please set confirmed=true after confirming with the user.',
+              },
+            ],
             isError: true,
           }
         }
@@ -930,7 +1059,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ success: true, message: `Post ${id} permanently deleted` }, null, 2),
+              text: JSON.stringify(
+                { success: true, message: `Post ${id} permanently deleted` },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -941,7 +1074,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         if (!confirmed) {
           return {
-            content: [{ type: 'text', text: 'Error: Archive not confirmed. Please set confirmed=true after confirming with the user.' }],
+            content: [
+              {
+                type: 'text',
+                text: 'Error: Archive not confirmed. Please set confirmed=true after confirming with the user.',
+              },
+            ],
             isError: true,
           }
         }
@@ -1220,7 +1358,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         for (const sub of subreddits) {
           if (!sub.subreddit || !sub.title) {
             return {
-              content: [{ type: 'text', text: 'Error: Each subreddit entry requires subreddit and title' }],
+              content: [
+                { type: 'text', text: 'Error: Each subreddit entry requires subreddit and title' },
+              ],
               isError: true,
             }
           }
@@ -1254,12 +1394,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                groupId,
-                count: createdPosts.length,
-                posts: createdPosts,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  groupId,
+                  count: createdPosts.length,
+                  posts: createdPosts,
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1351,7 +1495,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         if (!confirmed) {
           return {
-            content: [{ type: 'text', text: 'Error: Deletion not confirmed. Please set confirmed=true after confirming with the user.' }],
+            content: [
+              {
+                type: 'text',
+                text: 'Error: Deletion not confirmed. Please set confirmed=true after confirming with the user.',
+              },
+            ],
             isError: true,
           }
         }
@@ -1369,7 +1518,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ success: true, message: `Blog draft ${id} permanently deleted` }, null, 2),
+              text: JSON.stringify(
+                { success: true, message: `Blog draft ${id} permanently deleted` },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1380,7 +1533,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         if (!confirmed) {
           return {
-            content: [{ type: 'text', text: 'Error: Archive not confirmed. Please set confirmed=true after confirming with the user.' }],
+            content: [
+              {
+                type: 'text',
+                text: 'Error: Archive not confirmed. Please set confirmed=true after confirming with the user.',
+              },
+            ],
             isError: true,
           }
         }
@@ -1439,7 +1597,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         })
 
         // Return simplified list (title, status, date, id)
-        const simplifiedDrafts = drafts.map(d => ({
+        const simplifiedDrafts = drafts.map((d) => ({
           id: d.id,
           title: d.title,
           status: d.status,
@@ -1452,7 +1610,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({ success: true, count: drafts.length, drafts: simplifiedDrafts }, null, 2),
+              text: JSON.stringify(
+                { success: true, count: drafts.length, drafts: simplifiedDrafts },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1496,14 +1658,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                filename: result.filename,
-                size: result.size,
-                mimetype: result.mimetype,
-                markdown: result.markdown,
-                message: `Image added. Use this markdown to embed it: ${result.markdown}`,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  filename: result.filename,
+                  size: result.size,
+                  mimetype: result.mimetype,
+                  markdown: result.markdown,
+                  message: `Image added. Use this markdown to embed it: ${result.markdown}`,
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1525,12 +1691,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                count: images.length,
-                images,
-                markdownRefs: images.map(img => `![image](/api/blog-media/${img})`),
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  count: images.length,
+                  images,
+                  markdownRefs: images.map((img) => `![image](/api/blog-media/${img})`),
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1568,14 +1738,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                project: result.project,
-                atLimit: result.atLimit,
-                message: result.atLimit
-                  ? 'Project created. Note: You have reached the soft limit of 3 projects.'
-                  : 'Project created successfully.',
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  project: result.project,
+                  atLimit: result.atLimit,
+                  message: result.atLimit
+                    ? 'Project created. Note: You have reached the soft limit of 3 projects.'
+                    : 'Project created successfully.',
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1628,7 +1802,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         if (!confirmed) {
           return {
-            content: [{ type: 'text', text: 'Error: Deletion not confirmed. Please set confirmed=true after confirming with the user.' }],
+            content: [
+              {
+                type: 'text',
+                text: 'Error: Deletion not confirmed. Please set confirmed=true after confirming with the user.',
+              },
+            ],
             isError: true,
           }
         }
@@ -1639,10 +1818,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                message: `Project deleted. ${result.campaignsDeleted} campaigns became unassigned.`,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  message: `Project deleted. ${result.campaignsDeleted} campaigns became unassigned.`,
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1656,10 +1839,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                ...result,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  ...result,
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1680,12 +1867,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                project: result.project,
-                campaigns: result.campaigns,
-                campaignCount: result.campaigns.length,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  project: result.project,
+                  campaigns: result.campaigns,
+                  campaignCount: result.campaigns.length,
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1728,11 +1919,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                association,
-                message: 'Account added to project.',
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  association,
+                  message: 'Account added to project.',
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1754,10 +1949,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success,
-                message: success ? 'Account removed from project.' : 'Association not found.',
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success,
+                  message: success ? 'Account removed from project.' : 'Association not found.',
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1779,18 +1978,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                accounts,
-                count: accounts.length,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  accounts,
+                  count: accounts.length,
+                },
+                null,
+                2
+              ),
             },
           ],
         }
       }
 
       case 'move_campaign_to_project': {
-        const { campaignId, targetProjectId } = args as { campaignId: string; targetProjectId?: string }
+        const { campaignId, targetProjectId } = args as {
+          campaignId: string
+          targetProjectId?: string
+        }
 
         if (!campaignId) {
           return {
@@ -1812,13 +2018,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                campaign,
-                message: targetProjectId
-                  ? `Campaign moved to project. Note: Project defaults will not apply retroactively to existing posts.`
-                  : 'Campaign is now unassigned.',
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  campaign,
+                  message: targetProjectId
+                    ? `Campaign moved to project. Note: Project defaults will not apply retroactively to existing posts.`
+                    : 'Campaign is now unassigned.',
+                },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1845,11 +2055,180 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           content: [
             {
               type: 'text',
-              text: JSON.stringify({
-                success: true,
-                campaigns,
-                count: campaigns.length,
-              }, null, 2),
+              text: JSON.stringify(
+                {
+                  success: true,
+                  campaigns,
+                  count: campaigns.length,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        }
+      }
+
+      // ==================
+      // Launch post handlers
+      // ==================
+
+      case 'create_launch_post': {
+        const {
+          platform,
+          title,
+          url,
+          description,
+          platformFields,
+          campaignId,
+          scheduledAt,
+          notes,
+          status,
+        } = args as {
+          platform: string
+          title: string
+          url?: string
+          description?: string
+          platformFields?: Record<string, unknown>
+          campaignId?: string
+          scheduledAt?: string
+          notes?: string
+          status?: string
+        }
+
+        if (!platform || !title) {
+          return {
+            content: [{ type: 'text', text: 'Error: platform and title are required' }],
+            isError: true,
+          }
+        }
+
+        const launchPost = await createLaunchPost({
+          platform: platform as Platform,
+          title,
+          url,
+          description,
+          platformFields,
+          campaignId,
+          scheduledAt,
+          notes,
+          status,
+        })
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ success: true, launchPost }, null, 2),
+            },
+          ],
+        }
+      }
+
+      case 'get_launch_post': {
+        const { id } = args as { id: string }
+        const launchPost = await getLaunchPost(id)
+
+        if (!launchPost) {
+          return {
+            content: [{ type: 'text', text: `Error: Launch post with ID ${id} not found` }],
+            isError: true,
+          }
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ success: true, launchPost }, null, 2),
+            },
+          ],
+        }
+      }
+
+      case 'update_launch_post': {
+        const { id, ...updates } = args as { id: string } & Partial<LaunchPost>
+        const launchPost = await updateLaunchPost(id, updates)
+
+        if (!launchPost) {
+          return {
+            content: [{ type: 'text', text: `Error: Launch post with ID ${id} not found` }],
+            isError: true,
+          }
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ success: true, launchPost }, null, 2),
+            },
+          ],
+        }
+      }
+
+      case 'delete_launch_post': {
+        const { id, confirmed } = args as { id: string; confirmed: boolean }
+
+        if (!confirmed) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: 'Error: Deletion not confirmed. Please set confirmed=true after confirming with the user.',
+              },
+            ],
+            isError: true,
+          }
+        }
+
+        const success = await deleteLaunchPost(id)
+
+        if (!success) {
+          return {
+            content: [{ type: 'text', text: `Error: Launch post with ID ${id} not found` }],
+            isError: true,
+          }
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                { success: true, message: `Launch post ${id} deleted` },
+                null,
+                2
+              ),
+            },
+          ],
+        }
+      }
+
+      case 'list_launch_posts': {
+        const { platform, status, campaignId, limit } = args as {
+          platform?: Platform
+          status?: string
+          campaignId?: string
+          limit?: number
+        }
+
+        const launchPosts = await listLaunchPosts({
+          platform,
+          status,
+          campaignId,
+          limit: limit || 50,
+        })
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                { success: true, count: launchPosts.length, launchPosts },
+                null,
+                2
+              ),
             },
           ],
         }
@@ -1876,6 +2255,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // Start server
 async function main() {
+  if (!process.env.BULLHORN_API_KEY) {
+    console.error(
+      'Error: BULLHORN_API_KEY is required.\n' +
+        'Create one at https://bullhorn.to/settings → API Keys.'
+    )
+    process.exit(1)
+  }
+
   const transport = new StdioServerTransport()
   await server.connect(transport)
   console.error('Bullhorn MCP Server running on stdio')
