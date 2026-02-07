@@ -277,6 +277,32 @@ Examples:
 - `fix: resolve auth redirect loop`
 - `test: add E2E tests for launch posts (#73)`
 
+## Guardrails
+
+### General
+
+- When a tool or approach fails 3+ times in a row (e.g., simulator crashes, browser click failures), stop retrying and suggest an alternative approach or escalate to the user instead of repeating the same failing command.
+- Before starting, review this file for project constraints. If unsure about the approach, present 2-3 options with tradeoffs BEFORE implementing.
+
+### Debugging
+
+- When debugging auth/webhook 401 errors, check infrastructure-level blocks first (Vercel Authentication, Cloudflare bot protection, iframe restrictions) before assuming application-level secret mismatches.
+- When debugging build or runtime errors, check environment configuration before blaming application code.
+
+### Environment & Secrets
+
+- This project uses Doppler for secrets management. Always ensure the session/environment is started with `doppler run` when Supabase, Vercel, or other service credentials are needed. Never suggest redundant secret storage across Doppler and Vercel — Doppler is the source of truth.
+
+### CI/CD
+
+- When CI/E2E tests require secrets or credentials, always verify they are configured before running. Never let CI jobs run indefinitely with placeholder credentials — fail fast with clear error messages.
+- Always run `prettier --write` on changed files before committing. Ensure all reformatted files are included in commits.
+
+### Database
+
+- When deploying database changes, always verify migrations are applied to ALL environments (production AND staging). After applying migrations, verify the schema cache is refreshed and RLS policies are updated.
+- Never edit existing migration files — create new ones with `make db-new name=description`.
+
 ## Known Issues
 
 - **Invisible gold buttons**: Gold/yellow buttons (#fbbf24) on cream background have near-zero contrast. Affects: New Campaign, Create Campaign submit, CTA empty state buttons.
