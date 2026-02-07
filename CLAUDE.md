@@ -277,6 +277,42 @@ Examples:
 - `fix: resolve auth redirect loop`
 - `test: add E2E tests for launch posts (#73)`
 
+## Automations
+
+### Skills
+
+| Command | Purpose | When to use |
+|---------|---------|-------------|
+| `/db-migrate <name>` | Create and apply a Supabase migration | Adding/changing database schema |
+| `/audit-rls` | Scan tables for missing RLS policies | After `/db-migrate`, or periodically |
+| `/scaffold-api <path> <methods>` | Generate boilerplate API route | Creating new API endpoints |
+| `/gen-test <file>` | Generate unit tests for a file | After implementing new code |
+| `/ship` | Build, lint, typecheck, and deploy | Ready to deploy changes |
+| `/monitor-ci` | Watch CI pipeline and debug failures | After pushing to remote |
+
+### Agents
+
+| Agent | Purpose | When to invoke |
+|-------|---------|----------------|
+| `code-reviewer` | Review code against project conventions | After completing a feature or PR |
+| `security-reviewer` | Focused security audit (OWASP, auth, RLS) | After auth/API/database changes |
+| `ios-tester` | Test workflows on iOS Simulator | After UI changes affecting mobile |
+
+### Hooks (automatic)
+
+- **protect-files** (PreToolUse): Blocks edits to `.env.local`, `package-lock.json`, and existing migrations
+- **auto-format** (PostToolUse): Runs Prettier on `.ts`, `.tsx`, `.css` files after edits
+- **typecheck** (PostToolUse): Runs `tsc --noEmit` after `.ts`/`.tsx` edits to surface type errors
+
+### MCP Servers
+
+| Server | Purpose |
+|--------|---------|
+| `context7` | Library documentation lookup |
+| `playwright` | Browser automation for E2E testing |
+| `github` | GitHub API (PRs, issues, repos) |
+| `supabase` | Database queries, migrations, edge functions |
+
 ## Guardrails
 
 ### General
