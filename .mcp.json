@@ -5,10 +5,19 @@
       "args": ["-y", "@upstash/context7-mcp@latest"]
     },
     "supabase": {
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server-supabase@latest"],
+      "command": "doppler",
+      "args": [
+        "run",
+        "--project",
+        "bullhorn",
+        "--config",
+        "dev",
+        "--",
+        "npx",
+        "-y",
+        "@supabase/mcp-server-supabase@latest"
+      ],
       "env": {
-        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}",
         "SUPABASE_PROJECT_REF": "jvoppjybagyeffklbohr"
       }
     }
