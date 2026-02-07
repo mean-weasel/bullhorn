@@ -2,12 +2,15 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const addPostToCampaignSchema = z.object({
+  postId: z.string().uuid().optional(),
+  post_id: z.string().uuid().optional(),
+})
 
 // GET /api/campaigns/[id]/posts - Get posts for campaign
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -45,7 +48,7 @@ export async function GET(
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const posts = (data || []).map(post => transformPostFromDb(post as Record<string, unknown>))
+    const posts = (data || []).map((post) => transformPostFromDb(post as Record<string, unknown>))
     return NextResponse.json({ posts })
   } catch (error) {
     console.error('Error fetching campaign posts:', error)
@@ -54,10 +57,7 @@ export async function GET(
 }
 
 // POST /api/campaigns/[id]/posts - Add post to campaign
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -71,8 +71,15 @@ export async function POST(
     const { id } = await params
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = addPostToCampaignSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
-    const postId = body.postId || body.post_id
+    const postId = parsed.data.postId || parsed.data.post_id
 
     if (!postId) {
       return NextResponse.json({ error: 'postId is required' }, { status: 400 })

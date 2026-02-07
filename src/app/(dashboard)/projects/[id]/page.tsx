@@ -32,7 +32,10 @@ import { getMediaUrl } from '@/lib/media'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { AccountPicker } from '@/components/projects/AccountPicker'
 
-const CAMPAIGN_STATUS_CONFIG: Record<CampaignStatus, { label: string; icon: typeof FileText; color: string }> = {
+const CAMPAIGN_STATUS_CONFIG: Record<
+  CampaignStatus,
+  { label: string; icon: typeof FileText; color: string }
+> = {
   draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   active: { label: 'Active', icon: Rocket, color: 'text-blue-400' },
   completed: { label: 'Completed', icon: CheckCircle, color: 'text-green-400' },
@@ -43,7 +46,8 @@ type TabType = 'campaigns' | 'settings'
 
 export default function ProjectDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const { fetchProjectWithCampaigns, fetchProjectAnalytics, updateProject, deleteProject } = useProjectsStore()
+  const { fetchProjectWithCampaigns, fetchProjectAnalytics, updateProject, deleteProject } =
+    useProjectsStore()
   const { addCampaign } = useCampaignsStore()
   const { fetchConnections, getConnectionsByProject } = useAnalyticsStore()
 
@@ -109,7 +113,13 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       setLoading(false)
     }
     loadProject()
-  }, [projectId, fetchProjectWithCampaigns, fetchProjectAnalytics, fetchConnections, getConnectionsByProject])
+  }, [
+    projectId,
+    fetchProjectWithCampaigns,
+    fetchProjectAnalytics,
+    fetchConnections,
+    getConnectionsByProject,
+  ])
 
   const handleSave = async () => {
     if (!project || !editName.trim()) return
@@ -254,7 +264,9 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 )}
 
                 {/* Brand colors */}
-                {(project.brandColors.primary || project.brandColors.secondary || project.brandColors.accent) && (
+                {(project.brandColors.primary ||
+                  project.brandColors.secondary ||
+                  project.brandColors.accent) && (
                   <div className="flex items-center gap-1.5">
                     <Palette className="w-4 h-4 text-muted-foreground" />
                     <div className="flex gap-1">
@@ -307,25 +319,33 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 <div className="text-2xl font-display font-bold text-[hsl(var(--gold-dark))]">
                   {analytics.totalCampaigns}
                 </div>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground">Campaigns</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Campaigns
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-display font-bold text-[hsl(var(--gold-dark))]">
                   {analytics.totalPosts}
                 </div>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground">Total Posts</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Total Posts
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-display font-bold text-blue-400">
                   {analytics.scheduledPosts}
                 </div>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground">Scheduled</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Scheduled
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-display font-bold text-green-400">
                   {analytics.publishedPosts}
                 </div>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground">Published</div>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground">
+                  Published
+                </div>
               </div>
             </div>
           )}
@@ -371,7 +391,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium',
                 'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                'text-white hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+                'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
               )}
             >
               <Plus className="w-4 h-4" />
@@ -394,7 +414,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 className={cn(
                   'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium',
                   'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                  'text-white hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+                  'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
                 )}
               >
                 <Plus className="w-4 h-4" />
@@ -467,7 +487,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Hashtags <span className="text-muted-foreground font-normal">(comma-separated)</span>
+                  Hashtags{' '}
+                  <span className="text-muted-foreground font-normal">(comma-separated)</span>
                 </label>
                 <input
                   type="text"
@@ -596,11 +617,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
             {analyticsConnections.length > 0 ? (
               <div className="space-y-4">
                 {analyticsConnections.map((connection) => (
-                  <AnalyticsDashboard
-                    key={connection.id}
-                    connectionId={connection.id}
-                    compact
-                  />
+                  <AnalyticsDashboard key={connection.id} connectionId={connection.id} compact />
                 ))}
               </div>
             ) : (
@@ -632,7 +649,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               className={cn(
                 'px-6 py-2.5 rounded-lg text-sm font-medium',
                 'bg-gradient-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                'text-black hover:opacity-90 transition-opacity'
+                'text-primary-foreground hover:opacity-90 transition-opacity'
               )}
             >
               Save Changes
@@ -643,7 +660,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           <div className="bg-card border border-destructive/30 rounded-xl p-4 md:p-6">
             <h3 className="font-semibold text-destructive mb-2">Danger Zone</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Deleting this project will unassign all campaigns. The campaigns and their posts will not be deleted.
+              Deleting this project will unassign all campaigns. The campaigns and their posts will
+              not be deleted.
             </p>
             <button
               onClick={() => setShowDeleteConfirm(true)}
@@ -796,7 +814,9 @@ function ProjectCampaignCard({ campaign, index }: { campaign: Campaign; index: n
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold mb-1 truncate">{campaign.name}</h3>
           {campaign.description && (
-            <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{campaign.description}</p>
+            <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
+              {campaign.description}
+            </p>
           )}
           <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
             <span className={cn('flex items-center gap-1.5', statusConfig.color)}>

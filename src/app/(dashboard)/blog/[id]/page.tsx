@@ -12,8 +12,16 @@ export default function BlogEditorPage() {
   const router = useRouter()
   const isEditing = !!id
 
-  const { getDraft, addDraft, updateDraft, archiveDraft, restoreDraft, deleteDraft, fetchDrafts, initialized } =
-    useBlogDraftsStore()
+  const {
+    getDraft,
+    addDraft,
+    updateDraft,
+    archiveDraft,
+    restoreDraft,
+    deleteDraft,
+    fetchDrafts,
+    initialized,
+  } = useBlogDraftsStore()
 
   // Form state
   const [title, setTitle] = useState('')
@@ -27,7 +35,12 @@ export default function BlogEditorPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Track original values for change detection
-  const originalRef = useRef<{ title: string; content: string; notes: string; date: string } | null>(null)
+  const originalRef = useRef<{
+    title: string
+    content: string
+    notes: string
+    date: string
+  } | null>(null)
 
   // Clear message after 3 seconds
   useEffect(() => {
@@ -153,7 +166,8 @@ export default function BlogEditorPage() {
   // Delete handler
   const handleDelete = useCallback(async () => {
     if (!isEditing) return
-    if (!confirm('Are you sure you want to permanently delete this draft? This cannot be undone.')) return
+    if (!confirm('Are you sure you want to permanently delete this draft? This cannot be undone.'))
+      return
     try {
       await deleteDraft(id!)
       router.push('/blog')
@@ -202,7 +216,7 @@ export default function BlogEditorPage() {
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg min-h-[40px]',
                 'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                'text-white font-medium text-sm',
+                'text-primary-foreground font-medium text-sm',
                 'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all',
                 'disabled:opacity-50 disabled:cursor-not-allowed'
               )}
@@ -259,12 +273,14 @@ export default function BlogEditorPage() {
           />
           <span>{wordCount} words</span>
           {status !== 'draft' && (
-            <span className={cn(
-              'px-2 py-0.5 rounded text-xs font-medium',
-              status === 'published' && 'bg-green-500/20 text-green-400',
-              status === 'scheduled' && 'bg-blue-500/20 text-blue-400',
-              status === 'archived' && 'bg-muted text-muted-foreground'
-            )}>
+            <span
+              className={cn(
+                'px-2 py-0.5 rounded text-xs font-medium',
+                status === 'published' && 'bg-green-500/20 text-green-400',
+                status === 'scheduled' && 'bg-blue-500/20 text-blue-400',
+                status === 'archived' && 'bg-muted text-muted-foreground'
+              )}
+            >
               {status}
             </span>
           )}
@@ -350,4 +366,3 @@ export default function BlogEditorPage() {
     </div>
   )
 }
-

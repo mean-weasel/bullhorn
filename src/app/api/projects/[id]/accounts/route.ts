@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const addAccountSchema = z.object({
+  accountId: z.string().min(1),
+})
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -9,14 +14,24 @@ interface RouteContext {
 // GET /api/projects/[id]/accounts - List accounts associated with project
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
+    // Require authentication
+    let userId: string
+    try {
+      const auth = await requireAuth()
+      userId = auth.userId
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
-    // Verify project exists (RLS handles auth)
+    // Verify project exists and user owns it (defense-in-depth alongside RLS)
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')
       .eq('id', projectId)
+      .eq('user_id', userId)
       .single()
 
     if (projectError || !project) {
@@ -35,7 +50,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     }
 
     // Transform to camelCase
-    const accounts = (data || []).map(pa => ({
+    const accounts = (data || []).map((pa) => ({
       id: pa.id,
       projectId: pa.project_id,
       accountId: pa.account_id,
@@ -62,9 +77,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { id: projectId } = await context.params
     const supabase = await createClient()
     const body = await request.json()
-
-    if (!body.accountId) {
-      return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
+    const parsed = addAccountSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
 
     // Verify project exists (RLS handles ownership)
@@ -83,26 +101,33 @@ export async function POST(request: NextRequest, context: RouteContext) {
       .from('project_accounts')
       .insert({
         project_id: projectId,
-        account_id: body.accountId,
+        account_id: parsed.data.accountId,
       })
       .select()
       .single()
 
     if (error) {
-      if (error.code === '23505') { // Unique violation
-        return NextResponse.json({ error: 'Account already associated with project' }, { status: 409 })
+      if (error.code === '23505') {
+        // Unique violation
+        return NextResponse.json(
+          { error: 'Account already associated with project' },
+          { status: 409 }
+        )
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({
-      account: {
-        id: data.id,
-        projectId: data.project_id,
-        accountId: data.account_id,
-        createdAt: data.created_at,
-      }
-    }, { status: 201 })
+    return NextResponse.json(
+      {
+        account: {
+          id: data.id,
+          projectId: data.project_id,
+          accountId: data.account_id,
+          createdAt: data.created_at,
+        },
+      },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Error adding account to project:', error)
     return NextResponse.json({ error: 'Failed to add account' }, { status: 500 })

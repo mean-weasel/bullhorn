@@ -27,7 +27,10 @@ import { IOSSegmentedControl } from '@/components/ui/IOSSegmentedControl'
 
 type FilterStatus = 'all' | CampaignStatus
 
-const STATUS_CONFIG: Record<CampaignStatus, { label: string; icon: typeof FileText; color: string }> = {
+const STATUS_CONFIG: Record<
+  CampaignStatus,
+  { label: string; icon: typeof FileText; color: string }
+> = {
   draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   active: { label: 'Active', icon: Rocket, color: 'text-blue-400' },
   completed: { label: 'Completed', icon: CheckCircle, color: 'text-green-400' },
@@ -35,7 +38,8 @@ const STATUS_CONFIG: Record<CampaignStatus, { label: string; icon: typeof FileTe
 }
 
 export default function CampaignsPage() {
-  const { campaigns, fetchCampaigns, initialized, addCampaign, deleteCampaign } = useCampaignsStore()
+  const { campaigns, fetchCampaigns, initialized, addCampaign, deleteCampaign } =
+    useCampaignsStore()
   const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
   const [filter, setFilter] = useState<FilterStatus>('all')
   const [showNewModal, setShowNewModal] = useState(false)
@@ -84,7 +88,11 @@ export default function CampaignsPage() {
   const handleDeleteCampaign = async (id: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (confirm('Are you sure you want to delete this campaign? Posts will be unlinked but not deleted.')) {
+    if (
+      confirm(
+        'Are you sure you want to delete this campaign? Posts will be unlinked but not deleted.'
+      )
+    ) {
       await deleteCampaign(id)
     }
   }
@@ -94,7 +102,9 @@ export default function CampaignsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">Campaigns</h1>
+          <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">
+            Campaigns
+          </h1>
           <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
             Group and manage related posts across platforms.
           </p>
@@ -105,7 +115,7 @@ export default function CampaignsPage() {
           className={cn(
             'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
             'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-            'text-white font-medium text-sm',
+            'text-primary-foreground font-medium text-sm',
             'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
           )}
         >
@@ -123,10 +133,31 @@ export default function CampaignsPage() {
           fullWidth
           options={[
             { value: 'all', label: 'All', count: counts.all },
-            { value: 'draft', label: STATUS_CONFIG.draft.label, icon: <FileText className="w-4 h-4" />, count: counts.draft },
-            { value: 'active', label: STATUS_CONFIG.active.label, icon: <Rocket className="w-4 h-4" />, count: counts.active },
-            { value: 'completed', label: STATUS_CONFIG.completed.label, icon: <CheckCircle className="w-4 h-4" />, count: counts.completed },
-            { value: 'archived', label: STATUS_CONFIG.archived.label, icon: <Archive className="w-4 h-4" />, count: counts.archived, hidden: counts.archived === 0 },
+            {
+              value: 'draft',
+              label: STATUS_CONFIG.draft.label,
+              icon: <FileText className="w-4 h-4" />,
+              count: counts.draft,
+            },
+            {
+              value: 'active',
+              label: STATUS_CONFIG.active.label,
+              icon: <Rocket className="w-4 h-4" />,
+              count: counts.active,
+            },
+            {
+              value: 'completed',
+              label: STATUS_CONFIG.completed.label,
+              icon: <CheckCircle className="w-4 h-4" />,
+              count: counts.completed,
+            },
+            {
+              value: 'archived',
+              label: STATUS_CONFIG.archived.label,
+              icon: <Archive className="w-4 h-4" />,
+              count: counts.archived,
+              hidden: counts.archived === 0,
+            },
           ]}
         />
       </div>
@@ -150,7 +181,7 @@ export default function CampaignsPage() {
             className={cn(
               'inline-flex items-center gap-2 px-5 py-3 rounded-xl',
               'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-              'text-white font-medium text-sm',
+              'text-primary-foreground font-medium text-sm',
               'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
             )}
           >
@@ -165,7 +196,7 @@ export default function CampaignsPage() {
               key={campaign.id}
               campaign={campaign}
               index={i}
-              project={projects.find(p => p.id === campaign.projectId)}
+              project={projects.find((p) => p.id === campaign.projectId)}
               onDelete={(e) => handleDeleteCampaign(campaign.id, e)}
               onMove={() => setMovingCampaign(campaign)}
             />
@@ -228,7 +259,9 @@ function CampaignCard({
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold mb-1 truncate">{campaign.name}</h3>
           {campaign.description && (
-            <p className="text-sm text-muted-foreground line-clamp-1 mb-2">{campaign.description}</p>
+            <p className="text-sm text-muted-foreground line-clamp-1 mb-2">
+              {campaign.description}
+            </p>
           )}
           <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
             {/* Status */}
@@ -256,7 +289,9 @@ function CampaignCard({
             )}
 
             {/* Last updated */}
-            <span className="flex items-center gap-1.5">Updated {format(new Date(campaign.updatedAt), 'MMM d')}</span>
+            <span className="flex items-center gap-1.5">
+              Updated {format(new Date(campaign.updatedAt), 'MMM d')}
+            </span>
           </div>
         </div>
 

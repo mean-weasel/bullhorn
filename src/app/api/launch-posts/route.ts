@@ -1,6 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const createLaunchPostSchema = z.object({
+  platform: z.enum(['twitter', 'linkedin', 'reddit', 'producthunt', 'hackernews', 'other']),
+  title: z.string().min(1).max(500),
+  status: z.enum(['draft', 'scheduled', 'published', 'failed', 'archived']).optional(),
+  url: z.string().url().optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
+  platformFields: z.record(z.string(), z.unknown()).optional(),
+  campaignId: z.string().uuid().optional().nullable(),
+  scheduledAt: z.string().optional().nullable(),
+  notes: z.string().max(5000).optional().nullable(),
+})
 
 // Transform snake_case DB response to camelCase for frontend
 function transformLaunchPost(data: Record<string, unknown>) {
@@ -88,28 +101,27 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
     const body = await request.json()
-
-    // Validate required fields
-    if (!body.platform) {
-      return NextResponse.json({ error: 'platform is required' }, { status: 400 })
-    }
-    if (!body.title) {
-      return NextResponse.json({ error: 'title is required' }, { status: 400 })
+    const parsed = createLaunchPostSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
 
     const { data, error } = await supabase
       .from('launch_posts')
       .insert({
         user_id: userId,
-        platform: body.platform,
-        status: body.status || 'draft',
-        title: body.title,
-        url: body.url || null,
-        description: body.description || null,
-        platform_fields: body.platformFields || {},
-        campaign_id: body.campaignId || null,
-        scheduled_at: body.scheduledAt || null,
-        notes: body.notes || null,
+        platform: parsed.data.platform,
+        status: parsed.data.status || 'draft',
+        title: parsed.data.title,
+        url: parsed.data.url || null,
+        description: parsed.data.description || null,
+        platform_fields: parsed.data.platformFields || {},
+        campaign_id: parsed.data.campaignId || null,
+        scheduled_at: parsed.data.scheduledAt || null,
+        notes: parsed.data.notes || null,
       })
       .select()
       .single()

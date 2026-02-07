@@ -1,6 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const updateBlogDraftSchema = z.object({
+  title: z.string().max(500).optional().nullable(),
+  content: z.string().max(100000).optional().nullable(),
+  date: z.string().optional().nullable(),
+  status: z.enum(['draft', 'scheduled', 'published', 'archived']).optional(),
+  scheduled_at: z.string().optional().nullable(),
+  scheduledAt: z.string().optional().nullable(),
+  notes: z.string().max(5000).optional().nullable(),
+  campaign_id: z.string().uuid().optional().nullable(),
+  campaignId: z.string().uuid().optional().nullable(),
+  images: z.array(z.unknown()).optional(),
+})
 
 // Transform snake_case Supabase response to camelCase for frontend
 function transformDraft(draft: Record<string, unknown>) {
@@ -42,10 +56,7 @@ const validTransitions: Record<string, string[]> = {
 }
 
 // GET /api/blog-drafts/[id] - Get single blog draft
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -83,10 +94,7 @@ export async function GET(
 }
 
 // PATCH /api/blog-drafts/[id] - Update blog draft
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -100,6 +108,13 @@ export async function PATCH(
     const { id } = await params
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = updateBlogDraftSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     // Get current draft to validate status transition (with ownership check)
     const { data: currentDraft, error: fetchError } = await supabase
@@ -117,11 +132,11 @@ export async function PATCH(
     }
 
     // Validate status transition
-    if (body.status && body.status !== currentDraft.status) {
+    if (parsed.data.status && parsed.data.status !== currentDraft.status) {
       const allowed = validTransitions[currentDraft.status] || []
-      if (!allowed.includes(body.status)) {
+      if (!allowed.includes(parsed.data.status)) {
         return NextResponse.json(
-          { error: `Cannot transition from ${currentDraft.status} to ${body.status}` },
+          { error: `Cannot transition from ${currentDraft.status} to ${parsed.data.status}` },
           { status: 400 }
         )
       }
@@ -129,21 +144,21 @@ export async function PATCH(
 
     // Build update object
     const updates: Record<string, unknown> = {}
-    if (body.title !== undefined) updates.title = body.title
-    if (body.content !== undefined) {
-      updates.content = body.content
-      updates.word_count = calculateWordCount(body.content)
+    if (parsed.data.title !== undefined) updates.title = parsed.data.title
+    if (parsed.data.content !== undefined) {
+      updates.content = parsed.data.content
+      updates.word_count = calculateWordCount(parsed.data.content || '')
     }
-    if (body.date !== undefined) updates.date = body.date
-    if (body.status !== undefined) updates.status = body.status
-    if (body.scheduled_at !== undefined || body.scheduledAt !== undefined) {
-      updates.scheduled_at = body.scheduled_at || body.scheduledAt
+    if (parsed.data.date !== undefined) updates.date = parsed.data.date
+    if (parsed.data.status !== undefined) updates.status = parsed.data.status
+    if (parsed.data.scheduled_at !== undefined || parsed.data.scheduledAt !== undefined) {
+      updates.scheduled_at = parsed.data.scheduled_at || parsed.data.scheduledAt
     }
-    if (body.notes !== undefined) updates.notes = body.notes
-    if (body.campaign_id !== undefined || body.campaignId !== undefined) {
-      updates.campaign_id = body.campaign_id || body.campaignId
+    if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes
+    if (parsed.data.campaign_id !== undefined || parsed.data.campaignId !== undefined) {
+      updates.campaign_id = parsed.data.campaign_id || parsed.data.campaignId
     }
-    if (body.images !== undefined) updates.images = body.images
+    if (parsed.data.images !== undefined) updates.images = parsed.data.images
 
     const { data, error } = await supabase
       .from('blog_drafts')
@@ -186,11 +201,7 @@ export async function DELETE(
     const { id } = await params
     const supabase = await createClient()
 
-    const { error } = await supabase
-      .from('blog_drafts')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId)
+    const { error } = await supabase.from('blog_drafts').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

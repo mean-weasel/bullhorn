@@ -24,20 +24,33 @@ import { useCampaignsStore } from '@/lib/campaigns'
 import { usePostsStore } from '@/lib/storage'
 import { useProjectsStore } from '@/lib/projects'
 import { useLaunchPostsStore, LaunchPost, LAUNCH_PLATFORM_INFO } from '@/lib/launchPosts'
-import { Campaign, CampaignStatus, Post, PostStatus, getPostPreviewText, PLATFORM_INFO } from '@/lib/posts'
+import {
+  Campaign,
+  CampaignStatus,
+  Post,
+  PostStatus,
+  getPostPreviewText,
+  PLATFORM_INFO,
+} from '@/lib/posts'
 import { cn } from '@/lib/utils'
 import { getMediaUrl } from '@/lib/media'
 import { MoveCampaignModal } from '@/components/campaigns/MoveCampaignModal'
 import { LaunchPostCard } from '@/components/launch-posts/LaunchPostCard'
 
-const CAMPAIGN_STATUS_CONFIG: Record<CampaignStatus, { label: string; icon: typeof FileText; color: string }> = {
+const CAMPAIGN_STATUS_CONFIG: Record<
+  CampaignStatus,
+  { label: string; icon: typeof FileText; color: string }
+> = {
   draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   active: { label: 'Active', icon: Rocket, color: 'text-blue-400' },
   completed: { label: 'Completed', icon: CheckCircle, color: 'text-green-400' },
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
 }
 
-const POST_STATUS_CONFIG: Record<PostStatus, { label: string; icon: typeof FileText; color: string }> = {
+const POST_STATUS_CONFIG: Record<
+  PostStatus,
+  { label: string; icon: typeof FileText; color: string }
+> = {
   draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-blue-400' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-green-400' },
@@ -48,7 +61,8 @@ const POST_STATUS_CONFIG: Record<PostStatus, { label: string; icon: typeof FileT
 export default function CampaignDetailPage({ params }: { params: { id: string } }) {
   const { id } = params
   const router = useRouter()
-  const { getCampaignWithPosts, updateCampaign, deleteCampaign, removePostFromCampaign } = useCampaignsStore()
+  const { getCampaignWithPosts, updateCampaign, deleteCampaign, removePostFromCampaign } =
+    useCampaignsStore()
   const { posts: allPosts, fetchPosts, initialized: postsInitialized, updatePost } = usePostsStore()
   const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
   const {
@@ -79,7 +93,14 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
     if (!launchPostsInitialized) {
       fetchLaunchPosts()
     }
-  }, [postsInitialized, fetchPosts, projectsInitialized, fetchProjects, launchPostsInitialized, fetchLaunchPosts])
+  }, [
+    postsInitialized,
+    fetchPosts,
+    projectsInitialized,
+    fetchProjects,
+    launchPostsInitialized,
+    fetchLaunchPosts,
+  ])
 
   useEffect(() => {
     async function loadCampaign() {
@@ -103,7 +124,11 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
       name: editName.trim(),
       description: editDescription.trim() || undefined,
     })
-    setCampaign({ ...campaign, name: editName.trim(), description: editDescription.trim() || undefined })
+    setCampaign({
+      ...campaign,
+      name: editName.trim(),
+      description: editDescription.trim() || undefined,
+    })
     setEditing(false)
   }
 
@@ -115,7 +140,11 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
 
   const handleDelete = async () => {
     if (!campaign) return
-    if (confirm('Are you sure you want to delete this campaign? Posts will be unlinked but not deleted.')) {
+    if (
+      confirm(
+        'Are you sure you want to delete this campaign? Posts will be unlinked but not deleted.'
+      )
+    ) {
       await deleteCampaign(campaign.id)
       router.push('/campaigns')
     }
@@ -223,7 +252,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
                 <div className="flex gap-2">
                   <button
                     onClick={handleSave}
-                    className="px-4 py-2 rounded-lg bg-[hsl(var(--gold))] text-white text-sm font-medium hover:bg-[hsl(var(--gold-dark))] transition-colors"
+                    className="px-4 py-2 rounded-lg bg-[hsl(var(--gold))] text-primary-foreground text-sm font-medium hover:bg-[hsl(var(--gold-dark))] transition-colors"
                   >
                     Save
                   </button>
@@ -245,7 +274,9 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
                   <div className="w-10 h-10 rounded-lg bg-[hsl(var(--gold))]/10 flex items-center justify-center">
                     <FolderOpen className="w-5 h-5 text-[hsl(var(--gold-dark))]" />
                   </div>
-                  <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">{campaign.name}</h1>
+                  <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">
+                    {campaign.name}
+                  </h1>
                   <button
                     onClick={() => setEditing(true)}
                     className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -273,7 +304,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
                   {campaign.projectId ? (
                     <>
                       {(() => {
-                        const project = projects.find(p => p.id === campaign.projectId)
+                        const project = projects.find((p) => p.id === campaign.projectId)
                         return (
                           <Link
                             href={`/projects/${campaign.projectId}`}
@@ -366,7 +397,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium',
                 'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                'text-white hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+                'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
               )}
             >
               <Plus className="w-4 h-4" />
@@ -389,7 +420,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               className={cn(
                 'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium',
                 'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                'text-white hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+                'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
               )}
             >
               <Plus className="w-4 h-4" />
@@ -432,7 +463,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium',
                 'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                'text-white hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+                'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
               )}
             >
               <Plus className="w-4 h-4" />
@@ -455,7 +486,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
               className={cn(
                 'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium',
                 'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-                'text-white hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+                'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
               )}
             >
               <Plus className="w-4 h-4" />
@@ -556,9 +587,14 @@ function CampaignPostCard({
       </div>
 
       {/* Content */}
-      <Link href={`/edit/${post.id}`} className="flex-1 min-w-0 hover:opacity-80 transition-opacity">
+      <Link
+        href={`/edit/${post.id}`}
+        className="flex-1 min-w-0 hover:opacity-80 transition-opacity"
+      >
         <p className="text-sm leading-relaxed line-clamp-2 mb-2">
-          {getPostPreviewText(post) || <span className="text-muted-foreground italic">No content</span>}
+          {getPostPreviewText(post) || (
+            <span className="text-muted-foreground italic">No content</span>
+          )}
         </p>
         <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
           <span className={cn('flex items-center gap-1.5', statusConfig.color)}>
@@ -630,7 +666,9 @@ function AddPostModal({
                 <span className="text-xs text-muted-foreground capitalize">{post.status}</span>
               </div>
               <p className="text-sm line-clamp-2">
-                {getPostPreviewText(post) || <span className="text-muted-foreground italic">No content</span>}
+                {getPostPreviewText(post) || (
+                  <span className="text-muted-foreground italic">No content</span>
+                )}
               </p>
             </button>
           ))}
@@ -663,7 +701,9 @@ function AddLaunchPostModal({
       <div className="relative bg-card border border-border rounded-xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col animate-scale-in">
         <div className="p-4 border-b border-border">
           <h2 className="text-lg font-display font-bold">Add Launch Post</h2>
-          <p className="text-sm text-muted-foreground">Select a launch post to add to this campaign</p>
+          <p className="text-sm text-muted-foreground">
+            Select a launch post to add to this campaign
+          </p>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {launchPosts.map((launchPost) => {
@@ -685,7 +725,9 @@ function AddLaunchPostModal({
                     {platformInfo.icon}
                   </span>
                   <span className="text-xs text-muted-foreground">{platformInfo.label}</span>
-                  <span className="text-xs text-muted-foreground capitalize">• {launchPost.status}</span>
+                  <span className="text-xs text-muted-foreground capitalize">
+                    • {launchPost.status}
+                  </span>
                 </div>
                 <p className="text-sm line-clamp-2 font-medium">{launchPost.title}</p>
               </button>

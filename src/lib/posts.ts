@@ -10,7 +10,7 @@ export interface Campaign {
   name: string
   description?: string
   status: CampaignStatus
-  projectId?: string  // Reference to parent project
+  projectId?: string // Reference to parent project
   createdAt: string
   updatedAt: string
 }
@@ -41,24 +41,24 @@ export interface ProjectAnalytics {
 export interface TwitterContent {
   text: string
   mediaUrls?: string[]
-  launchedUrl?: string  // URL of the published tweet
+  launchedUrl?: string // URL of the published tweet
 }
 
 export interface LinkedInContent {
   text: string
   visibility: 'public' | 'connections'
-  mediaUrl?: string  // Single image or video URL
-  launchedUrl?: string  // URL of the published LinkedIn post
+  mediaUrl?: string // Single image or video URL
+  launchedUrl?: string // URL of the published LinkedIn post
 }
 
 export interface RedditContent {
-  subreddit: string     // Single target subreddit
+  subreddit: string // Single target subreddit
   title: string
   body?: string
   url?: string
   flairId?: string
   flairText?: string
-  launchedUrl?: string  // URL of the published Reddit post
+  launchedUrl?: string // URL of the published Reddit post
 }
 
 export interface PublishResult {
@@ -81,10 +81,10 @@ export interface Post {
   scheduledAt: string | null
   status: PostStatus
   platform: Platform
-  notes?: string  // User/MCP notes for this post
-  campaignId?: string  // Optional reference to a campaign
-  groupId?: string     // Groups related posts (e.g., Reddit crossposts)
-  groupType?: GroupType  // Type of grouping
+  notes?: string // User/MCP notes for this post
+  campaignId?: string // Optional reference to a campaign
+  groupId?: string // Groups related posts (e.g., Reddit crossposts)
+  groupType?: GroupType // Type of grouping
   content: PlatformContent
   publishResult?: PublishResult
 }
@@ -97,24 +97,27 @@ export const CHAR_LIMITS: Record<Platform, number> = {
 }
 
 // Platform display info
-export const PLATFORM_INFO: Record<Platform, { name: string; label: string; color: string; bgColor: string }> = {
+export const PLATFORM_INFO: Record<
+  Platform,
+  { name: string; label: string; color: string; bgColor: string }
+> = {
   twitter: {
     name: 'Twitter / X',
     label: 'Twitter',
     color: 'text-twitter',
-    bgColor: 'bg-twitter-soft',
+    bgColor: 'bg-twitter/10',
   },
   linkedin: {
     name: 'LinkedIn',
     label: 'LinkedIn',
     color: 'text-linkedin',
-    bgColor: 'bg-linkedin-soft',
+    bgColor: 'bg-linkedin/10',
   },
   reddit: {
     name: 'Reddit',
     label: 'Reddit',
     color: 'text-reddit',
-    bgColor: 'bg-reddit-soft',
+    bgColor: 'bg-reddit/10',
   },
 }
 

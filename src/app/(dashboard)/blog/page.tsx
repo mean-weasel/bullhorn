@@ -20,7 +20,10 @@ import { cn } from '@/lib/utils'
 
 type FilterStatus = 'all' | BlogDraftStatus
 
-const STATUS_CONFIG: Record<BlogDraftStatus, { label: string; icon: typeof FileText; color: string }> = {
+const STATUS_CONFIG: Record<
+  BlogDraftStatus,
+  { label: string; icon: typeof FileText; color: string }
+> = {
   draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-blue-400' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-green-400' },
@@ -122,7 +125,9 @@ function BlogDraftsContent() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">Blog Drafts</h1>
+          <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">
+            Blog Drafts
+          </h1>
           <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
             Manage your markdown blog posts.
           </p>
@@ -133,7 +138,7 @@ function BlogDraftsContent() {
           className={cn(
             'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
             'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-            'text-white font-medium text-sm',
+            'text-primary-foreground font-medium text-sm',
             'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
           )}
         >
@@ -170,12 +175,37 @@ function BlogDraftsContent() {
 
       {/* Filter tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-        <FilterTab label="All" count={counts.all} active={filter === 'all'} onClick={() => setFilter('all')} />
-        <FilterTab label="Drafts" count={counts.draft} active={filter === 'draft'} onClick={() => setFilter('draft')} />
-        <FilterTab label="Scheduled" count={counts.scheduled} active={filter === 'scheduled'} onClick={() => setFilter('scheduled')} />
-        <FilterTab label="Published" count={counts.published} active={filter === 'published'} onClick={() => setFilter('published')} />
+        <FilterTab
+          label="All"
+          count={counts.all}
+          active={filter === 'all'}
+          onClick={() => setFilter('all')}
+        />
+        <FilterTab
+          label="Drafts"
+          count={counts.draft}
+          active={filter === 'draft'}
+          onClick={() => setFilter('draft')}
+        />
+        <FilterTab
+          label="Scheduled"
+          count={counts.scheduled}
+          active={filter === 'scheduled'}
+          onClick={() => setFilter('scheduled')}
+        />
+        <FilterTab
+          label="Published"
+          count={counts.published}
+          active={filter === 'published'}
+          onClick={() => setFilter('published')}
+        />
         {counts.archived > 0 && (
-          <FilterTab label="Archived" count={counts.archived} active={filter === 'archived'} onClick={() => setFilter('archived')} />
+          <FilterTab
+            label="Archived"
+            count={counts.archived}
+            active={filter === 'archived'}
+            onClick={() => setFilter('archived')}
+          />
         )}
       </div>
 
@@ -191,7 +221,11 @@ function BlogDraftsContent() {
         <div className="text-center py-12">
           <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
           <h3 className="text-lg font-medium mb-2">
-            {searchQuery ? 'No matching drafts' : filter === 'all' ? 'No blog drafts yet' : `No ${filter} drafts`}
+            {searchQuery
+              ? 'No matching drafts'
+              : filter === 'all'
+                ? 'No blog drafts yet'
+                : `No ${filter} drafts`}
           </h3>
           <p className="text-muted-foreground mb-4">
             {searchQuery
@@ -203,7 +237,7 @@ function BlogDraftsContent() {
               href="/blog/new"
               className={cn(
                 'inline-flex items-center gap-2 px-4 py-2 rounded-lg',
-                'bg-[hsl(var(--gold))] text-white font-medium',
+                'bg-[hsl(var(--gold))] text-primary-foreground font-medium',
                 'hover:bg-[hsl(var(--gold-dark))] transition-colors'
               )}
             >
@@ -226,7 +260,8 @@ function BlogDraftsContent() {
       {/* Search results count */}
       {searchQuery && sortedDrafts.length > 0 && (
         <p className="text-sm text-muted-foreground mt-4 text-center">
-          Found {sortedDrafts.length} draft{sortedDrafts.length !== 1 ? 's' : ''} matching &quot;{searchQuery}&quot;
+          Found {sortedDrafts.length} draft{sortedDrafts.length !== 1 ? 's' : ''} matching &quot;
+          {searchQuery}&quot;
         </p>
       )}
     </div>
@@ -273,7 +308,10 @@ function DraftCard({ draft }: { draft: BlogDraft }) {
   const StatusIcon = statusConfig.icon
 
   // Get first 100 chars of content as preview
-  const contentPreview = draft.content.slice(0, 100).replace(/[#*_`]/g, '').trim()
+  const contentPreview = draft.content
+    .slice(0, 100)
+    .replace(/[#*_`]/g, '')
+    .trim()
 
   return (
     <Link

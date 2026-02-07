@@ -13,9 +13,9 @@
     --card-foreground: 220 20% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 15%;
-    /* Vibrant yellow primary */
-    --primary: 43 96% 56%;
-    --primary-foreground: 220 20% 15%;
+    /* Dark amber primary — WCAG AA contrast on cream background */
+    --primary: 38 92% 42%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 220 14% 96%;
     --secondary-foreground: 220 20% 15%;
     --muted: 220 14% 92%;
@@ -28,10 +28,10 @@
     /* Strong black borders */
     --border: 220 20% 20%;
     --input: 220 20% 20%;
-    --ring: 43 96% 56%;
+    --ring: 38 92% 42%;
     --radius: 12px;
-    --gold: 43 96% 56%;
-    --gold-dark: 38 89% 45%;
+    --gold: 38 92% 42%;
+    --gold-dark: 36 92% 30%;
   }
 
   /* Dark mode - Sticker Bomb Dark */
@@ -42,8 +42,8 @@
     --card-foreground: 0 0% 95%;
     --popover: 220 18% 14%;
     --popover-foreground: 0 0% 95%;
-    /* Keep vibrant yellow */
-    --primary: 43 96% 56%;
+    /* Vibrant gold — visible on dark backgrounds, white text readable */
+    --primary: 43 96% 50%;
     --primary-foreground: 220 20% 10%;
     --secondary: 220 18% 20%;
     --secondary-foreground: 0 0% 95%;
@@ -57,9 +57,9 @@
     /* Lighter borders for dark mode */
     --border: 220 15% 35%;
     --input: 220 15% 35%;
-    --ring: 43 96% 56%;
-    --gold: 43 96% 56%;
-    --gold-dark: 38 89% 45%;
+    --ring: 43 96% 50%;
+    --gold: 43 96% 50%;
+    --gold-dark: 36 92% 30%;
   }
 
   * {
@@ -118,7 +118,7 @@
   }
 
   .gradient-bar {
-    background: linear-gradient(90deg, #fbbf24, #ec4899, #8b5cf6, #22c55e, #0ea5e9, #f97316);
+    background: linear-gradient(90deg, #ce9a08, #ec4899, #8b5cf6, #22c55e, #0ea5e9, #f97316);
   }
 }
 
@@ -200,8 +200,8 @@
 }
 
 /* Date and time input styling */
-input[type="date"],
-input[type="time"] {
+input[type='date'],
+input[type='time'] {
   color-scheme: light dark;
   /* iOS Safari fix: ensure inputs are tappable */
   min-height: 44px;
@@ -212,16 +212,16 @@ input[type="time"] {
 
 /* iOS Safari: make the entire input area tappable */
 @supports (-webkit-touch-callout: none) {
-  input[type="date"],
-  input[type="time"] {
+  input[type='date'],
+  input[type='time'] {
     /* On iOS, the input needs to cover the full tap area */
     min-width: 100%;
     padding-right: 2rem;
   }
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='time']::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.6;
   filter: invert(0);
@@ -236,14 +236,14 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   height: 2rem;
 }
 
-.dark input[type="date"]::-webkit-calendar-picker-indicator,
-.dark input[type="time"]::-webkit-calendar-picker-indicator {
+.dark input[type='date']::-webkit-calendar-picker-indicator,
+.dark input[type='time']::-webkit-calendar-picker-indicator {
   filter: invert(1);
   opacity: 0.8;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator:hover,
-input[type="time"]::-webkit-calendar-picker-indicator:hover {
+input[type='date']::-webkit-calendar-picker-indicator:hover,
+input[type='time']::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 

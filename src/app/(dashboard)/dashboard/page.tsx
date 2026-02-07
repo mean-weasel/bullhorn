@@ -4,7 +4,16 @@ import Link from 'next/link'
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, formatDistanceToNow } from 'date-fns'
-import { Calendar, FileText, Clock, ChevronRight, Plus, FolderOpen, CheckCircle, FolderKanban } from 'lucide-react'
+import {
+  Calendar,
+  FileText,
+  Clock,
+  ChevronRight,
+  Plus,
+  FolderOpen,
+  CheckCircle,
+  FolderKanban,
+} from 'lucide-react'
 import { usePostsStore } from '@/lib/storage'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { useProjectsStore } from '@/lib/projects'
@@ -57,9 +66,9 @@ function PostCard({ post, showSchedule = false }: { post: Post; showSchedule?: b
         <div
           className={cn(
             'flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border-2',
-            post.platform === 'twitter' && 'bg-twitter-soft text-twitter border-twitter/30',
-            post.platform === 'linkedin' && 'bg-linkedin-soft text-linkedin border-linkedin/30',
-            post.platform === 'reddit' && 'bg-reddit-soft text-reddit border-reddit/30'
+            post.platform === 'twitter' && 'bg-twitter/10 text-twitter border-twitter/30',
+            post.platform === 'linkedin' && 'bg-linkedin/10 text-linkedin border-linkedin/30',
+            post.platform === 'reddit' && 'bg-reddit/10 text-reddit border-reddit/30'
           )}
         >
           <PlatformIcon platform={post.platform} />
@@ -117,7 +126,9 @@ function ProjectMiniCard({ project, campaignCount }: { project: Project; campaig
             {project.name}
           </h3>
           <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-            <span>{campaignCount} campaign{campaignCount !== 1 ? 's' : ''}</span>
+            <span>
+              {campaignCount} campaign{campaignCount !== 1 ? 's' : ''}
+            </span>
             {project.hashtags.length > 0 && (
               <span className="text-sticker-pink">#{project.hashtags.length} tags</span>
             )}
@@ -171,7 +182,9 @@ function CampaignCard({ campaign }: { campaign: Campaign }) {
       {/* Meta info */}
       <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
         <Clock className="w-3.5 h-3.5" />
-        <span>Updated {formatDistanceToNow(new Date(campaign.updatedAt), { addSuffix: true })}</span>
+        <span>
+          Updated {formatDistanceToNow(new Date(campaign.updatedAt), { addSuffix: true })}
+        </span>
         <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
     </Link>
@@ -246,7 +259,12 @@ export default function DashboardPage() {
   const allPosts = usePostsStore((state) => state.posts)
   const fetchPosts = usePostsStore((state) => state.fetchPosts)
   const postsInitialized = usePostsStore((state) => state.initialized)
-  const { campaigns, fetchCampaigns, initialized: campaignsInitialized, getCampaignsByProject } = useCampaignsStore()
+  const {
+    campaigns,
+    fetchCampaigns,
+    initialized: campaignsInitialized,
+    getCampaignsByProject,
+  } = useCampaignsStore()
   const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
 
   // Project filter state
@@ -273,83 +291,93 @@ export default function DashboardPage() {
   }, [projectsInitialized, fetchProjects])
 
   // Memoized: Exclude archived posts
-  const activePosts = useMemo(
-    () => allPosts.filter((p) => p.status !== 'archived'),
-    [allPosts]
-  )
+  const activePosts = useMemo(() => allPosts.filter((p) => p.status !== 'archived'), [allPosts])
 
   // Memoized: Upcoming scheduled posts (sorted by schedule date)
   const upcomingPosts = useMemo(
-    () => activePosts
-      .filter((p) => p.status === 'scheduled' && p.scheduledAt)
-      .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime())
-      .slice(0, 5),
+    () =>
+      activePosts
+        .filter((p) => p.status === 'scheduled' && p.scheduledAt)
+        .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime())
+        .slice(0, 5),
     [activePosts]
   )
 
   // Memoized: Recent drafts (sorted by last updated)
   const recentDrafts = useMemo(
-    () => activePosts
-      .filter((p) => p.status === 'draft')
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 5),
+    () =>
+      activePosts
+        .filter((p) => p.status === 'draft')
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 5),
     [activePosts]
   )
 
   // Memoized: Recently published (sorted by last updated)
   const recentlyPublished = useMemo(
-    () => allPosts
-      .filter((p) => p.status === 'published')
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 5),
+    () =>
+      allPosts
+        .filter((p) => p.status === 'published')
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 5),
     [allPosts]
   )
 
   // Memoized: Filter campaigns by project if selected
   const filteredCampaigns = useMemo(() => {
-    const baseCampaigns = selectedProject === 'all'
-      ? campaigns
-      : selectedProject === 'unassigned'
-        ? getCampaignsByProject(null)
-        : getCampaignsByProject(selectedProject)
+    const baseCampaigns =
+      selectedProject === 'all'
+        ? campaigns
+        : selectedProject === 'unassigned'
+          ? getCampaignsByProject(null)
+          : getCampaignsByProject(selectedProject)
     return baseCampaigns.filter((c) => c.status !== 'archived')
   }, [campaigns, selectedProject, getCampaignsByProject])
 
   // Memoized: Recent campaigns (sorted by updated)
   const recentCampaigns = useMemo(
-    () => [...filteredCampaigns]
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 4),
+    () =>
+      [...filteredCampaigns]
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 4),
     [filteredCampaigns]
   )
 
   // Memoized: Recent projects (sorted by updated)
   const recentProjects = useMemo(
-    () => [...projects]
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 4),
+    () =>
+      [...projects]
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, 4),
     [projects]
   )
 
   // Memoized: Pre-compute campaign counts per project (O(n) instead of O(n²))
   const campaignCountsByProject = useMemo(
-    () => campaigns.reduce((acc, c) => {
-      if (c.status !== 'archived' && c.projectId) {
-        acc[c.projectId] = (acc[c.projectId] || 0) + 1
-      }
-      return acc
-    }, {} as Record<string, number>),
+    () =>
+      campaigns.reduce(
+        (acc, c) => {
+          if (c.status !== 'archived' && c.projectId) {
+            acc[c.projectId] = (acc[c.projectId] || 0) + 1
+          }
+          return acc
+        },
+        {} as Record<string, number>
+      ),
     [campaigns]
   )
 
   // Memoized: Stats
-  const stats = useMemo(() => ({
-    scheduled: activePosts.filter((p) => p.status === 'scheduled').length,
-    drafts: activePosts.filter((p) => p.status === 'draft').length,
-    published: activePosts.filter((p) => p.status === 'published').length,
-    campaigns: campaigns.filter((c) => c.status !== 'archived').length,
-    projects: projects.length,
-  }), [activePosts, campaigns, projects])
+  const stats = useMemo(
+    () => ({
+      scheduled: activePosts.filter((p) => p.status === 'scheduled').length,
+      drafts: activePosts.filter((p) => p.status === 'draft').length,
+      published: activePosts.filter((p) => p.status === 'published').length,
+      campaigns: campaigns.filter((c) => c.status !== 'archived').length,
+      projects: projects.length,
+    }),
+    [activePosts, campaigns, projects]
+  )
 
   const totalPosts = stats.scheduled + stats.drafts + stats.published
   const hasNoPosts = totalPosts === 0
@@ -360,36 +388,28 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))]">
         <div className="flex-1 flex items-center gap-4 sm:gap-6 overflow-x-auto">
           <div className="text-center flex-shrink-0">
-            <div className="text-2xl font-extrabold text-sticker-blue">
-              {stats.scheduled}
-            </div>
+            <div className="text-2xl font-extrabold text-sticker-blue">{stats.scheduled}</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
               📅 Scheduled
             </div>
           </div>
           <div className="w-px h-8 bg-border flex-shrink-0" />
           <div className="text-center flex-shrink-0">
-            <div className="text-2xl font-extrabold text-sticker-orange">
-              {stats.drafts}
-            </div>
+            <div className="text-2xl font-extrabold text-sticker-orange">{stats.drafts}</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
               📝 Drafts
             </div>
           </div>
           <div className="w-px h-8 bg-border flex-shrink-0" />
           <div className="text-center flex-shrink-0">
-            <div className="text-2xl font-extrabold text-sticker-green">
-              {stats.published}
-            </div>
+            <div className="text-2xl font-extrabold text-sticker-green">{stats.published}</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
               ✅ Published
             </div>
           </div>
           <div className="w-px h-8 bg-border hidden sm:block flex-shrink-0" />
           <div className="text-center hidden sm:block flex-shrink-0">
-            <div className="text-2xl font-extrabold text-sticker-purple">
-              {stats.projects}
-            </div>
+            <div className="text-2xl font-extrabold text-sticker-purple">{stats.projects}</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
               📁 Projects
             </div>
@@ -429,7 +449,8 @@ export default function DashboardPage() {
           </div>
           <h2 className="text-2xl font-extrabold mb-2">Welcome to Bullhorn</h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Create your first post to get started. Schedule content for Twitter, LinkedIn, and Reddit all in one place.
+            Create your first post to get started. Schedule content for Twitter, LinkedIn, and
+            Reddit all in one place.
           </p>
           <Link
             href="/new"
@@ -537,7 +558,9 @@ export default function DashboardPage() {
                     <FolderKanban className="w-6 h-6 text-[hsl(var(--gold-dark))]" />
                   </div>
                   <p className="text-sm font-medium mb-1">No projects yet</p>
-                  <p className="text-xs text-muted-foreground mb-4">Create a project to organize campaigns and brand assets</p>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Create a project to organize campaigns and brand assets
+                  </p>
                   <button
                     onClick={() => setShowCreateProjectModal(true)}
                     className={cn(
@@ -568,14 +591,26 @@ export default function DashboardPage() {
           {/* Campaigns section - full width */}
           <div className="lg:col-span-2 xl:col-span-3">
             <Section
-              title={selectedProject === 'all' ? 'Campaigns' : selectedProject === 'unassigned' ? 'Unassigned Campaigns' : 'Project Campaigns'}
+              title={
+                selectedProject === 'all'
+                  ? 'Campaigns'
+                  : selectedProject === 'unassigned'
+                    ? 'Unassigned Campaigns'
+                    : 'Project Campaigns'
+              }
               icon={FolderOpen}
               viewAllLink="/campaigns"
               viewAllLabel="View all campaigns"
               isEmpty={recentCampaigns.length === 0}
               emptyIcon={FolderOpen}
-              emptyTitle={selectedProject === 'all' ? 'No campaigns yet' : 'No campaigns in this project'}
-              emptyDescription={selectedProject === 'all' ? 'Create a campaign to group related posts' : 'Add campaigns to this project'}
+              emptyTitle={
+                selectedProject === 'all' ? 'No campaigns yet' : 'No campaigns in this project'
+              }
+              emptyDescription={
+                selectedProject === 'all'
+                  ? 'Create a campaign to group related posts'
+                  : 'Add campaigns to this project'
+              }
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {recentCampaigns.map((campaign) => (

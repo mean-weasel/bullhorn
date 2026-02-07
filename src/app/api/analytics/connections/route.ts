@@ -2,15 +2,38 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformAnalyticsConnectionFromDb } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const createAnalyticsConnectionSchema = z.object({
+  propertyId: z.string().min(1),
+  propertyName: z.string().max(500).optional().nullable(),
+  accessToken: z.string().min(1),
+  refreshToken: z.string().min(1),
+  tokenExpiresAt: z.string().min(1),
+  provider: z.string().optional(),
+  scopes: z.array(z.string()).optional(),
+  projectId: z.string().uuid().optional().nullable(),
+})
 
 // GET /api/analytics/connections - List connections
 export async function GET() {
   try {
+    // Require authentication
+    let userId: string
+    try {
+      const auth = await requireAuth()
+      userId = auth.userId
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const supabase = await createClient()
 
+    // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('analytics_connections')
       .select('*')
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -25,10 +48,7 @@ export async function GET() {
     return NextResponse.json({ connections })
   } catch (error) {
     console.error('Error fetching analytics connections:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch analytics connections' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch analytics connections' }, { status: 500 })
   }
 }
 
@@ -46,32 +66,10 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
     const body = await request.json()
-
-    // Validate required fields
-    if (!body.propertyId || typeof body.propertyId !== 'string') {
+    const parsed = createAnalyticsConnectionSchema.safeParse(body)
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Property ID is required' },
-        { status: 400 }
-      )
-    }
-
-    if (!body.accessToken || typeof body.accessToken !== 'string') {
-      return NextResponse.json(
-        { error: 'Access token is required' },
-        { status: 400 }
-      )
-    }
-
-    if (!body.refreshToken || typeof body.refreshToken !== 'string') {
-      return NextResponse.json(
-        { error: 'Refresh token is required' },
-        { status: 400 }
-      )
-    }
-
-    if (!body.tokenExpiresAt || typeof body.tokenExpiresAt !== 'string') {
-      return NextResponse.json(
-        { error: 'Token expiration is required' },
+        { error: 'Invalid input', details: parsed.error.flatten() },
         { status: 400 }
       )
     }
@@ -81,7 +79,7 @@ export async function POST(request: NextRequest) {
       .from('analytics_connections')
       .select('id')
       .eq('user_id', userId)
-      .eq('property_id', body.propertyId)
+      .eq('property_id', parsed.data.propertyId)
       .single()
 
     if (existing) {
@@ -95,14 +93,14 @@ export async function POST(request: NextRequest) {
       .from('analytics_connections')
       .insert({
         user_id: userId,
-        provider: body.provider || 'google_analytics',
-        property_id: body.propertyId,
-        property_name: body.propertyName || null,
-        access_token: body.accessToken,
-        refresh_token: body.refreshToken,
-        token_expires_at: body.tokenExpiresAt,
-        scopes: body.scopes || [],
-        project_id: body.projectId || null,
+        provider: parsed.data.provider || 'google_analytics',
+        property_id: parsed.data.propertyId,
+        property_name: parsed.data.propertyName || null,
+        access_token: parsed.data.accessToken,
+        refresh_token: parsed.data.refreshToken,
+        token_expires_at: parsed.data.tokenExpiresAt,
+        scopes: parsed.data.scopes || [],
+        project_id: parsed.data.projectId || null,
         sync_status: 'pending',
       })
       .select()
@@ -113,15 +111,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform connection from snake_case to camelCase
-    const connection = transformAnalyticsConnectionFromDb(
-      data as Record<string, unknown>
-    )
+    const connection = transformAnalyticsConnectionFromDb(data as Record<string, unknown>)
     return NextResponse.json({ connection }, { status: 201 })
   } catch (error) {
     console.error('Error creating analytics connection:', error)
-    return NextResponse.json(
-      { error: 'Failed to create analytics connection' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to create analytics connection' }, { status: 500 })
   }
 }

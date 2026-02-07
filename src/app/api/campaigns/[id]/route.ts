@@ -2,12 +2,17 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformCampaignFromDb, transformPostFromDb } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const updateCampaignSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  status: z.enum(['active', 'paused', 'completed', 'archived']).optional(),
+  projectId: z.string().uuid().optional().nullable(),
+})
 
 // GET /api/campaigns/[id] - Get single campaign with posts
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -50,7 +55,9 @@ export async function GET(
 
     // Transform campaign and posts from snake_case to camelCase
     const transformedCampaign = transformCampaignFromDb(campaign as Record<string, unknown>)
-    const transformedPosts = (posts || []).map(post => transformPostFromDb(post as Record<string, unknown>))
+    const transformedPosts = (posts || []).map((post) =>
+      transformPostFromDb(post as Record<string, unknown>)
+    )
     return NextResponse.json({ campaign: transformedCampaign, posts: transformedPosts })
   } catch (error) {
     console.error('Error fetching campaign:', error)
@@ -59,10 +66,7 @@ export async function GET(
 }
 
 // PATCH /api/campaigns/[id] - Update campaign
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -76,12 +80,19 @@ export async function PATCH(
     const { id } = await params
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = updateCampaignSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     const updates: Record<string, unknown> = {}
-    if (body.name !== undefined) updates.name = body.name
-    if (body.description !== undefined) updates.description = body.description
-    if (body.status !== undefined) updates.status = body.status
-    if (body.projectId !== undefined) updates.project_id = body.projectId || null
+    if (parsed.data.name !== undefined) updates.name = parsed.data.name
+    if (parsed.data.description !== undefined) updates.description = parsed.data.description
+    if (parsed.data.status !== undefined) updates.status = parsed.data.status
+    if (parsed.data.projectId !== undefined) updates.project_id = parsed.data.projectId || null
 
     const { data, error } = await supabase
       .from('campaigns')
@@ -145,11 +156,7 @@ export async function DELETE(
       .eq('user_id', userId)
 
     // Delete the campaign
-    const { error } = await supabase
-      .from('campaigns')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId)
+    const { error } = await supabase.from('campaigns').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
