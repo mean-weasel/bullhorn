@@ -277,6 +277,68 @@ Examples:
 - `fix: resolve auth redirect loop`
 - `test: add E2E tests for launch posts (#73)`
 
+## Automations
+
+### Skills
+
+| Command | Purpose | When to use |
+|---------|---------|-------------|
+| `/db-migrate <name>` | Create and apply a Supabase migration | Adding/changing database schema |
+| `/audit-rls` | Scan tables for missing RLS policies | After `/db-migrate`, or periodically |
+| `/scaffold-api <path> <methods>` | Generate boilerplate API route | Creating new API endpoints |
+| `/gen-test <file>` | Generate unit tests for a file | After implementing new code |
+| `/ship` | Build, lint, typecheck, and deploy | Ready to deploy changes |
+| `/monitor-ci` | Watch CI pipeline and debug failures | After pushing to remote |
+
+### Agents
+
+| Agent | Purpose | When to invoke |
+|-------|---------|----------------|
+| `code-reviewer` | Review code against project conventions | After completing a feature or PR |
+| `security-reviewer` | Focused security audit (OWASP, auth, RLS) | After auth/API/database changes |
+| `ios-tester` | Test workflows on iOS Simulator | After UI changes affecting mobile |
+
+### Hooks (automatic)
+
+- **protect-files** (PreToolUse): Blocks edits to `.env.local`, `package-lock.json`, and existing migrations
+- **auto-format** (PostToolUse): Runs Prettier on `.ts`, `.tsx`, `.css` files after edits
+- **typecheck** (PostToolUse): Runs `tsc --noEmit` after `.ts`/`.tsx` edits to surface type errors
+
+### MCP Servers
+
+| Server | Purpose |
+|--------|---------|
+| `context7` | Library documentation lookup |
+| `playwright` | Browser automation for E2E testing |
+| `github` | GitHub API (PRs, issues, repos) |
+| `supabase` | Database queries, migrations, edge functions |
+
+## Guardrails
+
+### General
+
+- When a tool or approach fails 3+ times in a row (e.g., simulator crashes, browser click failures), stop retrying and suggest an alternative approach or escalate to the user instead of repeating the same failing command.
+- Before starting, review this file for project constraints. If unsure about the approach, present 2-3 options with tradeoffs BEFORE implementing.
+
+### Debugging
+
+- When debugging auth/webhook 401 errors, check infrastructure-level blocks first (Vercel Authentication, Cloudflare bot protection, iframe restrictions) before assuming application-level secret mismatches.
+- When debugging build or runtime errors, check environment configuration before blaming application code.
+
+### Environment & Secrets
+
+- This project uses Doppler for secrets management. Always ensure the session/environment is started with `doppler run` when Supabase, Vercel, or other service credentials are needed. Never suggest redundant secret storage across Doppler and Vercel — Doppler is the source of truth.
+
+### CI/CD
+
+- When CI/E2E tests require secrets or credentials, always verify they are configured before running. Never let CI jobs run indefinitely with placeholder credentials — fail fast with clear error messages.
+- Always run `prettier --write` on changed files before committing. Ensure all reformatted files are included in commits.
+
+### Database
+
+- When deploying database changes, always verify migrations are applied to ALL environments (production AND staging). After applying migrations, verify the schema cache is refreshed and RLS policies are updated.
+- Never edit existing migration files — create new ones with `make db-new name=description`.
+
 ## Known Issues
 
 - **Invisible gold buttons**: Gold/yellow buttons (#fbbf24) on cream background have near-zero contrast. Affects: New Campaign, Create Campaign submit, CTA empty state buttons.
