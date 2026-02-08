@@ -15,6 +15,7 @@ import {
 import { useBlogDraftsStore, BlogDraft, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 import { IOSDateTimePicker } from '@/components/ui/IOSDateTimePicker'
+import { MarkdownEditor } from '@/components/ui/MarkdownEditor'
 
 export default function BlogEditorPage() {
   const { id } = useParams<{ id: string }>()
@@ -331,17 +332,10 @@ export default function BlogEditorPage() {
         </div>
 
         {/* Content */}
-        <textarea
-          placeholder="Start writing your post in markdown..."
+        <MarkdownEditor
           value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className={cn(
-            'w-full min-h-[400px] resize-y',
-            'bg-card border border-border rounded-lg',
-            'p-4 text-base font-mono leading-relaxed',
-            'placeholder:text-muted-foreground/50',
-            'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
-          )}
+          onChange={setContent}
+          placeholder="Start writing your post in markdown..."
         />
 
         {/* Notes section */}

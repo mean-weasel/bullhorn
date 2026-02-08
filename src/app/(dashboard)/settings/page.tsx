@@ -15,13 +15,11 @@ import {
   Trash2,
   Loader2,
   Key,
+  Send,
 } from 'lucide-react'
 import { useTheme, Theme } from '@/lib/theme'
-import {
-  useNotificationStore,
-  getNotificationPermission,
-  requestNotificationPermission,
-} from '@/lib/notifications'
+import { useNotificationStore } from '@/lib/notifications'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { cn } from '@/lib/utils'
 import { IOSToggleSwitch } from '@/components/ui/IOSToggleSwitch'
 import { useAnalyticsStore, useAnalyticsConnections } from '@/lib/analyticsStore'
@@ -40,8 +38,6 @@ export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
   const { enabled: notificationsEnabled, setEnabled: setNotificationsEnabled } =
     useNotificationStore()
-  const [notificationPermission, setNotificationPermission] =
-    useState<NotificationPermission>('default')
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -59,11 +55,20 @@ export default function SettingsPage() {
   const [connectionToDelete, setConnectionToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  const {
+    isSupported: pushSupported,
+    permission: pushPermission,
+    subscribed: pushSubscribed,
+    loading: pushLoading,
+    subscribe: pushSubscribe,
+    unsubscribe: pushUnsubscribe,
+    sendTestNotification,
+  } = usePushNotifications()
+
   const { fetchConnections, deleteConnection, loading: analyticsLoading } = useAnalyticsStore()
   const connections = useAnalyticsConnections()
 
   useEffect(() => {
-    setNotificationPermission(getNotificationPermission())
     fetchConnections()
   }, [fetchConnections])
 
@@ -102,17 +107,29 @@ export default function SettingsPage() {
     }
   }, [searchParams])
 
-  const handleRequestPermission = async () => {
-    const permission = await requestNotificationPermission()
-    setNotificationPermission(permission)
-    if (permission === 'granted') {
-      setSuccess('Notifications enabled!')
+  const handleToggleNotifications = (enabled: boolean) => {
+    setNotificationsEnabled(enabled)
+  }
+
+  const handlePushSubscribe = async () => {
+    const ok = await pushSubscribe()
+    if (ok) {
+      setNotificationsEnabled(true)
+      setSuccess('Push notifications enabled!')
       setTimeout(() => setSuccess(null), 3000)
     }
   }
 
-  const handleToggleNotifications = (enabled: boolean) => {
-    setNotificationsEnabled(enabled)
+  const handlePushUnsubscribe = async () => {
+    const ok = await pushUnsubscribe()
+    if (ok) {
+      setSuccess('Push notifications disabled')
+      setTimeout(() => setSuccess(null), 3000)
+    }
+  }
+
+  const handleTestNotification = async () => {
+    await sendTestNotification()
   }
 
   const handleConnectAnalytics = () => {
@@ -209,9 +226,19 @@ export default function SettingsPage() {
           Get notified when your scheduled posts are due.
         </p>
 
-        {notificationPermission === 'denied' ? (
+        {!pushSupported ? (
+          <div className="flex items-center gap-2 p-4 rounded-md bg-muted/50 text-muted-foreground border-2 border-border">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div>
+              <p className="font-bold">Not supported</p>
+              <p className="text-sm opacity-80">
+                Push notifications are not supported in this browser.
+              </p>
+            </div>
+          </div>
+        ) : pushPermission === 'denied' ? (
           <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30">
-            <AlertCircle className="w-4 h-4" />
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <div>
               <p className="font-bold">Notifications blocked</p>
               <p className="text-sm opacity-80">
@@ -219,26 +246,32 @@ export default function SettingsPage() {
               </p>
             </div>
           </div>
-        ) : notificationPermission === 'default' ? (
+        ) : !pushSubscribed ? (
           <button
-            onClick={handleRequestPermission}
+            onClick={handlePushSubscribe}
+            disabled={pushLoading}
             className={cn(
               'flex items-center gap-2 px-4 py-3 rounded-md w-full',
               'bg-primary text-primary-foreground font-bold text-sm',
               'border-[3px] border-border',
               'shadow-[3px_3px_0_hsl(var(--border))]',
               'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-              'transition-all'
+              'transition-all',
+              'disabled:opacity-60 disabled:cursor-not-allowed'
             )}
           >
-            <Bell className="w-4 h-4" />
-            Enable Notifications
+            {pushLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Bell className="w-4 h-4" />
+            )}
+            Enable Push Notifications
           </button>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm text-sticker-green font-bold">
               <Check className="w-4 h-4" />
-              Browser notifications enabled
+              Push notifications enabled
             </div>
             <div className="flex items-center gap-3 px-4 py-3 rounded-md border-2 border-border bg-card">
               {notificationsEnabled ? (
@@ -252,6 +285,41 @@ export default function SettingsPage() {
                 label="Post reminders"
                 description="Notify when scheduled posts are due"
               />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleTestNotification}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 rounded-md',
+                  'text-sm font-bold',
+                  'border-[3px] border-border bg-card',
+                  'shadow-[2px_2px_0_hsl(var(--border))]',
+                  'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]',
+                  'transition-all'
+                )}
+              >
+                <Send className="w-3.5 h-3.5" />
+                Send test notification
+              </button>
+              <button
+                onClick={handlePushUnsubscribe}
+                disabled={pushLoading}
+                className={cn(
+                  'flex items-center gap-2 px-3 py-2 rounded-md',
+                  'text-sm font-medium text-muted-foreground',
+                  'border-2 border-border bg-card',
+                  'hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5',
+                  'transition-all',
+                  'disabled:opacity-60 disabled:cursor-not-allowed'
+                )}
+              >
+                {pushLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <BellOff className="w-3.5 h-3.5" />
+                )}
+                Unsubscribe
+              </button>
             </div>
           </div>
         )}

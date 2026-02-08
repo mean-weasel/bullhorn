@@ -265,3 +265,93 @@ input[type='time']::-webkit-calendar-picker-indicator:hover {
 .scroll-snap-start {
   scroll-snap-align: start;
 }
+
+/* Markdown preview typography */
+.markdown-preview h1 {
+  @apply text-2xl font-display font-bold mt-6 mb-3 pb-2 border-b border-border;
+}
+
+.markdown-preview h2 {
+  @apply text-xl font-display font-bold mt-5 mb-2 pb-1 border-b border-border;
+}
+
+.markdown-preview h3 {
+  @apply text-lg font-display font-semibold mt-4 mb-2;
+}
+
+.markdown-preview h4 {
+  @apply text-base font-display font-semibold mt-3 mb-1;
+}
+
+.markdown-preview p {
+  @apply mb-3 leading-relaxed;
+}
+
+.markdown-preview ul {
+  @apply list-disc pl-6 mb-3 space-y-1;
+}
+
+.markdown-preview ol {
+  @apply list-decimal pl-6 mb-3 space-y-1;
+}
+
+.markdown-preview li > ul,
+.markdown-preview li > ol {
+  @apply mt-1 mb-0;
+}
+
+.markdown-preview blockquote {
+  @apply border-l-4 border-[hsl(var(--gold))] pl-4 py-1 my-3 text-muted-foreground italic bg-muted/30 rounded-r-md;
+}
+
+.markdown-preview code {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-[hsl(var(--accent))];
+}
+
+.markdown-preview pre {
+  @apply bg-muted rounded-lg p-4 my-3 overflow-x-auto;
+}
+
+.markdown-preview pre code {
+  @apply bg-transparent px-0 py-0 text-foreground;
+}
+
+.markdown-preview a {
+  @apply text-[hsl(var(--gold))] underline underline-offset-2 hover:text-[hsl(var(--gold-dark))] transition-colors;
+}
+
+.markdown-preview hr {
+  @apply my-6 border-border;
+}
+
+.markdown-preview img {
+  @apply max-w-full rounded-lg my-3;
+}
+
+.markdown-preview table {
+  @apply w-full border-collapse my-3;
+}
+
+.markdown-preview th {
+  @apply border-2 border-border bg-muted px-3 py-2 text-left font-bold text-sm;
+}
+
+.markdown-preview td {
+  @apply border-2 border-border px-3 py-2 text-sm;
+}
+
+.markdown-preview strong {
+  @apply font-bold;
+}
+
+.markdown-preview em {
+  @apply italic;
+}
+
+.markdown-preview del {
+  @apply line-through text-muted-foreground;
+}
+
+.markdown-preview input[type='checkbox'] {
+  @apply mr-2;
+}
