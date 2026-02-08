@@ -198,6 +198,9 @@ test.describe('Scheduling', () => {
       await schedulePost(page)
       await waitForNavigation(page, '/')
 
+      // Wait for save to propagate
+      await page.waitForTimeout(1000)
+
       // Verify schedule was changed (different from original)
       const updatedPosts = await getAllPosts(page)
       expect(updatedPosts[0].scheduledAt).not.toBe(originalScheduledAt)
@@ -340,7 +343,9 @@ test.describe('Scheduling', () => {
         await selectPlatform(page, 'twitter')
         await fillContent(page, `Post scheduled at ${time}`)
 
-        await page.locator('[data-testid="main-schedule-date-input"]').fill(baseTomorrow.toISOString().split('T')[0])
+        await page
+          .locator('[data-testid="main-schedule-date-input"]')
+          .fill(baseTomorrow.toISOString().split('T')[0])
         await page.locator('[data-testid="main-schedule-time-input"]').fill(time)
 
         await schedulePost(page)
@@ -385,7 +390,9 @@ test.describe('Scheduling', () => {
       await page.goto('/posts')
 
       // Find the post card
-      const postCard = page.locator('a[href^="/edit/"]').filter({ hasText: 'Post with visible schedule' })
+      const postCard = page
+        .locator('a[href^="/edit/"]')
+        .filter({ hasText: 'Post with visible schedule' })
       await expect(postCard).toBeVisible()
 
       // Should show the schedule time somewhere (10:30 AM formatted)

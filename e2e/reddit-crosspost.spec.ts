@@ -19,8 +19,15 @@ import {
 } from './helpers'
 
 // Type guard to access Reddit content fields
-function getRedditContent(post: { content: unknown }): { subreddit: string; title: string; body?: string; launchedUrl?: string } | undefined {
-  const content = post.content as { subreddit?: string; title?: string; body?: string; launchedUrl?: string }
+function getRedditContent(post: {
+  content: unknown
+}): { subreddit: string; title: string; body?: string; launchedUrl?: string } | undefined {
+  const content = post.content as {
+    subreddit?: string
+    title?: string
+    body?: string
+    launchedUrl?: string
+  }
   if (content && typeof content.subreddit === 'string') {
     return content as { subreddit: string; title: string; body?: string; launchedUrl?: string }
   }
@@ -52,7 +59,7 @@ test.describe('Reddit Cross-posting', () => {
       expect(posts.length).toBe(3)
 
       // Verify each post has a different subreddit
-      const subreddits = posts.map(p => getRedditContent(p)?.subreddit).sort()
+      const subreddits = posts.map((p) => getRedditContent(p)?.subreddit).sort()
       expect(subreddits).toEqual(['SaaS', 'sideproject', 'startups'])
 
       // Verify all posts have the same content
@@ -165,7 +172,7 @@ test.describe('Reddit Cross-posting', () => {
       // Get the posts
       let posts = await getAllPosts(page)
       expect(posts.length).toBe(2)
-      const entrepreneurPost = posts.find(p => getRedditContent(p)?.subreddit === 'entrepreneur')!
+      const entrepreneurPost = posts.find((p) => getRedditContent(p)?.subreddit === 'entrepreneur')!
 
       // Edit the entrepreneur post to a different time
       await page.goto(`/edit/${entrepreneurPost.id}`)
@@ -184,8 +191,10 @@ test.describe('Reddit Cross-posting', () => {
 
       // Verify the posts now have different schedules
       posts = await getAllPosts(page)
-      const updatedStartup = posts.find(p => getRedditContent(p)?.subreddit === 'startups')!
-      const updatedEntrepreneur = posts.find(p => getRedditContent(p)?.subreddit === 'entrepreneur')!
+      const updatedStartup = posts.find((p) => getRedditContent(p)?.subreddit === 'startups')!
+      const updatedEntrepreneur = posts.find(
+        (p) => getRedditContent(p)?.subreddit === 'entrepreneur'
+      )!
 
       // The schedules should be different
       expect(updatedStartup.scheduledAt).not.toBe(updatedEntrepreneur.scheduledAt)
@@ -193,11 +202,15 @@ test.describe('Reddit Cross-posting', () => {
       // Verify the UI shows correct times in the subreddit cards (check hidden input with -input suffix)
       await page.goto(`/edit/${updatedStartup.id}`)
       await waitForRedditEditForm(page, 'startups')
-      await expect(page.locator('[data-testid="subreddit-time-startups-input"]')).toHaveValue('10:00')
+      await expect(page.locator('[data-testid="subreddit-time-startups-input"]')).toHaveValue(
+        '10:00'
+      )
 
       await page.goto(`/edit/${updatedEntrepreneur.id}`)
       await waitForRedditEditForm(page, 'entrepreneur')
-      await expect(page.locator('[data-testid="subreddit-time-entrepreneur-input"]')).toHaveValue('15:00')
+      await expect(page.locator('[data-testid="subreddit-time-entrepreneur-input"]')).toHaveValue(
+        '15:00'
+      )
     })
 
     test('should allow different statuses for grouped posts', async ({ page }) => {
@@ -222,7 +235,7 @@ test.describe('Reddit Cross-posting', () => {
       expect(posts[1].status).toBe('draft')
 
       // Schedule only the webdev post
-      const webdevPost = posts.find(p => getRedditContent(p)?.subreddit === 'webdev')!
+      const webdevPost = posts.find((p) => getRedditContent(p)?.subreddit === 'webdev')!
       await page.goto(`/edit/${webdevPost.id}`)
       await waitForRedditEditForm(page, 'webdev')
 
@@ -234,8 +247,8 @@ test.describe('Reddit Cross-posting', () => {
 
       // Verify different statuses
       posts = await getAllPosts(page)
-      const updatedWebdev = posts.find(p => getRedditContent(p)?.subreddit === 'webdev')!
-      const updatedJs = posts.find(p => getRedditContent(p)?.subreddit === 'javascript')!
+      const updatedWebdev = posts.find((p) => getRedditContent(p)?.subreddit === 'webdev')!
+      const updatedJs = posts.find((p) => getRedditContent(p)?.subreddit === 'javascript')!
 
       expect(updatedWebdev.status).toBe('scheduled')
       expect(updatedJs.status).toBe('draft')
@@ -261,7 +274,7 @@ test.describe('Reddit Cross-posting', () => {
       await waitForNavigation(page, '/')
 
       let posts = await getAllPosts(page)
-      const startupPost = posts.find(p => getRedditContent(p)?.subreddit === 'startups')!
+      const startupPost = posts.find((p) => getRedditContent(p)?.subreddit === 'startups')!
 
       // Edit just the startups post title
       await page.goto(`/edit/${startupPost.id}`)
@@ -275,8 +288,8 @@ test.describe('Reddit Cross-posting', () => {
 
       // Verify only the startups post was updated
       posts = await getAllPosts(page)
-      const updatedStartup = posts.find(p => getRedditContent(p)?.subreddit === 'startups')!
-      const smallbizPost = posts.find(p => getRedditContent(p)?.subreddit === 'smallbusiness')!
+      const updatedStartup = posts.find((p) => getRedditContent(p)?.subreddit === 'startups')!
+      const smallbizPost = posts.find((p) => getRedditContent(p)?.subreddit === 'smallbusiness')!
 
       expect(getRedditContent(updatedStartup)?.title).toBe('Updated title for startups')
       expect(getRedditContent(smallbizPost)?.title).toBe('Original title')
@@ -297,7 +310,7 @@ test.describe('Reddit Cross-posting', () => {
       await waitForNavigation(page, '/')
 
       let posts = await getAllPosts(page)
-      const webdevPost = posts.find(p => getRedditContent(p)?.subreddit === 'webdev')!
+      const webdevPost = posts.find((p) => getRedditContent(p)?.subreddit === 'webdev')!
 
       // Add launchedUrl to just the webdev post
       await page.goto(`/edit/${webdevPost.id}`)
@@ -312,12 +325,17 @@ test.describe('Reddit Cross-posting', () => {
       await saveDraft(page)
       await waitForNavigation(page, '/')
 
+      // Wait for save to propagate
+      await page.waitForTimeout(1000)
+
       // Verify only webdev post has launchedUrl
       posts = await getAllPosts(page)
-      const updatedWebdev = posts.find(p => getRedditContent(p)?.subreddit === 'webdev')!
-      const programmingPost = posts.find(p => getRedditContent(p)?.subreddit === 'programming')!
+      const updatedWebdev = posts.find((p) => getRedditContent(p)?.subreddit === 'webdev')!
+      const programmingPost = posts.find((p) => getRedditContent(p)?.subreddit === 'programming')!
 
-      expect(getRedditContent(updatedWebdev)?.launchedUrl).toBe('https://reddit.com/r/webdev/comments/abc123')
+      expect(getRedditContent(updatedWebdev)?.launchedUrl).toBe(
+        'https://reddit.com/r/webdev/comments/abc123'
+      )
       expect(getRedditContent(programmingPost)?.launchedUrl).toBeFalsy()
     })
   })
@@ -364,8 +382,8 @@ test.describe('Reddit Cross-posting', () => {
       const posts = await getAllPosts(page)
       expect(posts.length).toBe(2)
 
-      const startupPost = posts.find(p => getRedditContent(p)?.subreddit === 'startups')!
-      const entrepreneurPost = posts.find(p => getRedditContent(p)?.subreddit === 'entrepreneur')!
+      const startupPost = posts.find((p) => getRedditContent(p)?.subreddit === 'startups')!
+      const entrepreneurPost = posts.find((p) => getRedditContent(p)?.subreddit === 'entrepreneur')!
 
       expect(getRedditContent(startupPost)?.title).toBe('Startup Title')
       expect(getRedditContent(entrepreneurPost)?.title).toBe('Entrepreneur Title')
@@ -398,8 +416,8 @@ test.describe('Reddit Cross-posting', () => {
       await waitForNavigation(page, '/')
 
       const posts = await getAllPosts(page)
-      const webdevPost = posts.find(p => getRedditContent(p)?.subreddit === 'webdev')!
-      const jsPost = posts.find(p => getRedditContent(p)?.subreddit === 'javascript')!
+      const webdevPost = posts.find((p) => getRedditContent(p)?.subreddit === 'webdev')!
+      const jsPost = posts.find((p) => getRedditContent(p)?.subreddit === 'javascript')!
 
       expect(webdevPost.scheduledAt).not.toBe(jsPost.scheduledAt)
       expect(webdevPost.status).toBe('scheduled')
