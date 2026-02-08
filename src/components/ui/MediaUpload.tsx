@@ -39,13 +39,16 @@ export function MediaUpload({
 
   const canAddMore = existingMedia.length < maxFiles && !uploading && !disabled
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (canAddMore) {
-      setIsDragging(true)
-    }
-  }, [canAddMore])
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (canAddMore) {
+        setIsDragging(true)
+      }
+    },
+    [canAddMore]
+  )
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -53,34 +56,37 @@ export function MediaUpload({
     setIsDragging(false)
   }, [])
 
-  const handleFileUpload = useCallback(async (file: File) => {
-    setError(null)
+  const handleFileUpload = useCallback(
+    async (file: File) => {
+      setError(null)
 
-    // Validate file
-    const validation = validateFile(file)
-    if (!validation.valid) {
-      setError(validation.error || 'Invalid file')
-      return
-    }
+      // Validate file
+      const validation = validateFile(file)
+      if (!validation.valid) {
+        setError(validation.error || 'Invalid file')
+        return
+      }
 
-    setUploading(true)
-    setUploadFilename(file.name)
-    setUploadProgress({ loaded: 0, total: file.size, percentage: 0 })
+      setUploading(true)
+      setUploadFilename(file.name)
+      setUploadProgress({ loaded: 0, total: file.size, percentage: 0 })
 
-    const result = await uploadMedia(file, (progress) => {
-      setUploadProgress(progress)
-    })
+      const result = await uploadMedia(file, (progress) => {
+        setUploadProgress(progress)
+      })
 
-    setUploading(false)
-    setUploadProgress(null)
-    setUploadFilename(null)
+      setUploading(false)
+      setUploadProgress(null)
+      setUploadFilename(null)
 
-    if (result.success && result.filename) {
-      onMediaChange([...existingMedia, result.filename])
-    } else {
-      setError(result.error || 'Upload failed')
-    }
-  }, [existingMedia, onMediaChange])
+      if (result.success && result.filename) {
+        onMediaChange([...existingMedia, result.filename])
+      } else {
+        setError(result.error || 'Upload failed')
+      }
+    },
+    [existingMedia, onMediaChange]
+  )
 
   const handleDrop = useCallback(
     async (e: React.DragEvent) => {
@@ -148,12 +154,7 @@ export function MediaUpload({
 
       {/* Existing media previews */}
       {existingMedia.length > 0 && (
-        <div
-          className={cn(
-            'grid gap-3',
-            maxFiles === 1 ? 'grid-cols-1 max-w-xs' : 'grid-cols-2'
-          )}
-        >
+        <div className={cn('grid gap-3', maxFiles === 1 ? 'grid-cols-1 max-w-xs' : 'grid-cols-2')}>
           {existingMedia.map((filename, idx) => (
             <MediaPreviewItem
               key={filename}
@@ -185,8 +186,8 @@ export function MediaUpload({
             'shadow-[3px_3px_0_hsl(var(--border))]',
             isDragging
               ? platform === 'twitter'
-                ? 'border-twitter bg-twitter-soft'
-                : 'border-linkedin bg-linkedin-soft'
+                ? 'border-twitter bg-twitter/10'
+                : 'border-linkedin bg-linkedin/10'
               : 'border-border hover:border-primary bg-card',
             'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
             disabled && 'opacity-50 cursor-not-allowed hover:translate-y-0'
@@ -200,9 +201,7 @@ export function MediaUpload({
             className="hidden"
             disabled={disabled}
           />
-          <div className="text-4xl mb-3">
-            {isDragging ? '📥' : '📸'}
-          </div>
+          <div className="text-4xl mb-3">{isDragging ? '📥' : '📸'}</div>
           <p className="text-sm font-bold">
             {isDragging ? 'Drop to upload!' : 'Drag & drop or click to upload'}
           </p>
@@ -227,7 +226,8 @@ interface MediaPreviewItemProps {
 function MediaPreviewItem({ filename, index, onRemove }: MediaPreviewItemProps) {
   const [hasError, setHasError] = useState(false)
   const url = getMediaUrl(filename)
-  const isVideo = filename.endsWith('.mp4') || filename.endsWith('.mov') || filename.endsWith('.webm')
+  const isVideo =
+    filename.endsWith('.mp4') || filename.endsWith('.mov') || filename.endsWith('.webm')
 
   return (
     <div className="relative group">

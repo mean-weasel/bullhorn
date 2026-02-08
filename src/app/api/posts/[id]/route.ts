@@ -1,7 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb } from '@/lib/utils'
+import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const updatePostSchema = z.object({
+  platform: z.enum(['twitter', 'linkedin', 'reddit']).optional(),
+  content: z.record(z.string(), z.unknown()).optional(),
+  status: z.enum(['draft', 'scheduled', 'published', 'failed', 'archived']).optional(),
+  scheduled_at: z.string().optional().nullable(),
+  scheduledAt: z.string().optional().nullable(),
+  notes: z.string().max(5000).optional().nullable(),
+  campaign_id: z.string().uuid().optional().nullable(),
+  campaignId: z.string().uuid().optional().nullable(),
+  publish_result: z.record(z.string(), z.unknown()).optional().nullable(),
+  publishResult: z.record(z.string(), z.unknown()).optional().nullable(),
+  group_id: z.string().optional().nullable(),
+  groupId: z.string().optional().nullable(),
+  group_type: z.string().optional().nullable(),
+  groupType: z.string().optional().nullable(),
+})
 
 // Valid status transitions
 const validTransitions: Record<string, string[]> = {
@@ -13,10 +31,7 @@ const validTransitions: Record<string, string[]> = {
 }
 
 // GET /api/posts/[id] - Get single post
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -46,7 +61,7 @@ export async function GET(
     }
 
     // Transform post from snake_case to camelCase
-    const post = transformPostFromDb(data as Record<string, unknown>)
+    const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post })
   } catch (error) {
     console.error('Error fetching post:', error)
@@ -55,10 +70,7 @@ export async function GET(
 }
 
 // PATCH /api/posts/[id] - Update post
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -72,6 +84,13 @@ export async function PATCH(
     const { id } = await params
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = updatePostSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     // Get current post to validate status transition (with ownership check)
     const { data: currentPost, error: fetchError } = await supabase
@@ -89,11 +108,11 @@ export async function PATCH(
     }
 
     // Validate status transition if status is being changed
-    if (body.status && body.status !== currentPost.status) {
+    if (parsed.data.status && parsed.data.status !== currentPost.status) {
       const allowed = validTransitions[currentPost.status] || []
-      if (!allowed.includes(body.status)) {
+      if (!allowed.includes(parsed.data.status)) {
         return NextResponse.json(
-          { error: `Cannot transition from ${currentPost.status} to ${body.status}` },
+          { error: `Cannot transition from ${currentPost.status} to ${parsed.data.status}` },
           { status: 400 }
         )
       }
@@ -101,24 +120,24 @@ export async function PATCH(
 
     // Build update object
     const updates: Record<string, unknown> = {}
-    if (body.platform !== undefined) updates.platform = body.platform
-    if (body.content !== undefined) updates.content = body.content
-    if (body.status !== undefined) updates.status = body.status
-    if (body.scheduled_at !== undefined || body.scheduledAt !== undefined) {
-      updates.scheduled_at = body.scheduled_at || body.scheduledAt
+    if (parsed.data.platform !== undefined) updates.platform = parsed.data.platform
+    if (parsed.data.content !== undefined) updates.content = parsed.data.content
+    if (parsed.data.status !== undefined) updates.status = parsed.data.status
+    if (parsed.data.scheduled_at !== undefined || parsed.data.scheduledAt !== undefined) {
+      updates.scheduled_at = parsed.data.scheduled_at || parsed.data.scheduledAt
     }
-    if (body.notes !== undefined) updates.notes = body.notes
-    if (body.campaign_id !== undefined || body.campaignId !== undefined) {
-      updates.campaign_id = body.campaign_id || body.campaignId
+    if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes
+    if (parsed.data.campaign_id !== undefined || parsed.data.campaignId !== undefined) {
+      updates.campaign_id = parsed.data.campaign_id || parsed.data.campaignId
     }
-    if (body.publish_result !== undefined || body.publishResult !== undefined) {
-      updates.publish_result = body.publish_result || body.publishResult
+    if (parsed.data.publish_result !== undefined || parsed.data.publishResult !== undefined) {
+      updates.publish_result = parsed.data.publish_result || parsed.data.publishResult
     }
-    if (body.group_id !== undefined || body.groupId !== undefined) {
-      updates.group_id = body.group_id || body.groupId
+    if (parsed.data.group_id !== undefined || parsed.data.groupId !== undefined) {
+      updates.group_id = parsed.data.group_id || parsed.data.groupId
     }
-    if (body.group_type !== undefined || body.groupType !== undefined) {
-      updates.group_type = body.group_type || body.groupType
+    if (parsed.data.group_type !== undefined || parsed.data.groupType !== undefined) {
+      updates.group_type = parsed.data.group_type || parsed.data.groupType
     }
 
     const { data, error } = await supabase
@@ -137,7 +156,7 @@ export async function PATCH(
     }
 
     // Transform post from snake_case to camelCase
-    const post = transformPostFromDb(data as Record<string, unknown>)
+    const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post })
   } catch (error) {
     console.error('Error updating post:', error)
@@ -163,11 +182,7 @@ export async function DELETE(
     const { id } = await params
     const supabase = await createClient()
 
-    const { error } = await supabase
-      .from('posts')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId)
+    const { error } = await supabase.from('posts').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

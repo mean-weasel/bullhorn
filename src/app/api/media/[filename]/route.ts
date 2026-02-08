@@ -23,6 +23,13 @@ export async function GET(
   { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
+    // Require authentication to serve uploaded media
+    try {
+      await requireAuth()
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { filename } = await params
 
     // Sanitize filename to prevent path traversal

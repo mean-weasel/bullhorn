@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { LandingPage } from './landing-page'
 
 export default async function Home() {
   // Skip auth check in E2E test mode
@@ -14,7 +15,7 @@ export default async function Home() {
 
   if (user) {
     redirect('/dashboard')
-  } else {
-    redirect('/login')
   }
+
+  return <LandingPage />
 }

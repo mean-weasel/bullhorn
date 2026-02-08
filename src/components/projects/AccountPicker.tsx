@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, Loader2, Link2, AlertCircle } from 'lucide-react'
+import { Check, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // Platform icon components
@@ -104,16 +104,10 @@ export function AccountPicker({
 
   if (accounts.length === 0) {
     return (
-      <div className="text-center py-8 px-4 bg-card border border-border rounded-xl">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-muted flex items-center justify-center">
-          <Link2 className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <h3 className="font-semibold mb-1">No accounts connected</h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Connect your social media accounts to associate them with this project.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Account connections coming soon.
+      <div className="text-center py-6 px-4">
+        <p className="text-sm text-muted-foreground">
+          Connect your social media accounts to publish directly to Twitter, LinkedIn, and Reddit
+          from this project. This feature is under development.
         </p>
       </div>
     )
@@ -134,7 +128,8 @@ export function AccountPicker({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Select which accounts should be pre-selected when creating posts in this project's campaigns.
+        Select which accounts should be pre-selected when creating posts in this project's
+        campaigns.
       </p>
 
       {Object.entries(groupedAccounts).map(([platform, platformAccounts]) => {
@@ -189,9 +184,7 @@ export function AccountPicker({
                       <p className="font-medium truncate">
                         {account.displayName || account.handle}
                       </p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        @{account.handle}
-                      </p>
+                      <p className="text-sm text-muted-foreground truncate">@{account.handle}</p>
                     </div>
 
                     {/* Connection status */}
@@ -211,7 +204,7 @@ export function AccountPicker({
                           : 'border-muted-foreground/30'
                       )}
                     >
-                      {isSelected && <Check className="w-3 h-3 text-black" />}
+                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
                     </div>
                   </button>
                 )

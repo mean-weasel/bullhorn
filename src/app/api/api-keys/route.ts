@@ -1,6 +1,13 @@
 import { requireAuth } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { randomBytes, createHash } from 'crypto'
+import { z } from 'zod'
+
+const createApiKeySchema = z.object({
+  name: z.string().min(1).max(200),
+  expiresAt: z.string().optional().nullable(),
+  scopes: z.array(z.string()).optional(),
+})
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -61,15 +68,12 @@ export async function POST(request: Request) {
   try {
     const { userId } = await requireAuth()
     const body = await request.json()
-
-    const { name, expiresAt, scopes } = body as {
-      name?: string
-      expiresAt?: string
-      scopes?: string[]
-    }
-
-    if (!name || name.trim() === '') {
-      return Response.json({ error: 'Name is required' }, { status: 400 })
+    const parsed = createApiKeySchema.safeParse(body)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
 
     // Generate raw key: bh_ + 40 hex chars (20 random bytes = 160 bits)
@@ -85,11 +89,11 @@ export async function POST(request: Request) {
       .from('api_keys')
       .insert({
         user_id: userId,
-        name: name.trim(),
+        name: parsed.data.name.trim(),
         key_hash: keyHash,
         key_prefix: keyPrefix,
-        scopes: scopes || [],
-        expires_at: expiresAt || null,
+        scopes: parsed.data.scopes || [],
+        expires_at: parsed.data.expiresAt || null,
       })
       .select(
         'id, name, key_prefix, scopes, expires_at, last_used_at, revoked_at, created_at, updated_at'

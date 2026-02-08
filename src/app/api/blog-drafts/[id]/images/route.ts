@@ -1,6 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const addImageSchema = z.object({
+  filename: z.string().max(500).optional(),
+  url: z.string().url().optional(),
+  sourcePath: z.string().max(1000).optional(),
+})
 
 // Transform snake_case Supabase response to camelCase for frontend
 function transformDraft(draft: Record<string, unknown>) {
@@ -21,10 +28,7 @@ function transformDraft(draft: Record<string, unknown>) {
 }
 
 // GET /api/blog-drafts/[id]/images - List images for a blog draft
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -61,10 +65,7 @@ export async function GET(
 }
 
 // POST /api/blog-drafts/[id]/images - Add image to blog draft
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -78,8 +79,15 @@ export async function POST(
     const { id } = await params
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = addImageSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
-    const { filename, url, sourcePath } = body
+    const { filename, url, sourcePath } = parsed.data
 
     if (!filename && !url && !sourcePath) {
       return NextResponse.json(

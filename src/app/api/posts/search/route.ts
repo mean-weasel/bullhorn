@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb } from '@/lib/utils'
+import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 
 // GET /api/posts/search - Search posts
@@ -38,19 +38,23 @@ export async function GET(request: NextRequest) {
 
     // Additionally filter by content (JSON field) on the client side
     // since Supabase doesn't easily search within JSONB text
-    const filtered = data.filter((post: { content?: unknown; notes?: string; platform?: string }) => {
-      const contentStr = JSON.stringify(post.content || {}).toLowerCase()
-      const notesStr = (post.notes || '').toLowerCase()
-      const platformStr = (post.platform || '').toLowerCase()
-      const searchLower = query.toLowerCase()
+    const filtered = data.filter(
+      (post: { content?: unknown; notes?: string; platform?: string }) => {
+        const contentStr = JSON.stringify(post.content || {}).toLowerCase()
+        const notesStr = (post.notes || '').toLowerCase()
+        const platformStr = (post.platform || '').toLowerCase()
+        const searchLower = query.toLowerCase()
 
-      return contentStr.includes(searchLower) ||
-             notesStr.includes(searchLower) ||
-             platformStr.includes(searchLower)
-    })
+        return (
+          contentStr.includes(searchLower) ||
+          notesStr.includes(searchLower) ||
+          platformStr.includes(searchLower)
+        )
+      }
+    )
 
     // Transform posts from snake_case to camelCase
-    const posts = filtered.map(post => transformPostFromDb(post as Record<string, unknown>))
+    const posts = filtered.map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ posts })
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

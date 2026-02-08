@@ -211,10 +211,10 @@ All Supabase responses use snake_case. The frontend uses camelCase. Transform fu
 
 ### CSS Variables (from `src/index.css`)
 
-- Primary (gold): `--primary: 43 96% 56%` (`#fbbf24`)
+- Primary (gold): `--primary: 38 92% 42%` (`#ce9a08`)
 - Accent (pink): `--accent: 330 80% 60%` (`#ec4899`)
 - Border: `--border: 220 20% 20%` (strong black)
-- Gold variants: `--gold: 43 96% 56%`, `--gold-dark: 38 89% 45%`
+- Gold variants: `--gold: 38 92% 42%`, `--gold-dark: 36 92% 30%`
 - Font: Nunito (sans), JetBrains Mono (mono)
 
 ### Utility Classes
@@ -341,5 +341,5 @@ Examples:
 
 ## Known Issues
 
-- **Invisible gold buttons**: Gold/yellow buttons (#fbbf24) on cream background have near-zero contrast. Affects: New Campaign, Create Campaign submit, CTA empty state buttons.
+- **~~Invisible gold buttons~~**: Fixed. Gold darkened from `#fbbf24` to `#ce9a08` (WCAG AA compliant).
 - **Dark theme**: May not render correctly in production.

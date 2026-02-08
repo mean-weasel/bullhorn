@@ -61,7 +61,7 @@ export default {
 
         // Sticker bomb color palette
         sticker: {
-          yellow: '#fbbf24',
+          yellow: '#ce9a08',
           pink: '#ec4899',
           purple: '#8b5cf6',
           green: '#22c55e',

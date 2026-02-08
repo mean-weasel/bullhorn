@@ -1,6 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const createBlogDraftSchema = z.object({
+  title: z.string().max(500).optional().nullable(),
+  content: z.string().max(100000).optional().nullable(),
+  date: z.string().optional().nullable(),
+  status: z.enum(['draft', 'scheduled', 'published', 'archived']).optional(),
+  scheduled_at: z.string().optional().nullable(),
+  scheduledAt: z.string().optional().nullable(),
+  notes: z.string().max(5000).optional().nullable(),
+  campaign_id: z.string().uuid().optional().nullable(),
+  campaignId: z.string().uuid().optional().nullable(),
+  images: z.array(z.unknown()).optional(),
+  tags: z.array(z.string().max(50)).max(10).optional(),
+})
 
 // Transform snake_case Supabase response to camelCase for frontend
 function transformDraft(draft: Record<string, unknown>) {
@@ -17,6 +32,7 @@ function transformDraft(draft: Record<string, unknown>) {
     wordCount: draft.word_count,
     campaignId: draft.campaign_id,
     images: draft.images || [],
+    tags: (draft.tags as string[]) || [],
   }
 }
 
@@ -37,6 +53,15 @@ function calculateWordCount(content: string): number {
 // GET /api/blog-drafts - List blog drafts
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
+    let userId: string
+    try {
+      const auth = await requireAuth()
+      userId = auth.userId
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
 
@@ -48,6 +73,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('blog_drafts')
       .select('*')
+      .eq('user_id', userId)
       .order('updated_at', { ascending: false })
 
     if (status && status !== 'all') {
@@ -92,23 +118,31 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = createBlogDraftSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
-    const content = body.content || ''
+    const content = parsed.data.content || ''
     const wordCount = calculateWordCount(content)
 
     const { data, error } = await supabase
       .from('blog_drafts')
       .insert({
         user_id: userId,
-        title: body.title,
+        title: parsed.data.title,
         content: content,
-        date: body.date,
-        status: body.status || 'draft',
-        scheduled_at: body.scheduled_at || body.scheduledAt,
-        notes: body.notes,
+        date: parsed.data.date,
+        status: parsed.data.status || 'draft',
+        scheduled_at: parsed.data.scheduled_at || parsed.data.scheduledAt,
+        notes: parsed.data.notes,
         word_count: wordCount,
-        campaign_id: body.campaign_id || body.campaignId,
-        images: body.images || [],
+        campaign_id: parsed.data.campaign_id || parsed.data.campaignId,
+        images: parsed.data.images || [],
+        tags: parsed.data.tags || [],
       })
       .select()
       .single()

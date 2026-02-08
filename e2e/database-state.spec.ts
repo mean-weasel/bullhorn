@@ -100,7 +100,6 @@ test.describe('Database State Verification', () => {
       expect(posts[0].status).toBe('scheduled')
       expect(posts[0].scheduledAt).toBeTruthy()
     })
-
   })
 
   test.describe.serial('Edit Operations', () => {
@@ -118,6 +117,9 @@ test.describe('Database State Verification', () => {
       await fillContent(page, 'Updated content')
       await page.getByRole('button', { name: /save draft/i }).click()
       await expect(page).toHaveURL('/dashboard')
+
+      // Wait for save to fully propagate
+      await page.waitForTimeout(1000)
 
       // Should still have exactly 1 post
       expect(await getPostCount(page)).toBe(1)
@@ -149,7 +151,11 @@ test.describe('Database State Verification', () => {
     })
 
     test('should convert draft to scheduled without creating duplicates', async ({ page }) => {
-      await createTestPost(page, { platform: 'twitter', content: 'Draft to schedule', asDraft: true })
+      await createTestPost(page, {
+        platform: 'twitter',
+        content: 'Draft to schedule',
+        asDraft: true,
+      })
       expect(await getPostCount(page)).toBe(1)
 
       const posts = await getAllPosts(page)

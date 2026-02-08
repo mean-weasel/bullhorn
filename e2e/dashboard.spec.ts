@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test'
-import { enterDemoMode, createTestPost, deletePost, archivePost, waitForNavigation } from './helpers'
+import {
+  enterDemoMode,
+  createTestPost,
+  deletePost,
+  archivePost,
+  waitForNavigation,
+} from './helpers'
 
 test.describe('Dashboard', () => {
   test.beforeEach(async ({ page }) => {
@@ -17,13 +23,19 @@ test.describe('Dashboard', () => {
       const statsBar = page.locator('.flex-1.flex.items-center')
 
       // Check Scheduled count
-      await expect(statsBar.locator('text=Scheduled').locator('..').locator('.text-2xl')).toHaveText('0')
+      await expect(
+        statsBar.locator('text=Scheduled').locator('..').locator('.text-2xl')
+      ).toHaveText('0')
 
       // Check Drafts count
-      await expect(statsBar.locator('text=Drafts').locator('..').locator('.text-2xl')).toHaveText('0')
+      await expect(statsBar.locator('text=Drafts').locator('..').locator('.text-2xl')).toHaveText(
+        '0'
+      )
 
       // Check Published count
-      await expect(statsBar.locator('text=Published').locator('..').locator('.text-2xl')).toHaveText('0')
+      await expect(
+        statsBar.locator('text=Published').locator('..').locator('.text-2xl')
+      ).toHaveText('0')
     })
 
     test('should increment drafts count when draft is created', async ({ page }) => {
@@ -85,7 +97,11 @@ test.describe('Dashboard', () => {
     test('should decrement count when post is deleted', async ({ page }) => {
       // Create 2 drafts
       await createTestPost(page, { platform: 'twitter', content: 'Draft to keep', asDraft: true })
-      await createTestPost(page, { platform: 'linkedin', content: 'Draft to delete', asDraft: true })
+      await createTestPost(page, {
+        platform: 'linkedin',
+        content: 'Draft to delete',
+        asDraft: true,
+      })
 
       // Navigate to dashboard and verify count is 2
       await page.goto('/')
@@ -127,7 +143,11 @@ test.describe('Dashboard', () => {
     test('should decrement count when post is archived', async ({ page }) => {
       // Create 2 scheduled posts
       await createTestPost(page, { platform: 'twitter', content: 'Post to keep', asDraft: false })
-      await createTestPost(page, { platform: 'linkedin', content: 'Post to archive', asDraft: false })
+      await createTestPost(page, {
+        platform: 'linkedin',
+        content: 'Post to archive',
+        asDraft: false,
+      })
 
       // Navigate to dashboard and verify count is 2
       await page.goto('/')
@@ -192,7 +212,7 @@ test.describe('Dashboard', () => {
       await page.goto('/')
 
       // Upcoming section should be visible
-      await expect(page.getByRole('heading', { name: /upcoming/i })).toBeVisible()
+      await expect(page.getByRole('heading', { name: /upcoming/i }).first()).toBeVisible()
     })
 
     test('should show empty state when no scheduled posts', async ({ page }) => {

@@ -36,7 +36,11 @@ export default function ProjectsPage() {
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (confirm('Are you sure you want to delete this project? Campaigns will be unassigned but not deleted.')) {
+    if (
+      confirm(
+        'Are you sure you want to delete this project? Campaigns will be unassigned but not deleted.'
+      )
+    ) {
       await deleteProject(id)
     }
   }
@@ -51,7 +55,9 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">Projects</h1>
+          <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">
+            Projects
+          </h1>
           <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
             Organize campaigns and brand assets for different products or initiatives.
           </p>
@@ -62,7 +68,7 @@ export default function ProjectsPage() {
           className={cn(
             'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
             'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-            'text-white font-medium text-sm',
+            'text-primary-foreground font-medium text-sm',
             'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
           )}
         >
@@ -105,14 +111,15 @@ export default function ProjectsPage() {
           </div>
           <h3 className="text-lg font-semibold mb-2">No projects yet</h3>
           <p className="text-muted-foreground mb-6 max-w-sm mx-auto px-4">
-            Create projects to organize campaigns and maintain brand consistency across different products or initiatives.
+            Create projects to organize campaigns and maintain brand consistency across different
+            products or initiatives.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
             className={cn(
               'inline-flex items-center gap-2 px-5 py-3 rounded-xl',
               'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-              'text-white font-medium text-sm',
+              'text-primary-foreground font-medium text-sm',
               'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
             )}
           >

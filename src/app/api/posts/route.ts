@@ -1,11 +1,36 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb } from '@/lib/utils'
+import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const createPostSchema = z.object({
+  platform: z.enum(['twitter', 'linkedin', 'reddit']),
+  content: z.record(z.string(), z.unknown()),
+  status: z.enum(['draft', 'scheduled', 'published', 'failed', 'archived']).optional(),
+  scheduled_at: z.string().optional().nullable(),
+  scheduledAt: z.string().optional().nullable(),
+  notes: z.string().max(5000).optional().nullable(),
+  campaign_id: z.string().uuid().optional().nullable(),
+  campaignId: z.string().uuid().optional().nullable(),
+  group_id: z.string().optional().nullable(),
+  groupId: z.string().optional().nullable(),
+  group_type: z.string().optional().nullable(),
+  groupType: z.string().optional().nullable(),
+})
 
 // GET /api/posts - List posts with optional filters
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
+    let userId: string
+    try {
+      const auth = await requireAuth()
+      userId = auth.userId
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
 
@@ -18,6 +43,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('posts')
       .select('*')
+      .eq('user_id', userId)
       .order('updated_at', { ascending: false })
 
     if (status && status !== 'all') {
@@ -43,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform posts from snake_case to camelCase
-    const posts = (data || []).map(post => transformPostFromDb(post as Record<string, unknown>))
+    const posts = (data || []).map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ posts })
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -65,19 +91,26 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = createPostSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     const { data, error } = await supabase
       .from('posts')
       .insert({
         user_id: userId,
-        platform: body.platform,
-        content: body.content,
-        status: body.status || 'draft',
-        scheduled_at: body.scheduled_at || body.scheduledAt,
-        notes: body.notes,
-        campaign_id: body.campaign_id || body.campaignId,
-        group_id: body.group_id || body.groupId,
-        group_type: body.group_type || body.groupType,
+        platform: parsed.data.platform,
+        content: parsed.data.content,
+        status: parsed.data.status || 'draft',
+        scheduled_at: parsed.data.scheduled_at || parsed.data.scheduledAt,
+        notes: parsed.data.notes,
+        campaign_id: parsed.data.campaign_id || parsed.data.campaignId,
+        group_id: parsed.data.group_id || parsed.data.groupId,
+        group_type: parsed.data.group_type || parsed.data.groupType,
       })
       .select()
       .single()
@@ -87,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform post from snake_case to camelCase
-    const post = transformPostFromDb(data as Record<string, unknown>)
+    const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post }, { status: 201 })
   } catch (error) {
     console.error('Error creating post:', error)

@@ -25,9 +25,7 @@ export default function Error({
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-foreground mb-2">
-          Something went wrong
-        </h1>
+        <h1 className="text-2xl font-bold text-foreground mb-2">Something went wrong</h1>
 
         <p className="text-muted-foreground mb-6">
           We encountered an unexpected error. Please try again or return to the home page.
@@ -35,16 +33,14 @@ export default function Error({
 
         {process.env.NODE_ENV === 'development' && error.message && (
           <div className="mb-6 p-4 bg-muted rounded-lg text-left">
-            <p className="text-sm font-mono text-destructive break-all">
-              {error.message}
-            </p>
+            <p className="text-sm font-mono text-destructive break-all">{error.message}</p>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] text-white font-medium hover:shadow-lg transition-all"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] text-primary-foreground font-medium hover:shadow-lg transition-all"
           >
             <RefreshCw className="w-4 h-4" />
             Try Again
@@ -60,9 +56,7 @@ export default function Error({
         </div>
 
         {error.digest && (
-          <p className="mt-6 text-xs text-muted-foreground">
-            Error ID: {error.digest}
-          </p>
+          <p className="mt-6 text-xs text-muted-foreground">Error ID: {error.digest}</p>
         )}
       </div>
     </div>

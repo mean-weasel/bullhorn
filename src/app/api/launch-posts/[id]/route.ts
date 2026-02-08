@@ -1,6 +1,30 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { z } from 'zod'
+
+const updateLaunchPostSchema = z.object({
+  platform: z
+    .enum([
+      'hacker_news_show',
+      'hacker_news_ask',
+      'hacker_news_link',
+      'product_hunt',
+      'dev_hunt',
+      'beta_list',
+      'indie_hackers',
+    ])
+    .optional(),
+  title: z.string().min(1).max(500).optional(),
+  status: z.enum(['draft', 'scheduled', 'posted']).optional(),
+  url: z.string().url().optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
+  platformFields: z.record(z.string(), z.unknown()).optional(),
+  campaignId: z.string().uuid().optional().nullable(),
+  scheduledAt: z.string().optional().nullable(),
+  postedAt: z.string().optional().nullable(),
+  notes: z.string().max(5000).optional().nullable(),
+})
 
 // Transform snake_case DB response to camelCase for frontend
 function transformLaunchPost(data: Record<string, unknown>) {
@@ -22,10 +46,7 @@ function transformLaunchPost(data: Record<string, unknown>) {
 }
 
 // GET /api/launch-posts/[id] - Get single launch post
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -63,10 +84,7 @@ export async function GET(
 }
 
 // PATCH /api/launch-posts/[id] - Update launch post
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Require authentication
     let userId: string
@@ -80,19 +98,27 @@ export async function PATCH(
     const { id } = await params
     const supabase = await createClient()
     const body = await request.json()
+    const parsed = updateLaunchPostSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
+    }
 
     // Build update object - only include fields that were provided
     const updates: Record<string, unknown> = {}
-    if (body.platform !== undefined) updates.platform = body.platform
-    if (body.status !== undefined) updates.status = body.status
-    if (body.title !== undefined) updates.title = body.title
-    if (body.url !== undefined) updates.url = body.url
-    if (body.description !== undefined) updates.description = body.description
-    if (body.platformFields !== undefined) updates.platform_fields = body.platformFields
-    if (body.campaignId !== undefined) updates.campaign_id = body.campaignId
-    if (body.scheduledAt !== undefined) updates.scheduled_at = body.scheduledAt
-    if (body.postedAt !== undefined) updates.posted_at = body.postedAt
-    if (body.notes !== undefined) updates.notes = body.notes
+    if (parsed.data.platform !== undefined) updates.platform = parsed.data.platform
+    if (parsed.data.status !== undefined) updates.status = parsed.data.status
+    if (parsed.data.title !== undefined) updates.title = parsed.data.title
+    if (parsed.data.url !== undefined) updates.url = parsed.data.url
+    if (parsed.data.description !== undefined) updates.description = parsed.data.description
+    if (parsed.data.platformFields !== undefined)
+      updates.platform_fields = parsed.data.platformFields
+    if (parsed.data.campaignId !== undefined) updates.campaign_id = parsed.data.campaignId
+    if (parsed.data.scheduledAt !== undefined) updates.scheduled_at = parsed.data.scheduledAt
+    if (parsed.data.postedAt !== undefined) updates.posted_at = parsed.data.postedAt
+    if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes
 
     const { data, error } = await supabase
       .from('launch_posts')
