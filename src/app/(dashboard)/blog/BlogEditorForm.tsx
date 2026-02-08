@@ -252,6 +252,7 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg min-h-[40px]',
                 'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+                'border-2 border-[hsl(var(--gold-dark))]',
                 'text-primary-foreground font-medium text-sm',
                 'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all',
                 'disabled:opacity-50 disabled:cursor-not-allowed'

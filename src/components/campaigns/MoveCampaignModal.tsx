@@ -23,7 +23,9 @@ interface MoveCampaignModalProps {
 export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignModalProps) {
   const { projects, fetchProjects, initialized } = useProjectsStore()
   const { moveCampaignToProject } = useCampaignsStore()
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(campaign.projectId || null)
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    campaign.projectId || null
+  )
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -55,11 +57,11 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
   }
 
   const currentProject = campaign.projectId
-    ? projects.find(p => p.id === campaign.projectId)
+    ? projects.find((p) => p.id === campaign.projectId)
     : null
 
   const selectedProject = selectedProjectId
-    ? projects.find(p => p.id === selectedProjectId)
+    ? projects.find((p) => p.id === selectedProjectId)
     : null
 
   const iconWrapper = (
@@ -93,9 +95,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
           ) : (
             <FolderKanban className="w-4 h-4 text-muted-foreground" />
           )}
-          <span className="font-medium">
-            {currentProject?.name || 'Unassigned'}
-          </span>
+          <span className="font-medium">{currentProject?.name || 'Unassigned'}</span>
         </div>
       </div>
 
@@ -116,13 +116,9 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium">Unassigned</p>
-            <p className="text-xs text-muted-foreground">
-              Not part of any project
-            </p>
+            <p className="text-xs text-muted-foreground">Not part of any project</p>
           </div>
-          {selectedProjectId === null && (
-            <Check className="w-5 h-5 text-[hsl(var(--gold-dark))]" />
-          )}
+          {selectedProjectId === null && <Check className="w-5 h-5 text-[hsl(var(--gold-dark))]" />}
         </button>
 
         {/* Project options */}
@@ -151,9 +147,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
             <div className="flex-1 min-w-0">
               <p className="font-medium truncate">{project.name}</p>
               {project.description && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {project.description}
-                </p>
+                <p className="text-xs text-muted-foreground truncate">{project.description}</p>
               )}
             </div>
             {selectedProjectId === project.id && (
@@ -167,9 +161,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
       {selectedProjectId !== (campaign.projectId || null) && (
         <div className="mt-4 p-3 bg-[hsl(var(--gold))]/5 border border-[hsl(var(--gold))]/20 rounded-lg">
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">
-              {currentProject?.name || 'Unassigned'}
-            </span>
+            <span className="text-muted-foreground">{currentProject?.name || 'Unassigned'}</span>
             <ArrowRight className="w-4 h-4 text-[hsl(var(--gold-dark))]" />
             <span className="font-medium text-[hsl(var(--gold-dark))]">
               {selectedProject?.name || 'Unassigned'}
@@ -179,9 +171,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
       )}
 
       {/* Error message */}
-      {error && (
-        <p className="mt-4 text-sm text-destructive">{error}</p>
-      )}
+      {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
 
       {/* Actions */}
       <ResponsiveDialogActions className="mt-6">
@@ -195,6 +185,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
             'flex-1 flex items-center justify-center gap-2 px-4 rounded-lg text-sm font-medium transition-all',
             'md:py-2.5 py-3.5 min-h-[48px] md:min-h-0',
             'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+            'border-2 border-[hsl(var(--gold-dark))]',
             'text-white',
             'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30',
             'disabled:opacity-50 disabled:cursor-not-allowed'

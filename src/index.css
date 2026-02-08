@@ -13,8 +13,8 @@
     --card-foreground: 220 20% 15%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 15%;
-    /* Dark amber primary — WCAG AA contrast on cream background */
-    --primary: 38 92% 42%;
+    /* Deep amber primary — improved WCAG contrast on cream background */
+    --primary: 35 95% 34%;
     --primary-foreground: 0 0% 100%;
     --secondary: 220 14% 96%;
     --secondary-foreground: 220 20% 15%;
@@ -28,10 +28,10 @@
     /* Strong black borders */
     --border: 220 20% 20%;
     --input: 220 20% 20%;
-    --ring: 38 92% 42%;
+    --ring: 35 95% 34%;
     --radius: 12px;
-    --gold: 38 92% 42%;
-    --gold-dark: 36 92% 30%;
+    --gold: 35 95% 34%;
+    --gold-dark: 30 95% 24%;
   }
 
   /* Dark mode - Sticker Bomb Dark */

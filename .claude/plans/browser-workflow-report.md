@@ -1,154 +1,138 @@
-# Browser Workflow Report
+# Bullhorn Browser Workflow QA Audit Report
 
-**Application:** Social Scheduler
-**Date:** 2026-01-07
-**Overall Status:** Passed (8/9 workflows passed, 1 incomplete due to external issue)
+**Date:** February 8, 2026
+**Target:** https://bullhorn.to (Production)
+**Test Account:** neonwatty@gmail.com (Google OAuth)
+**Total Workflows:** 46 defined, 40 executed
 
 ---
 
 ## Executive Summary
 
-Comprehensive browser-based testing was performed on the Social Scheduler application. The application demonstrated excellent stability and functionality across all tested workflows. Only one minor bug was discovered, and the overall user experience is polished and intuitive.
+**40 workflows tested across all major app features.** The app is largely functional with a well-executed sticker bomb design system. Two critical API failures were discovered (blog drafts and email notifications), along with several minor UX issues.
 
-**Key Metrics:**
-- Workflows Executed: 9
-- Passed: 8
-- Incomplete: 1 (due to browser extension connectivity, not app issue)
-- Bugs Found: 1 (low severity)
-- UX Issues: 0
+| Category | Count |
+|----------|-------|
+| Passed | 31 |
+| Partial (limited by auth/data) | 5 |
+| MANUAL (requires human interaction) | 3 |
+| BLOCKED (by API failures) | 4 |
+| FAILED | 1 |
+| SKIPPED (destructive) | 1 |
 
 ---
 
-## Workflow Results Summary
+## Critical Issues (Production Bugs)
+
+### 1. [HIGH] Blog Draft Save — 500 Internal Server Error
+- **Endpoint:** `POST /api/blog-drafts`
+- **Impact:** Blog draft creation is **completely non-functional** in production
+- **Behavior:** User fills out blog editor, clicks Save, API returns 500. No error message shown — "Unsaved changes" persists silently
+- **Blocked workflows:** Create, Edit, Search/Filter, Archive/Restore, Delete Blog Draft (5 workflows)
+- **Recommendation:** Investigate server-side error in blog-drafts API route
+
+### 2. [HIGH] Email Notification Preferences — 500 Internal Server Error
+- **Endpoint:** `GET /api/notification-preferences`
+- **Impact:** Email notification management is **completely broken** in production
+- **Behavior:** Settings page shows "Failed to load email preferences. Please refresh the page."
+- **Recommendation:** Investigate notification_preferences table/API route
+
+---
+
+## Medium Severity Issues
+
+### 3. [MED] No Error Feedback on Blog Draft Save Failure
+- **Location:** `/blog/new` editor
+- **Issue:** When API returns 500, UI shows no error toast. User has no indication why save failed
+
+### 4. [MED] Reset Password Page Lacks Session Validation
+- **Location:** `/reset-password`
+- **Issue:** Shows password form without valid recovery session. Submit silently fails
+
+### 5. [MED] Date Picker React State Sync Issue
+- **Location:** Post editor date/time inputs
+- **Issue:** Programmatic date/time values don't sync with React state on first attempt
+
+---
+
+## Low Severity Issues
+
+| # | Issue | Location |
+|---|-------|----------|
+| 6 | Stats bar doesn't update after campaign creation | `/projects/:id` |
+| 7 | Launch post cards not directly clickable | `/launch-posts` |
+| 8 | Empty search shows generic empty state | `/posts` |
+| 9 | URL query param not reflected in filter tab | `/posts?status=...` |
+| 10 | Profile Save button always active | `/profile` |
+| 11 | Gold button contrast on white backgrounds | Multiple pages |
+
+---
+
+## Observations & Notes
+
+- New campaigns default to "Active" instead of "Draft" — may be intentional
+- Sticker bomb design system is consistently applied throughout
+- ConfirmDialog component is well-designed for destructive actions
+- Real-time avatar/name preview, PasswordStrength indicator, markdown Write/Preview tabs are strong UX patterns
+- Brand Kit with hashtag pill previews works well
+
+---
+
+## Workflow Results
 
 | # | Workflow | Status | Issues |
-|---|----------|--------|--------|
-| 1 | Dashboard Overview | Passed | None |
-| 2 | Navigation Flow | Passed | 1 minor bug |
-| 3 | First-Time User Experience | Passed | None |
-| 4 | Create Twitter Post | Passed | None |
-| 5 | Create LinkedIn Post | Passed | None |
-| 6 | Create Reddit Post | Passed | None |
-| 11 | Create New Campaign | Passed | None |
-| 15 | Change Theme | Passed | None |
-| 16 | Archive and Restore Post | Incomplete | Browser connectivity |
+|---|---------|--------|--------|
+| 1 | Login with Email | Passed | 0 |
+| 2 | Login with Google OAuth | Passed | 0 |
+| 3 | Sign Up with Email | Partial | 0 |
+| 4 | Forgot Password | Passed | 0 |
+| 5 | Reset Password | Partial | 1 Med |
+| 6 | Access Denied | Passed | 0 |
+| 7 | Change Theme | Passed | 0 |
+| 8 | Handle Empty States | Passed | 0 |
+| 9 | Enable Notifications | Partial | 0 |
+| 10 | Create Post | Passed | 0 |
+| 11 | Edit Post | Passed | 0 |
+| 12 | Schedule Post | Passed | 1 Med |
+| 13 | Delete Post | MANUAL | 0 |
+| 14 | Archive/Restore Post | Passed | 0 |
+| 15 | Filter Posts | Passed | 1 Low |
+| 16 | Search Posts | Passed | 1 Low |
+| 17 | Create Campaign | Passed | 1 Low |
+| 18 | Edit Campaign | Passed | 0 |
+| 19 | Move Campaign | Passed | 0 |
+| 20 | Filter Campaigns | Passed | 0 |
+| 21 | Delete Campaign | Passed | 0 |
+| 22 | Create Launch Post | Passed | 0 |
+| 23 | Edit Launch Post | Passed | 0 |
+| 24 | Filter Launch Posts | Passed | 1 Low |
+| 25 | Delete Launch Post | MANUAL | 0 |
+| 26 | Bulk Actions | Incomplete | 0 |
+| 27 | Create New Project | Passed | 0 |
+| 28 | View Project Detail | Passed | 0 |
+| 29 | Edit Project Settings | Passed | 0 |
+| 30 | Delete Project | Passed | 0 |
+| 31 | Campaign in Project | Passed | 1 Low |
+| 32 | Create Blog Draft | **FAILED** | **1 High, 1 Med** |
+| 33 | Edit Blog Draft | BLOCKED | 0 |
+| 34 | Search Blog Drafts | BLOCKED | 0 |
+| 35 | Archive Blog Draft | BLOCKED | 0 |
+| 36 | Delete Blog Draft | BLOCKED | 0 |
+| 37 | Connect Analytics | Partial | **1 High** |
+| 38 | View/Edit Profile | Passed | 1 Low |
+| 39 | Change Password | Passed | 0 |
+| 40 | Delete Account | SKIPPED | 0 |
 
 ---
 
-## Issues Discovered
+## Recommendations (Priority Order)
 
-### Bug #1: URL Query Parameter Tab Initialization
-**Severity:** Low
-**Location:** Posts page (/posts)
-**Description:** When navigating directly to `/posts?status=scheduled`, the filter tab does not properly highlight the "Scheduled" tab on initial page load. The "All" tab remains highlighted instead.
-**Steps to Reproduce:**
-1. Navigate directly to `http://localhost:5173/posts?status=scheduled`
-2. Observe that "All" tab is highlighted instead of "Scheduled"
-3. Click any tab manually - then the correct tab highlighting works
-
-**Technical Analysis:** React state initialization may not be syncing with URL query parameters on mount.
-
-**Recommendation:** Ensure `useEffect` or router hooks properly read and apply query params to tab state on component mount.
-
----
-
-## UX/Design Observations
-
-### Strengths
-
-1. **Empty States:** Clean, encouraging empty states guide users to take action ("Welcome to Social Scheduler", "Create Your First Campaign")
-
-2. **Auto-Save:** Excellent auto-save functionality - posts save automatically and URL updates from `/new` to `/edit/:id`
-
-3. **Platform-Specific UI:** Smart adaptation of form fields based on selected platform:
-   - Twitter: 280 character limit with counter
-   - LinkedIn: Visibility toggle (Public/Connections Only), 3000 char limit
-   - Reddit: Multi-subreddit support with custom titles per subreddit
-
-4. **Theme System:** Instant, smooth theme switching between Light/Dark/System modes
-
-5. **Navigation:** Consistent header navigation with clear active states and prominent FAB button
-
-6. **Campaign Management:** Clean modal for campaign creation, well-organized campaign detail page with status tabs
-
-7. **Visual Consistency:** Gold accent color used consistently for CTAs and interactive elements
-
-### Areas for Potential Enhancement
-
-1. **Date/Time Picker:** Calendar popup is challenging to interact with programmatically (not a user-facing issue, but noted for testing purposes)
-
-2. **Character Counter:** Could consider adding a visual warning when approaching character limit
-
----
-
-## Technical Observations
-
-1. **State Management:** Zustand store manages state effectively across components
-
-2. **Routing:** React Router handles navigation smoothly with proper URL updates
-
-3. **Auto-Save:** Debounced auto-save prevents excessive writes while keeping data safe
-
-4. **Theme Persistence:** Theme preference persists correctly across sessions
-
-5. **Platform Detection:** Platform-specific settings appear/disappear cleanly based on selection
-
----
-
-## Test Coverage
-
-### Features Tested
-- Dashboard overview and stats
-- Navigation (header, FAB, back button)
-- Post creation (Twitter, LinkedIn, Reddit)
-- Platform-specific settings
-- Character limits and counters
-- Campaign creation
-- Theme switching (Light/Dark/System)
-- Posts list and filtering
-
-### Features Not Fully Tested (Due to Browser Extension Issues)
-- Post archiving and restoration
-- Post editing workflow completion
-- Scheduled post functionality
-- Published links feature
-
----
-
-## Recommendations
-
-### High Priority
-1. **Fix URL Query Param Bug:** Ensure filter tabs properly initialize from URL query parameters
-
-### Medium Priority
-2. **Add E2E Tests:** Consider adding Playwright tests for critical user flows to complement manual testing
-
-### Low Priority
-3. **Date Picker Enhancement:** Consider adding quick-select buttons (Today, Tomorrow, Next Week) for faster scheduling
-
----
-
-## Conclusion
-
-The Social Scheduler application is well-built with excellent attention to UX details. The single bug discovered is low-severity and cosmetic. All core functionality for creating and managing social media posts across Twitter, LinkedIn, and Reddit works correctly. The application is ready for production use.
-
----
-
-## Appendix: Screenshots Captured
-
-| Screenshot ID | Description |
-|---------------|-------------|
-| ss_9092vzbrv | Dashboard empty state |
-| ss_1678w6uvy | Post editor |
-| ss_736099kua | Campaigns page |
-| ss_85245at3g | Settings page |
-| ss_5757z7432 | Posts filtered view |
-| ss_33166gzwi | Campaigns empty state |
-| ss_6023wnsh5 | New campaign modal |
-| ss_4943n8ve0 | Campaign form filled |
-| ss_6002egwfd | Campaign created |
-| ss_22183wcnn | Settings (light theme) |
-| ss_7252urf1m | Dark theme applied |
-| ss_8400t4iw2 | Light theme applied |
-| ss_5126jdi9t | Posts list |
-| ss_2878qg4sk | Edit post view |
+1. **Fix `POST /api/blog-drafts` 500 error** — Blog feature completely broken
+2. **Fix `GET /api/notification-preferences` 500 error** — Email settings broken
+3. **Add error toasts for failed API calls** — Silent failures confuse users
+4. **Validate recovery session on reset-password page**
+5. **Make launch post cards clickable** — Consistency with campaigns/posts
+6. **Add search-specific empty state messaging**
+7. **Update stats bar reactively after campaign CRUD**
+8. **Initialize filter from URL query params**
+9. **Disable Save button when unchanged**
