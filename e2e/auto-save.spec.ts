@@ -122,13 +122,18 @@ test.describe('Auto-save', () => {
       // Wait for auto-save to complete by checking for "Saved" indicator
       await expect(page.getByText(/saved/i)).toBeVisible({ timeout: 10000 })
 
+      // Wait for the API response to be fully processed
+      await page.waitForTimeout(1000)
+
       // Should still have exactly 1 post
       expect(await getPostCount(page)).toBe(1)
 
       // Verify content was updated
       const updatedPosts = await getAllPosts(page)
       expect(updatedPosts[0].id).toBe(postId)
-      expect((updatedPosts[0].content as { text: string }).text).toBe('Modified draft content via auto-save')
+      expect((updatedPosts[0].content as { text: string }).text).toBe(
+        'Modified draft content via auto-save'
+      )
     })
 
     test('should auto-save platform switch', async ({ page }) => {
@@ -185,7 +190,9 @@ test.describe('Auto-save', () => {
       expect(currentPosts[0].updatedAt).toBe(originalUpdatedAt)
     })
 
-    test('should keep scheduled status when editing and saving a scheduled post', async ({ page }) => {
+    test('should keep scheduled status when editing and saving a scheduled post', async ({
+      page,
+    }) => {
       // Create a scheduled post
       await page.goto('/new')
       await page.getByRole('button', { name: 'Twitter' }).click()
@@ -220,7 +227,9 @@ test.describe('Auto-save', () => {
       const updatedPosts = await getAllPosts(page)
       expect(updatedPosts[0].status).toBe('scheduled')
       expect(updatedPosts[0].scheduledAt).toBeTruthy()
-      expect((updatedPosts[0].content as { text: string }).text).toBe('Updated scheduled post content')
+      expect((updatedPosts[0].content as { text: string }).text).toBe(
+        'Updated scheduled post content'
+      )
     })
   })
 })

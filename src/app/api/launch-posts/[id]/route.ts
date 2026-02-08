@@ -5,10 +5,18 @@ import { z } from 'zod'
 
 const updateLaunchPostSchema = z.object({
   platform: z
-    .enum(['twitter', 'linkedin', 'reddit', 'producthunt', 'hackernews', 'other'])
+    .enum([
+      'hacker_news_show',
+      'hacker_news_ask',
+      'hacker_news_link',
+      'product_hunt',
+      'dev_hunt',
+      'beta_list',
+      'indie_hackers',
+    ])
     .optional(),
   title: z.string().min(1).max(500).optional(),
-  status: z.enum(['draft', 'scheduled', 'published', 'failed', 'archived']).optional(),
+  status: z.enum(['draft', 'scheduled', 'posted']).optional(),
   url: z.string().url().optional().nullable(),
   description: z.string().max(5000).optional().nullable(),
   platformFields: z.record(z.string(), z.unknown()).optional(),
