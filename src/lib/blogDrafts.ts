@@ -7,7 +7,7 @@ const API_BASE = '/api'
 // Types
 export type BlogDraftStatus = 'draft' | 'scheduled' | 'published' | 'archived'
 
-export type BlogDraftTag = 'Blog Post' | 'Twitter Article'
+type BlogDraftTag = 'Blog Post' | 'Twitter Article'
 
 export const BLOG_DRAFT_TAGS: BlogDraftTag[] = ['Blog Post', 'Twitter Article']
 

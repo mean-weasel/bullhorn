@@ -17,7 +17,7 @@ export interface Reminder {
   updatedAt: string
 }
 
-export interface CreateReminderInput {
+interface CreateReminderInput {
   title: string
   description?: string
   remindAt: string
@@ -25,7 +25,7 @@ export interface CreateReminderInput {
   campaignId?: string
 }
 
-export interface UpdateReminderInput {
+interface UpdateReminderInput {
   title?: string
   description?: string | null
   remindAt?: string
@@ -49,7 +49,7 @@ export interface DbReminder {
 }
 
 /** Partial snake_case shape used when inserting / updating a reminder */
-export interface DbReminderInsert {
+interface DbReminderInsert {
   title?: string
   description?: string | null
   remind_at?: string

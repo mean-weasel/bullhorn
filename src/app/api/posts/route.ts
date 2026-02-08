@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 const createPostSchema = z.object({
   platform: z.enum(['twitter', 'linkedin', 'reddit']),
-  content: z.string().min(1).max(10000),
+  content: z.record(z.string(), z.unknown()),
   status: z.enum(['draft', 'scheduled', 'published', 'failed', 'archived']).optional(),
   scheduled_at: z.string().optional().nullable(),
   scheduledAt: z.string().optional().nullable(),
