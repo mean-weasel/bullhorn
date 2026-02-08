@@ -1,0 +1,78 @@
+'use client'
+
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
+
+export function NewCampaignModal({
+  onClose,
+  onCreate,
+}: {
+  onClose: () => void
+  onCreate: (name: string, description?: string) => void
+}) {
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (name.trim()) {
+      onCreate(name.trim(), description.trim() || undefined)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-card border border-border rounded-xl shadow-xl w-full max-w-md animate-scale-in">
+        <div className="p-6">
+          <h2 className="text-xl font-display font-bold mb-4">New Campaign</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter campaign name..."
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Description (optional)</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe this campaign..."
+                rows={3}
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 resize-none"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={!name.trim()}
+                className={cn(
+                  'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+                  'text-white',
+                  'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30',
+                  'disabled:opacity-50 disabled:cursor-not-allowed'
+                )}
+              >
+                Create Campaign
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}

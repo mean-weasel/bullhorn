@@ -1,37 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
-import {
-  Bell,
-  BellOff,
-  Sun,
-  Moon,
-  Monitor,
-  Check,
-  AlertCircle,
-  BarChart3,
-  Plus,
-  Trash2,
-  Loader2,
-  Key,
-  Send,
-} from 'lucide-react'
-import { useTheme, Theme } from '@/lib/theme'
+import { Check, AlertCircle, Key } from 'lucide-react'
+import { useTheme } from '@/lib/theme'
 import { useNotificationStore } from '@/lib/notifications'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
-import { cn } from '@/lib/utils'
-import { IOSToggleSwitch } from '@/components/ui/IOSToggleSwitch'
 import { useAnalyticsStore, useAnalyticsConnections } from '@/lib/analyticsStore'
 import { ConnectAnalyticsModal } from '@/components/analytics/ConnectAnalyticsModal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ApiKeyManager } from '@/components/ui/ApiKeyManager'
-
-const THEME_OPTIONS: { value: Theme; label: string; icon: typeof Sun; emoji: string }[] = [
-  { value: 'light', label: 'Light', icon: Sun, emoji: '☀️' },
-  { value: 'dark', label: 'Dark', icon: Moon, emoji: '🌙' },
-  { value: 'system', label: 'System', icon: Monitor, emoji: '💻' },
-]
+import { ThemeSection, AnalyticsSection, AboutSection } from './SettingsSections'
+import {
+  PushNotificationsSection,
+  EmailNotificationsSection,
+  EmailPreferences,
+} from './NotificationSections'
 
 export default function SettingsPage() {
   const searchParams = useSearchParams()
@@ -40,6 +24,11 @@ export default function SettingsPage() {
     useNotificationStore()
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  // Email notification preferences state
+  const [emailPrefs, setEmailPrefs] = useState<EmailPreferences | null>(null)
+  const [emailPrefsLoading, setEmailPrefsLoading] = useState(true)
+  const [emailPrefsSaving, setEmailPrefsSaving] = useState(false)
 
   // Analytics state
   const [showConnectModal, setShowConnectModal] = useState(false)
@@ -71,6 +60,52 @@ export default function SettingsPage() {
   useEffect(() => {
     fetchConnections()
   }, [fetchConnections])
+
+  // Fetch email notification preferences on mount
+  const fetchEmailPrefs = useCallback(async () => {
+    try {
+      setEmailPrefsLoading(true)
+      const res = await fetch('/api/notification-preferences')
+      if (!res.ok) throw new Error('Failed to fetch')
+      const data = await res.json()
+      setEmailPrefs(data.preferences)
+    } catch (err) {
+      console.error('Failed to load email preferences:', err)
+    } finally {
+      setEmailPrefsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchEmailPrefs()
+  }, [fetchEmailPrefs])
+
+  const handleEmailPrefToggle = async (key: keyof EmailPreferences, value: boolean) => {
+    if (!emailPrefs) return
+
+    // Optimistic update
+    const previous = { ...emailPrefs }
+    setEmailPrefs({ ...emailPrefs, [key]: value })
+    setEmailPrefsSaving(true)
+
+    try {
+      const res = await fetch('/api/notification-preferences', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [key]: value }),
+      })
+      if (!res.ok) throw new Error('Failed to save')
+      const data = await res.json()
+      setEmailPrefs(data.preferences)
+    } catch (err) {
+      // Roll back on failure
+      setEmailPrefs(previous)
+      setError('Failed to save notification preference')
+      console.error('Failed to update email preference:', err)
+    } finally {
+      setEmailPrefsSaving(false)
+    }
+  }
 
   // Handle OAuth callback params
   useEffect(() => {
@@ -188,226 +223,36 @@ export default function SettingsPage() {
       )}
 
       {/* Theme */}
-      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
-        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
-          🎨 Appearance
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">Choose your preferred color scheme.</p>
-        <div className="flex gap-2">
-          {THEME_OPTIONS.map((option) => {
-            const isActive = theme === option.value
-            return (
-              <button
-                key={option.value}
-                onClick={() => setTheme(option.value)}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-md',
-                  'text-sm font-bold transition-all',
-                  'border-[3px]',
-                  isActive
-                    ? 'border-border bg-primary text-primary-foreground shadow-[3px_3px_0_hsl(var(--border))]'
-                    : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-secondary shadow-[2px_2px_0_hsl(var(--border))]'
-                )}
-              >
-                <span>{option.emoji}</span>
-                {option.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      <ThemeSection theme={theme} setTheme={setTheme} />
 
       {/* Notifications */}
-      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
-        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
-          🔔 Notifications
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Get notified when your scheduled posts are due.
-        </p>
+      <PushNotificationsSection
+        pushSupported={pushSupported}
+        pushPermission={pushPermission}
+        pushSubscribed={pushSubscribed}
+        pushLoading={pushLoading}
+        notificationsEnabled={notificationsEnabled}
+        onToggleNotifications={handleToggleNotifications}
+        onPushSubscribe={handlePushSubscribe}
+        onPushUnsubscribe={handlePushUnsubscribe}
+        onTestNotification={handleTestNotification}
+      />
 
-        {!pushSupported ? (
-          <div className="flex items-center gap-2 p-4 rounded-md bg-muted/50 text-muted-foreground border-2 border-border">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <div>
-              <p className="font-bold">Not supported</p>
-              <p className="text-sm opacity-80">
-                Push notifications are not supported in this browser.
-              </p>
-            </div>
-          </div>
-        ) : pushPermission === 'denied' ? (
-          <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <div>
-              <p className="font-bold">Notifications blocked</p>
-              <p className="text-sm opacity-80">
-                Please enable notifications in your browser settings.
-              </p>
-            </div>
-          </div>
-        ) : !pushSubscribed ? (
-          <button
-            onClick={handlePushSubscribe}
-            disabled={pushLoading}
-            className={cn(
-              'flex items-center gap-2 px-4 py-3 rounded-md w-full',
-              'bg-primary text-primary-foreground font-bold text-sm',
-              'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-              'transition-all',
-              'disabled:opacity-60 disabled:cursor-not-allowed'
-            )}
-          >
-            {pushLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Bell className="w-4 h-4" />
-            )}
-            Enable Push Notifications
-          </button>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-sticker-green font-bold">
-              <Check className="w-4 h-4" />
-              Push notifications enabled
-            </div>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-md border-2 border-border bg-card">
-              {notificationsEnabled ? (
-                <Bell className="w-5 h-5 text-primary flex-shrink-0" />
-              ) : (
-                <BellOff className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-              )}
-              <IOSToggleSwitch
-                checked={notificationsEnabled}
-                onChange={handleToggleNotifications}
-                label="Post reminders"
-                description="Notify when scheduled posts are due"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleTestNotification}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-md',
-                  'text-sm font-bold',
-                  'border-[3px] border-border bg-card',
-                  'shadow-[2px_2px_0_hsl(var(--border))]',
-                  'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]',
-                  'transition-all'
-                )}
-              >
-                <Send className="w-3.5 h-3.5" />
-                Send test notification
-              </button>
-              <button
-                onClick={handlePushUnsubscribe}
-                disabled={pushLoading}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-md',
-                  'text-sm font-medium text-muted-foreground',
-                  'border-2 border-border bg-card',
-                  'hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5',
-                  'transition-all',
-                  'disabled:opacity-60 disabled:cursor-not-allowed'
-                )}
-              >
-                {pushLoading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <BellOff className="w-3.5 h-3.5" />
-                )}
-                Unsubscribe
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Email Notifications */}
+      <EmailNotificationsSection
+        emailPrefs={emailPrefs}
+        emailPrefsLoading={emailPrefsLoading}
+        emailPrefsSaving={emailPrefsSaving}
+        onToggle={handleEmailPrefToggle}
+      />
 
       {/* Analytics */}
-      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
-        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
-          📊 Analytics
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          Connect Google Analytics to view website metrics in your dashboard.
-        </p>
-
-        {analyticsLoading && connections.length === 0 ? (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-          </div>
-        ) : connections.length > 0 ? (
-          <div className="space-y-3">
-            {connections.map((connection) => (
-              <div
-                key={connection.id}
-                className="flex items-center justify-between p-3 rounded-md border-2 border-border bg-card"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md bg-sticker-blue/10 flex items-center justify-center border-2 border-sticker-blue/30">
-                    <BarChart3 className="w-5 h-5 text-sticker-blue" />
-                  </div>
-                  <div>
-                    <div className="font-bold">
-                      {connection.propertyName || `Property ${connection.propertyId}`}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      ID: {connection.propertyId}
-                      {connection.syncStatus === 'error' && (
-                        <span className="ml-2 text-destructive font-bold">Sync error</span>
-                      )}
-                      {connection.syncStatus === 'success' && (
-                        <span className="ml-2 text-sticker-green font-bold">Connected</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setConnectionToDelete(connection.id)}
-                  className={cn(
-                    'p-2 rounded-md',
-                    'text-muted-foreground hover:text-destructive',
-                    'hover:bg-destructive/10 border-2 border-transparent hover:border-destructive/30 transition-all'
-                  )}
-                  title="Remove connection"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-
-            <button
-              onClick={handleConnectAnalytics}
-              className={cn(
-                'flex items-center gap-2 px-4 py-2.5 rounded-md w-full',
-                'border-2 border-dashed border-border',
-                'text-muted-foreground hover:text-foreground font-medium',
-                'hover:border-primary/50 transition-all'
-              )}
-            >
-              <Plus className="w-4 h-4" />
-              Add another property
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={handleConnectAnalytics}
-            className={cn(
-              'flex items-center gap-2 px-4 py-3 rounded-md w-full',
-              'bg-sticker-blue text-white font-bold text-sm',
-              'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-              'transition-all'
-            )}
-          >
-            <BarChart3 className="w-4 h-4" />
-            Connect Google Analytics
-          </button>
-        )}
-      </div>
+      <AnalyticsSection
+        connections={connections}
+        analyticsLoading={analyticsLoading}
+        onConnect={handleConnectAnalytics}
+        onDeleteConnection={(id) => setConnectionToDelete(id)}
+      />
 
       {/* API Keys */}
       <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
@@ -421,31 +266,7 @@ export default function SettingsPage() {
       </div>
 
       {/* About */}
-      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))]">
-        <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
-          ℹ️ About
-        </h2>
-        <ul className="space-y-3 text-sm text-muted-foreground">
-          <li className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
-              1
-            </span>
-            <span>Create and organize your social media post ideas.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
-              2
-            </span>
-            <span>Schedule posts and get reminded when they&apos;re due.</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
-              3
-            </span>
-            <span>All data is stored locally in your browser.</span>
-          </li>
-        </ul>
-      </div>
+      <AboutSection />
 
       {/* Connect Analytics Modal */}
       <ConnectAnalyticsModal

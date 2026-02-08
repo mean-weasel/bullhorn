@@ -3,10 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isBefore, startOfDay } from 'date-fns'
 import {
-  Clock,
-  Edit2,
   Plus,
   FileText,
   Calendar,
@@ -14,20 +11,23 @@ import {
   AlertCircle,
   Archive,
   List,
-  ChevronLeft,
-  ChevronRight,
   LayoutGrid,
   Search,
   X,
 } from 'lucide-react'
 import { usePostsStore } from '@/lib/storage'
-import { Post, PostStatus, getPostPreviewText, PLATFORM_INFO } from '@/lib/posts'
+import { PostStatus, getPostPreviewText } from '@/lib/posts'
 import { cn } from '@/lib/utils'
+import { PostCard } from './PostCard'
+import { CalendarView } from './CalendarView'
 
 type FilterStatus = 'all' | PostStatus
 type ViewMode = 'list' | 'calendar'
 
-const STATUS_CONFIG: Record<PostStatus, { label: string; icon: typeof FileText; color: string; emoji: string }> = {
+const STATUS_CONFIG: Record<
+  PostStatus,
+  { label: string; icon: typeof FileText; color: string; emoji: string }
+> = {
   draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground', emoji: '📝' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-sticker-blue', emoji: '📅' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-sticker-green', emoji: '✅' },
@@ -52,7 +52,14 @@ export default function PostsPage() {
   // Initialize filter from URL query param, default to 'all'
   const getFilterFromParams = useCallback((): FilterStatus => {
     const statusParam = searchParams.get('status')
-    const validStatuses: FilterStatus[] = ['all', 'draft', 'scheduled', 'published', 'failed', 'archived']
+    const validStatuses: FilterStatus[] = [
+      'all',
+      'draft',
+      'scheduled',
+      'published',
+      'failed',
+      'archived',
+    ]
     if (statusParam && validStatuses.includes(statusParam as FilterStatus)) {
       return statusParam as FilterStatus
     }
@@ -198,7 +205,8 @@ export default function PostsPage() {
             </div>
             {searchQuery && (
               <p className="text-xs text-muted-foreground mt-2 font-medium">
-                Found {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'} matching &quot;{searchQuery}&quot;
+                Found {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}{' '}
+                matching &quot;{searchQuery}&quot;
               </p>
             )}
           </div>
@@ -217,28 +225,30 @@ export default function PostsPage() {
               >
                 All <span className="ml-1 text-xs opacity-70">({counts.all})</span>
               </button>
-              {(['draft', 'scheduled', 'published', 'failed', 'archived'] as PostStatus[]).map((status) => {
-                const config = STATUS_CONFIG[status]
-                const count = counts[status]
-                // Hide failed and archived tabs when empty
-                if ((status === 'failed' || status === 'archived') && count === 0) return null
-                return (
-                  <button
-                    key={status}
-                    onClick={() => setFilter(status)}
-                    className={cn(
-                      'flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
-                      filter === status
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                    )}
-                  >
-                    <span>{config.emoji}</span>
-                    <span className="hidden sm:inline">{config.label}</span>
-                    <span className="text-xs opacity-70">({count})</span>
-                  </button>
-                )
-              })}
+              {(['draft', 'scheduled', 'published', 'failed', 'archived'] as PostStatus[]).map(
+                (status) => {
+                  const config = STATUS_CONFIG[status]
+                  const count = counts[status]
+                  // Hide failed and archived tabs when empty
+                  if ((status === 'failed' || status === 'archived') && count === 0) return null
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => setFilter(status)}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
+                        filter === status
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                      )}
+                    >
+                      <span>{config.emoji}</span>
+                      <span className="hidden sm:inline">{config.label}</span>
+                      <span className="text-xs opacity-70">({count})</span>
+                    </button>
+                  )
+                }
+              )}
             </div>
           </div>
 
@@ -294,267 +304,6 @@ export default function PostsPage() {
           onDateChange={setCurrentDate}
         />
       )}
-    </div>
-  )
-}
-
-function PostCard({ post, index }: { post: Post; index: number }) {
-  const statusConfig = STATUS_CONFIG[post.status]
-
-  return (
-    <Link
-      href={`/edit/${post.id}`}
-      className={cn(
-        'block p-3 md:p-4 bg-card border-[3px] border-border rounded-md',
-        'shadow-[3px_3px_0_hsl(var(--border))]',
-        'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
-        'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
-        'transition-all',
-        'animate-slide-up'
-      )}
-      style={{ animationDelay: `${index * 30}ms` }}
-    >
-      <div className="flex items-start gap-3 md:gap-4">
-        {/* Platform indicator */}
-        <div className="flex flex-col gap-1.5 pt-1">
-          <span
-            className={cn(
-              'w-8 h-8 rounded-md flex items-center justify-center border-2 font-bold text-xs',
-              post.platform === 'twitter' && 'bg-twitter/10 border-twitter/30 text-twitter',
-              post.platform === 'linkedin' && 'bg-linkedin/10 border-linkedin/30 text-linkedin',
-              post.platform === 'reddit' && 'bg-reddit/10 border-reddit/30 text-reddit'
-            )}
-            title={PLATFORM_INFO[post.platform].name}
-          >
-            {post.platform === 'twitter' && '𝕏'}
-            {post.platform === 'linkedin' && 'in'}
-            {post.platform === 'reddit' && 'r/'}
-          </span>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm leading-relaxed line-clamp-2 mb-2 font-medium">
-            {getPostPreviewText(post) || <span className="text-muted-foreground italic">No content</span>}
-          </p>
-          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
-            {/* Status */}
-            <span className={cn('flex items-center gap-1.5 font-bold', statusConfig.color)}>
-              <span>{statusConfig.emoji}</span>
-              {statusConfig.label}
-            </span>
-
-            {/* Scheduled time */}
-            {post.scheduledAt && post.status === 'scheduled' && (
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
-                {format(new Date(post.scheduledAt), 'MMM d, h:mm a')}
-              </span>
-            )}
-
-            {/* Published time */}
-            {post.status === 'published' && post.publishResult && (
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
-                {post.publishResult.publishedAt
-                  ? format(new Date(post.publishResult.publishedAt), 'MMM d, h:mm a')
-                  : 'Published'}
-              </span>
-            )}
-
-            {/* Last updated for drafts */}
-            {post.status === 'draft' && (
-              <span className="flex items-center gap-1.5">
-                Updated {format(new Date(post.updatedAt), 'MMM d')}
-              </span>
-            )}
-
-            {/* Platform */}
-            <span className="hidden sm:flex items-center gap-1.5">
-              {PLATFORM_INFO[post.platform].name.split(' ')[0]}
-            </span>
-          </div>
-        </div>
-
-        {/* Edit button */}
-        <button className={cn(
-          'p-2 rounded-md text-muted-foreground hover:text-foreground',
-          'hover:bg-accent border-2 border-transparent hover:border-border',
-          'transition-all min-w-[40px] min-h-[40px] flex items-center justify-center'
-        )}>
-          <Edit2 className="w-4 h-4" />
-        </button>
-      </div>
-    </Link>
-  )
-}
-
-function CalendarView({
-  posts,
-  currentDate,
-  onDateChange,
-}: {
-  posts: Post[]
-  currentDate: Date
-  onDateChange: (date: Date) => void
-}) {
-  const router = useRouter()
-  const monthStart = startOfMonth(currentDate)
-  const monthEnd = endOfMonth(currentDate)
-  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
-
-  const startPadding = monthStart.getDay()
-  const paddedDays = Array(startPadding).fill(null).concat(calendarDays)
-
-  // Group posts by date
-  const postsByDate = posts.reduce((acc, post) => {
-    if (post.scheduledAt) {
-      const date = format(new Date(post.scheduledAt), 'yyyy-MM-dd')
-      if (!acc[date]) acc[date] = []
-      acc[date].push(post)
-    }
-    return acc
-  }, {} as Record<string, Post[]>)
-
-  const navigateMonth = (delta: number) => {
-    const next = new Date(currentDate)
-    next.setMonth(next.getMonth() + delta)
-    onDateChange(next)
-  }
-
-  return (
-    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] overflow-hidden">
-      {/* Calendar header */}
-      <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-primary/5">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-extrabold tracking-tight">
-            📆 {format(currentDate, 'MMMM yyyy')}
-          </h2>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => navigateMonth(-1)}
-              className={cn(
-                'p-1.5 rounded-md',
-                'text-muted-foreground hover:text-foreground',
-                'hover:bg-accent border-2 border-transparent hover:border-border',
-                'transition-all'
-              )}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDateChange(new Date())}
-              className={cn(
-                'px-3 py-1.5 text-xs font-bold rounded-md',
-                'hover:bg-accent border-2 border-transparent hover:border-border',
-                'transition-all'
-              )}
-            >
-              Today
-            </button>
-            <button
-              onClick={() => navigateMonth(1)}
-              className={cn(
-                'p-1.5 rounded-md',
-                'text-muted-foreground hover:text-foreground',
-                'hover:bg-accent border-2 border-transparent hover:border-border',
-                'transition-all'
-              )}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Scrollable calendar container */}
-      <div className="overflow-x-auto">
-        <div className="min-w-[560px]">
-          {/* Weekday headers */}
-          <div className="grid grid-cols-7 border-b-2 border-border bg-secondary/50">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-              <div
-                key={day}
-                className="py-3 text-center text-xs font-extrabold uppercase tracking-wider text-muted-foreground"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7">
-            {paddedDays.map((day, i) => {
-              if (!day) {
-                return <div key={`pad-${i}`} className="aspect-square border-r border-b border-border opacity-30" />
-              }
-
-              const dateKey = format(day, 'yyyy-MM-dd')
-              const dayPosts = postsByDate[dateKey] || []
-              const isCurrentMonth = isSameMonth(day, currentDate)
-              const isCurrentDay = isToday(day)
-              const isPastDate = isBefore(startOfDay(day), startOfDay(new Date())) && !isCurrentDay
-
-              const handleCellClick = () => {
-                if (!isPastDate) {
-                  router.push(`/new?date=${dateKey}`)
-                }
-              }
-
-              const handlePostClick = (e: React.MouseEvent, postId: string) => {
-                e.preventDefault()
-                e.stopPropagation()
-                router.push(`/edit/${postId}`)
-              }
-
-              return (
-                <div
-                  key={dateKey}
-                  onClick={handleCellClick}
-                  className={cn(
-                    'min-h-[80px] md:min-h-[100px] p-1.5 md:p-2 border-r border-b border-border',
-                    'flex flex-col gap-1 transition-colors',
-                    !isPastDate && 'cursor-pointer hover:bg-primary/5',
-                    isPastDate && 'cursor-default',
-                    !isCurrentMonth && 'opacity-30',
-                    isCurrentDay && 'bg-primary/10'
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'text-sm font-bold text-muted-foreground',
-                      isCurrentDay &&
-                        'w-6 h-6 rounded-md bg-primary text-primary-foreground flex items-center justify-center'
-                    )}
-                  >
-                    {format(day, 'd')}
-                  </span>
-                  <div className="flex flex-col gap-0.5 mt-auto">
-                    {dayPosts.slice(0, 3).map((post) => (
-                      <div
-                        key={post.id}
-                        className={cn(
-                          'flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold truncate border',
-                          post.platform === 'twitter' && 'bg-twitter/10 text-twitter border-twitter/30',
-                          post.platform === 'linkedin' && 'bg-linkedin/10 text-linkedin border-linkedin/30',
-                          post.platform === 'reddit' && 'bg-reddit/10 text-reddit border-reddit/30'
-                        )}
-                        onClick={(e) => handlePostClick(e, post.id)}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                        {getPostPreviewText(post).slice(0, 20)}
-                      </div>
-                    ))}
-                    {dayPosts.length > 3 && (
-                      <span className="text-[10px] text-muted-foreground font-medium">+{dayPosts.length - 3} more</span>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
