@@ -14,8 +14,9 @@ import {
   X,
   Clock,
   Edit2,
+  Tag,
 } from 'lucide-react'
-import { useBlogDraftsStore, BlogDraft, BlogDraftStatus } from '@/lib/blogDrafts'
+import { useBlogDraftsStore, BlogDraft, BlogDraftStatus, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 
 type FilterStatus = 'all' | BlogDraftStatus
@@ -75,6 +76,9 @@ function BlogDraftsContent() {
 
   const filter = getFilterFromParams()
 
+  // Initialize tag filter from URL query param
+  const tagFilter = searchParams.get('tag') || null
+
   // Update filter via URL params
   const setFilter = useCallback(
     (newFilter: FilterStatus) => {
@@ -89,22 +93,41 @@ function BlogDraftsContent() {
     [searchParams, router]
   )
 
+  // Update tag filter via URL params
+  const setTagFilter = useCallback(
+    (tag: string | null) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (tag === null || tag === tagFilter) {
+        params.delete('tag')
+      } else {
+        params.set('tag', tag)
+      }
+      router.replace(`/blog?${params.toString()}`)
+    },
+    [searchParams, router, tagFilter]
+  )
+
   // Filter drafts - 'all' excludes archived
   const statusFilteredDrafts =
     filter === 'all'
       ? drafts.filter((d) => d.status !== 'archived')
       : drafts.filter((d) => d.status === filter)
 
+  // Apply tag filter
+  const tagFilteredDrafts = tagFilter
+    ? statusFilteredDrafts.filter((d) => d.tags && d.tags.includes(tagFilter))
+    : statusFilteredDrafts
+
   // Apply search filter
   const filteredDrafts = searchQuery.trim()
-    ? statusFilteredDrafts.filter((d) => {
+    ? tagFilteredDrafts.filter((d) => {
         const query = searchQuery.toLowerCase()
         const title = d.title.toLowerCase()
         const content = d.content.toLowerCase()
         const notes = (d.notes || '').toLowerCase()
         return title.includes(query) || content.includes(query) || notes.includes(query)
       })
-    : statusFilteredDrafts
+    : tagFilteredDrafts
 
   // Sort by most recent first
   const sortedDrafts = [...filteredDrafts].sort(
@@ -206,6 +229,34 @@ function BlogDraftsContent() {
             active={filter === 'archived'}
             onClick={() => setFilter('archived')}
           />
+        )}
+      </div>
+
+      {/* Tag filter */}
+      <div className="flex items-center gap-2 mb-6">
+        <Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        {BLOG_DRAFT_TAGS.map((tag) => (
+          <button
+            key={tag}
+            onClick={() => setTagFilter(tag)}
+            className={cn(
+              'sticker-badge px-3 py-1 text-xs font-medium rounded-full',
+              'transition-all duration-200 cursor-pointer',
+              tagFilter === tag
+                ? 'bg-[hsl(var(--gold))]/20 text-[hsl(var(--gold-dark))] border-[hsl(var(--gold))]/50'
+                : 'bg-muted text-muted-foreground border-border hover:border-foreground/20'
+            )}
+          >
+            {tag}
+          </button>
+        ))}
+        {tagFilter && (
+          <button
+            onClick={() => setTagFilter(null)}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         )}
       </div>
 
@@ -349,6 +400,23 @@ function DraftCard({ draft }: { draft: BlogDraft }) {
               {contentPreview}
               {draft.content.length > 100 ? '...' : ''}
             </p>
+          )}
+
+          {/* Tags */}
+          {draft.tags && draft.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {draft.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className={cn(
+                    'sticker-badge px-2 py-0.5 text-[10px] font-medium rounded-full',
+                    'bg-[hsl(var(--gold))]/15 text-[hsl(var(--gold-dark))] border-[hsl(var(--gold))]/30'
+                  )}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
 
           {/* Meta info */}

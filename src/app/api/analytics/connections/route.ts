@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformAnalyticsConnectionFromDb } from '@/lib/utils'
+import { transformAnalyticsConnectionFromDb, type DbAnalyticsConnection } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -42,7 +42,7 @@ export async function GET() {
 
     // Transform connections from snake_case to camelCase
     const connections = (data || []).map((conn) =>
-      transformAnalyticsConnectionFromDb(conn as Record<string, unknown>)
+      transformAnalyticsConnectionFromDb(conn as DbAnalyticsConnection)
     )
 
     return NextResponse.json({ connections })
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform connection from snake_case to camelCase
-    const connection = transformAnalyticsConnectionFromDb(data as Record<string, unknown>)
+    const connection = transformAnalyticsConnectionFromDb(data as DbAnalyticsConnection)
     return NextResponse.json({ connection }, { status: 201 })
   } catch (error) {
     console.error('Error creating analytics connection:', error)

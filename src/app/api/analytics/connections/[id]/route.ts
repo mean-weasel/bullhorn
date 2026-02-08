@@ -1,6 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformAnalyticsConnectionFromDb, transformAnalyticsConnectionToDb } from '@/lib/utils'
+import {
+  transformAnalyticsConnectionFromDb,
+  transformAnalyticsConnectionToDb,
+  type DbAnalyticsConnection,
+} from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -50,7 +54,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const connection = transformAnalyticsConnectionFromDb(data as Record<string, unknown>)
+    const connection = transformAnalyticsConnectionFromDb(data as DbAnalyticsConnection)
     return NextResponse.json({ connection })
   } catch (error) {
     console.error('Error fetching analytics connection:', error)
@@ -100,7 +104,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const connection = transformAnalyticsConnectionFromDb(data as Record<string, unknown>)
+    const connection = transformAnalyticsConnectionFromDb(data as DbAnalyticsConnection)
     return NextResponse.json({ connection })
   } catch (error) {
     console.error('Error updating analytics connection:', error)

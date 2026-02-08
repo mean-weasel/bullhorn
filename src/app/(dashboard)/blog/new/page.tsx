@@ -2,8 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Archive, Trash2, RotateCcw, AlertCircle, CheckCircle } from 'lucide-react'
-import { useBlogDraftsStore, BlogDraft } from '@/lib/blogDrafts'
+import {
+  ArrowLeft,
+  Save,
+  Archive,
+  Trash2,
+  RotateCcw,
+  AlertCircle,
+  CheckCircle,
+  Tag,
+} from 'lucide-react'
+import { useBlogDraftsStore, BlogDraft, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 import { IOSDateTimePicker } from '@/components/ui/IOSDateTimePicker'
 
@@ -30,6 +39,7 @@ export default function BlogEditorPage() {
   const [notes, setNotes] = useState('')
   const [status, setStatus] = useState<BlogDraft['status']>('draft')
   const [scheduledAt, setScheduledAt] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -40,6 +50,7 @@ export default function BlogEditorPage() {
     content: string
     notes: string
     date: string
+    tags: string[]
   } | null>(null)
 
   // Clear message after 3 seconds
@@ -66,11 +77,13 @@ export default function BlogEditorPage() {
         setNotes(draft.notes || '')
         setStatus(draft.status)
         setScheduledAt(draft.scheduledAt || '')
+        setTags(draft.tags || [])
         originalRef.current = {
           title: draft.title,
           content: draft.content,
           notes: draft.notes || '',
           date: draft.date || '',
+          tags: draft.tags || [],
         }
       } else {
         // Draft not found, redirect to list
@@ -92,10 +105,11 @@ export default function BlogEditorPage() {
         title !== originalRef.current.title ||
         content !== originalRef.current.content ||
         notes !== originalRef.current.notes ||
-        date !== originalRef.current.date
+        date !== originalRef.current.date ||
+        JSON.stringify(tags) !== JSON.stringify(originalRef.current.tags)
       setHasUnsavedChanges(hasChanges)
     }
-  }, [title, content, notes, date, isEditing])
+  }, [title, content, notes, date, tags, isEditing])
 
   // Calculate word count
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0
@@ -116,8 +130,9 @@ export default function BlogEditorPage() {
           date: date || null,
           notes: notes || undefined,
           scheduledAt: scheduledAt || null,
+          tags,
         })
-        originalRef.current = { title, content, notes, date }
+        originalRef.current = { title, content, notes, date, tags }
         setHasUnsavedChanges(false)
         setMessage({ type: 'success', text: 'Draft saved' })
       } else {
@@ -128,6 +143,7 @@ export default function BlogEditorPage() {
           notes: notes || undefined,
           status: 'draft',
           scheduledAt: null,
+          tags,
         })
         setMessage({ type: 'success', text: 'Draft created' })
         router.replace(`/blog/${newDraft.id}`)
@@ -138,7 +154,7 @@ export default function BlogEditorPage() {
     } finally {
       setSaving(false)
     }
-  }, [title, content, date, notes, scheduledAt, isEditing, id, addDraft, updateDraft, router])
+  }, [title, content, date, notes, tags, scheduledAt, isEditing, id, addDraft, updateDraft, router])
 
   // Archive handler
   const handleArchive = useCallback(async () => {
@@ -263,7 +279,7 @@ export default function BlogEditorPage() {
         />
 
         {/* Metadata row */}
-        <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-muted-foreground">
           <IOSDateTimePicker
             value={date ? new Date(`${date}T12:00:00`) : null}
             onChange={(newDate) => setDate(newDate ? newDate.toISOString().split('T')[0] : '')}
@@ -284,6 +300,34 @@ export default function BlogEditorPage() {
               {status}
             </span>
           )}
+        </div>
+
+        {/* Tags */}
+        <div className="flex items-center gap-3 mb-6">
+          <Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <div className="flex flex-wrap gap-2">
+            {BLOG_DRAFT_TAGS.map((tag) => {
+              const isSelected = tags.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => {
+                    setTags((prev) => (isSelected ? prev.filter((t) => t !== tag) : [...prev, tag]))
+                  }}
+                  className={cn(
+                    'sticker-badge px-3 py-1 text-xs font-medium rounded-full',
+                    'transition-all duration-200 cursor-pointer',
+                    isSelected
+                      ? 'bg-[hsl(var(--gold))]/20 text-[hsl(var(--gold-dark))] border-[hsl(var(--gold))]/50'
+                      : 'bg-muted text-muted-foreground border-border hover:border-foreground/20'
+                  )}
+                >
+                  {tag}
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {/* Content */}

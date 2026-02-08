@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformCampaignFromDb } from '@/lib/utils'
+import { transformCampaignFromDb, type DbCampaign } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 
 interface RouteContext {
@@ -38,7 +38,9 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const campaigns = (data || []).map(campaign => transformCampaignFromDb(campaign as Record<string, unknown>))
+    const campaigns = (data || []).map((campaign) =>
+      transformCampaignFromDb(campaign as DbCampaign)
+    )
     return NextResponse.json({ campaigns })
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

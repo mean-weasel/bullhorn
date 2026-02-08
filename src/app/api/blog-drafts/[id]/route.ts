@@ -14,6 +14,7 @@ const updateBlogDraftSchema = z.object({
   campaign_id: z.string().uuid().optional().nullable(),
   campaignId: z.string().uuid().optional().nullable(),
   images: z.array(z.unknown()).optional(),
+  tags: z.array(z.string().max(50)).max(10).optional(),
 })
 
 // Transform snake_case Supabase response to camelCase for frontend
@@ -31,6 +32,7 @@ function transformDraft(draft: Record<string, unknown>) {
     wordCount: draft.word_count,
     campaignId: draft.campaign_id,
     images: draft.images || [],
+    tags: (draft.tags as string[]) || [],
   }
 }
 
@@ -159,6 +161,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       updates.campaign_id = parsed.data.campaign_id || parsed.data.campaignId
     }
     if (parsed.data.images !== undefined) updates.images = parsed.data.images
+    if (parsed.data.tags !== undefined) updates.tags = parsed.data.tags
 
     const { data, error } = await supabase
       .from('blog_drafts')

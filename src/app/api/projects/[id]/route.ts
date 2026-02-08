@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformProjectFromDb, transformProjectToDb } from '@/lib/utils'
+import { transformProjectFromDb, transformProjectToDb, type DbProject } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -46,7 +46,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const project = transformProjectFromDb(data as Record<string, unknown>)
+    const project = transformProjectFromDb(data as DbProject)
     return NextResponse.json({ project })
   } catch (error) {
     console.error('Error fetching project:', error)
@@ -96,7 +96,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const project = transformProjectFromDb(data as Record<string, unknown>)
+    const project = transformProjectFromDb(data as DbProject)
     return NextResponse.json({ project })
   } catch (error) {
     console.error('Error updating project:', error)

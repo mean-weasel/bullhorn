@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformProjectFromDb } from '@/lib/utils'
+import { transformProjectFromDb, type DbProject } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -40,9 +40,7 @@ export async function GET() {
     }
 
     // Transform projects from snake_case to camelCase
-    const projects = (data || []).map((project) =>
-      transformProjectFromDb(project as Record<string, unknown>)
-    )
+    const projects = (data || []).map((project) => transformProjectFromDb(project as DbProject))
 
     return NextResponse.json({
       projects,
@@ -106,7 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform project from snake_case to camelCase
-    const project = transformProjectFromDb(data as Record<string, unknown>)
+    const project = transformProjectFromDb(data as DbProject)
     return NextResponse.json(
       {
         project,

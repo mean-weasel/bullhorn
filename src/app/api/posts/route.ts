@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb } from '@/lib/utils'
+import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform posts from snake_case to camelCase
-    const posts = (data || []).map((post) => transformPostFromDb(post as Record<string, unknown>))
+    const posts = (data || []).map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ posts })
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform post from snake_case to camelCase
-    const post = transformPostFromDb(data as Record<string, unknown>)
+    const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post }, { status: 201 })
   } catch (error) {
     console.error('Error creating post:', error)

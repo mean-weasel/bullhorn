@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformCampaignFromDb } from '@/lib/utils'
+import { transformCampaignFromDb, type DbCampaign } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
 
     // Transform campaigns from snake_case to camelCase
     const campaigns = (data || []).map((campaign) =>
-      transformCampaignFromDb(campaign as Record<string, unknown>)
+      transformCampaignFromDb(campaign as DbCampaign)
     )
     return NextResponse.json({ campaigns })
   } catch (error) {
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Transform campaign from snake_case to camelCase
-    const campaign = transformCampaignFromDb(data as Record<string, unknown>)
+    const campaign = transformCampaignFromDb(data as DbCampaign)
     return NextResponse.json({ campaign }, { status: 201 })
   } catch (error) {
     console.error('Error creating campaign:', error)

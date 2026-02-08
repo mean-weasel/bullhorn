@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb } from '@/lib/utils'
+import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -48,7 +48,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const posts = (data || []).map((post) => transformPostFromDb(post as Record<string, unknown>))
+    const posts = (data || []).map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ posts })
   } catch (error) {
     console.error('Error fetching campaign posts:', error)
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const post = transformPostFromDb(data as Record<string, unknown>)
+    const post = transformPostFromDb(data as DbPost)
     return NextResponse.json(post)
   } catch (error) {
     console.error('Error adding post to campaign:', error)

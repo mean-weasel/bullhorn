@@ -1,13 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb } from '@/lib/utils'
+import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 
 // POST /api/posts/[id]/restore - Restore an archived post
-export async function POST(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await requireAuth()
     const { id } = await params
@@ -45,7 +42,7 @@ export async function POST(
     }
 
     // Transform post from snake_case to camelCase
-    const post = transformPostFromDb(data as Record<string, unknown>)
+    const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post })
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {

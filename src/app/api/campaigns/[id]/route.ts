@@ -1,6 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformCampaignFromDb, transformPostFromDb } from '@/lib/utils'
+import {
+  transformCampaignFromDb,
+  transformPostFromDb,
+  type DbCampaign,
+  type DbPost,
+} from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -54,10 +59,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     }
 
     // Transform campaign and posts from snake_case to camelCase
-    const transformedCampaign = transformCampaignFromDb(campaign as Record<string, unknown>)
-    const transformedPosts = (posts || []).map((post) =>
-      transformPostFromDb(post as Record<string, unknown>)
-    )
+    const transformedCampaign = transformCampaignFromDb(campaign as DbCampaign)
+    const transformedPosts = (posts || []).map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ campaign: transformedCampaign, posts: transformedPosts })
   } catch (error) {
     console.error('Error fetching campaign:', error)
@@ -110,7 +113,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // Transform campaign from snake_case to camelCase
-    const campaign = transformCampaignFromDb(data as Record<string, unknown>)
+    const campaign = transformCampaignFromDb(data as DbCampaign)
     return NextResponse.json({ campaign })
   } catch (error) {
     console.error('Error updating campaign:', error)

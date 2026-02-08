@@ -7,6 +7,10 @@ const API_BASE = '/api'
 // Types
 export type BlogDraftStatus = 'draft' | 'scheduled' | 'published' | 'archived'
 
+export type BlogDraftTag = 'Blog Post' | 'Twitter Article'
+
+export const BLOG_DRAFT_TAGS: BlogDraftTag[] = ['Blog Post', 'Twitter Article']
+
 export interface BlogDraft {
   id: string
   createdAt: string
@@ -20,6 +24,7 @@ export interface BlogDraft {
   wordCount: number
   campaignId?: string
   images: string[]
+  tags: string[]
 }
 
 interface BlogDraftsState {
@@ -31,7 +36,11 @@ interface BlogDraftsState {
 
 interface BlogDraftsActions {
   fetchDrafts: () => Promise<void>
-  addDraft: (draft: Omit<BlogDraft, 'id' | 'createdAt' | 'updatedAt' | 'wordCount' | 'images'>) => Promise<BlogDraft>
+  addDraft: (
+    draft: Omit<BlogDraft, 'id' | 'createdAt' | 'updatedAt' | 'wordCount' | 'images' | 'tags'> & {
+      tags?: string[]
+    }
+  ) => Promise<BlogDraft>
   updateDraft: (id: string, updates: Partial<BlogDraft>) => Promise<void>
   deleteDraft: (id: string) => Promise<void>
   archiveDraft: (id: string) => Promise<void>
