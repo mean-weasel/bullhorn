@@ -241,7 +241,9 @@ test.describe('Blog Drafts', () => {
       })
 
       await page.goto(`/blog/${created.id}`)
-      await expect(page.getByPlaceholder('Post title...')).toBeVisible()
+
+      // Wait for form to load with original data before making changes
+      await expect(page.getByPlaceholder('Post title...')).toHaveValue('Original Title')
 
       await fillBlogDraftTitle(page, 'Updated Title')
       await saveBlogDraft(page)
