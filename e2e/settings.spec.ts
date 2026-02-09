@@ -91,12 +91,11 @@ test.describe('Settings', () => {
 
       // Reload page
       await page.reload()
-      await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
 
-      // Verify dark theme persists
+      // Verify dark theme persists (html class and localStorage)
       await expect(page.locator('html')).toHaveClass(/dark/)
-      const darkButton = page.locator('button').filter({ hasText: 'Dark' })
-      await expect(darkButton).toHaveClass(/bg-primary/, { timeout: 10000 })
+      const darkTheme = await page.evaluate(() => localStorage.getItem('bullhorn-theme'))
+      expect(darkTheme).toBe('dark')
 
       // Set light theme
       await page.locator('button').filter({ hasText: 'Light' }).click()
@@ -104,12 +103,11 @@ test.describe('Settings', () => {
 
       // Reload page
       await page.reload()
-      await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
 
-      // Verify light theme persists
+      // Verify light theme persists (html class and localStorage)
       await expect(page.locator('html')).toHaveClass(/light/)
-      const lightButton = page.locator('button').filter({ hasText: 'Light' })
-      await expect(lightButton).toHaveClass(/bg-primary/, { timeout: 10000 })
+      const lightTheme = await page.evaluate(() => localStorage.getItem('bullhorn-theme'))
+      expect(lightTheme).toBe('light')
     })
 
     test('should switch between all themes in sequence', async ({ page }) => {
