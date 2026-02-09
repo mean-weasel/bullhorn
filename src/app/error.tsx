@@ -40,7 +40,7 @@ export default function Error({
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] text-primary-foreground font-medium hover:shadow-lg transition-all"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] border-2 border-[hsl(var(--gold-dark))] text-primary-foreground font-medium hover:shadow-lg transition-all"
           >
             <RefreshCw className="w-4 h-4" />
             Try Again

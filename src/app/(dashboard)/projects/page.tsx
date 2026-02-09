@@ -68,6 +68,7 @@ export default function ProjectsPage() {
           className={cn(
             'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
             'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+            'border-2 border-[hsl(var(--gold-dark))]',
             'text-primary-foreground font-medium text-sm',
             'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
           )}
@@ -119,6 +120,7 @@ export default function ProjectsPage() {
             className={cn(
               'inline-flex items-center gap-2 px-5 py-3 rounded-xl',
               'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'border-2 border-[hsl(var(--gold-dark))]',
               'text-primary-foreground font-medium text-sm',
               'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
             )}

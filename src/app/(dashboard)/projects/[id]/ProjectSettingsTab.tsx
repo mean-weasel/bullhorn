@@ -149,6 +149,7 @@ export function ProjectSettingsTab({
           className={cn(
             'px-6 py-2.5 rounded-lg text-sm font-medium',
             'bg-gradient-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+            'border-2 border-[hsl(var(--gold-dark))]',
             'text-primary-foreground hover:opacity-90 transition-opacity'
           )}
         >
