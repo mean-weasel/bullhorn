@@ -1287,7 +1287,8 @@ export async function filterBlogDraftsByStatus(page: Page, status: 'all' | BlogD
     published: 'Published',
     archived: 'Archived',
   }
-  await page.getByRole('button', { name: new RegExp(`^${statusLabels[status]}$`, 'i') }).click()
+  // Filter tabs include a count badge, so match start of text only (not exact)
+  await page.getByRole('button', { name: new RegExp(`^${statusLabels[status]}`, 'i') }).click()
 }
 
 /**
@@ -1378,10 +1379,7 @@ export async function createBlogDraftViaAPI(
  * Get blog draft cards from the list page
  */
 export async function getBlogDraftCards(page: Page) {
-  const locator = page.locator('a[href^="/blog/"]').filter({
-    hasNot: page.locator('[href="/blog/new"]'),
-  })
-  return locator
+  return page.locator('a[href^="/blog/"]:not([href="/blog/new"]):not([href="/blog"])')
 }
 
 /**
