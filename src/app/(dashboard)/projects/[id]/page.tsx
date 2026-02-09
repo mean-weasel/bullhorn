@@ -157,6 +157,10 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       setNewCampaignName('')
       setNewCampaignDescription('')
       setShowNewCampaignModal(false)
+
+      // Refresh analytics so the stats bar reflects the new campaign count
+      const updated = await fetchProjectAnalytics(project.id)
+      if (updated) setAnalytics(updated)
     } catch {
       // Error handled in store
     }
