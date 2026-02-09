@@ -15,7 +15,6 @@ import {
   createBlogDraftViaAPI,
   getAllBlogDrafts,
   getBlogDraftById,
-  clickBlogDraft,
 } from './helpers'
 
 test.describe('Blog Drafts', () => {
