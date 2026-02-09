@@ -318,9 +318,12 @@ test.describe('Reddit Cross-posting', () => {
       // Expand Published Links section
       await page.getByText('Published Links').click()
 
-      // Fill in the Reddit launched URL
+      // Fill in the Reddit launched URL and verify React processed the value
       const redditUrlInput = page.locator('input[placeholder="https://reddit.com/r/..."]')
       await redditUrlInput.fill('https://reddit.com/r/webdev/comments/abc123')
+      await expect(redditUrlInput).toHaveValue('https://reddit.com/r/webdev/comments/abc123')
+      // Allow React state to propagate to post object before saving
+      await page.waitForTimeout(200)
 
       await saveDraft(page)
       await waitForNavigation(page, '/')

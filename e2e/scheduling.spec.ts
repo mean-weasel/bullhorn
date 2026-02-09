@@ -4,6 +4,7 @@ import {
   goToNewPost,
   selectPlatform,
   fillContent,
+  setSchedule,
   schedulePost,
   saveDraft,
   waitForNavigation,
@@ -171,13 +172,10 @@ test.describe('Scheduling', () => {
       await selectPlatform(page, 'twitter')
       await fillContent(page, 'Post to reschedule')
 
-      const dateInput = page.locator('[data-testid="main-schedule-date-input"]')
-      const timeInput = page.locator('[data-testid="main-schedule-time-input"]')
-
       const tomorrow = new Date()
       tomorrow.setDate(tomorrow.getDate() + 1)
-      await dateInput.fill(tomorrow.toISOString().split('T')[0])
-      await timeInput.fill('10:00')
+      tomorrow.setHours(10, 0, 0, 0)
+      await setSchedule(page, tomorrow)
 
       await schedulePost(page)
       await waitForNavigation(page, '/')
@@ -191,10 +189,15 @@ test.describe('Scheduling', () => {
       // Change date to day after tomorrow and time to 15:00
       const dayAfter = new Date()
       dayAfter.setDate(dayAfter.getDate() + 2)
+      dayAfter.setHours(15, 0, 0, 0)
       const newDateStr = dayAfter.toISOString().split('T')[0]
 
-      await page.locator('[data-testid="main-schedule-date-input"]').fill(newDateStr)
-      await page.locator('[data-testid="main-schedule-time-input"]').fill('15:00')
+      await setSchedule(page, dayAfter)
+
+      // Verify inputs have new values before scheduling
+      await expect(page.locator('[data-testid="main-schedule-date-input"]')).toHaveValue(newDateStr)
+      await expect(page.locator('[data-testid="main-schedule-time-input"]')).toHaveValue('15:00')
+
       await schedulePost(page)
       await waitForNavigation(page, '/')
 
