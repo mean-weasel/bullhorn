@@ -191,7 +191,9 @@ export async function expandSubredditCard(page: Page, subreddit: string) {
   if (!isExpanded) {
     // Click using JavaScript for more reliable interaction
     await page.evaluate((sub) => {
-      const btn = document.querySelector(`[data-testid="subreddit-toggle-${sub}"]`) as HTMLButtonElement
+      const btn = document.querySelector(
+        `[data-testid="subreddit-toggle-${sub}"]`
+      ) as HTMLButtonElement
       if (btn) btn.click()
     }, subreddit)
     await page.waitForTimeout(300)
@@ -345,7 +347,10 @@ export async function restorePost(page: Page) {
 /**
  * Filter posts list by status
  */
-export async function filterByStatus(page: Page, status: 'all' | 'draft' | 'scheduled' | 'published' | 'archived') {
+export async function filterByStatus(
+  page: Page,
+  status: 'all' | 'draft' | 'scheduled' | 'published' | 'archived'
+) {
   const statusNames: Record<string, string> = {
     all: 'All',
     draft: 'Drafts',
@@ -379,7 +384,10 @@ export async function clickPost(page: Page, index: number = 0) {
 /**
  * Verify character count is displayed
  */
-export async function verifyCharacterCount(page: Page, platform: 'twitter' | 'linkedin' | 'reddit') {
+export async function verifyCharacterCount(
+  page: Page,
+  platform: 'twitter' | 'linkedin' | 'reddit'
+) {
   const limits = {
     twitter: '280',
     linkedin: '3000',
@@ -516,7 +524,9 @@ export async function getAllPosts(page: Page): Promise<PostFromAPI[]> {
   const response = await page.request.get(`${API_BASE}/posts`)
   if (!response.ok()) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(`Failed to get posts: ${response.status()} - ${errorData.error || response.statusText()}`)
+    throw new Error(
+      `Failed to get posts: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
   }
   const data = await response.json()
   return data.posts
@@ -611,7 +621,9 @@ export async function getAllCampaigns(page: Page): Promise<CampaignFromAPI[]> {
   const response = await page.request.get(`${API_BASE}/campaigns`)
   if (!response.ok()) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(`Failed to get campaigns: ${response.status()} - ${errorData.error || response.statusText()}`)
+    throw new Error(
+      `Failed to get campaigns: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
   }
   const data = await response.json()
   return data.campaigns
@@ -634,7 +646,9 @@ export async function getCampaignPosts(page: Page, campaignId: string): Promise<
   const response = await page.request.get(`${API_BASE}/campaigns/${campaignId}/posts`)
   if (!response.ok()) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(`Failed to get campaign posts: ${response.status()} - ${errorData.error || response.statusText()}`)
+    throw new Error(
+      `Failed to get campaign posts: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
   }
   const data = await response.json()
   return data.posts
@@ -644,7 +658,9 @@ export async function getCampaignPosts(page: Page, campaignId: string): Promise<
  * Click on a campaign card to view it
  */
 export async function clickCampaign(page: Page, index: number = 0) {
-  const cards = page.locator('a[href^="/campaigns/"]').filter({ hasNot: page.locator('a[href="/campaigns/new"]') })
+  const cards = page
+    .locator('a[href^="/campaigns/"]')
+    .filter({ hasNot: page.locator('a[href="/campaigns/new"]') })
   await cards.nth(index).click()
 }
 
@@ -802,9 +818,11 @@ export async function getAllProjects(page: Page): Promise<ProjectFromAPI[]> {
   const response = await page.request.get(`${API_BASE}/projects`)
   if (!response.ok()) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(`Failed to get projects: ${response.status()} - ${errorData.error || response.statusText()}`)
+    throw new Error(
+      `Failed to get projects: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
   }
-  const data = await response.json() as ProjectListResponse
+  const data = (await response.json()) as ProjectListResponse
   return data.projects
 }
 
@@ -815,9 +833,11 @@ export async function getProjectsMeta(page: Page): Promise<ProjectListResponse['
   const response = await page.request.get(`${API_BASE}/projects`)
   if (!response.ok()) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(`Failed to get projects meta: ${response.status()} - ${errorData.error || response.statusText()}`)
+    throw new Error(
+      `Failed to get projects meta: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
   }
-  const data = await response.json() as ProjectListResponse
+  const data = (await response.json()) as ProjectListResponse
   return data.meta
 }
 
@@ -834,11 +854,16 @@ export async function getProjectById(page: Page, id: string): Promise<ProjectFro
 /**
  * Get campaigns for a specific project
  */
-export async function getProjectCampaigns(page: Page, projectId: string): Promise<CampaignFromAPI[]> {
+export async function getProjectCampaigns(
+  page: Page,
+  projectId: string
+): Promise<CampaignFromAPI[]> {
   const response = await page.request.get(`${API_BASE}/projects/${projectId}/campaigns`)
   if (!response.ok()) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(`Failed to get project campaigns: ${response.status()} - ${errorData.error || response.statusText()}`)
+    throw new Error(
+      `Failed to get project campaigns: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
   }
   const data = await response.json()
   return data.campaigns
@@ -859,7 +884,9 @@ export async function createProjectViaAPI(
   })
   if (!response.ok()) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(`Failed to create project: ${response.status()} - ${errorData.error || response.statusText()}`)
+    throw new Error(
+      `Failed to create project: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
   }
   const data = await response.json()
   return data.project
@@ -1175,3 +1202,190 @@ export async function copyLaunchPostFields(page: Page, index: number = 0) {
   await page.getByRole('button', { name: /copy fields/i }).click()
 }
 
+// ============================================
+// Blog Drafts Helpers
+// ============================================
+
+export type BlogDraftStatus = 'draft' | 'scheduled' | 'published' | 'archived'
+
+interface BlogDraftFromAPI {
+  id: string
+  createdAt: string
+  updatedAt: string
+  scheduledAt: string | null
+  status: BlogDraftStatus
+  title: string
+  date: string | null
+  content: string
+  notes: string | null
+  wordCount: number
+  campaignId: string | null
+  images: unknown[]
+  tags: string[]
+}
+
+/**
+ * Navigate to blog drafts list
+ */
+export async function goToBlogDrafts(page: Page) {
+  await page.goto('/blog')
+  await expect(page.getByRole('heading', { name: 'Blog Drafts' }).first()).toBeVisible()
+}
+
+/**
+ * Navigate to create new blog draft
+ */
+export async function goToNewBlogDraft(page: Page) {
+  await page.goto('/blog/new')
+  await expect(page.getByPlaceholder('Post title...')).toBeVisible()
+}
+
+/**
+ * Fill in blog draft title
+ */
+export async function fillBlogDraftTitle(page: Page, title: string) {
+  await page.getByPlaceholder('Post title...').fill(title)
+}
+
+/**
+ * Fill in blog draft content (markdown)
+ */
+export async function fillBlogDraftContent(page: Page, content: string) {
+  const textarea = page.locator('textarea').first()
+  await textarea.fill(content)
+}
+
+/**
+ * Fill in blog draft notes
+ */
+export async function fillBlogDraftNotes(page: Page, notes: string) {
+  await page.getByPlaceholder(/add private notes about this draft/i).fill(notes)
+}
+
+/**
+ * Save blog draft
+ */
+export async function saveBlogDraft(page: Page) {
+  await page.getByRole('button', { name: /^save$/i }).click()
+}
+
+/**
+ * Search blog drafts
+ */
+export async function searchBlogDrafts(page: Page, query: string) {
+  await page.getByPlaceholder('Search by title, content, or notes...').fill(query)
+}
+
+/**
+ * Filter blog drafts by status
+ */
+export async function filterBlogDraftsByStatus(page: Page, status: 'all' | BlogDraftStatus) {
+  const statusLabels: Record<string, string> = {
+    all: 'All',
+    draft: 'Drafts',
+    scheduled: 'Scheduled',
+    published: 'Published',
+    archived: 'Archived',
+  }
+  // Filter tabs include a count badge, so match start of text only (not exact)
+  await page.getByRole('button', { name: new RegExp(`^${statusLabels[status]}`, 'i') }).click()
+}
+
+/**
+ * Archive blog draft (from edit page)
+ */
+export async function archiveBlogDraft(page: Page) {
+  await page.getByRole('button', { name: /^archive$/i }).click()
+}
+
+/**
+ * Restore blog draft (from edit page)
+ */
+export async function restoreBlogDraft(page: Page) {
+  await page.getByRole('button', { name: /^restore$/i }).click()
+}
+
+/**
+ * Delete blog draft (from edit page)
+ */
+export async function deleteBlogDraft(page: Page) {
+  // Set up dialog handler to accept the confirm dialog
+  page.once('dialog', (dialog) => dialog.accept())
+
+  await page.getByRole('button', { name: /^delete$/i }).click()
+
+  // Wait for navigation back to list
+  await page.waitForURL('/blog')
+}
+
+/**
+ * Get all blog drafts via API
+ */
+export async function getAllBlogDrafts(page: Page): Promise<BlogDraftFromAPI[]> {
+  const response = await page.request.get(`${API_BASE}/blog-drafts`)
+  if (!response.ok()) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      `Failed to get blog drafts: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
+  }
+  const data = await response.json()
+  return data.drafts
+}
+
+/**
+ * Get blog draft by ID via API
+ */
+export async function getBlogDraftById(page: Page, id: string): Promise<BlogDraftFromAPI | null> {
+  const response = await page.request.get(`${API_BASE}/blog-drafts/${id}`)
+  if (!response.ok()) return null
+  const data = await response.json()
+  return data.draft
+}
+
+/**
+ * Create a blog draft via API (for test setup)
+ */
+export async function createBlogDraftViaAPI(
+  page: Page,
+  options: {
+    title?: string
+    content?: string
+    status?: BlogDraftStatus
+    notes?: string
+    tags?: string[]
+  }
+): Promise<BlogDraftFromAPI> {
+  const response = await page.request.post(`${API_BASE}/blog-drafts`, {
+    data: {
+      title: options.title || 'Untitled Draft',
+      content: options.content || '',
+      status: options.status || 'draft',
+      notes: options.notes,
+      tags: options.tags || [],
+    },
+  })
+  if (!response.ok()) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      `Failed to create blog draft: ${response.status()} - ${errorData.error || response.statusText()}`
+    )
+  }
+  const data = await response.json()
+  return data.draft
+}
+
+/**
+ * Get blog draft cards from the list page
+ */
+export async function getBlogDraftCards(page: Page) {
+  return page.locator('a[href^="/blog/"]:not([href="/blog/new"]):not([href="/blog"])')
+}
+
+/**
+ * Click on a blog draft to edit it
+ */
+export async function clickBlogDraft(page: Page, index: number = 0) {
+  const cards = await getBlogDraftCards(page)
+  await cards.nth(index).click()
+}
