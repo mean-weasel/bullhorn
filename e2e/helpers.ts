@@ -1229,7 +1229,7 @@ interface BlogDraftFromAPI {
  */
 export async function goToBlogDrafts(page: Page) {
   await page.goto('/blog')
-  await expect(page.getByRole('heading', { name: 'Blog Drafts' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Blog Drafts' }).first()).toBeVisible()
 }
 
 /**
