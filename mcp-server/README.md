@@ -2,6 +2,8 @@
 
 MCP server for [Bullhorn](https://bullhorn.to) — manage social media posts, campaigns, projects, blog drafts, and launch posts from Claude Code or any MCP client.
 
+> **[Full documentation](https://bullhorn.to/docs/mcp)** — setup guide, tool reference, and examples.
+
 ## Quick Start
 
 ```bash

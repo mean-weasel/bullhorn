@@ -2,6 +2,7 @@ import Link from 'next/link'
 import {
   CalendarDays,
   BarChart3,
+  Bot,
   Rocket,
   FileText,
   FolderKanban,
@@ -55,6 +56,13 @@ const features = [
       'Organize posts, campaigns, and drafts by project. Perfect for managing multiple products or clients.',
     color: 'bg-sticker-yellow',
   },
+  {
+    icon: Bot,
+    title: 'AI-Powered Workflow',
+    description:
+      'Manage posts, campaigns, and drafts from Claude Code or any AI assistant. Our MCP server gives your tools direct access to Bullhorn.',
+    color: 'bg-sticker-black',
+  },
 ]
 
 const steps = [
@@ -97,6 +105,12 @@ export function LandingPage() {
               className="sticker-button bg-card px-4 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
             >
               Log in
+            </Link>
+            <Link
+              href="/docs/mcp"
+              className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Docs
             </Link>
             <Link
               href="/signup"
@@ -276,6 +290,9 @@ export function LandingPage() {
             >
               GitHub
             </a>
+            <Link href="/docs/mcp" className="transition-colors hover:text-foreground">
+              Docs
+            </Link>
             <span>&copy; {new Date().getFullYear()} Bullhorn</span>
           </div>
         </div>

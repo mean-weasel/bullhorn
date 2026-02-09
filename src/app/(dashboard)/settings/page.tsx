@@ -260,7 +260,10 @@ export default function SettingsPage() {
           <Key className="w-4 h-4 inline-block mr-1 -mt-0.5" /> API Keys
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Create API keys for the Bullhorn MCP server or external integrations.
+          Create API keys for the Bullhorn MCP server or external integrations.{' '}
+          <a href="/docs/mcp" className="text-primary font-semibold hover:underline">
+            Learn how to set up the MCP server &rarr;
+          </a>
         </p>
         <ApiKeyManager />
       </div>
