@@ -35,8 +35,8 @@ export default function SignUpPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
       setLoading(false)
       return
     }
@@ -73,12 +73,11 @@ export default function SignUpPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-green/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               ✉️
             </div>
-            <h2 className="text-xl font-extrabold text-foreground mb-2">
-              Check your email
-            </h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-2">Check your email</h2>
             <p className="text-muted-foreground mb-4">
-              We&apos;ve sent you a confirmation link to <strong className="text-foreground">{email}</strong>.
-              Click the link to activate your account.
+              We&apos;ve sent you a confirmation link to{' '}
+              <strong className="text-foreground">{email}</strong>. Click the link to activate your
+              account.
             </p>
             <Link
               href="/login"
@@ -114,12 +113,8 @@ export default function SignUpPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-pink/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               🎉
             </div>
-            <h1 className="text-3xl font-extrabold text-foreground">
-              Create an account
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Get started with Bullhorn
-            </p>
+            <h1 className="text-3xl font-extrabold text-foreground">Create an account</h1>
+            <p className="mt-2 text-muted-foreground">Get started with Bullhorn</p>
           </div>
 
           {/* Email/Password Form */}
@@ -162,7 +157,7 @@ export default function SignUpPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className={cn(
                   'w-full px-4 py-3 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',
@@ -177,7 +172,10 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-bold text-foreground mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-bold text-foreground mb-2"
+              >
                 Confirm Password
               </label>
               <input
@@ -186,7 +184,7 @@ export default function SignUpPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className={cn(
                   'w-full px-4 py-3 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',

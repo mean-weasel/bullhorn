@@ -107,8 +107,8 @@ export function AccountSection({ email, changingPassword, onChangePassword }: Ac
     setPasswordError(null)
     setPasswordSuccess(null)
 
-    if (newPassword.length < 6) {
-      setPasswordError('New password must be at least 6 characters')
+    if (newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters')
       return
     }
 

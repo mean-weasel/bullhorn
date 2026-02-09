@@ -122,8 +122,8 @@ test.describe('Authentication', () => {
       const passwordInput = page.getByLabel('Password', { exact: true })
       const confirmInput = page.getByLabel('Confirm Password')
 
-      await expect(passwordInput).toHaveAttribute('minLength', '6')
-      await expect(confirmInput).toHaveAttribute('minLength', '6')
+      await expect(passwordInput).toHaveAttribute('minLength', '8')
+      await expect(confirmInput).toHaveAttribute('minLength', '8')
     })
 
     test('should require all fields via HTML5', async ({ page }) => {
@@ -161,11 +161,11 @@ test.describe('Authentication', () => {
       // No indicator when empty
       await expect(page.getByText('Weak')).not.toBeVisible()
 
-      // Score 1 (Weak): 6+ chars, one criterion met
-      await passwordInput.fill('abcdef')
+      // Score 1 (Weak): 8+ chars, one criterion met
+      await passwordInput.fill('abcdefgh')
       await expect(page.getByText('Weak')).toBeVisible()
 
-      // Score 2 (Fair): 10+ chars (two criteria: length >= 6 and length >= 10)
+      // Score 2 (Fair): 10+ chars (two criteria: length >= 8 and length >= 10)
       await passwordInput.fill('abcdefghij')
       await expect(page.getByText('Fair')).toBeVisible()
 
@@ -181,8 +181,8 @@ test.describe('Authentication', () => {
     test('should show helpful tips for weak passwords', async ({ page }) => {
       const passwordInput = page.getByLabel('Password', { exact: true })
 
-      // Must be >= 6 chars to show tip (score 1-2)
-      await passwordInput.fill('abcdef')
+      // Must be >= 8 chars to show tip (score 1-2)
+      await passwordInput.fill('abcdefgh')
       // Should show tip about improving password
       await expect(page.getByText(/Try adding/)).toBeVisible()
     })

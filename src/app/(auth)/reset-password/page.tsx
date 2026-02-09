@@ -20,13 +20,17 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     // Check if user has a valid recovery session
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       setIsValidSession(!!session)
     }
     checkSession()
 
     // Listen for auth state changes (recovery link clicked)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setIsValidSession(true)
       }
@@ -44,8 +48,8 @@ export default function ResetPasswordPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
       return
     }
 
@@ -94,12 +98,9 @@ export default function ResetPasswordPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-destructive/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               ⚠️
             </div>
-            <h2 className="text-xl font-extrabold text-foreground mb-2">
-              Invalid or expired link
-            </h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-2">Invalid or expired link</h2>
             <p className="text-muted-foreground mb-4">
-              This password reset link is invalid or has expired.
-              Please request a new one.
+              This password reset link is invalid or has expired. Please request a new one.
             </p>
             <Link
               href="/forgot-password"
@@ -132,12 +133,9 @@ export default function ResetPasswordPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-green/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               ✅
             </div>
-            <h2 className="text-xl font-extrabold text-foreground mb-2">
-              Password updated
-            </h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-2">Password updated</h2>
             <p className="text-muted-foreground mb-4">
-              Your password has been successfully reset.
-              Redirecting you to sign in...
+              Your password has been successfully reset. Redirecting you to sign in...
             </p>
             <Link
               href="/login"
@@ -173,12 +171,8 @@ export default function ResetPasswordPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-purple/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               🔐
             </div>
-            <h1 className="text-3xl font-extrabold text-foreground">
-              Set new password
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Enter your new password below
-            </p>
+            <h1 className="text-3xl font-extrabold text-foreground">Set new password</h1>
+            <p className="mt-2 text-muted-foreground">Enter your new password below</p>
           </div>
 
           {/* Form */}
@@ -199,7 +193,7 @@ export default function ResetPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className={cn(
                   'w-full px-4 py-3 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',
@@ -214,7 +208,10 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-bold text-foreground mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-bold text-foreground mb-2"
+              >
                 Confirm New Password
               </label>
               <input
@@ -223,7 +220,7 @@ export default function ResetPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className={cn(
                   'w-full px-4 py-3 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',

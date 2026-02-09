@@ -20,7 +20,7 @@ function calculateStrength(password: string): StrengthResult {
   let score = 0
 
   // Length checks
-  if (password.length >= 6) score++
+  if (password.length >= 8) score++
   if (password.length >= 10) score++
   if (password.length >= 14) score++
 

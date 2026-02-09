@@ -196,10 +196,10 @@ test.describe('User Profile Page', () => {
     test('should show error when password is too short', async ({ page }) => {
       await goToProfile(page)
 
-      await fillPasswordChange(page, '12345', '12345') // 5 chars, needs 6
+      await fillPasswordChange(page, '1234567', '1234567') // 7 chars, needs 8
       await updatePassword(page)
 
-      await expect(page.getByText('New password must be at least 6 characters')).toBeVisible()
+      await expect(page.getByText('New password must be at least 8 characters')).toBeVisible()
     })
 
     test('should show error when passwords do not match', async ({ page }) => {
@@ -229,8 +229,8 @@ test.describe('User Profile Page', () => {
       // No indicator when empty
       await expect(page.getByText('Weak')).not.toBeVisible()
 
-      // Score 1 (Weak): 6+ chars, one criterion met
-      await newPasswordInput.fill('abcdef')
+      // Score 1 (Weak): 8+ chars, one criterion met
+      await newPasswordInput.fill('abcdefgh')
       await expect(page.getByText('Weak')).toBeVisible()
 
       // Score 3 (Good): 10+ chars with mixed case (three criteria)
