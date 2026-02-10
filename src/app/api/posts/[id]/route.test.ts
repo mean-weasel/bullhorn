@@ -46,7 +46,10 @@ const mockRequireAuth = vi.mocked(requireAuth)
 // ---------------------------------------------------------------------------
 
 function createRequest(url: string, init?: RequestInit): NextRequest {
-  return new NextRequest(new URL(url, 'http://localhost:3000'), init)
+  return new NextRequest(
+    new URL(url, 'http://localhost:3000'),
+    init as ConstructorParameters<typeof NextRequest>[1]
+  )
 }
 
 function makeParams(id: string): { params: Promise<{ id: string }> } {
