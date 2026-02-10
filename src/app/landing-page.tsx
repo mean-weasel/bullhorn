@@ -1,7 +1,5 @@
 import Link from 'next/link'
 import {
-  CalendarDays,
-  BarChart3,
   Bot,
   Rocket,
   FileText,
@@ -11,57 +9,166 @@ import {
   PenLine,
   Send,
   TrendingUp,
+  Folder,
 } from 'lucide-react'
+import { FeatureCarousel } from '@/components/ui/FeatureCarousel'
+import type { LucideIcon } from 'lucide-react'
 
-const features = [
+interface Feature {
+  icon: LucideIcon
+  title: string
+  description: string
+  color: string
+  slides: { src: string; alt: string; caption: string }[]
+}
+
+const features: Feature[] = [
   {
-    icon: CalendarDays,
-    title: 'Multi-Platform Scheduling',
+    icon: Bot,
+    title: 'Capture with your AI tooling of choice, anytime',
     description:
-      'Write once, schedule across Twitter, LinkedIn, and Reddit. Pick the perfect time for each platform.',
-    color: 'bg-sticker-blue',
-  },
-  {
-    icon: FolderKanban,
-    title: 'Campaign Management',
-    description:
-      'Group related posts into campaigns. Coordinate launches, announcements, and content series in one place.',
+      'Save post ideas from Claude, Cursor, or whatever AI tool you use. Capture mid-flow via MCP without breaking your work context.',
     color: 'bg-sticker-purple',
+    slides: [
+      {
+        src: '/landing/feature-1/step-2.png',
+        alt: 'Dashboard overview with stats',
+        caption: 'Your dashboard shows all captured drafts at a glance',
+      },
+      {
+        src: '/landing/feature-1/step-3.png',
+        alt: 'Dashboard drafts section',
+        caption: 'Drafts captured via MCP appear instantly',
+      },
+    ],
   },
   {
-    icon: Rocket,
-    title: 'Launch Posts',
+    icon: PenLine,
+    title: "Polish and organize when you're ready",
     description:
-      'Dedicated workflows for Product Hunt, Hacker News, and launch day. Ship your announcements with confidence.',
-    color: 'bg-sticker-orange',
-  },
-  {
-    icon: FileText,
-    title: 'Blog Drafts',
-    description:
-      'Draft long-form content alongside your social posts. Keep your writing and distribution in one tool.',
-    color: 'bg-sticker-green',
-  },
-  {
-    icon: BarChart3,
-    title: 'Analytics Dashboard',
-    description:
-      'Track engagement and performance across platforms. See what resonates and double down on what works.',
-    color: 'bg-sticker-pink',
+      'Come back later to draft full announcements, refine messaging, and organize into campaigns. Your product context is waiting for you.',
+    color: 'bg-sticker-blue',
+    slides: [
+      {
+        src: '/landing/feature-2/step-1.png',
+        alt: 'Posts list with filter tabs',
+        caption: 'Filter posts by status — drafts, scheduled, or all',
+      },
+      {
+        src: '/landing/feature-2/step-2.png',
+        alt: 'Post editor with content',
+        caption: 'Edit content, assign campaigns, and set platforms',
+      },
+      {
+        src: '/landing/feature-2/step-3.png',
+        alt: 'Post editor scheduling controls',
+        caption: 'Schedule posts and configure platform-specific settings',
+      },
+      {
+        src: '/landing/feature-2/step-4.png',
+        alt: 'Create new post form',
+        caption: 'Create posts for Twitter, LinkedIn, or Reddit',
+      },
+    ],
   },
   {
     icon: Share2,
-    title: 'Projects',
+    title: 'Fork your content across formats',
     description:
-      'Organize posts, campaigns, and drafts by project. Perfect for managing multiple products or clients.',
-    color: 'bg-sticker-yellow',
+      'Take a blog post and turn it into tweets. Turn a feature idea into a LinkedIn update. Transform your context for any platform.',
+    color: 'bg-sticker-green',
+    slides: [],
   },
   {
-    icon: Bot,
-    title: 'AI-Powered Workflow',
+    icon: FolderKanban,
+    title: 'Organize launches like you organize code',
     description:
-      'Manage posts, campaigns, and drafts from Claude Code or any AI assistant. Our MCP server gives your tools direct access to Bullhorn.',
+      'Group related posts into campaigns. Coordinate product launches, feature drops, and announcements in one place.',
+    color: 'bg-sticker-orange',
+    slides: [
+      {
+        src: '/landing/feature-4/step-1.png',
+        alt: 'Dashboard campaigns section',
+        caption: 'See all campaigns from your dashboard',
+      },
+      {
+        src: '/landing/feature-4/step-2.png',
+        alt: 'Campaigns list with filters',
+        caption: 'Filter campaigns by status — active, planning, or completed',
+      },
+      {
+        src: '/landing/feature-4/step-3.png',
+        alt: 'Campaign detail with posts',
+        caption: 'Drill into a campaign to see all its posts',
+      },
+    ],
+  },
+  {
+    icon: Rocket,
+    title: 'Dedicated workflows for launch day',
+    description:
+      'Templates for Product Hunt, Hacker News, and coordinated launches. Keep all your launch communication organized and ready.',
+    color: 'bg-sticker-pink',
+    slides: [
+      {
+        src: '/landing/feature-5/step-1.png',
+        alt: 'Launch posts list',
+        caption: 'Dedicated launch posts for Product Hunt and Hacker News',
+      },
+      {
+        src: '/landing/feature-5/step-2.png',
+        alt: 'Launch post creation form',
+        caption: 'Create launch posts with platform-specific fields',
+      },
+      {
+        src: '/landing/feature-5/step-3.png',
+        alt: 'Product Hunt specific fields',
+        caption: 'Fill in tagline, pricing, and maker comment for PH',
+      },
+    ],
+  },
+  {
+    icon: FileText,
+    title: 'Draft long-form alongside your social content',
+    description:
+      'Write blog posts in the same place as your tweets and updates. Keep your full product story in one context-rich workspace.',
+    color: 'bg-sticker-yellow',
+    slides: [
+      {
+        src: '/landing/feature-6/step-1.png',
+        alt: 'Blog drafts list',
+        caption: 'Manage blog drafts with word counts and timestamps',
+      },
+      {
+        src: '/landing/feature-6/step-2.png',
+        alt: 'Blog editor with markdown',
+        caption: 'Rich markdown editor with live word count',
+      },
+    ],
+  },
+  {
+    icon: Folder,
+    title: 'Manage multiple products or clients',
+    description:
+      'Organize everything by project. Perfect for teams shipping multiple products or agencies managing client launches.',
     color: 'bg-sticker-black',
+    slides: [
+      {
+        src: '/landing/feature-7/step-1.png',
+        alt: 'Dashboard projects section',
+        caption: 'Projects overview right on your dashboard',
+      },
+      {
+        src: '/landing/feature-7/step-2.png',
+        alt: 'Projects list page',
+        caption: 'Browse all projects with descriptions and stats',
+      },
+      {
+        src: '/landing/feature-7/step-3.png',
+        alt: 'Project detail with campaigns and posts',
+        caption: 'Drill into a project to see campaigns and posts',
+      },
+    ],
   },
 ]
 
@@ -132,12 +239,11 @@ export function LandingPage() {
             <span className="sticker-badge bg-sticker-pink/10 text-sticker-pink">Now in beta</span>
           </div>
           <h1 className="mb-6 text-4xl font-black leading-tight tracking-tight sm:text-5xl md:text-6xl">
-            Schedule and ship social content{' '}
-            <span className="text-primary">across every platform</span>
+            Your single source of truth for <span className="text-primary">product context</span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-            One tool for Twitter, LinkedIn, and Reddit. Write your posts, schedule them, and track
-            what works — without switching tabs.
+            Capture product updates while working with AI. Organize and polish in the UI. One place
+            for all your launches, updates, and social content.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
@@ -167,33 +273,53 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Features — alternating text + carousel */}
       <section className="px-4 py-16 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
+          <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Everything you need to ship content
+              Built for teams who work with AI
             </h2>
             <p className="mx-auto max-w-2xl text-muted-foreground">
-              From drafting to scheduling to analytics, Bullhorn keeps your entire content workflow
-              in one place.
+              Capture ideas in flow, organize them later, and ship when ready. Your entire product
+              communication workflow in one tool.
             </p>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <div key={feature.title} className="sticker-card-hover p-6">
+          <div className="space-y-20 sm:space-y-28">
+            {features.map((feature, idx) => {
+              const hasSlides = feature.slides.length > 0
+              const isEven = idx % 2 === 0
+
+              return (
                 <div
-                  className={`mb-4 inline-flex rounded-md border-[3px] border-border p-2.5 ${feature.color}`}
+                  key={feature.title}
+                  className={`flex flex-col items-center gap-8 sm:gap-12 ${
+                    hasSlides ? 'lg:flex-row' : ''
+                  } ${hasSlides && !isEven ? 'lg:flex-row-reverse' : ''}`}
                 >
-                  <feature.icon className="h-6 w-6 text-white" />
+                  {/* Text side */}
+                  <div className={hasSlides ? 'flex-1' : 'max-w-2xl'}>
+                    <div
+                      className={`mb-4 inline-flex rounded-md border-[3px] border-border p-2.5 ${feature.color}`}
+                    >
+                      <feature.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="mb-3 text-2xl font-bold sm:text-3xl">{feature.title}</h3>
+                    <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+                      {feature.description}
+                    </p>
+                  </div>
+
+                  {/* Carousel side */}
+                  {hasSlides && (
+                    <div className="w-full max-w-xs flex-shrink-0 sm:max-w-sm">
+                      <FeatureCarousel slides={feature.slides} />
+                    </div>
+                  )}
                 </div>
-                <h3 className="mb-2 text-lg font-bold">{feature.title}</h3>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>
