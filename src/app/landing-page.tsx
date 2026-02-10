@@ -31,6 +31,11 @@ const features: Feature[] = [
     color: 'bg-sticker-purple',
     slides: [
       {
+        src: '/landing/feature-1/terminal-1.png',
+        alt: 'MCP create_post in Claude Code',
+        caption: 'Save a tweet draft from Claude Code via MCP',
+      },
+      {
         src: '/landing/feature-1/step-2.png',
         alt: 'Dashboard overview with stats',
         caption: 'Your dashboard shows all captured drafts at a glance',
@@ -77,7 +82,13 @@ const features: Feature[] = [
     description:
       'Take a blog post and turn it into tweets. Turn a feature idea into a LinkedIn update. Transform your context for any platform.',
     color: 'bg-sticker-green',
-    slides: [],
+    slides: [
+      {
+        src: '/landing/feature-3/terminal-1.png',
+        alt: 'MCP fork blog to tweets in Claude Code',
+        caption: 'Turn a blog post into a tweet thread via MCP',
+      },
+    ],
   },
   {
     icon: FolderKanban,
