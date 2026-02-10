@@ -15,7 +15,8 @@
     "dev": "CI=true tsx src/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "vitest run --config vitest.e2e.config.ts"
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "smoke-test": "node smoke-test.mjs"
   },
   "keywords": ["mcp", "bullhorn", "social-media", "scheduler", "claude"],
   "license": "MIT",
