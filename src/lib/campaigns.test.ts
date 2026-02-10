@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useCampaignsStore } from './campaigns'
 import { clearInFlightRequests } from './requestDedup'
+import type { Campaign } from './posts'
 
 // ---------------------------------------------------------------------------
 // Mock fetch
@@ -24,11 +25,11 @@ beforeEach(() => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const makeCampaign = (overrides: Record<string, unknown> = {}) => ({
+const makeCampaign = (overrides: Partial<Campaign> = {}): Campaign => ({
   id: 'camp-1',
   name: 'Test Campaign',
   description: 'A test campaign',
-  status: 'active',
+  status: 'active' as const,
   projectId: 'proj-1',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
