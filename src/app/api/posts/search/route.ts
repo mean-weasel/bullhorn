@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb, type DbPost } from '@/lib/utils'
+import { transformPostFromDb, escapeSearchPattern, type DbPost } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
 
 // GET /api/posts/search - Search posts
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Search in content (as text), notes, and platform
     // Note: Supabase textSearch requires full-text search setup
     // Using ilike for simple search
-    const searchPattern = `%${query}%`
+    const searchPattern = `%${escapeSearchPattern(query)}%`
 
     // Defense-in-depth: filter by user_id alongside RLS
     const { data, error } = await supabase

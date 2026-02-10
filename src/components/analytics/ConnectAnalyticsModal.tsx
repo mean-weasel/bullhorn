@@ -19,15 +19,17 @@ interface GA4Property {
   currencyCode?: string
 }
 
+interface PendingAuthData {
+  accessToken: string
+  refreshToken: string
+  tokenExpiresAt: string
+  scopes: string[]
+}
+
 interface ConnectAnalyticsModalProps {
   open: boolean
   onClose: () => void
-  authData?: {
-    accessToken: string
-    refreshToken: string
-    tokenExpiresAt: string
-    scopes: string[]
-  }
+  pendingConnectionId?: string
   onSuccess?: () => void
 }
 
@@ -36,32 +38,57 @@ type Step = 'connect' | 'select-property' | 'success'
 export function ConnectAnalyticsModal({
   open,
   onClose,
-  authData,
+  pendingConnectionId,
   onSuccess,
 }: ConnectAnalyticsModalProps) {
   const [step, setStep] = useState<Step>('connect')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [properties, setProperties] = useState<GA4Property[]>([])
-  const [selectedProperty, setSelectedProperty] = useState<GA4Property | null>(
-    null
-  )
+  const [selectedProperty, setSelectedProperty] = useState<GA4Property | null>(null)
+  const [authData, setAuthData] = useState<PendingAuthData | null>(null)
 
-  const { createConnection } = useAnalyticsStore()
+  const { updateConnection } = useAnalyticsStore()
 
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
       setError(null)
-      if (authData) {
-        // We have auth data from OAuth callback, move to property selection
+      if (pendingConnectionId) {
+        // Fetch the pending connection from the API to get tokens
         setStep('select-property')
-        fetchProperties(authData.accessToken)
+        fetchPendingConnection(pendingConnectionId)
       } else {
         setStep('connect')
       }
     }
-  }, [open, authData])
+  }, [open, pendingConnectionId])
+
+  const fetchPendingConnection = async (connectionId: string) => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const res = await fetch(`/api/analytics/connections/${connectionId}`)
+      if (!res.ok) {
+        throw new Error('Failed to fetch pending connection')
+      }
+      const data = await res.json()
+      const connection = data.connection
+
+      const pendingAuth: PendingAuthData = {
+        accessToken: connection.accessToken,
+        refreshToken: connection.refreshToken,
+        tokenExpiresAt: connection.tokenExpiresAt,
+        scopes: connection.scopes || [],
+      }
+      setAuthData(pendingAuth)
+      await fetchProperties(pendingAuth.accessToken)
+    } catch (err) {
+      setError((err as Error).message || 'Failed to load authentication data')
+      setIsLoading(false)
+    }
+  }
 
   const handleConnect = async () => {
     setIsLoading(true)
@@ -111,20 +138,17 @@ export function ConnectAnalyticsModal({
   }
 
   const handleSelectProperty = async () => {
-    if (!selectedProperty || !authData) return
+    if (!selectedProperty || !pendingConnectionId || !authData) return
 
     setIsLoading(true)
     setError(null)
 
     try {
-      await createConnection({
-        provider: 'google_analytics',
+      // Update the pending connection with the selected property
+      await updateConnection(pendingConnectionId, {
         propertyId: selectedProperty.propertyId,
         propertyName: selectedProperty.displayName,
-        accessToken: authData.accessToken,
-        refreshToken: authData.refreshToken,
-        tokenExpiresAt: authData.tokenExpiresAt,
-        scopes: authData.scopes,
+        syncStatus: 'pending',
       })
 
       setStep('success')
@@ -142,6 +166,7 @@ export function ConnectAnalyticsModal({
     setStep('connect')
     setProperties([])
     setSelectedProperty(null)
+    setAuthData(null)
     setError(null)
     onClose()
   }
@@ -160,8 +185,8 @@ export function ConnectAnalyticsModal({
         step === 'success'
           ? 'Connected!'
           : step === 'select-property'
-          ? 'Select Property'
-          : 'Connect Google Analytics'
+            ? 'Select Property'
+            : 'Connect Google Analytics'
       }
       titleId="connect-analytics-title"
       icon={iconWrapper}
@@ -169,8 +194,8 @@ export function ConnectAnalyticsModal({
       {step === 'connect' && (
         <>
           <ResponsiveDialogDescription>
-            Connect your Google Analytics 4 property to view website metrics
-            directly in your dashboard.
+            Connect your Google Analytics 4 property to view website metrics directly in your
+            dashboard.
           </ResponsiveDialogDescription>
 
           <div className="space-y-4">
@@ -225,9 +250,7 @@ export function ConnectAnalyticsModal({
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                <span className="ml-2 text-muted-foreground">
-                  Loading properties...
-                </span>
+                <span className="ml-2 text-muted-foreground">Loading properties...</span>
               </div>
             ) : properties.length > 0 ? (
               <div className="max-h-64 overflow-y-auto space-y-2">
@@ -255,9 +278,7 @@ export function ConnectAnalyticsModal({
                 ))}
               </div>
             ) : (
-              <div className="py-8 text-center text-muted-foreground">
-                No properties found
-              </div>
+              <div className="py-8 text-center text-muted-foreground">No properties found</div>
             )}
 
             {error && (
@@ -295,9 +316,7 @@ export function ConnectAnalyticsModal({
             <Check className="w-8 h-8 text-green-500" />
           </div>
           <p className="text-lg font-medium mb-2">Successfully Connected!</p>
-          <p className="text-muted-foreground">
-            Your Google Analytics property is now connected.
-          </p>
+          <p className="text-muted-foreground">Your Google Analytics property is now connected.</p>
         </div>
       )}
     </ResponsiveDialog>

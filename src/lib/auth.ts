@@ -33,11 +33,27 @@ export async function getApiKeyFromHeaders(): Promise<string | null> {
 }
 
 /**
- * Resolve a raw API key to a user ID.
+ * Available API key scopes.
+ * - posts:read / posts:write — Read/create/update/delete posts
+ * - campaigns:read / campaigns:write — Read/create/update/delete campaigns
+ * - projects:read / projects:write — Read/create/update/delete projects
+ * - analytics:read — Read analytics data
+ */
+export type ApiKeyScope =
+  | 'posts:read'
+  | 'posts:write'
+  | 'campaigns:read'
+  | 'campaigns:write'
+  | 'projects:read'
+  | 'projects:write'
+  | 'analytics:read'
+
+/**
+ * Resolve a raw API key to a user ID and its granted scopes.
  * Validates the key format, looks up the hash, checks expiry/revocation,
  * and updates last_used_at.
  */
-export async function resolveApiKey(rawKey: string): Promise<{ userId: string }> {
+export async function resolveApiKey(rawKey: string): Promise<{ userId: string; scopes: string[] }> {
   if (!rawKey.startsWith('bh_') || rawKey.length < 20) {
     throw new Error('Unauthorized')
   }
@@ -60,7 +76,7 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string }>
 
   const { data: apiKey, error } = await serviceClient
     .from('api_keys')
-    .select('id, user_id, expires_at, revoked_at')
+    .select('id, user_id, expires_at, revoked_at, scopes')
     .eq('key_hash', keyHash)
     .single()
 
@@ -85,7 +101,23 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string }>
     .eq('id', apiKey.id)
     .then(() => {})
 
-  return { userId: apiKey.user_id }
+  return { userId: apiKey.user_id, scopes: (apiKey.scopes as string[]) || [] }
+}
+
+/**
+ * Validate that the given scopes include all required scopes.
+ * Throws an error with message 'Forbidden' if any required scope is missing.
+ *
+ * @param userScopes - Scopes granted to the API key
+ * @param required - Scopes required by the route
+ * @throws Error with message 'Forbidden' if scopes are insufficient
+ */
+export function validateScopes(userScopes: string[], required: string[]): void {
+  for (const scope of required) {
+    if (!userScopes.includes(scope)) {
+      throw new Error('Forbidden')
+    }
+  }
 }
 
 /**
@@ -103,7 +135,7 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string }>
 // Valid UUID for test user (used in E2E tests)
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
 
-export async function requireAuth(): Promise<{ userId: string }> {
+export async function requireAuth(): Promise<{ userId: string; scopes?: string[] }> {
   // In test mode (non-production only), use a consistent test user ID
   if (isTestMode()) {
     return { userId: TEST_USER_ID }

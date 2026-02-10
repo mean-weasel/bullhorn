@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { escapeSearchPattern } from '@/lib/utils'
 import { z } from 'zod'
 
 const createBlogDraftSchema = z.object({
@@ -83,7 +84,10 @@ export async function GET(request: NextRequest) {
       query = query.eq('campaign_id', campaignId)
     }
     if (search) {
-      query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%,notes.ilike.%${search}%`)
+      const escaped = escapeSearchPattern(search)
+      query = query.or(
+        `title.ilike.%${escaped}%,content.ilike.%${escaped}%,notes.ilike.%${escaped}%`
+      )
     }
     if (limit > 0) {
       query = query.limit(limit)

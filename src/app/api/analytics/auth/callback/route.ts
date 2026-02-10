@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 
 // Google OAuth token endpoint
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -34,9 +35,7 @@ export async function GET(request: NextRequest) {
 
     // Validate code
     if (!code) {
-      return NextResponse.redirect(
-        `${baseUrl}/settings?error=missing_code`
-      )
+      return NextResponse.redirect(`${baseUrl}/settings?error=missing_code`)
     }
 
     // Exchange code for tokens
@@ -45,9 +44,7 @@ export async function GET(request: NextRequest) {
     const redirectUri = `${baseUrl}/api/analytics/auth/callback`
 
     if (!clientId || !clientSecret) {
-      return NextResponse.redirect(
-        `${baseUrl}/settings?error=not_configured`
-      )
+      return NextResponse.redirect(`${baseUrl}/settings?error=not_configured`)
     }
 
     const tokenResponse = await fetch(GOOGLE_TOKEN_URL, {
@@ -67,50 +64,48 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorData = await tokenResponse.json()
       console.error('Token exchange failed:', errorData)
-      return NextResponse.redirect(
-        `${baseUrl}/settings?error=token_exchange_failed`
-      )
+      return NextResponse.redirect(`${baseUrl}/settings?error=token_exchange_failed`)
     }
 
     const tokens = await tokenResponse.json()
     const { access_token, refresh_token, expires_in, scope } = tokens
 
     if (!access_token || !refresh_token) {
-      return NextResponse.redirect(
-        `${baseUrl}/settings?error=missing_tokens`
-      )
+      return NextResponse.redirect(`${baseUrl}/settings?error=missing_tokens`)
     }
 
     // Calculate token expiration
     const tokenExpiresAt = new Date(Date.now() + expires_in * 1000).toISOString()
 
-    // Store tokens temporarily - we'll need the user to select a property
-    // For now, redirect to settings with tokens in URL params (they'll be used client-side)
-    // In production, you might use a temporary session/cookie approach
+    // Store tokens directly in the database instead of passing via URL
+    const supabase = await createClient()
+    const { data: pendingConnection, error: dbError } = await supabase
+      .from('analytics_connections')
+      .insert({
+        user_id: userId,
+        provider: 'google_analytics',
+        property_id: 'pending',
+        access_token,
+        refresh_token,
+        token_expires_at: tokenExpiresAt,
+        scopes: scope ? scope.split(' ') : [],
+        sync_status: 'pending_property_selection',
+      })
+      .select('id')
+      .single()
 
-    // We'll store a temporary auth state that can be used to complete the connection
-    // This is a simplified approach - in production you might use secure sessions
-    const tempAuthData = {
-      userId,
-      accessToken: access_token,
-      refreshToken: refresh_token,
-      tokenExpiresAt,
-      scopes: scope ? scope.split(' ') : [],
+    if (dbError || !pendingConnection) {
+      console.error('Failed to store OAuth tokens:', dbError)
+      return NextResponse.redirect(`${baseUrl}/settings?error=callback_failed`)
     }
 
-    // Store temp auth in a cookie or return it encoded for the client to use
-    // For simplicity, we'll encode it in the URL (base64)
-    const encodedAuth = Buffer.from(JSON.stringify(tempAuthData)).toString('base64url')
-
-    // Redirect to settings page with success and the auth data
+    // Redirect with only a success flag and connection ID (no sensitive data in URL)
     return NextResponse.redirect(
-      `${baseUrl}/settings?analytics_auth=success&auth_data=${encodedAuth}`
+      `${baseUrl}/settings?analytics_auth=success&connection_id=${pendingConnection.id}`
     )
   } catch (error) {
     console.error('OAuth callback error:', error)
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    return NextResponse.redirect(
-      `${baseUrl}/settings?error=callback_failed`
-    )
+    return NextResponse.redirect(`${baseUrl}/settings?error=callback_failed`)
   }
 }
