@@ -11,6 +11,7 @@ import { ConnectAnalyticsModal } from '@/components/analytics/ConnectAnalyticsMo
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ApiKeyManager } from '@/components/ui/ApiKeyManager'
 import { ThemeSection, AnalyticsSection, AboutSection } from './SettingsSections'
+import { DataManagementSection } from './DataManagementSection'
 import {
   PushNotificationsSection,
   EmailNotificationsSection,
@@ -267,6 +268,9 @@ export default function SettingsPage() {
         </p>
         <ApiKeyManager />
       </div>
+
+      {/* Data Management */}
+      <DataManagementSection />
 
       {/* About */}
       <AboutSection />
