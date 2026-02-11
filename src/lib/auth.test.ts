@@ -258,7 +258,7 @@ describe('resolveApiKey', () => {
       error: null,
     })
     const result = await resolveApiKey('bh_a1b2c3d4e5f6g7h8i9j0')
-    expect(result).toEqual({ userId: 'user-abc' })
+    expect(result).toEqual({ userId: 'user-abc', scopes: [] })
   })
 
   it('returns userId when expires_at is null (never expires)', async () => {
@@ -272,7 +272,7 @@ describe('resolveApiKey', () => {
       error: null,
     })
     const result = await resolveApiKey('bh_a1b2c3d4e5f6g7h8i9j0')
-    expect(result).toEqual({ userId: 'user-def' })
+    expect(result).toEqual({ userId: 'user-def', scopes: [] })
   })
 })
 
