@@ -315,21 +315,17 @@ test.describe('Reddit Cross-posting', () => {
       // Add launchedUrl to just the webdev post
       await page.goto(`/edit/${webdevPost.id}`)
 
-      // Expand Published Links section
+      // Expand Published Links section and wait for input to render
       await page.getByText('Published Links').click()
+      const redditUrlInput = page.locator('input[placeholder="https://reddit.com/r/..."]')
+      await expect(redditUrlInput).toBeVisible()
 
       // Fill in the Reddit launched URL and verify React processed the value
-      const redditUrlInput = page.locator('input[placeholder="https://reddit.com/r/..."]')
       await redditUrlInput.fill('https://reddit.com/r/webdev/comments/abc123')
       await expect(redditUrlInput).toHaveValue('https://reddit.com/r/webdev/comments/abc123')
-      // Allow React state to propagate to post object before saving
-      await page.waitForTimeout(200)
 
       await saveDraft(page)
       await waitForNavigation(page, '/')
-
-      // Wait for save to propagate
-      await page.waitForTimeout(1000)
 
       // Verify only webdev post has launchedUrl
       posts = await getAllPosts(page)
