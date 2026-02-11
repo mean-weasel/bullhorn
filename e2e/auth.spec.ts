@@ -74,22 +74,30 @@ test.describe('Authentication', () => {
       await page.getByLabel('Email').fill('test@example.com')
       await page.getByLabel('Password').fill('password123')
 
-      // Override fetch to never resolve auth token requests,
-      // keeping the loading state active so we can assert the disabled button
+      // Track whether the button was ever disabled during form submission
       await page.evaluate(() => {
-        const originalFetch = window.fetch
-        window.fetch = ((...args: Parameters<typeof fetch>) => {
-          const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || ''
-          if (url.includes('/auth/v1/token')) {
-            return new Promise<Response>(() => {})
-          }
-          return originalFetch(...args)
-        }) as typeof fetch
+        const btn = document.querySelector('button[type="submit"]')
+        if (btn) {
+          ;(window as unknown as Record<string, boolean>).__btnWasDisabled = false
+          new MutationObserver(() => {
+            if ((btn as HTMLButtonElement).disabled) {
+              ;(window as unknown as Record<string, boolean>).__btnWasDisabled = true
+            }
+          }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
+        }
       })
 
       const signInButton = page.getByRole('button', { name: /sign in/i })
       await signInButton.click()
-      await expect(signInButton).toBeDisabled()
+
+      // Wait for the full submit cycle (loading → error → idle)
+      await expect(page.getByText(/invalid|error|failed/i)).toBeVisible({ timeout: 10000 })
+
+      // Verify the button was disabled at some point during loading
+      const wasDisabled = await page.evaluate(
+        () => (window as unknown as Record<string, boolean>).__btnWasDisabled
+      )
+      expect(wasDisabled).toBe(true)
     })
   })
 
@@ -153,21 +161,30 @@ test.describe('Authentication', () => {
       await page.getByLabel('Password', { exact: true }).fill('password123')
       await page.getByLabel('Confirm Password').fill('password123')
 
-      // Override fetch to never resolve auth signup requests
+      // Track whether the button was ever disabled during form submission
       await page.evaluate(() => {
-        const originalFetch = window.fetch
-        window.fetch = ((...args: Parameters<typeof fetch>) => {
-          const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || ''
-          if (url.includes('/auth/v1/signup')) {
-            return new Promise<Response>(() => {})
-          }
-          return originalFetch(...args)
-        }) as typeof fetch
+        const btn = document.querySelector('button[type="submit"]')
+        if (btn) {
+          ;(window as unknown as Record<string, boolean>).__btnWasDisabled = false
+          new MutationObserver(() => {
+            if ((btn as HTMLButtonElement).disabled) {
+              ;(window as unknown as Record<string, boolean>).__btnWasDisabled = true
+            }
+          }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
+        }
       })
 
       const createButton = page.getByRole('button', { name: /create account/i })
       await createButton.click()
-      await expect(createButton).toBeDisabled()
+
+      // Should show loading text briefly then complete
+      await expect(createButton).not.toBeDisabled({ timeout: 10000 })
+
+      // Verify the button was disabled at some point during loading
+      const wasDisabled = await page.evaluate(
+        () => (window as unknown as Record<string, boolean>).__btnWasDisabled
+      )
+      expect(wasDisabled).toBe(true)
     })
 
     test('should validate email format via HTML5', async ({ page }) => {
@@ -236,21 +253,30 @@ test.describe('Authentication', () => {
     test('should show loading state when sending reset link', async ({ page }) => {
       await page.getByLabel('Email').fill('test@example.com')
 
-      // Override fetch to never resolve auth recover requests
+      // Track whether the button was ever disabled during form submission
       await page.evaluate(() => {
-        const originalFetch = window.fetch
-        window.fetch = ((...args: Parameters<typeof fetch>) => {
-          const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || ''
-          if (url.includes('/auth/v1/recover')) {
-            return new Promise<Response>(() => {})
-          }
-          return originalFetch(...args)
-        }) as typeof fetch
+        const btn = document.querySelector('button[type="submit"]')
+        if (btn) {
+          ;(window as unknown as Record<string, boolean>).__btnWasDisabled = false
+          new MutationObserver(() => {
+            if ((btn as HTMLButtonElement).disabled) {
+              ;(window as unknown as Record<string, boolean>).__btnWasDisabled = true
+            }
+          }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
+        }
       })
 
       const submitButton = page.getByRole('button', { name: /send reset link/i })
       await submitButton.click()
-      await expect(submitButton).toBeDisabled()
+
+      // Should show loading text briefly then complete
+      await expect(submitButton).not.toBeDisabled({ timeout: 10000 })
+
+      // Verify the button was disabled at some point during loading
+      const wasDisabled = await page.evaluate(
+        () => (window as unknown as Record<string, boolean>).__btnWasDisabled
+      )
+      expect(wasDisabled).toBe(true)
     })
 
     test('should navigate back to login page', async ({ page }) => {
