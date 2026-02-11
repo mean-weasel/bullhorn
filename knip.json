@@ -8,11 +8,16 @@
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
     "src/vite-env.d.ts",
-    "src/app/**/*"
+    "src/app/**/*",
+    "src/lib/googleSignIn.ts"
   ],
   "ignoreDependencies": [
-    "@capacitor/core",
     "@capacitor/ios",
+    "@capacitor/haptics",
+    "@capacitor/keyboard",
+    "@capacitor/splash-screen",
+    "@capacitor/status-bar",
+    "@capgo/capacitor-social-login",
     "@octokit/rest",
     "gh-pages",
     "tsx"
