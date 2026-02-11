@@ -26,6 +26,7 @@ import {
   DashboardCampaignCard as CampaignCard,
   DashboardSection as Section,
 } from './DashboardComponents'
+import { SkeletonCard, SkeletonStatBar } from '@/components/ui/Skeleton'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -154,6 +155,25 @@ export default function DashboardPage() {
 
   const totalPosts = stats.scheduled + stats.drafts + stats.published
   const hasNoPosts = totalPosts === 0
+
+  // Show skeleton during initial load
+  if (!postsInitialized && !campaignsInitialized && !projectsInitialized) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] p-4 md:p-6 max-w-5xl mx-auto">
+        <SkeletonStatBar />
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="space-y-3">
+              <div className="h-5 w-24 bg-muted rounded animate-pulse mb-4" />
+              {[1, 2, 3].map((j) => (
+                <SkeletonCard key={j} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-[calc(100vh-4rem)] p-4 md:p-6 max-w-5xl mx-auto">
