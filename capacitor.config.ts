@@ -16,6 +16,7 @@ const config: CapacitorConfig = {
     preferredContentMode: 'mobile',
     scheme: 'Bullhorn',
     allowsLinkPreview: false,
+    appendUserAgent: 'BullhornCapacitor',
   },
   plugins: {
     SplashScreen: {

@@ -1,13 +1,15 @@
-import { Capacitor } from '@capacitor/core'
+const CAPACITOR_UA_MARKER = 'BullhornCapacitor'
 
 export function isNativePlatform(): boolean {
-  return Capacitor.isNativePlatform()
+  if (typeof navigator === 'undefined') return false
+  return navigator.userAgent.includes(CAPACITOR_UA_MARKER)
 }
 
 export function isIOS(): boolean {
-  return Capacitor.getPlatform() === 'ios'
+  return isNativePlatform()
 }
 
 export function getPlatform(): string {
-  return Capacitor.getPlatform()
+  if (isNativePlatform()) return 'ios'
+  return 'web'
 }
