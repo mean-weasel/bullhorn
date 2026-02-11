@@ -46,8 +46,8 @@ test.describe('Create Post', () => {
 
       // Set schedule for tomorrow
       const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(10, 0, 0, 0)
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+      tomorrow.setUTCHours(10, 0, 0, 0)
       await setSchedule(page, tomorrow)
 
       // Schedule the post
@@ -88,7 +88,10 @@ test.describe('Create Post', () => {
       await goToNewPost(page)
 
       await selectPlatform(page, 'linkedin')
-      await fillContent(page, 'Professional update from E2E tests!\n\nKey points:\n- Testing is important\n- Automation saves time')
+      await fillContent(
+        page,
+        'Professional update from E2E tests!\n\nKey points:\n- Testing is important\n- Automation saves time'
+      )
 
       // Verify LinkedIn settings panel is visible
       await expect(page.getByText('LinkedIn Settings')).toBeVisible()
@@ -120,8 +123,8 @@ test.describe('Create Post', () => {
       await fillContent(page, 'Scheduled LinkedIn post for next week!')
 
       const nextWeek = new Date()
-      nextWeek.setDate(nextWeek.getDate() + 7)
-      nextWeek.setHours(9, 0, 0, 0)
+      nextWeek.setUTCDate(nextWeek.getUTCDate() + 7)
+      nextWeek.setUTCHours(9, 0, 0, 0)
       await setSchedule(page, nextWeek)
 
       await schedulePost(page)
@@ -144,7 +147,10 @@ test.describe('Create Post', () => {
         title: 'Built a social scheduler with Playwright tests',
       })
 
-      await fillContent(page, 'Just added E2E tests to my social scheduler app. Here are some learnings...')
+      await fillContent(
+        page,
+        'Just added E2E tests to my social scheduler app. Here are some learnings...'
+      )
 
       await saveDraft(page)
       await waitForNavigation(page, '/')
@@ -177,11 +183,11 @@ test.describe('Create Post', () => {
         title: 'Launch day announcement',
       })
 
-      await fillContent(page, 'We\'re launching next month and would love your feedback!')
+      await fillContent(page, "We're launching next month and would love your feedback!")
 
       const nextMonth = new Date()
-      nextMonth.setMonth(nextMonth.getMonth() + 1)
-      nextMonth.setHours(12, 0, 0, 0)
+      nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1)
+      nextMonth.setUTCHours(12, 0, 0, 0)
       await setSchedule(page, nextMonth)
 
       await schedulePost(page)

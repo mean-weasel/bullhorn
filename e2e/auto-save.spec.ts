@@ -119,11 +119,9 @@ test.describe('Auto-save', () => {
       // Edit the content
       await fillContent(page, 'Modified draft content via auto-save')
 
-      // Wait for auto-save to complete by checking for "Saved" indicator
-      await expect(page.getByText(/saved/i)).toBeVisible({ timeout: 10000 })
-
-      // Wait for the API response to be fully processed
-      await page.waitForTimeout(1000)
+      // Wait for auto-save to detect change (shows "Saving...") then complete (shows "Saved!")
+      await expect(page.getByText('Saving...')).toBeVisible({ timeout: 10000 })
+      await expect(page.getByText('Saved!')).toBeVisible({ timeout: 10000 })
 
       // Should still have exactly 1 post
       expect(await getPostCount(page)).toBe(1)
@@ -153,8 +151,9 @@ test.describe('Auto-save', () => {
       await waitForContentToLoad(page, 'Platform switch test')
       await switchPlatformWithConfirm(page, 'linkedin')
 
-      // Wait for auto-save to complete by checking for "Saved" indicator
-      await expect(page.getByText(/saved/i)).toBeVisible({ timeout: 10000 })
+      // Wait for auto-save to detect change then complete
+      await expect(page.getByText('Saving...')).toBeVisible({ timeout: 10000 })
+      await expect(page.getByText('Saved!')).toBeVisible({ timeout: 10000 })
 
       // Verify platform was switched to LinkedIn
       const updatedPosts = await getAllPosts(page)

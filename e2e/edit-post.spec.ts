@@ -77,8 +77,8 @@ test.describe('Edit Post', () => {
 
       // Set a schedule
       const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(10, 0, 0, 0)
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+      tomorrow.setUTCHours(10, 0, 0, 0)
       await setSchedule(page, tomorrow)
 
       // Schedule the post
@@ -101,8 +101,8 @@ test.describe('Edit Post', () => {
 
       // Change the schedule
       const newDate = new Date()
-      newDate.setDate(newDate.getDate() + 3)
-      newDate.setHours(14, 30, 0, 0)
+      newDate.setUTCDate(newDate.getUTCDate() + 3)
+      newDate.setUTCHours(14, 30, 0, 0)
       await setSchedule(page, newDate)
 
       // Re-schedule

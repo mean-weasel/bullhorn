@@ -134,6 +134,7 @@ jobs:
         env:
           CI: true
           E2E_TEST_MODE: 'true'
+          TZ: UTC
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

@@ -131,8 +131,8 @@ test.describe('Reddit Cross-posting', () => {
 
       // Set schedule
       const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(10, 0, 0, 0)
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+      tomorrow.setUTCHours(10, 0, 0, 0)
       await setSchedule(page, tomorrow)
 
       await schedulePost(page)
@@ -162,8 +162,8 @@ test.describe('Reddit Cross-posting', () => {
       await fillContent(page, 'How I built my company')
 
       const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(10, 0, 0, 0)
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+      tomorrow.setUTCHours(10, 0, 0, 0)
       await setSchedule(page, tomorrow)
 
       await schedulePost(page)
@@ -180,8 +180,8 @@ test.describe('Reddit Cross-posting', () => {
 
       // Change to day after tomorrow at 3pm
       const dayAfter = new Date()
-      dayAfter.setDate(dayAfter.getDate() + 2)
-      dayAfter.setHours(15, 0, 0, 0)
+      dayAfter.setUTCDate(dayAfter.getUTCDate() + 2)
+      dayAfter.setUTCHours(15, 0, 0, 0)
 
       // Use setSchedule helper to update schedule
       await setSchedule(page, dayAfter)
@@ -399,16 +399,16 @@ test.describe('Reddit Cross-posting', () => {
       await expandSubredditCard(page, 'webdev')
       await fillSubredditTitle(page, 'webdev', 'Webdev Title')
       const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(10, 0, 0, 0)
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+      tomorrow.setUTCHours(10, 0, 0, 0)
       await setSubredditSchedule(page, 'webdev', tomorrow)
 
       // Expand second card and set different schedule
       await expandSubredditCard(page, 'javascript')
       await fillSubredditTitle(page, 'javascript', 'JS Title')
       const dayAfter = new Date()
-      dayAfter.setDate(dayAfter.getDate() + 2)
-      dayAfter.setHours(14, 0, 0, 0)
+      dayAfter.setUTCDate(dayAfter.getUTCDate() + 2)
+      dayAfter.setUTCHours(14, 0, 0, 0)
       await setSubredditSchedule(page, 'javascript', dayAfter)
 
       await schedulePost(page)
