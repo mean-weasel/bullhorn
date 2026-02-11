@@ -71,10 +71,15 @@ test.describe('Authentication', () => {
     })
 
     test('should show loading state when signing in', async ({ page }) => {
+      // Delay the auth response so Playwright can observe the loading state
+      await page.route('**/auth/v1/token*', async (route) => {
+        await new Promise((r) => setTimeout(r, 1000))
+        await route.continue()
+      })
+
       await page.getByLabel('Email').fill('test@example.com')
       await page.getByLabel('Password').fill('password123')
 
-      // The button should become disabled during form submission
       const signInButton = page.getByRole('button', { name: /sign in/i })
       await signInButton.click()
       await expect(signInButton).toBeDisabled()
@@ -137,11 +142,16 @@ test.describe('Authentication', () => {
     })
 
     test('should show loading state when creating account', async ({ page }) => {
+      // Delay the auth response so Playwright can observe the loading state
+      await page.route('**/auth/v1/signup*', async (route) => {
+        await new Promise((r) => setTimeout(r, 1000))
+        await route.continue()
+      })
+
       await page.getByLabel('Email').fill('newuser@example.com')
       await page.getByLabel('Password', { exact: true }).fill('password123')
       await page.getByLabel('Confirm Password').fill('password123')
 
-      // The button should become disabled during form submission
       const createButton = page.getByRole('button', { name: /create account/i })
       await createButton.click()
       await expect(createButton).toBeDisabled()
@@ -211,9 +221,14 @@ test.describe('Authentication', () => {
     })
 
     test('should show loading state when sending reset link', async ({ page }) => {
+      // Delay the auth response so Playwright can observe the loading state
+      await page.route('**/auth/v1/recover*', async (route) => {
+        await new Promise((r) => setTimeout(r, 1000))
+        await route.continue()
+      })
+
       await page.getByLabel('Email').fill('test@example.com')
 
-      // The button should become disabled during form submission
       const submitButton = page.getByRole('button', { name: /send reset link/i })
       await submitButton.click()
       await expect(submitButton).toBeDisabled()
