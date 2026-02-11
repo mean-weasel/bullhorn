@@ -16,6 +16,7 @@ const config: CapacitorConfig = {
     preferredContentMode: 'mobile',
     scheme: 'Bullhorn',
     allowsLinkPreview: false,
+    appendUserAgent: 'BullhornCapacitor',
   },
   plugins: {
     SplashScreen: {
@@ -30,6 +31,12 @@ const config: CapacitorConfig = {
     Keyboard: {
       resize: 'body',
       resizeOnFullScreen: true,
+    },
+    SocialLogin: {
+      google: {
+        iOSClientId: '95354811469-3hvu64aje2dnp1oj3fiv4cqd2ajcr0qc.apps.googleusercontent.com',
+        webClientId: '95354811469-6dk6cb54kuee0t91dtsiu9mndumk14jv.apps.googleusercontent.com',
+      },
     },
   },
 }

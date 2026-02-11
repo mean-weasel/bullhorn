@@ -88,7 +88,13 @@ export default function EditorPage() {
     }
     return newPost
   })
-  const [content, setContent] = useState('')
+  // Pre-populate content from shared URL params (iOS share extension)
+  const [content, setContent] = useState(() => {
+    const sharedText = searchParams.get('text') || ''
+    const sharedUrl = searchParams.get('url') || ''
+    if (sharedText && sharedUrl) return `${sharedText}\n\n${sharedUrl}`
+    return sharedText || sharedUrl || ''
+  })
   const [mediaUrls, setMediaUrls] = useState<string[]>([])
   const [linkedInMediaUrl, setLinkedInMediaUrl] = useState('')
   const [redditUrl, setRedditUrl] = useState('')

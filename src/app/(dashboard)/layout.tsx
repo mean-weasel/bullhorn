@@ -4,12 +4,9 @@ import { AppHeader, FloatingActionButton } from './components/AppHeader'
 import { BottomNav } from './components/BottomNav'
 import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import { VerificationSuccessBanner } from './components/VerificationSuccessBanner'
+import { NativeInit } from './components/NativeInit'
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   let userEmail: string | undefined
   let userDisplayName: string | null | undefined
   let isEmailVerified = true
@@ -18,7 +15,9 @@ export default async function DashboardLayout({
   // Skip auth check in E2E test mode
   if (process.env.E2E_TEST_MODE !== 'true') {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
       redirect('/login')
@@ -40,6 +39,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
+      <NativeInit />
       <AppHeader userEmail={userEmail} userDisplayName={userDisplayName} />
 
       {/* Email verification success banner - always rendered to catch ?verified=true */}
@@ -51,9 +51,7 @@ export default async function DashboardLayout({
       )}
 
       {/* Main content - bottom padding for mobile nav */}
-      <main className="flex-1 pb-20 md:pb-0">
-        {children}
-      </main>
+      <main className="flex-1 pb-20 md:pb-0">{children}</main>
 
       {/* FAB for new post - hidden on mobile (replaced by bottom nav) */}
       <FloatingActionButton />

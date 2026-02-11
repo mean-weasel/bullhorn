@@ -47,5 +47,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Reversed Google iOS Client ID for Google Sign-In redirect -->
+				<string>com.googleusercontent.apps.95354811469-3hvu64aje2dnp1oj3fiv4cqd2ajcr0qc</string>
+				<!-- Custom URL scheme for share extension deep links -->
+				<string>bullhorn</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
