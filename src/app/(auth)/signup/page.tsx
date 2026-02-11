@@ -1,12 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { isNativePlatform } from '@/lib/capacitor'
+import { nativeGoogleSignIn } from '@/lib/googleSignIn'
 import PasswordStrength from '@/components/ui/PasswordStrength'
 
 export default function SignUpPage() {
+  const router = useRouter()
   const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -16,6 +20,20 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false)
 
   const handleGoogleSignUp = async () => {
+    if (isNativePlatform()) {
+      setError(null)
+      setLoading(true)
+      const { success, error: signInError } = await nativeGoogleSignIn(supabase)
+      if (success) {
+        router.push('/dashboard')
+        router.refresh()
+      } else {
+        setError(signInError || 'Google Sign-In failed')
+      }
+      setLoading(false)
+      return
+    }
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

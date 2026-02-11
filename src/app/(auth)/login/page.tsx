@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { isNativePlatform } from '@/lib/capacitor'
+import { nativeGoogleSignIn } from '@/lib/googleSignIn'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -15,6 +17,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   const handleGoogleLogin = async () => {
+    if (isNativePlatform()) {
+      setError(null)
+      setLoading(true)
+      const { success, error: signInError } = await nativeGoogleSignIn(supabase)
+      if (success) {
+        router.push('/dashboard')
+        router.refresh()
+      } else {
+        setError(signInError || 'Google Sign-In failed')
+      }
+      setLoading(false)
+      return
+    }
+
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -62,12 +78,8 @@ export default function LoginPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-primary flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               📢
             </div>
-            <h1 className="text-3xl font-extrabold text-foreground">
-              Bullhorn
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              Sign in to manage your social posts
-            </p>
+            <h1 className="text-3xl font-extrabold text-foreground">Bullhorn</h1>
+            <p className="mt-2 text-muted-foreground">Sign in to manage your social posts</p>
           </div>
 
           {/* Email/Password Form */}
@@ -105,7 +117,10 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm font-bold text-foreground">
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-sm font-medium text-primary hover:text-primary/80">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-medium text-primary hover:text-primary/80"
+                >
                   Forgot password?
                 </Link>
               </div>
