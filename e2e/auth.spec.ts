@@ -78,10 +78,11 @@ test.describe('Authentication', () => {
       await page.evaluate(() => {
         const btn = document.querySelector('button[type="submit"]')
         if (btn) {
-          ;(window as unknown as Record<string, boolean>).__btnWasDisabled = false
+          const w = window as unknown as Record<string, boolean>
+          w.__btnWasDisabled = false
           new MutationObserver(() => {
             if ((btn as HTMLButtonElement).disabled) {
-              ;(window as unknown as Record<string, boolean>).__btnWasDisabled = true
+              w.__btnWasDisabled = true
             }
           }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
         }
@@ -165,10 +166,11 @@ test.describe('Authentication', () => {
       await page.evaluate(() => {
         const btn = document.querySelector('button[type="submit"]')
         if (btn) {
-          ;(window as unknown as Record<string, boolean>).__btnWasDisabled = false
+          const w = window as unknown as Record<string, boolean>
+          w.__btnWasDisabled = false
           new MutationObserver(() => {
             if ((btn as HTMLButtonElement).disabled) {
-              ;(window as unknown as Record<string, boolean>).__btnWasDisabled = true
+              w.__btnWasDisabled = true
             }
           }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
         }
@@ -257,10 +259,11 @@ test.describe('Authentication', () => {
       await page.evaluate(() => {
         const btn = document.querySelector('button[type="submit"]')
         if (btn) {
-          ;(window as unknown as Record<string, boolean>).__btnWasDisabled = false
+          const w = window as unknown as Record<string, boolean>
+          w.__btnWasDisabled = false
           new MutationObserver(() => {
             if ((btn as HTMLButtonElement).disabled) {
-              ;(window as unknown as Record<string, boolean>).__btnWasDisabled = true
+              w.__btnWasDisabled = true
             }
           }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
         }
