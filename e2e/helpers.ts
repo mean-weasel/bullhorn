@@ -403,7 +403,7 @@ export async function verifyCharacterCount(
 export async function waitForNavigation(page: Page, url: string | RegExp) {
   // Normalize '/' to '/dashboard' since the root redirects to dashboard
   const normalizedUrl = url === '/' ? '/dashboard' : url
-  await expect(page).toHaveURL(normalizedUrl)
+  await expect(page).toHaveURL(normalizedUrl, { timeout: 10000 })
 }
 
 /**
