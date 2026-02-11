@@ -74,8 +74,18 @@ test.describe('Authentication', () => {
       await page.getByLabel('Email').fill('test@example.com')
       await page.getByLabel('Password').fill('password123')
 
-      // Intercept the auth request and never resolve it, keeping loading=true
-      await page.route(/\/auth\/v1\/token/, () => {})
+      // Override fetch to never resolve auth token requests,
+      // keeping the loading state active so we can assert the disabled button
+      await page.evaluate(() => {
+        const originalFetch = window.fetch
+        window.fetch = ((...args: Parameters<typeof fetch>) => {
+          const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || ''
+          if (url.includes('/auth/v1/token')) {
+            return new Promise<Response>(() => {})
+          }
+          return originalFetch(...args)
+        }) as typeof fetch
+      })
 
       const signInButton = page.getByRole('button', { name: /sign in/i })
       await signInButton.click()
@@ -143,8 +153,17 @@ test.describe('Authentication', () => {
       await page.getByLabel('Password', { exact: true }).fill('password123')
       await page.getByLabel('Confirm Password').fill('password123')
 
-      // Intercept the auth request and never resolve it, keeping loading=true
-      await page.route(/\/auth\/v1\/signup/, () => {})
+      // Override fetch to never resolve auth signup requests
+      await page.evaluate(() => {
+        const originalFetch = window.fetch
+        window.fetch = ((...args: Parameters<typeof fetch>) => {
+          const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || ''
+          if (url.includes('/auth/v1/signup')) {
+            return new Promise<Response>(() => {})
+          }
+          return originalFetch(...args)
+        }) as typeof fetch
+      })
 
       const createButton = page.getByRole('button', { name: /create account/i })
       await createButton.click()
@@ -217,8 +236,17 @@ test.describe('Authentication', () => {
     test('should show loading state when sending reset link', async ({ page }) => {
       await page.getByLabel('Email').fill('test@example.com')
 
-      // Intercept the auth request and never resolve it, keeping loading=true
-      await page.route(/\/auth\/v1\/recover/, () => {})
+      // Override fetch to never resolve auth recover requests
+      await page.evaluate(() => {
+        const originalFetch = window.fetch
+        window.fetch = ((...args: Parameters<typeof fetch>) => {
+          const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request)?.url || ''
+          if (url.includes('/auth/v1/recover')) {
+            return new Promise<Response>(() => {})
+          }
+          return originalFetch(...args)
+        }) as typeof fetch
+      })
 
       const submitButton = page.getByRole('button', { name: /send reset link/i })
       await submitButton.click()
