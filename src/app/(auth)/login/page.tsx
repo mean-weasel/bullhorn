@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import { isNativePlatform } from '@/lib/capacitor'
-import { nativeGoogleSignIn } from '@/lib/googleSignIn'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -17,20 +15,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
 
   const handleGoogleLogin = async () => {
-    if (isNativePlatform()) {
-      setError(null)
-      setLoading(true)
-      const { success, error: signInError } = await nativeGoogleSignIn(supabase)
-      if (success) {
-        router.push('/dashboard')
-        router.refresh()
-      } else {
-        setError(signInError || 'Google Sign-In failed')
-      }
-      setLoading(false)
-      return
-    }
-
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
