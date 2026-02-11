@@ -33,15 +33,7 @@ export default function SettingsPage() {
 
   // Analytics state
   const [showConnectModal, setShowConnectModal] = useState(false)
-  const [authData, setAuthData] = useState<
-    | {
-        accessToken: string
-        refreshToken: string
-        tokenExpiresAt: string
-        scopes: string[]
-      }
-    | undefined
-  >(undefined)
+  const [pendingConnectionId, setPendingConnectionId] = useState<string | undefined>(undefined)
   const [connectionToDelete, setConnectionToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -111,21 +103,15 @@ export default function SettingsPage() {
   // Handle OAuth callback params
   useEffect(() => {
     const analyticsAuth = searchParams.get('analytics_auth')
-    const authDataParam = searchParams.get('auth_data')
+    const connectionId = searchParams.get('connection_id')
     const errorParam = searchParams.get('error')
 
-    if (analyticsAuth === 'success' && authDataParam) {
-      try {
-        const decoded = JSON.parse(Buffer.from(authDataParam, 'base64url').toString())
-        setAuthData(decoded)
-        setShowConnectModal(true)
+    if (analyticsAuth === 'success' && connectionId) {
+      setPendingConnectionId(connectionId)
+      setShowConnectModal(true)
 
-        // Clean up URL params
-        window.history.replaceState({}, '', '/settings')
-      } catch (err) {
-        console.error('Failed to parse auth data:', err)
-        setError('Failed to complete authentication')
-      }
+      // Clean up URL params
+      window.history.replaceState({}, '', '/settings')
     } else if (errorParam) {
       const errorMessages: Record<string, string> = {
         unauthorized: 'Please sign in to connect Google Analytics',
@@ -169,12 +155,12 @@ export default function SettingsPage() {
   }
 
   const handleConnectAnalytics = () => {
-    setAuthData(undefined)
+    setPendingConnectionId(undefined)
     setShowConnectModal(true)
   }
 
   const handleConnectSuccess = () => {
-    setAuthData(undefined)
+    setPendingConnectionId(undefined)
     fetchConnections()
     setSuccess('Google Analytics connected successfully!')
     setTimeout(() => setSuccess(null), 3000)
@@ -280,9 +266,9 @@ export default function SettingsPage() {
         open={showConnectModal}
         onClose={() => {
           setShowConnectModal(false)
-          setAuthData(undefined)
+          setPendingConnectionId(undefined)
         }}
-        authData={authData}
+        pendingConnectionId={pendingConnectionId}
         onSuccess={handleConnectSuccess}
       />
 

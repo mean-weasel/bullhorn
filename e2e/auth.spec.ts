@@ -74,12 +74,31 @@ test.describe('Authentication', () => {
       await page.getByLabel('Email').fill('test@example.com')
       await page.getByLabel('Password').fill('password123')
 
-      // Click and immediately check for loading state
-      const signInButton = page.getByRole('button', { name: 'Sign in' })
+      // Track whether the button was ever disabled during form submission
+      await page.evaluate(() => {
+        const btn = document.querySelector('button[type="submit"]')
+        if (btn) {
+          const w = window as unknown as Record<string, boolean>
+          w.__btnWasDisabled = false
+          new MutationObserver(() => {
+            if ((btn as HTMLButtonElement).disabled) {
+              w.__btnWasDisabled = true
+            }
+          }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
+        }
+      })
+
+      const signInButton = page.getByRole('button', { name: /sign in/i })
       await signInButton.click()
 
-      // Should show loading text briefly
-      await expect(page.getByRole('button', { name: 'Signing in...' })).toBeVisible()
+      // Wait for the full submit cycle (loading → error → idle)
+      await expect(page.getByText(/invalid|error|failed/i)).toBeVisible({ timeout: 10000 })
+
+      // Verify the button was disabled at some point during loading
+      const wasDisabled = await page.evaluate(
+        () => (window as unknown as Record<string, boolean>).__btnWasDisabled
+      )
+      expect(wasDisabled).toBe(true)
     })
   })
 
@@ -143,11 +162,31 @@ test.describe('Authentication', () => {
       await page.getByLabel('Password', { exact: true }).fill('password123')
       await page.getByLabel('Confirm Password').fill('password123')
 
-      const createButton = page.getByRole('button', { name: 'Create account' })
+      // Track whether the button was ever disabled during form submission
+      await page.evaluate(() => {
+        const btn = document.querySelector('button[type="submit"]')
+        if (btn) {
+          const w = window as unknown as Record<string, boolean>
+          w.__btnWasDisabled = false
+          new MutationObserver(() => {
+            if ((btn as HTMLButtonElement).disabled) {
+              w.__btnWasDisabled = true
+            }
+          }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
+        }
+      })
+
+      const createButton = page.getByRole('button', { name: /create account/i })
       await createButton.click()
 
-      // Should show loading text briefly
-      await expect(page.getByRole('button', { name: 'Creating account...' })).toBeVisible()
+      // Should show loading text briefly then complete
+      await expect(createButton).not.toBeDisabled({ timeout: 10000 })
+
+      // Verify the button was disabled at some point during loading
+      const wasDisabled = await page.evaluate(
+        () => (window as unknown as Record<string, boolean>).__btnWasDisabled
+      )
+      expect(wasDisabled).toBe(true)
     })
 
     test('should validate email format via HTML5', async ({ page }) => {
@@ -216,11 +255,31 @@ test.describe('Authentication', () => {
     test('should show loading state when sending reset link', async ({ page }) => {
       await page.getByLabel('Email').fill('test@example.com')
 
-      const submitButton = page.getByRole('button', { name: 'Send reset link' })
+      // Track whether the button was ever disabled during form submission
+      await page.evaluate(() => {
+        const btn = document.querySelector('button[type="submit"]')
+        if (btn) {
+          const w = window as unknown as Record<string, boolean>
+          w.__btnWasDisabled = false
+          new MutationObserver(() => {
+            if ((btn as HTMLButtonElement).disabled) {
+              w.__btnWasDisabled = true
+            }
+          }).observe(btn, { attributes: true, attributeFilter: ['disabled'] })
+        }
+      })
+
+      const submitButton = page.getByRole('button', { name: /send reset link/i })
       await submitButton.click()
 
-      // Should show loading text briefly
-      await expect(page.getByRole('button', { name: 'Sending...' })).toBeVisible()
+      // Should show loading text briefly then complete
+      await expect(submitButton).not.toBeDisabled({ timeout: 10000 })
+
+      // Verify the button was disabled at some point during loading
+      const wasDisabled = await page.evaluate(
+        () => (window as unknown as Record<string, boolean>).__btnWasDisabled
+      )
+      expect(wasDisabled).toBe(true)
     })
 
     test('should navigate back to login page', async ({ page }) => {

@@ -17,6 +17,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * Escape special PostgREST/SQL LIKE pattern characters in user-supplied search input.
+ * Prevents %, _, and * from being interpreted as wildcards.
+ */
+export function escapeSearchPattern(input: string): string {
+  return input.replace(/[%_*\\]/g, (ch) => `\\${ch}`)
+}
+
 // ---------------------------------------------------------------------------
 // Database row interfaces (snake_case, matching Supabase table columns)
 // ---------------------------------------------------------------------------

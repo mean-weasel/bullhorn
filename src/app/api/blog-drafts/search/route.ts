@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { escapeSearchPattern } from '@/lib/utils'
 
 // Transform snake_case Supabase response to camelCase for frontend
 function transformDraft(draft: Record<string, unknown>) {
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Search query is required' }, { status: 400 })
     }
 
-    const searchPattern = `%${query}%`
+    const searchPattern = `%${escapeSearchPattern(query)}%`
 
     // Defense-in-depth: filter by user_id alongside RLS
     const { data, error } = await supabase
@@ -42,7 +43,9 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('user_id', userId)
       .neq('status', 'archived')
-      .or(`title.ilike.${searchPattern},content.ilike.${searchPattern},notes.ilike.${searchPattern}`)
+      .or(
+        `title.ilike.${searchPattern},content.ilike.${searchPattern},notes.ilike.${searchPattern}`
+      )
       .order('updated_at', { ascending: false })
       .limit(limit)
 

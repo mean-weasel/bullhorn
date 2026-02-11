@@ -42,13 +42,23 @@ export interface RateLimitResult {
  * Check the rate limit for a given identifier.
  *
  * @param identifier - Unique key for the rate limit bucket (user ID or IP)
- * @returns Rate limit result, or a permissive default if Upstash is not configured
+ * @returns Rate limit result, or a fallback if Upstash is not configured.
+ *   In production, logs an error on every unconfigured request and denies it.
+ *   In development, allows the request through with a warning.
  */
 export async function rateLimit(identifier: string): Promise<RateLimitResult> {
   const limiter = getRatelimit()
 
-  // Graceful fallback: skip rate limiting if Upstash is not configured
   if (!limiter) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error(
+        `[rateLimit] Upstash Redis is not configured — rate limiting is disabled in production. Denying request for identifier: ${identifier}`
+      )
+      return { success: false, limit: 0, remaining: 0, reset: 0 }
+    }
+
+    // In development, allow through but warn once
+    console.warn('[rateLimit] Upstash Redis is not configured — rate limiting is disabled')
     return { success: true, limit: 10, remaining: 10, reset: 0 }
   }
 

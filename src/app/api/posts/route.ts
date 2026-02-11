@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes, type ApiKeyScope } from '@/lib/auth'
 import { z } from 'zod'
 
 const createPostSchema = z.object({
@@ -27,7 +27,17 @@ export async function GET(request: NextRequest) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+
+      // Enforce scope check for API-key authenticated requests
+      if (auth.scopes) {
+        const required: ApiKeyScope[] = ['posts:read']
+        validateScopes(auth.scopes, required)
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -85,7 +95,17 @@ export async function POST(request: NextRequest) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+
+      // Enforce scope check for API-key authenticated requests
+      if (auth.scopes) {
+        const required: ApiKeyScope[] = ['posts:write']
+        validateScopes(auth.scopes, required)
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
