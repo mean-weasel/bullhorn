@@ -6,15 +6,29 @@ import '../index.css'
 
 // eslint-disable-next-line react-refresh/only-export-components -- metadata export is required by Next.js App Router
 export const metadata: Metadata = {
-  title: 'Bullhorn',
-  description: 'Schedule and manage your social media posts',
+  metadataBase: new URL('https://bullhorn.to'),
+  title: {
+    default: 'Bullhorn — Social Media Post Scheduler',
+    template: '%s | Bullhorn',
+  },
+  description:
+    'Schedule and manage social media posts for Twitter, LinkedIn, and Reddit. Organize with campaigns and projects.',
+  openGraph: {
+    type: 'website',
+    siteName: 'Bullhorn',
+    title: 'Bullhorn — Social Media Post Scheduler',
+    description:
+      'Schedule and manage social media posts for Twitter, LinkedIn, and Reddit. Organize with campaigns and projects.',
+    url: 'https://bullhorn.to',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Bullhorn — Social Media Post Scheduler',
+    description: 'Schedule and manage social media posts for Twitter, LinkedIn, and Reddit.',
+  },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -26,9 +40,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans">
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
         <Analytics />
         <SpeedInsights />
       </body>
