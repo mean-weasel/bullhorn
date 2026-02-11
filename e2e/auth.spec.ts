@@ -74,12 +74,10 @@ test.describe('Authentication', () => {
       await page.getByLabel('Email').fill('test@example.com')
       await page.getByLabel('Password').fill('password123')
 
-      // Click and immediately check for loading state
-      const signInButton = page.getByRole('button', { name: 'Sign in' })
+      // The button should become disabled during form submission
+      const signInButton = page.getByRole('button', { name: /sign in/i })
       await signInButton.click()
-
-      // Should show loading text briefly
-      await expect(page.getByRole('button', { name: 'Signing in...' })).toBeVisible()
+      await expect(signInButton).toBeDisabled()
     })
   })
 
@@ -143,11 +141,10 @@ test.describe('Authentication', () => {
       await page.getByLabel('Password', { exact: true }).fill('password123')
       await page.getByLabel('Confirm Password').fill('password123')
 
-      const createButton = page.getByRole('button', { name: 'Create account' })
+      // The button should become disabled during form submission
+      const createButton = page.getByRole('button', { name: /create account/i })
       await createButton.click()
-
-      // Should show loading text briefly
-      await expect(page.getByRole('button', { name: 'Creating account...' })).toBeVisible()
+      await expect(createButton).toBeDisabled()
     })
 
     test('should validate email format via HTML5', async ({ page }) => {
@@ -216,11 +213,10 @@ test.describe('Authentication', () => {
     test('should show loading state when sending reset link', async ({ page }) => {
       await page.getByLabel('Email').fill('test@example.com')
 
-      const submitButton = page.getByRole('button', { name: 'Send reset link' })
+      // The button should become disabled during form submission
+      const submitButton = page.getByRole('button', { name: /send reset link/i })
       await submitButton.click()
-
-      // Should show loading text briefly
-      await expect(page.getByRole('button', { name: 'Sending...' })).toBeVisible()
+      await expect(submitButton).toBeDisabled()
     })
 
     test('should navigate back to login page', async ({ page }) => {
