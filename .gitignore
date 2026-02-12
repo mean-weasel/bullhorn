@@ -47,3 +47,12 @@ test-results/
 # Workflow testing screenshots (generated during iOS/browser testing)
 workflows/screenshots/
 .env*.local
+
+# Root-level screenshots (debug/temp artifacts)
+/*.png
+
+# Claude session plans (ephemeral)
+.claude/plans/
+
+# Temp scripts
+scripts/seed-*.ts
