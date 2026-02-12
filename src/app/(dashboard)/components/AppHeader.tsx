@@ -3,14 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import {
-  Settings,
-  Plus,
-  FolderOpen,
-  FileText,
-  FolderKanban,
-  Rocket,
-} from 'lucide-react'
+import { Settings, Plus, FolderOpen, FileText, FolderKanban, Rocket } from 'lucide-react'
 import { UserMenu } from './UserMenu'
 
 interface AppHeaderProps {
@@ -20,7 +13,11 @@ interface AppHeaderProps {
 
 export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
   const pathname = usePathname()
-  const isEditorPage = pathname?.startsWith('/new') || pathname?.startsWith('/edit') || pathname?.startsWith('/blog/new') || pathname?.startsWith('/blog/edit')
+  const isEditorPage =
+    pathname?.startsWith('/new') ||
+    pathname?.startsWith('/edit') ||
+    pathname?.startsWith('/blog/new') ||
+    pathname?.startsWith('/blog/edit')
 
   return (
     <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b-[3px] border-border">
@@ -29,6 +26,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
           {isEditorPage && (
             <Link
               href="/dashboard"
+              aria-label="Back to dashboard"
               className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors border-2 border-transparent hover:border-border"
             >
               <svg
@@ -49,14 +47,12 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-xl">
               📢
             </div>
-            <span className="font-extrabold text-xl md:text-2xl tracking-tight">
-              Bullhorn
-            </span>
+            <span className="font-extrabold text-xl md:text-2xl tracking-tight">Bullhorn</span>
           </Link>
         </div>
 
         {/* Desktop nav icons - hidden on mobile */}
-        <div className="hidden md:flex items-center gap-2">
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-2">
           <Link
             href="/projects"
             className={cn(
@@ -65,7 +61,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               'border-2 border-transparent hover:border-border',
               pathname?.startsWith('/projects') && 'bg-secondary text-foreground border-border'
             )}
-            title="Projects"
+            aria-label="Projects"
           >
             <FolderKanban className="w-5 h-5" />
           </Link>
@@ -77,7 +73,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               'border-2 border-transparent hover:border-border',
               pathname?.startsWith('/campaigns') && 'bg-secondary text-foreground border-border'
             )}
-            title="Campaigns"
+            aria-label="Campaigns"
           >
             <FolderOpen className="w-5 h-5" />
           </Link>
@@ -89,7 +85,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               'border-2 border-transparent hover:border-border',
               pathname?.startsWith('/blog') && 'bg-secondary text-foreground border-border'
             )}
-            title="Blog Drafts"
+            aria-label="Blog Drafts"
           >
             <FileText className="w-5 h-5" />
           </Link>
@@ -101,7 +97,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               'border-2 border-transparent hover:border-border',
               pathname?.startsWith('/launch-posts') && 'bg-secondary text-foreground border-border'
             )}
-            title="Launch Posts"
+            aria-label="Launch Posts"
           >
             <Rocket className="w-5 h-5" />
           </Link>
@@ -113,7 +109,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               'border-2 border-transparent hover:border-border',
               pathname === '/settings' && 'bg-secondary text-foreground border-border'
             )}
-            title="Settings"
+            aria-label="Settings"
           >
             <Settings className="w-5 h-5" />
           </Link>
@@ -126,7 +122,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               </div>
             )}
           </div>
-        </div>
+        </nav>
         {/* Mobile user avatar only */}
         <div className="md:hidden">
           {userEmail ? (
@@ -146,7 +142,11 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
 
 export function FloatingActionButton() {
   const pathname = usePathname()
-  const isEditorPage = pathname?.startsWith('/new') || pathname?.startsWith('/edit') || pathname?.startsWith('/blog/new') || pathname?.startsWith('/blog/edit')
+  const isEditorPage =
+    pathname?.startsWith('/new') ||
+    pathname?.startsWith('/edit') ||
+    pathname?.startsWith('/blog/new') ||
+    pathname?.startsWith('/blog/edit')
 
   if (isEditorPage) return null
 
@@ -166,7 +166,7 @@ export function FloatingActionButton() {
         'transition-all duration-200',
         'hidden md:flex'
       )}
-      title="Create new post"
+      aria-label="Create new post"
     >
       <Plus className="w-7 h-7" strokeWidth={3} />
     </Link>

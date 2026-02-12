@@ -24,11 +24,16 @@ export function BottomNav() {
   const pathname = usePathname()
 
   // Don't show on editor pages (they have their own back navigation)
-  const isEditorPage = pathname?.startsWith('/new') || pathname?.startsWith('/edit') || pathname?.startsWith('/blog/new') || pathname?.startsWith('/blog/edit')
+  const isEditorPage =
+    pathname?.startsWith('/new') ||
+    pathname?.startsWith('/edit') ||
+    pathname?.startsWith('/blog/new') ||
+    pathname?.startsWith('/blog/edit')
   if (isEditorPage) return null
 
   return (
     <nav
+      aria-label="Mobile navigation"
       className={cn(
         'fixed bottom-0 left-0 right-0 z-50',
         'bg-card/95 backdrop-blur-xl',
@@ -41,7 +46,8 @@ export function BottomNav() {
       <div className="h-1 gradient-bar" />
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
-          const isActive = pathname === item.path || (item.path === '/dashboard' && pathname === '/')
+          const isActive =
+            pathname === item.path || (item.path === '/dashboard' && pathname === '/')
           const Icon = item.icon
 
           if (item.isAction) {
@@ -71,6 +77,7 @@ export function BottomNav() {
             <Link
               key={item.path}
               href={item.path}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'flex flex-col items-center justify-center relative',
                 'flex-1 h-full max-w-[72px]',
@@ -80,10 +87,12 @@ export function BottomNav() {
               )}
             >
               <Icon className={cn('w-6 h-6', isActive && 'stroke-[2.5]')} />
-              <span className={cn(
-                'text-[10px] mt-1 font-bold uppercase',
-                isActive && 'text-foreground'
-              )}>
+              <span
+                className={cn(
+                  'text-[10px] mt-1 font-bold uppercase',
+                  isActive && 'text-foreground'
+                )}
+              >
                 {item.label}
               </span>
               {isActive && (
