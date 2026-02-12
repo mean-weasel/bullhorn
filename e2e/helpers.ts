@@ -238,7 +238,7 @@ export async function fillSubredditTitle(page: Page, subreddit: string, title: s
  */
 export async function setSubredditSchedule(page: Page, subreddit: string, date: Date) {
   const dateStr = date.toISOString().split('T')[0]
-  const timeStr = date.toTimeString().slice(0, 5)
+  const timeStr = date.toISOString().split('T')[1].slice(0, 5)
 
   // Fill the hidden inputs directly (they have -input suffix)
   const dateInput = page.locator(`[data-testid="subreddit-date-${subreddit}-input"]`)
@@ -275,7 +275,7 @@ export async function setLinkedInVisibility(page: Page, visibility: 'public' | '
  */
 export async function setSchedule(page: Page, date: Date) {
   const dateStr = date.toISOString().split('T')[0]
-  const timeStr = date.toTimeString().slice(0, 5)
+  const timeStr = date.toISOString().split('T')[1].slice(0, 5)
 
   // Fill the hidden inputs directly (they have -input suffix)
   // Fill date first, wait for React to process, then fill time
@@ -403,7 +403,7 @@ export async function verifyCharacterCount(
 export async function waitForNavigation(page: Page, url: string | RegExp) {
   // Normalize '/' to '/dashboard' since the root redirects to dashboard
   const normalizedUrl = url === '/' ? '/dashboard' : url
-  await expect(page).toHaveURL(normalizedUrl)
+  await expect(page).toHaveURL(normalizedUrl, { timeout: 10000 })
 }
 
 /**
@@ -435,8 +435,8 @@ export async function createTestPost(
   } else {
     // Set a schedule date in the future
     const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(12, 0, 0, 0)
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+    tomorrow.setUTCHours(12, 0, 0, 0)
     await setSchedule(page, tomorrow)
     await page.getByRole('button', { name: /^schedule$/i }).click()
   }

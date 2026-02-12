@@ -173,8 +173,8 @@ test.describe('Scheduling', () => {
       await fillContent(page, 'Post to reschedule')
 
       const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(10, 0, 0, 0)
+      tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+      tomorrow.setUTCHours(10, 0, 0, 0)
       await setSchedule(page, tomorrow)
 
       await schedulePost(page)
@@ -188,8 +188,8 @@ test.describe('Scheduling', () => {
 
       // Change date to day after tomorrow and time to 15:00
       const dayAfter = new Date()
-      dayAfter.setDate(dayAfter.getDate() + 2)
-      dayAfter.setHours(15, 0, 0, 0)
+      dayAfter.setUTCDate(dayAfter.getUTCDate() + 2)
+      dayAfter.setUTCHours(15, 0, 0, 0)
       const newDateStr = dayAfter.toISOString().split('T')[0]
 
       await setSchedule(page, dayAfter)
@@ -306,8 +306,8 @@ test.describe('Scheduling', () => {
 
       // Calculate a time 2 hours from now
       const futureTime = new Date(today.getTime() + 2 * 60 * 60 * 1000)
-      const hours = futureTime.getHours().toString().padStart(2, '0')
-      const minutes = futureTime.getMinutes().toString().padStart(2, '0')
+      const hours = futureTime.getUTCHours().toString().padStart(2, '0')
+      const minutes = futureTime.getUTCMinutes().toString().padStart(2, '0')
       const timeStr = `${hours}:${minutes}`
 
       await page.locator('[data-testid="main-schedule-date-input"]').fill(dateStr)
