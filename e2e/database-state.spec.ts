@@ -115,11 +115,10 @@ test.describe('Database State Verification', () => {
       await page.goto(`/edit/${postId}`)
       await waitForContentToLoad(page, 'Original content')
       await fillContent(page, 'Updated content')
+      // Verify React processed the content change before saving
+      await expect(page.locator('textarea').first()).toHaveValue('Updated content')
       await page.getByRole('button', { name: /save draft/i }).click()
-      await expect(page).toHaveURL('/dashboard')
-
-      // Wait for save to fully propagate
-      await page.waitForTimeout(1000)
+      await expect(page).toHaveURL('/dashboard', { timeout: 10000 })
 
       // Should still have exactly 1 post
       expect(await getPostCount(page)).toBe(1)
