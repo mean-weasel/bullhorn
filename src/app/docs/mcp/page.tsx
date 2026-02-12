@@ -1,4 +1,12 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+// eslint-disable-next-line react-refresh/only-export-components -- metadata export is required by Next.js App Router
+export const metadata: Metadata = {
+  title: 'MCP Server Documentation',
+  description:
+    'Connect Claude Code or any MCP client to manage your Bullhorn content with AI. Documentation for the @neonwatty/bullhorn-mcp npm package.',
+}
 import {
   Megaphone,
   Key,
