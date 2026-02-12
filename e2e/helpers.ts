@@ -244,12 +244,13 @@ export async function setSubredditSchedule(page: Page, subreddit: string, date: 
   const dateInput = page.locator(`[data-testid="subreddit-date-${subreddit}-input"]`)
   const timeInput = page.locator(`[data-testid="subreddit-time-${subreddit}-input"]`)
 
-  // Fill date first, wait for React to process, then fill time
-  // This is needed because time picker uses the date value as base
+  // Fill date first, wait for React to process the new date value,
+  // then fill time. The time input's onChange reads the current date
+  // from the component's value prop, so React must re-render first.
   await dateInput.fill(dateStr)
-  await page.waitForTimeout(100) // Allow React to re-render
+  await expect(dateInput).toHaveValue(dateStr)
   await timeInput.fill(timeStr)
-  await page.waitForTimeout(100) // Allow React to process final state
+  await expect(timeInput).toHaveValue(timeStr)
 }
 
 /**
@@ -278,15 +279,16 @@ export async function setSchedule(page: Page, date: Date) {
   const timeStr = date.toISOString().split('T')[1].slice(0, 5)
 
   // Fill the hidden inputs directly (they have -input suffix)
-  // Fill date first, wait for React to process, then fill time
-  // This is needed because time picker uses the date value as base
+  // Fill date first, wait for React to process the new date value,
+  // then fill time. The time input's onChange reads the current date
+  // from the component's value prop, so React must re-render first.
   const dateInput = page.locator('[data-testid="main-schedule-date-input"]')
   await dateInput.fill(dateStr)
-  await page.waitForTimeout(100) // Allow React to re-render
+  await expect(dateInput).toHaveValue(dateStr)
 
   const timeInput = page.locator('[data-testid="main-schedule-time-input"]')
   await timeInput.fill(timeStr)
-  await page.waitForTimeout(100) // Allow React to process final state
+  await expect(timeInput).toHaveValue(timeStr)
 }
 
 /**
