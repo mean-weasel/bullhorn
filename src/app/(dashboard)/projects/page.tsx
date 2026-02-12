@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, FolderKanban, Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { Plus, FolderKanban, AlertCircle, RefreshCw } from 'lucide-react'
 import { useProjectsStore, useProjectsLoading, useProjectsError } from '@/lib/projects'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { cn } from '@/lib/utils'
 import { ProjectCard } from '@/components/projects/ProjectCard'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { LimitGate } from '@/components/ui/LimitGate'
+import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -83,11 +84,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Loading state */}
-      {loading && !initialized && (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--gold))]" />
-        </div>
-      )}
+      {loading && !initialized && <SkeletonListPage count={3} />}
 
       {/* Error state */}
       {error && (

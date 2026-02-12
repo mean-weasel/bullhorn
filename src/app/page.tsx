@@ -1,6 +1,14 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { LandingPage } from './landing-page'
+
+// eslint-disable-next-line react-refresh/only-export-components -- metadata export is required by Next.js App Router
+export const metadata: Metadata = {
+  title: 'Bullhorn — Social Media Post Scheduler',
+  description:
+    'Schedule and manage social media posts for Twitter, LinkedIn, and Reddit. Organize campaigns, track projects, and automate with MCP.',
+}
 
 export default async function Home() {
   // Skip auth check in E2E test mode

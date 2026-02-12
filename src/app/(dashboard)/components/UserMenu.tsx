@@ -76,6 +76,8 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
 
       {isOpen && (
         <div
+          role="menu"
+          aria-label="User menu options"
           className={cn(
             'absolute right-0 mt-2 w-56 py-2',
             'bg-card rounded-md border-[3px] border-border',
@@ -85,9 +87,7 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
         >
           {/* User info */}
           <div className="px-4 py-3 border-b-2 border-border">
-            <p className="text-sm font-bold truncate">
-              {displayName || 'User'}
-            </p>
+            <p className="text-sm font-bold truncate">{displayName || 'User'}</p>
             <p className="text-xs text-muted-foreground truncate">{email}</p>
           </div>
 
@@ -95,6 +95,7 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
           <div className="py-1">
             <Link
               href="/profile"
+              role="menuitem"
               onClick={() => setIsOpen(false)}
               className={cn(
                 'flex items-center gap-3 px-4 py-2.5 text-sm font-medium',
@@ -106,6 +107,7 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
             </Link>
 
             <button
+              role="menuitem"
               onClick={handleLogout}
               disabled={isLoggingOut}
               className={cn(

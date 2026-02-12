@@ -8,6 +8,7 @@ import { useBlogDraftsStore, BlogDraftStatus, BLOG_DRAFT_TAGS } from '@/lib/blog
 import { cn } from '@/lib/utils'
 import { DraftCard, FilterTab } from './DraftCard'
 import { LimitGate } from '@/components/ui/LimitGate'
+import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 type FilterStatus = 'all' | BlogDraftStatus
 
@@ -159,6 +160,7 @@ function BlogDraftsContent() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
+          aria-label="Search blog drafts"
           placeholder="Search by title, content, or notes..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -172,6 +174,7 @@ function BlogDraftsContent() {
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
+            aria-label="Clear search"
             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
           >
             <X className="w-4 h-4" />
@@ -236,6 +239,7 @@ function BlogDraftsContent() {
         {tagFilter && (
           <button
             onClick={() => setTagFilter(null)}
+            aria-label="Clear tag filter"
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-3.5 h-3.5" />
@@ -244,11 +248,7 @@ function BlogDraftsContent() {
       </div>
 
       {/* Loading state */}
-      {loading && !initialized && (
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-2 border-[hsl(var(--gold))] border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
+      {loading && !initialized && <SkeletonListPage count={4} />}
 
       {/* Empty state */}
       {!loading && sortedDrafts.length === 0 && (

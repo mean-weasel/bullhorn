@@ -42,6 +42,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <div className="min-h-screen flex flex-col">
       <NativeInit />
       <PlanInitializer />
+      {/* Skip to content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:font-bold focus:border-[3px] focus:border-border focus:shadow-[3px_3px_0_hsl(var(--border))]"
+      >
+        Skip to content
+      </a>
       <AppHeader userEmail={userEmail} userDisplayName={userDisplayName} />
 
       {/* Email verification success banner - always rendered to catch ?verified=true */}
@@ -53,7 +60,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
       )}
 
       {/* Main content - bottom padding for mobile nav */}
-      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <main id="main-content" className="flex-1 pb-20 md:pb-0">
+        {children}
+      </main>
 
       {/* FAB for new post - hidden on mobile (replaced by bottom nav) */}
       <FloatingActionButton />

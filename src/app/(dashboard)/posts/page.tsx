@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 import { PostCard } from './PostCard'
 import { CalendarView } from './CalendarView'
 import { LimitGate } from '@/components/ui/LimitGate'
+import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 type FilterStatus = 'all' | PostStatus
 type ViewMode = 'list' | 'calendar'
@@ -40,6 +41,7 @@ export default function PostsPage() {
   const allPosts = usePostsStore((state) => state.posts)
   const fetchPosts = usePostsStore((state) => state.fetchPosts)
   const initialized = usePostsStore((state) => state.initialized)
+  const loading = usePostsStore((state) => state.loading)
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -118,6 +120,10 @@ export default function PostsPage() {
     archived: allPosts.filter((p) => p.status === 'archived').length,
   }
 
+  if (loading && !initialized) {
+    return <SkeletonListPage count={5} />
+  }
+
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto animate-fade-in">
       {/* Header */}
@@ -140,7 +146,7 @@ export default function PostsPage() {
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
-              title="List view"
+              aria-label="List view"
             >
               <List className="w-4 h-4" />
             </button>
@@ -152,7 +158,7 @@ export default function PostsPage() {
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
-              title="Calendar view"
+              aria-label="Calendar view"
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
@@ -185,6 +191,7 @@ export default function PostsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
+                aria-label="Search posts"
                 placeholder="Search posts by content or notes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -200,6 +207,7 @@ export default function PostsPage() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <X className="w-4 h-4" />
