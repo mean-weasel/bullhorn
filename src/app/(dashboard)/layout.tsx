@@ -5,6 +5,7 @@ import { BottomNav } from './components/BottomNav'
 import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import { VerificationSuccessBanner } from './components/VerificationSuccessBanner'
 import { NativeInit } from './components/NativeInit'
+import { PlanInitializer } from './components/PlanInitializer'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   let userEmail: string | undefined
@@ -40,6 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen flex flex-col">
       <NativeInit />
+      <PlanInitializer />
       {/* Skip to content link for keyboard users */}
       <a
         href="#main-content"

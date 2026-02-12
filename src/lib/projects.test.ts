@@ -87,31 +87,6 @@ describe('useProjectsStore', () => {
       expect(state.loading).toBe(false)
     })
 
-    it('should set atLimit when meta.atLimit is true', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ projects: [], meta: { atLimit: true } }),
-      })
-
-      await useProjectsStore.getState().fetchProjects()
-      expect(useProjectsStore.getState().atLimit).toBe(true)
-    })
-
-    it('should set atLimit when projects count >= SOFT_LIMIT (3)', async () => {
-      const projects = [
-        makeProject({ id: 'p1' }),
-        makeProject({ id: 'p2' }),
-        makeProject({ id: 'p3' }),
-      ]
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ projects }),
-      })
-
-      await useProjectsStore.getState().fetchProjects()
-      expect(useProjectsStore.getState().atLimit).toBe(true)
-    })
-
     it('should default to empty array when response has no projects key', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -177,18 +152,6 @@ describe('useProjectsStore', () => {
       const projects = useProjectsStore.getState().projects
       expect(projects).toHaveLength(2)
       expect(projects[0].id).toBe('new-1')
-    })
-
-    it('should set atLimit and showUpgradePrompt from meta', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ project: makeProject(), meta: { atLimit: true } }),
-      })
-
-      await useProjectsStore.getState().createProject({ name: 'Third' })
-
-      expect(useProjectsStore.getState().atLimit).toBe(true)
-      expect(useProjectsStore.getState().showUpgradePrompt).toBe(true)
     })
 
     it('should set error and throw on failure', async () => {
@@ -277,23 +240,6 @@ describe('useProjectsStore', () => {
       expect(result).toEqual({ campaignsAffected: 2 })
       expect(useProjectsStore.getState().projects).toHaveLength(1)
       expect(useProjectsStore.getState().projects[0].id).toBe('proj-2')
-    })
-
-    it('should update atLimit after deletion', async () => {
-      useProjectsStore.setState({
-        projects: [makeProject({ id: 'p1' }), makeProject({ id: 'p2' }), makeProject({ id: 'p3' })],
-        atLimit: true,
-      })
-
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ deleted: { campaignsAffected: 0 } }),
-      })
-
-      await useProjectsStore.getState().deleteProject('p3')
-
-      expect(useProjectsStore.getState().projects).toHaveLength(2)
-      expect(useProjectsStore.getState().atLimit).toBe(false)
     })
 
     it('should default campaignsAffected to 0', async () => {
@@ -429,50 +375,6 @@ describe('useProjectsStore', () => {
   })
 
   // ---------------------------------------------------------------------------
-  // checkSoftLimit / dismissUpgradePrompt
-  // ---------------------------------------------------------------------------
-
-  describe('checkSoftLimit', () => {
-    it('should return true and show prompt when at limit', () => {
-      useProjectsStore.setState({
-        projects: [makeProject({ id: 'p1' }), makeProject({ id: 'p2' }), makeProject({ id: 'p3' })],
-      })
-
-      const result = useProjectsStore.getState().checkSoftLimit()
-
-      expect(result).toBe(true)
-      expect(useProjectsStore.getState().showUpgradePrompt).toBe(true)
-    })
-
-    it('should return false when under limit', () => {
-      useProjectsStore.setState({ projects: [makeProject({ id: 'p1' })] })
-
-      const result = useProjectsStore.getState().checkSoftLimit()
-
-      expect(result).toBe(false)
-      expect(useProjectsStore.getState().showUpgradePrompt).toBe(false)
-    })
-
-    it('should not reset showUpgradePrompt if already showing', () => {
-      useProjectsStore.setState({
-        projects: [makeProject({ id: 'p1' }), makeProject({ id: 'p2' }), makeProject({ id: 'p3' })],
-        showUpgradePrompt: true,
-      })
-
-      useProjectsStore.getState().checkSoftLimit()
-      expect(useProjectsStore.getState().showUpgradePrompt).toBe(true)
-    })
-  })
-
-  describe('dismissUpgradePrompt', () => {
-    it('should set showUpgradePrompt to false', () => {
-      useProjectsStore.setState({ showUpgradePrompt: true })
-      useProjectsStore.getState().dismissUpgradePrompt()
-      expect(useProjectsStore.getState().showUpgradePrompt).toBe(false)
-    })
-  })
-
-  // ---------------------------------------------------------------------------
   // reset
   // ---------------------------------------------------------------------------
 
@@ -483,8 +385,6 @@ describe('useProjectsStore', () => {
         loading: true,
         error: 'some error',
         initialized: true,
-        atLimit: true,
-        showUpgradePrompt: true,
       })
 
       useProjectsStore.getState().reset()
@@ -494,8 +394,6 @@ describe('useProjectsStore', () => {
       expect(state.loading).toBe(false)
       expect(state.error).toBeNull()
       expect(state.initialized).toBe(false)
-      expect(state.atLimit).toBe(false)
-      expect(state.showUpgradePrompt).toBe(false)
     })
   })
 })

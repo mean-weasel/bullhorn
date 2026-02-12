@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes, type ApiKeyScope } from '@/lib/auth'
+import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
 const createPostSchema = z.object({
@@ -107,6 +108,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Enforce plan limit
+    const limitCheck = await enforceResourceLimit(userId, 'posts')
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        { error: 'Post limit reached', limit: limitCheck.limit, current: limitCheck.current },
+        { status: 403 }
+      )
     }
 
     const supabase = await createClient()

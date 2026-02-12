@@ -8,6 +8,7 @@ import { useCampaignsStore } from '@/lib/campaigns'
 import { cn } from '@/lib/utils'
 import { ProjectCard } from '@/components/projects/ProjectCard'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
+import { LimitGate } from '@/components/ui/LimitGate'
 import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 export default function ProjectsPage() {
@@ -64,20 +65,22 @@ export default function ProjectsPage() {
           </p>
           <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className={cn(
-            'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-            'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-            'border-2 border-[hsl(var(--gold-dark))]',
-            'text-primary-foreground font-medium text-sm',
-            'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
-          )}
-        >
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">New Project</span>
-          <span className="sm:hidden">New</span>
-        </button>
+        <LimitGate resource="projects">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className={cn(
+              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
+              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'border-2 border-[hsl(var(--gold-dark))]',
+              'text-primary-foreground font-medium text-sm',
+              'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+            )}
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Project</span>
+            <span className="sm:hidden">New</span>
+          </button>
+        </LimitGate>
       </div>
 
       {/* Loading state */}

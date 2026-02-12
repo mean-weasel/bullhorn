@@ -20,6 +20,7 @@ import { PostStatus, getPostPreviewText } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 import { PostCard } from './PostCard'
 import { CalendarView } from './CalendarView'
+import { LimitGate } from '@/components/ui/LimitGate'
 import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 type FilterStatus = 'all' | PostStatus
@@ -162,21 +163,23 @@ export default function PostsPage() {
               <LayoutGrid className="w-4 h-4" />
             </button>
           </div>
-          <Link
-            href="/new"
-            className={cn(
-              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-md min-h-[44px]',
-              'bg-primary text-primary-foreground font-bold text-sm',
-              'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
-              'transition-all'
-            )}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New Post</span>
-            <span className="sm:hidden">New</span>
-          </Link>
+          <LimitGate resource="posts">
+            <Link
+              href="/new"
+              className={cn(
+                'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-md min-h-[44px]',
+                'bg-primary text-primary-foreground font-bold text-sm',
+                'border-[3px] border-border',
+                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
+                'transition-all'
+              )}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">New Post</span>
+              <span className="sm:hidden">New</span>
+            </Link>
+          </LimitGate>
         </div>
       </div>
 

@@ -8,10 +8,7 @@ const TEST_USER_EMAIL = 'test@example.com'
 export async function POST() {
   // SECURITY: Never allow reset in production environment
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json(
-      { error: 'Reset endpoint is disabled in production' },
-      { status: 403 }
-    )
+    return NextResponse.json({ error: 'Reset endpoint is disabled in production' }, { status: 403 })
   }
 
   // Only allow in E2E test mode
@@ -44,15 +41,21 @@ export async function POST() {
     await supabase.from('launch_posts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
     await supabase.from('campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000')
     await supabase.from('blog_drafts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabase.from('project_accounts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    await supabase
+      .from('project_accounts')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000')
     await supabase.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+
+    // Reset plan to free and storage to 0 for E2E limit testing
+    await supabase
+      .from('user_profiles')
+      .update({ plan: 'free', storage_used_bytes: 0 })
+      .eq('id', TEST_USER_ID)
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error resetting database:', error)
-    return NextResponse.json(
-      { error: 'Failed to reset database' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to reset database' }, { status: 500 })
   }
 }

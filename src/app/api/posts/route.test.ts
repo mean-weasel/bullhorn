@@ -9,6 +9,15 @@ vi.mock('@/lib/auth', () => ({
   requireAuth: vi.fn(),
 }))
 
+vi.mock('@/lib/planEnforcement', () => ({
+  enforceResourceLimit: vi.fn(async () => ({
+    allowed: true,
+    current: 0,
+    limit: 50,
+    plan: 'free',
+  })),
+}))
+
 const mockLimit = vi.fn()
 const mockOrder = vi.fn(() => ({ limit: mockLimit }))
 const mockQueryEq = vi.fn(() => ({ eq: mockQueryEq, order: mockOrder }))

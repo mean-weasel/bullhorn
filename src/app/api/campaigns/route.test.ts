@@ -9,6 +9,15 @@ vi.mock('@/lib/auth', () => ({
   requireAuth: vi.fn(),
 }))
 
+vi.mock('@/lib/planEnforcement', () => ({
+  enforceResourceLimit: vi.fn(async () => ({
+    allowed: true,
+    current: 0,
+    limit: 5,
+    plan: 'free',
+  })),
+}))
+
 // mockQueryData holds { data, error } for the final await
 let mockQueryData: { data: unknown; error: unknown } = { data: [], error: null }
 // .order() is the terminal call before await, so it returns a thenable
