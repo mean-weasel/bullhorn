@@ -7,6 +7,7 @@ import { FileText, Plus, Search, X, Tag } from 'lucide-react'
 import { useBlogDraftsStore, BlogDraftStatus, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 import { DraftCard, FilterTab } from './DraftCard'
+import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 type FilterStatus = 'all' | BlogDraftStatus
 
@@ -241,11 +242,7 @@ function BlogDraftsContent() {
       </div>
 
       {/* Loading state */}
-      {loading && !initialized && (
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-2 border-[hsl(var(--gold))] border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
+      {loading && !initialized && <SkeletonListPage count={4} />}
 
       {/* Empty state */}
       {!loading && sortedDrafts.length === 0 && (

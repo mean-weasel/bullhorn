@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Rocket, Loader2, AlertCircle, RefreshCw, Filter } from 'lucide-react'
+import { Plus, Rocket, AlertCircle, RefreshCw, Filter } from 'lucide-react'
 import {
   useLaunchPostsStore,
   useLaunchPostsLoading,
@@ -12,6 +12,7 @@ import {
 } from '@/lib/launchPosts'
 import { cn } from '@/lib/utils'
 import { LaunchPostCard } from '@/components/launch-posts/LaunchPostCard'
+import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 export default function LaunchPostsPage() {
   const router = useRouter()
@@ -176,11 +177,7 @@ export default function LaunchPostsPage() {
       </div>
 
       {/* Loading state */}
-      {loading && !initialized && (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--gold))]" />
-        </div>
-      )}
+      {loading && !initialized && <SkeletonListPage count={3} />}
 
       {/* Error state */}
       {error && (

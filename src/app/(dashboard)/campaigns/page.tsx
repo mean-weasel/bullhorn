@@ -11,6 +11,7 @@ import { MoveCampaignModal } from '@/components/campaigns/MoveCampaignModal'
 import { IOSSegmentedControl } from '@/components/ui/IOSSegmentedControl'
 import { CampaignCard } from './CampaignCard'
 import { NewCampaignModal } from './NewCampaignModal'
+import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 type FilterStatus = 'all' | CampaignStatus
 
@@ -25,7 +26,7 @@ const STATUS_CONFIG: Record<
 }
 
 export default function CampaignsPage() {
-  const { campaigns, fetchCampaigns, initialized, addCampaign, deleteCampaign } =
+  const { campaigns, fetchCampaigns, initialized, loading, addCampaign, deleteCampaign } =
     useCampaignsStore()
   const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
   const [filter, setFilter] = useState<FilterStatus>('all')
@@ -82,6 +83,10 @@ export default function CampaignsPage() {
     ) {
       await deleteCampaign(id)
     }
+  }
+
+  if (loading && !initialized) {
+    return <SkeletonListPage count={4} />
   }
 
   return (

@@ -20,6 +20,7 @@ import { PostStatus, getPostPreviewText } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 import { PostCard } from './PostCard'
 import { CalendarView } from './CalendarView'
+import { SkeletonListPage } from '@/components/ui/Skeleton'
 
 type FilterStatus = 'all' | PostStatus
 type ViewMode = 'list' | 'calendar'
@@ -39,6 +40,7 @@ export default function PostsPage() {
   const allPosts = usePostsStore((state) => state.posts)
   const fetchPosts = usePostsStore((state) => state.fetchPosts)
   const initialized = usePostsStore((state) => state.initialized)
+  const loading = usePostsStore((state) => state.loading)
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -115,6 +117,10 @@ export default function PostsPage() {
     published: allPosts.filter((p) => p.status === 'published').length,
     failed: allPosts.filter((p) => p.status === 'failed').length,
     archived: allPosts.filter((p) => p.status === 'archived').length,
+  }
+
+  if (loading && !initialized) {
+    return <SkeletonListPage count={5} />
   }
 
   return (
