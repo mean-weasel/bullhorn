@@ -7,6 +7,7 @@ import { FileText, Plus, Search, X, Tag } from 'lucide-react'
 import { useBlogDraftsStore, BlogDraftStatus, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 import { DraftCard, FilterTab } from './DraftCard'
+import { LimitGate } from '@/components/ui/LimitGate'
 
 type FilterStatus = 'all' | BlogDraftStatus
 
@@ -135,20 +136,22 @@ function BlogDraftsContent() {
           </p>
           <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
         </div>
-        <Link
-          href="/blog/new"
-          className={cn(
-            'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-            'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-            'border-2 border-[hsl(var(--gold-dark))]',
-            'text-primary-foreground font-medium text-sm',
-            'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
-          )}
-        >
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">New Draft</span>
-          <span className="sm:hidden">New</span>
-        </Link>
+        <LimitGate resource="blogDrafts">
+          <Link
+            href="/blog/new"
+            className={cn(
+              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
+              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'border-2 border-[hsl(var(--gold-dark))]',
+              'text-primary-foreground font-medium text-sm',
+              'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+            )}
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Draft</span>
+            <span className="sm:hidden">New</span>
+          </Link>
+        </LimitGate>
       </div>
 
       {/* Search */}

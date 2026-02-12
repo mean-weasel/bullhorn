@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { escapeSearchPattern } from '@/lib/utils'
 import { z } from 'zod'
 
@@ -118,6 +119,19 @@ export async function POST(request: NextRequest) {
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Enforce plan limit
+    const limitCheck = await enforceResourceLimit(userId, 'blogDrafts')
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Blog draft limit reached',
+          limit: limitCheck.limit,
+          current: limitCheck.current,
+        },
+        { status: 403 }
+      )
     }
 
     const supabase = await createClient()

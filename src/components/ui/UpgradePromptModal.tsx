@@ -13,12 +13,13 @@ interface UpgradePromptModalProps {
   onDismiss: () => void
   title?: string
   description?: string
+  resourceName?: string
   currentCount?: number
   limit?: number
 }
 
 const UPCOMING_FEATURES = [
-  'Unlimited projects',
+  'Higher limits on all resources',
   'Team collaboration',
   'Advanced analytics',
   'Priority support',
@@ -28,7 +29,8 @@ export function UpgradePromptModal({
   open,
   onDismiss,
   title = "You've reached the free tier limit",
-  description = "You can continue using your existing projects. Premium features are coming soon — we'll notify you when they're available!",
+  description = "You can continue using your existing resources. Premium features are coming soon — we'll notify you when they're available!",
+  resourceName = 'Resources',
   currentCount = 3,
   limit = 3,
 }: UpgradePromptModalProps) {
@@ -63,7 +65,7 @@ export function UpgradePromptModal({
       {/* Usage indicator */}
       <div className="mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
         <div className="flex items-center justify-between text-sm mb-3">
-          <span className="text-muted-foreground font-medium">Projects used</span>
+          <span className="text-muted-foreground font-medium">{resourceName} used</span>
           <span className="font-bold text-foreground">
             {currentCount} / {limit}
           </span>

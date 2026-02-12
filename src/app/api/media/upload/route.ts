@@ -3,6 +3,8 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
 import { requireAuth } from '@/lib/auth'
+import { enforceStorageLimit } from '@/lib/planEnforcement'
+import { createClient } from '@/lib/supabase/server'
 
 // Media upload directory (in public folder for easy serving)
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads')
@@ -13,7 +15,7 @@ const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES]
 
 // File size limits
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024  // 10MB
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
 
 // Generate a unique ID using crypto (built-in Node.js module)
@@ -33,13 +35,12 @@ async function ensureUploadDir() {
 export async function POST(request: NextRequest) {
   try {
     // Require authentication for media uploads
+    let userId: string
     try {
-      await requireAuth()
+      const auth = await requireAuth()
+      userId = auth.userId
     } catch {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
     await ensureUploadDir()
@@ -48,16 +49,16 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 })
     }
 
     // Server-side file type validation
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { success: false, error: 'Unsupported file type. Allowed: JPG, PNG, GIF, WebP, MP4, MOV, WebM' },
+        {
+          success: false,
+          error: 'Unsupported file type. Allowed: JPG, PNG, GIF, WebP, MP4, MOV, WebM',
+        },
         { status: 400 }
       )
     }
@@ -73,6 +74,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Enforce storage limit
+    const storageCheck = await enforceStorageLimit(userId, file.size)
+    if (!storageCheck.allowed) {
+      const limitMB = Math.round(storageCheck.limitBytes / (1024 * 1024))
+      return NextResponse.json(
+        { success: false, error: `Storage limit reached (${limitMB} MB)` },
+        { status: 403 }
+      )
+    }
+
     // Generate unique filename
     const ext = path.extname(file.name).toLowerCase()
     const filename = `${generateId()}${ext}`
@@ -83,6 +94,13 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
     await writeFile(filepath, buffer)
 
+    // Track storage usage
+    const supabase = await createClient()
+    await supabase.rpc('increment_storage_used', {
+      user_id_param: userId,
+      bytes_param: file.size,
+    })
+
     return NextResponse.json({
       success: true,
       filename,
@@ -90,9 +108,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error uploading file:', error)
-    return NextResponse.json(
-      { success: false, error: 'Upload failed' },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 })
   }
 }

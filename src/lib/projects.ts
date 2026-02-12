@@ -5,16 +5,11 @@ import { dedup } from './requestDedup'
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
 
-const SOFT_LIMIT = 3
-
 interface ProjectsState {
   projects: Project[]
   loading: boolean
   error: string | null
   initialized: boolean
-  // Soft limit state
-  atLimit: boolean
-  showUpgradePrompt: boolean
 }
 
 interface ProjectsActions {
@@ -35,12 +30,10 @@ interface ProjectsActions {
   getProjectCount: () => number
 
   // Project details
-  fetchProjectWithCampaigns: (id: string) => Promise<{ project: Project; campaigns: Campaign[] } | undefined>
+  fetchProjectWithCampaigns: (
+    id: string
+  ) => Promise<{ project: Project; campaigns: Campaign[] } | undefined>
   fetchProjectAnalytics: (id: string) => Promise<ProjectAnalytics | undefined>
-
-  // Soft limit
-  checkSoftLimit: () => boolean
-  dismissUpgradePrompt: () => void
 
   // Reset
   reset: () => void
@@ -51,8 +44,6 @@ const initialState: ProjectsState = {
   loading: false,
   error: null,
   initialized: false,
-  atLimit: false,
-  showUpgradePrompt: false,
 }
 
 export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, get) => ({
@@ -66,12 +57,10 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
         if (!res.ok) throw new Error('Failed to fetch projects')
         const data = await res.json()
         const projects = data.projects || []
-        const atLimit = data.meta?.atLimit || projects.length >= SOFT_LIMIT
         set({
           projects,
           loading: false,
           initialized: true,
-          atLimit,
         })
       } catch (error) {
         set({ error: (error as Error).message, loading: false })
@@ -93,13 +82,10 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
       }
       const data = await res.json()
       const newProject = data.project as Project
-      const atLimit = data.meta?.atLimit || false
 
       set((state) => ({
         projects: [newProject, ...state.projects],
         loading: false,
-        atLimit,
-        showUpgradePrompt: atLimit,
       }))
 
       return newProject
@@ -146,14 +132,10 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
       }
       const data = await res.json()
 
-      set((state) => {
-        const newProjects = state.projects.filter((p) => p.id !== id)
-        return {
-          projects: newProjects,
-          loading: false,
-          atLimit: newProjects.length >= SOFT_LIMIT,
-        }
-      })
+      set((state) => ({
+        projects: state.projects.filter((p) => p.id !== id),
+        loading: false,
+      }))
 
       return { campaignsAffected: data.deleted?.campaignsAffected || 0 }
     } catch (error) {
@@ -205,19 +187,6 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
     }
   },
 
-  checkSoftLimit: () => {
-    const count = get().projects.length
-    const atLimit = count >= SOFT_LIMIT
-    if (atLimit && !get().showUpgradePrompt) {
-      set({ showUpgradePrompt: true })
-    }
-    return atLimit
-  },
-
-  dismissUpgradePrompt: () => {
-    set({ showUpgradePrompt: false })
-  },
-
   reset: () => {
     set(initialState)
   },
@@ -228,5 +197,3 @@ export const useProjects = () => useProjectsStore((state) => state.projects)
 export const useProjectsLoading = () => useProjectsStore((state) => state.loading)
 export const useProjectsError = () => useProjectsStore((state) => state.error)
 export const useProjectsInitialized = () => useProjectsStore((state) => state.initialized)
-export const useProjectsAtLimit = () => useProjectsStore((state) => state.atLimit)
-export const useShowUpgradePrompt = () => useProjectsStore((state) => state.showUpgradePrompt)

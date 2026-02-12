@@ -12,6 +12,7 @@ import {
 } from '@/lib/launchPosts'
 import { cn } from '@/lib/utils'
 import { LaunchPostCard } from '@/components/launch-posts/LaunchPostCard'
+import { LimitGate } from '@/components/ui/LimitGate'
 
 export default function LaunchPostsPage() {
   const router = useRouter()
@@ -81,20 +82,22 @@ export default function LaunchPostsPage() {
           </p>
           <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
         </div>
-        <button
-          onClick={() => router.push('/launch-posts/new')}
-          className={cn(
-            'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-            'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-            'border-2 border-[hsl(var(--gold-dark))]',
-            'text-primary-foreground font-medium text-sm',
-            'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
-          )}
-        >
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">New Launch Post</span>
-          <span className="sm:hidden">New</span>
-        </button>
+        <LimitGate resource="launchPosts">
+          <button
+            onClick={() => router.push('/launch-posts/new')}
+            className={cn(
+              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
+              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'border-2 border-[hsl(var(--gold-dark))]',
+              'text-primary-foreground font-medium text-sm',
+              'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+            )}
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Launch Post</span>
+            <span className="sm:hidden">New</span>
+          </button>
+        </LimitGate>
       </div>
 
       {/* Filters */}

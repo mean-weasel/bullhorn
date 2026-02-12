@@ -5,7 +5,6 @@ import {
   getAllProjects,
   getProjectById,
   getAllCampaigns,
-  getProjectsMeta,
   createProjectViaAPI,
 } from './helpers'
 
@@ -24,7 +23,9 @@ test.describe('Projects', () => {
 
       // Fill project details in modal
       await page.getByPlaceholder(/enter project name/i).fill('Product Launch 2024')
-      await page.getByPlaceholder(/describe this project/i).fill('Marketing initiatives for new product release')
+      await page
+        .getByPlaceholder(/describe this project/i)
+        .fill('Marketing initiatives for new product release')
 
       // Submit
       await page.getByRole('button', { name: /create project/i }).click()
@@ -289,52 +290,9 @@ test.describe('Projects', () => {
 
       // Verify campaign was created with correct projectId
       const campaigns = await getAllCampaigns(page)
-      const createdCampaign = campaigns.find(c => c.name === 'Test Campaign')
+      const createdCampaign = campaigns.find((c) => c.name === 'Test Campaign')
       expect(createdCampaign).toBeDefined()
       expect(createdCampaign?.projectId).toBe(project.id)
-    })
-  })
-
-  test.describe('Soft Limit Upgrade Prompts', () => {
-    test('should show warning when at project limit', async ({ page }) => {
-      // Create 3 projects (the soft limit)
-      await createProjectViaAPI(page, { name: 'Project 1' })
-      await createProjectViaAPI(page, { name: 'Project 2' })
-      await createProjectViaAPI(page, { name: 'Project 3' })
-
-      // Verify we're at the limit
-      const meta = await getProjectsMeta(page)
-      expect(meta.atLimit).toBe(true)
-      expect(meta.count).toBe(3)
-
-      // Navigate to projects and try to create another
-      await goToProjects(page)
-      await page.getByRole('button', { name: /new project|new$/i }).click()
-
-      // Should show warning message about limit
-      await expect(page.getByText(/you've reached the free tier limit/i)).toBeVisible()
-      await expect(page.getByText(/3\/3 projects/i)).toBeVisible()
-
-      // Can still create the project (soft limit)
-      await page.getByPlaceholder(/enter project name/i).fill('Project 4')
-      await page.getByRole('button', { name: /create project/i }).click()
-      await page.waitForURL(/\/projects\//)
-
-      // Project should be created
-      const projects = await getAllProjects(page)
-      expect(projects.length).toBe(4)
-    })
-
-    test('should not show warning when under limit', async ({ page }) => {
-      // Create 1 project
-      await createProjectViaAPI(page, { name: 'Single Project' })
-
-      // Navigate to projects and try to create another
-      await goToProjects(page)
-      await page.getByRole('button', { name: /new project|new$/i }).click()
-
-      // Should NOT show warning message
-      await expect(page.getByText(/you've reached the free tier limit/i)).not.toBeVisible()
     })
   })
 
@@ -352,7 +310,7 @@ test.describe('Projects', () => {
 
       // Verify campaign is unassigned
       let campaigns = await getAllCampaigns(page)
-      expect(campaigns.find(c => c.id === campaignId)?.projectId == null).toBe(true)
+      expect(campaigns.find((c) => c.id === campaignId)?.projectId == null).toBe(true)
 
       // Navigate to campaign detail
       await page.goto(`/campaigns/${campaignId}`)
@@ -379,7 +337,7 @@ test.describe('Projects', () => {
 
       // Verify campaign is now in the project
       campaigns = await getAllCampaigns(page)
-      const movedCampaign = campaigns.find(c => c.id === campaignId)
+      const movedCampaign = campaigns.find((c) => c.id === campaignId)
       expect(movedCampaign?.projectId).toBe(project.id)
     })
 
@@ -422,7 +380,7 @@ test.describe('Projects', () => {
 
       // Verify campaign is now in project 2
       const campaigns = await getAllCampaigns(page)
-      const movedCampaign = campaigns.find(c => c.id === campaignId)
+      const movedCampaign = campaigns.find((c) => c.id === campaignId)
       expect(movedCampaign?.projectId).toBe(project2.id)
     })
 
@@ -449,7 +407,10 @@ test.describe('Projects', () => {
       await expect(modal).toBeVisible()
 
       // Select "Unassigned" option
-      const unassignedOption = modal.locator('button').filter({ hasText: 'Unassigned' }).filter({ hasText: 'Not part of any project' })
+      const unassignedOption = modal
+        .locator('button')
+        .filter({ hasText: 'Unassigned' })
+        .filter({ hasText: 'Not part of any project' })
       await expect(unassignedOption).toBeVisible({ timeout: 5000 })
       await unassignedOption.click()
 
@@ -461,7 +422,7 @@ test.describe('Projects', () => {
 
       // Verify campaign is now unassigned
       const campaigns = await getAllCampaigns(page)
-      const movedCampaign = campaigns.find(c => c.id === campaignId)
+      const movedCampaign = campaigns.find((c) => c.id === campaignId)
       expect(movedCampaign?.projectId == null).toBe(true)
     })
   })

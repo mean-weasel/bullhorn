@@ -11,6 +11,7 @@ import { MoveCampaignModal } from '@/components/campaigns/MoveCampaignModal'
 import { IOSSegmentedControl } from '@/components/ui/IOSSegmentedControl'
 import { CampaignCard } from './CampaignCard'
 import { NewCampaignModal } from './NewCampaignModal'
+import { LimitGate } from '@/components/ui/LimitGate'
 
 type FilterStatus = 'all' | CampaignStatus
 
@@ -97,20 +98,22 @@ export default function CampaignsPage() {
           </p>
           <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
         </div>
-        <button
-          onClick={() => setShowNewModal(true)}
-          className={cn(
-            'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-            'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
-            'border-2 border-[hsl(var(--gold-dark))]',
-            'text-primary-foreground font-medium text-sm',
-            'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
-          )}
-        >
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">New Campaign</span>
-          <span className="sm:hidden">New</span>
-        </button>
+        <LimitGate resource="campaigns">
+          <button
+            onClick={() => setShowNewModal(true)}
+            className={cn(
+              'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
+              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'border-2 border-[hsl(var(--gold-dark))]',
+              'text-primary-foreground font-medium text-sm',
+              'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
+            )}
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">New Campaign</span>
+            <span className="sm:hidden">New</span>
+          </button>
+        </LimitGate>
       </div>
 
       {/* Filter tabs */}

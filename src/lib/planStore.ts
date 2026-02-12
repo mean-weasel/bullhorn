@@ -1,0 +1,97 @@
+import { create } from 'zustand'
+import { dedup } from './requestDedup'
+import { type PlanType, type ResourceType, PLAN_LIMITS } from './limits'
+
+interface LimitInfo {
+  current: number
+  limit: number
+}
+
+interface PlanState {
+  plan: PlanType
+  limits: Record<Exclude<ResourceType, 'storageBytes'>, LimitInfo>
+  storage: { usedBytes: number; limitBytes: number }
+  loading: boolean
+  error: string | null
+  initialized: boolean
+}
+
+interface PlanActions {
+  fetchPlan: () => Promise<void>
+  isAtLimit: (resource: Exclude<ResourceType, 'storageBytes'>) => boolean
+  incrementCount: (resource: Exclude<ResourceType, 'storageBytes'>) => void
+  decrementCount: (resource: Exclude<ResourceType, 'storageBytes'>) => void
+  reset: () => void
+}
+
+const defaultLimits: PlanState['limits'] = {
+  posts: { current: 0, limit: PLAN_LIMITS.free.posts },
+  campaigns: { current: 0, limit: PLAN_LIMITS.free.campaigns },
+  projects: { current: 0, limit: PLAN_LIMITS.free.projects },
+  blogDrafts: { current: 0, limit: PLAN_LIMITS.free.blogDrafts },
+  launchPosts: { current: 0, limit: PLAN_LIMITS.free.launchPosts },
+}
+
+const initialState: PlanState = {
+  plan: 'free',
+  limits: defaultLimits,
+  storage: { usedBytes: 0, limitBytes: PLAN_LIMITS.free.storageBytes },
+  loading: false,
+  error: null,
+  initialized: false,
+}
+
+export const usePlanStore = create<PlanState & PlanActions>()((set, get) => ({
+  ...initialState,
+
+  fetchPlan: async () => {
+    return dedup('fetchPlan', async () => {
+      set({ loading: true, error: null })
+      try {
+        const res = await fetch('/api/plan')
+        if (!res.ok) throw new Error('Failed to fetch plan')
+        const data = await res.json()
+        set({
+          plan: data.plan,
+          limits: data.limits,
+          storage: data.storage,
+          loading: false,
+          initialized: true,
+        })
+      } catch (error) {
+        set({ error: (error as Error).message, loading: false })
+      }
+    })
+  },
+
+  isAtLimit: (resource) => {
+    const info = get().limits[resource]
+    return info.current >= info.limit
+  },
+
+  incrementCount: (resource) => {
+    set((state) => ({
+      limits: {
+        ...state.limits,
+        [resource]: {
+          ...state.limits[resource],
+          current: state.limits[resource].current + 1,
+        },
+      },
+    }))
+  },
+
+  decrementCount: (resource) => {
+    set((state) => ({
+      limits: {
+        ...state.limits,
+        [resource]: {
+          ...state.limits[resource],
+          current: Math.max(0, state.limits[resource].current - 1),
+        },
+      },
+    }))
+  },
+
+  reset: () => set(initialState),
+}))

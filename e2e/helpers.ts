@@ -798,11 +798,6 @@ interface ProjectFromAPI {
 
 interface ProjectListResponse {
   projects: ProjectFromAPI[]
-  meta: {
-    count: number
-    softLimit: number
-    atLimit: boolean
-  }
 }
 
 /**
@@ -826,21 +821,6 @@ export async function getAllProjects(page: Page): Promise<ProjectFromAPI[]> {
   }
   const data = (await response.json()) as ProjectListResponse
   return data.projects
-}
-
-/**
- * Get project metadata (count, limit info) from the database via API
- */
-export async function getProjectsMeta(page: Page): Promise<ProjectListResponse['meta']> {
-  const response = await page.request.get(`${API_BASE}/projects`)
-  if (!response.ok()) {
-    const errorData = await response.json().catch(() => ({}))
-    throw new Error(
-      `Failed to get projects meta: ${response.status()} - ${errorData.error || response.statusText()}`
-    )
-  }
-  const data = (await response.json()) as ProjectListResponse
-  return data.meta
 }
 
 /**
