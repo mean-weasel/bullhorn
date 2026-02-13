@@ -13,10 +13,21 @@ function formatBytes(bytes: number): string {
   return `${(bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0)} ${units[i]}`
 }
 
-function UsageBar({ label, current, limit }: { label: string; current: number; limit: number }) {
+function UsageBar({
+  label,
+  current,
+  limit,
+  formatValue,
+}: {
+  label: string
+  current: number
+  limit: number
+  formatValue?: (v: number) => string
+}) {
   const pct = Math.min((current / limit) * 100, 100)
   const isNearLimit = pct >= 80
   const isAtLimit = current >= limit
+  const fmt = formatValue || String
 
   return (
     <div>
@@ -28,7 +39,7 @@ function UsageBar({ label, current, limit }: { label: string; current: number; l
             isAtLimit ? 'text-destructive' : isNearLimit ? 'text-amber-500' : 'text-foreground'
           )}
         >
-          {current} / {limit}
+          {fmt(current)} / {fmt(limit)}
         </span>
       </div>
       <div className="h-2.5 bg-muted rounded-full overflow-hidden border border-border">
@@ -109,14 +120,9 @@ export function PlanSection() {
           label={RESOURCE_LABELS.storageBytes}
           current={Number(storage.usedBytes)}
           limit={Number(storage.limitBytes)}
+          formatValue={formatBytes}
         />
       </div>
-
-      {/* Storage detail */}
-      <p className="text-xs text-muted-foreground mb-4">
-        Storage: {formatBytes(Number(storage.usedBytes))} /{' '}
-        {formatBytes(Number(storage.limitBytes))}
-      </p>
 
       {plan === 'free' && (
         <button
