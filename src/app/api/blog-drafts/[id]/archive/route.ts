@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 
 // Transform snake_case Supabase response to camelCase for frontend
 function transformDraft(draft: Record<string, unknown>) {
@@ -21,12 +21,13 @@ function transformDraft(draft: Record<string, unknown>) {
 }
 
 // POST /api/blog-drafts/[id]/archive - Archive a blog draft
-export async function POST(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await requireAuth()
+    const auth = await requireAuth()
+    const userId = auth.userId
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['blog:write'])
+    }
     const { id } = await params
     const supabase = await createClient()
 
@@ -64,6 +65,9 @@ export async function POST(
     // Transform to camelCase for frontend
     return NextResponse.json({ draft: transformDraft(data) })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Forbidden') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

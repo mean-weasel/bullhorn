@@ -120,6 +120,25 @@ For local development, point to your dev server:
 | `delete_launch_post` | Delete a launch post |
 | `list_launch_posts` | List launch posts with filters |
 
+## API Key Scopes
+
+API keys can be scoped to limit access. When creating a key without specifying scopes, all scopes are granted by default.
+
+| Scope | Access |
+|-------|--------|
+| `posts:read` | List, get, search posts |
+| `posts:write` | Create, update, delete, archive, restore posts |
+| `campaigns:read` | List, get campaigns and their posts |
+| `campaigns:write` | Create, update, delete campaigns; add/remove posts |
+| `projects:read` | List, get projects, campaigns, and accounts |
+| `projects:write` | Create, update, delete projects; manage accounts and logos |
+| `blog:read` | List, get, search blog drafts and images |
+| `blog:write` | Create, update, delete, archive, restore drafts; add images |
+| `launches:read` | List, get launch posts |
+| `launches:write` | Create, update, delete launch posts |
+| `media:write` | Upload media files |
+| `analytics:read` | Read project analytics |
+
 ## Development
 
 ```bash

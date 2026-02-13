@@ -3,7 +3,7 @@ import { writeFile, mkdir, unlink } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 
 // Logo upload directory
 const LOGO_DIR = path.join(process.cwd(), 'public', 'uploads', 'logos')
@@ -30,6 +30,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
   try {
     // Require authentication
     const auth = await requireAuth()
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['projects:write'])
+    }
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
@@ -68,10 +71,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Validate file size
     if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size: 5MB' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'File too large. Maximum size: 5MB' }, { status: 400 })
     }
 
     // Delete old logo if exists
@@ -117,6 +117,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
       logoUrl,
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Forbidden') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error uploading logo:', error)
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
   }
@@ -127,6 +133,9 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     // Require authentication
     const auth = await requireAuth()
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['projects:write'])
+    }
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
@@ -168,6 +177,12 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Forbidden') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error deleting logo:', error)
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
   }

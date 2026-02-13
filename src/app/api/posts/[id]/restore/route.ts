@@ -1,12 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 
 // POST /api/posts/[id]/restore - Restore an archived post
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await requireAuth()
+    const auth = await requireAuth()
+    const userId = auth.userId
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['posts:write'])
+    }
     const { id } = await params
     const supabase = await createClient()
 
@@ -45,6 +49,9 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Forbidden') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

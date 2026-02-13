@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceStorageLimit } from '@/lib/planEnforcement'
 import { createClient } from '@/lib/supabase/server'
 
@@ -39,7 +39,14 @@ export async function POST(request: NextRequest) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['media:write'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
