@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 import { escapeSearchPattern } from '@/lib/utils'
 
 // Transform snake_case Supabase response to camelCase for frontend
@@ -24,7 +24,11 @@ function transformDraft(draft: Record<string, unknown>) {
 // GET /api/blog-drafts/search - Search blog drafts
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await requireAuth()
+    const auth = await requireAuth()
+    const userId = auth.userId
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['blog:read'])
+    }
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
 
@@ -57,6 +61,9 @@ export async function GET(request: NextRequest) {
     const drafts = (data || []).map(transformDraft)
     return NextResponse.json({ drafts })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Forbidden') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

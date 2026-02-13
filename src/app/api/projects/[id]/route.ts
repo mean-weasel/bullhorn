@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformProjectFromDb, transformProjectToDb, type DbProject } from '@/lib/utils'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateProjectSchema = z.object({
@@ -24,7 +24,14 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:read'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -62,7 +69,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:write'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -112,7 +126,14 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:write'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformCampaignFromDb, type DbCampaign } from '@/lib/utils'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -10,7 +10,11 @@ interface RouteContext {
 // GET /api/projects/[id]/campaigns - List campaigns in project
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await requireAuth()
+    const auth = await requireAuth()
+    const userId = auth.userId
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['projects:read'])
+    }
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
@@ -43,6 +47,9 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     )
     return NextResponse.json({ campaigns })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Forbidden') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

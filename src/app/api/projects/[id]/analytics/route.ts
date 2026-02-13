@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -9,7 +9,11 @@ interface RouteContext {
 // GET /api/projects/[id]/analytics - Get rolled-up analytics for project
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await requireAuth()
+    const auth = await requireAuth()
+    const userId = auth.userId
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['analytics:read'])
+    }
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
@@ -36,7 +40,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: campaignsError.message }, { status: 500 })
     }
 
-    const campaignIds = (campaigns || []).map(c => c.id)
+    const campaignIds = (campaigns || []).map((c) => c.id)
     const totalCampaigns = campaignIds.length
 
     // If no campaigns, return zero counts
@@ -49,7 +53,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
           publishedPosts: 0,
           draftPosts: 0,
           failedPosts: 0,
-        }
+        },
       })
     }
 
@@ -66,10 +70,10 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     const postStatuses = posts || []
     const totalPosts = postStatuses.length
-    const scheduledPosts = postStatuses.filter(p => p.status === 'scheduled').length
-    const publishedPosts = postStatuses.filter(p => p.status === 'published').length
-    const draftPosts = postStatuses.filter(p => p.status === 'draft').length
-    const failedPosts = postStatuses.filter(p => p.status === 'failed').length
+    const scheduledPosts = postStatuses.filter((p) => p.status === 'scheduled').length
+    const publishedPosts = postStatuses.filter((p) => p.status === 'published').length
+    const draftPosts = postStatuses.filter((p) => p.status === 'draft').length
+    const failedPosts = postStatuses.filter((p) => p.status === 'failed').length
 
     return NextResponse.json({
       analytics: {
@@ -79,9 +83,12 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         publishedPosts,
         draftPosts,
         failedPosts,
-      }
+      },
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Forbidden') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

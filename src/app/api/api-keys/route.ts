@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, ALL_SCOPES } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { randomBytes, createHash } from 'crypto'
 import { z } from 'zod'
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
         name: parsed.data.name.trim(),
         key_hash: keyHash,
         key_prefix: keyPrefix,
-        scopes: parsed.data.scopes || [],
+        scopes: parsed.data.scopes || ALL_SCOPES,
         expires_at: parsed.data.expiresAt || null,
       })
       .select(

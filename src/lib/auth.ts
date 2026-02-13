@@ -37,6 +37,9 @@ export async function getApiKeyFromHeaders(): Promise<string | null> {
  * - posts:read / posts:write — Read/create/update/delete posts
  * - campaigns:read / campaigns:write — Read/create/update/delete campaigns
  * - projects:read / projects:write — Read/create/update/delete projects
+ * - blog:read / blog:write — Read/create/update/delete blog drafts
+ * - launches:read / launches:write — Read/create/update/delete launch posts
+ * - media:write — Upload media files
  * - analytics:read — Read analytics data
  */
 export type ApiKeyScope =
@@ -46,7 +49,28 @@ export type ApiKeyScope =
   | 'campaigns:write'
   | 'projects:read'
   | 'projects:write'
+  | 'blog:read'
+  | 'blog:write'
+  | 'launches:read'
+  | 'launches:write'
+  | 'media:write'
   | 'analytics:read'
+
+/** All available scopes — used as the default when creating new API keys. */
+export const ALL_SCOPES: ApiKeyScope[] = [
+  'posts:read',
+  'posts:write',
+  'campaigns:read',
+  'campaigns:write',
+  'projects:read',
+  'projects:write',
+  'blog:read',
+  'blog:write',
+  'launches:read',
+  'launches:write',
+  'media:write',
+  'analytics:read',
+]
 
 /**
  * Resolve a raw API key to a user ID and its granted scopes.

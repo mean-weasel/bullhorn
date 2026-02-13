@@ -6,6 +6,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('@/lib/auth', () => ({
   requireAuth: vi.fn(),
+  ALL_SCOPES: [
+    'posts:read',
+    'posts:write',
+    'campaigns:read',
+    'campaigns:write',
+    'projects:read',
+    'projects:write',
+    'blog:read',
+    'blog:write',
+    'launches:read',
+    'launches:write',
+    'media:write',
+    'analytics:read',
+  ],
 }))
 
 const mockOrder = vi.fn()
