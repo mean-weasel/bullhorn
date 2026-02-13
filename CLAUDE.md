@@ -328,6 +328,8 @@ Examples:
 ### Environment & Secrets
 
 - This project uses Doppler for secrets management. Always ensure the session/environment is started with `doppler run` when Supabase, Vercel, or other service credentials are needed. Never suggest redundant secret storage across Doppler and Vercel — Doppler is the source of truth.
+- **Environment variables are validated on startup** - see `src/lib/envValidation.ts` and `docs/environment-variables.md` for details
+- **Upstash Redis** (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) is **recommended but optional** - enables rate limiting (10 req/10sec per IP). If not configured, rate limiting is disabled with warnings logged.
 
 ### CI/CD
 
