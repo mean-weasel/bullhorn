@@ -25,6 +25,28 @@ function getClientIp(request: NextRequest): string {
   return 'unknown'
 }
 
+/**
+ * Extract a Bearer bh_* API key from the Authorization header, if present.
+ */
+function getApiKeyFromRequest(request: NextRequest): string | null {
+  const auth = request.headers.get('authorization')
+  if (auth && auth.startsWith('Bearer bh_')) {
+    return auth.slice('Bearer '.length)
+  }
+  return null
+}
+
+/**
+ * Compute a SHA-256 hash of a raw API key for use as a rate-limit identifier.
+ * Uses Web Crypto API (available in Edge Runtime). No DB call needed.
+ */
+async function hashApiKey(rawKey: string): Promise<string> {
+  const data = new TextEncoder().encode(rawKey)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
 export async function updateSession(request: NextRequest) {
   // Skip auth in E2E test mode
   if (process.env.E2E_TEST_MODE === 'true') {
@@ -87,30 +109,44 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // --- For API routes, refine rate limit identifier to user ID ---
-  if (pathname.startsWith('/api/') && pathname !== '/api/health' && user) {
-    // Re-check with user-specific identifier for better accuracy
-    // (the initial check used IP; this upgrades to user ID)
-    const result = await rateLimit(user.id)
+  // --- For API routes, refine rate limit identifier to user/key ---
+  if (pathname.startsWith('/api/') && pathname !== '/api/health') {
+    let rateLimitId: string | null = null
 
-    if (!result.success) {
-      const retryAfter = Math.ceil((result.reset - Date.now()) / 1000)
-      return NextResponse.json(
-        { error: 'Too many requests', retryAfter },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': String(retryAfter),
-            'X-RateLimit-Limit': String(result.limit),
-            'X-RateLimit-Remaining': '0',
-          },
-        }
-      )
+    if (user) {
+      // Session-authenticated: rate limit by user ID
+      rateLimitId = user.id
+    } else {
+      // Check for API key auth (Bearer bh_*) — rate limit by key hash
+      const apiKey = getApiKeyFromRequest(request)
+      if (apiKey) {
+        const keyHash = await hashApiKey(apiKey)
+        rateLimitId = `apikey:${keyHash}`
+      }
     }
 
-    // Add rate limit headers to the successful response
-    supabaseResponse.headers.set('X-RateLimit-Limit', String(result.limit))
-    supabaseResponse.headers.set('X-RateLimit-Remaining', String(result.remaining))
+    if (rateLimitId) {
+      const result = await rateLimit(rateLimitId)
+
+      if (!result.success) {
+        const retryAfter = Math.ceil((result.reset - Date.now()) / 1000)
+        return NextResponse.json(
+          { error: 'Too many requests', retryAfter },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': String(retryAfter),
+              'X-RateLimit-Limit': String(result.limit),
+              'X-RateLimit-Remaining': '0',
+            },
+          }
+        )
+      }
+
+      // Add rate limit headers to the successful response
+      supabaseResponse.headers.set('X-RateLimit-Limit', String(result.limit))
+      supabaseResponse.headers.set('X-RateLimit-Remaining', String(result.remaining))
+    }
   }
 
   // Check if access is restricted to specific emails
