@@ -3,6 +3,8 @@
  * All data transforms and auth are handled server-side.
  */
 
+import { readFile, stat } from 'node:fs/promises'
+import path from 'node:path'
 import { BullhornClient } from './client.js'
 
 // Singleton client
@@ -419,27 +421,87 @@ export async function searchBlogDrafts(
   return res.drafts
 }
 
+// ==================
+// Media Upload
+// ==================
+
+const ALLOWED_EXTENSIONS: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.gif': 'image/gif',
+  '.webp': 'image/webp',
+  '.mp4': 'video/mp4',
+  '.mov': 'video/quicktime',
+  '.webm': 'video/webm',
+}
+
+const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp'])
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
+
+export async function uploadMedia(filePath: string): Promise<{ filename: string; url: string }> {
+  const resolved = path.resolve(filePath)
+  const ext = path.extname(resolved).toLowerCase()
+
+  // Validate extension before reading file
+  const mimetype = ALLOWED_EXTENSIONS[ext]
+  if (!mimetype) {
+    const allowed = Object.keys(ALLOWED_EXTENSIONS).join(', ')
+    throw new Error(`Unsupported file type "${ext}". Allowed: ${allowed}`)
+  }
+
+  // Check file exists and is a regular file
+  const fileStat = await stat(resolved)
+  if (!fileStat.isFile()) {
+    throw new Error(`Path is not a regular file: ${resolved}`)
+  }
+
+  // Check size locally before uploading
+  const isImage = IMAGE_EXTENSIONS.has(ext)
+  const maxSize = isImage ? MAX_IMAGE_SIZE : MAX_VIDEO_SIZE
+  if (fileStat.size > maxSize) {
+    const maxMB = maxSize / (1024 * 1024)
+    throw new Error(
+      `File too large (${Math.round(fileStat.size / (1024 * 1024))}MB). Max: ${maxMB}MB`
+    )
+  }
+
+  // Read file and upload
+  const buffer = await readFile(resolved)
+  const basename = path.basename(resolved)
+  const blob = new Blob([buffer], { type: mimetype })
+  const formData = new FormData()
+  formData.append('file', blob, basename)
+
+  const client = getClient()
+  const res = await client.postFormData<{ success: boolean; filename: string; url: string }>(
+    '/media/upload',
+    formData
+  )
+
+  // Construct full public URL
+  const baseUrl = (process.env.BULLHORN_API_URL || 'https://bullhorn.to').replace(/\/$/, '')
+  const url = `${baseUrl}${res.url}`
+
+  return { filename: res.filename, url }
+}
+
 export async function addImageToBlogDraft(
   _draftId: string,
   sourcePath: string
 ): Promise<{ filename: string; size: number; mimetype: string; markdown: string }> {
-  // Image upload via MCP is a local operation — the HTTP API doesn't support file upload from MCP context.
-  // Return a placeholder that the user can manually upload.
-  const filename = sourcePath.split('/').pop() || 'image'
-  const ext = filename.split('.').pop()?.toLowerCase() || ''
-  const mimetypes: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    webp: 'image/webp',
-  }
+  const result = await uploadMedia(sourcePath)
+
+  const resolved = path.resolve(sourcePath)
+  const ext = path.extname(resolved).toLowerCase()
+  const fileStat = await stat(resolved)
 
   return {
-    filename,
-    size: 0,
-    mimetype: mimetypes[ext] || 'application/octet-stream',
-    markdown: `![image](/api/blog-media/${filename})`,
+    filename: result.filename,
+    size: fileStat.size,
+    mimetype: ALLOWED_EXTENSIONS[ext] || 'application/octet-stream',
+    markdown: `![image](${result.url})`,
   }
 }
 

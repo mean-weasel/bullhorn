@@ -31,6 +31,7 @@ import {
   searchBlogDrafts,
   addImageToBlogDraft,
   getDraftImages,
+  uploadMedia,
   // Project functions
   createProject,
   getProject,
@@ -625,6 +626,24 @@ const TOOLS = [
         },
       },
       required: ['draftId'],
+    },
+  },
+  // ==================
+  // Media upload tool
+  // ==================
+  {
+    name: 'upload_media',
+    description:
+      'Upload an image or video file. Returns a URL for use in post mediaUrls (Twitter) or mediaUrl (LinkedIn). Supported formats: JPG, PNG, GIF, WebP, MP4, MOV, WebM. Max 10MB images, 100MB videos.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        filePath: {
+          type: 'string',
+          description: 'Full path to the file on disk (e.g., /Users/name/Pictures/photo.jpg)',
+        },
+      },
+      required: ['filePath'],
     },
   },
   // ==================
@@ -1697,6 +1716,37 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   count: images.length,
                   images,
                   markdownRefs: images.map((img) => `![image](/api/blog-media/${img})`),
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        }
+      }
+
+      case 'upload_media': {
+        const { filePath } = args as { filePath: string }
+
+        if (!filePath) {
+          return {
+            content: [{ type: 'text', text: 'Error: filePath is required' }],
+            isError: true,
+          }
+        }
+
+        const uploadResult = await uploadMedia(filePath)
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  filename: uploadResult.filename,
+                  url: uploadResult.url,
+                  message: `File uploaded. Use this URL in post content: mediaUrls: ["${uploadResult.url}"] (Twitter) or mediaUrl: "${uploadResult.url}" (LinkedIn).`,
                 },
                 null,
                 2
