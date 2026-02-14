@@ -219,12 +219,6 @@ export function LandingPage() {
           </Link>
           <div className="flex items-center gap-3">
             <Link
-              href="/login"
-              className="sticker-button bg-card px-4 py-2 text-sm text-foreground transition-colors hover:bg-secondary"
-            >
-              Log in
-            </Link>
-            <Link
               href="/docs/mcp"
               className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -262,12 +256,6 @@ export function LandingPage() {
               className="sticker-button bg-primary px-8 py-3 text-base text-primary-foreground"
             >
               Get started free
-            </Link>
-            <Link
-              href="/login"
-              className="sticker-button bg-card px-8 py-3 text-base text-foreground transition-colors hover:bg-secondary"
-            >
-              Log in
             </Link>
           </div>
 
