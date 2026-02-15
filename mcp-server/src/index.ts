@@ -32,6 +32,7 @@ import {
   addImageToBlogDraft,
   getDraftImages,
   uploadMedia,
+  listMediaFiles,
   deleteMediaFile,
   // Project functions
   createProject,
@@ -645,6 +646,15 @@ const TOOLS = [
         },
       },
       required: ['filePath'],
+    },
+  },
+  {
+    name: 'list_media',
+    description:
+      'List all uploaded media files. Returns filename, URL, size, mimetype, and creation date for each file.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {},
     },
   },
   {
@@ -1767,6 +1777,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 null,
                 2
               ),
+            },
+          ],
+        }
+      }
+
+      case 'list_media': {
+        const files = await listMediaFiles()
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ success: true, count: files.length, files }, null, 2),
             },
           ],
         }
