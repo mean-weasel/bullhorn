@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFile, unlink, stat } from 'fs/promises'
-import path from 'path'
 import { requireAuth } from '@/lib/auth'
-
-// Media upload directory (in public folder)
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads')
+import { createClient } from '@/lib/supabase/server'
 
 // Content type mapping
 const CONTENT_TYPES: Record<string, string> = {
@@ -23,40 +19,34 @@ export async function GET(
   { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    // Require authentication to serve uploaded media
-    try {
-      await requireAuth()
-    } catch {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
+    const { userId } = await requireAuth()
     const { filename } = await params
 
-    // Sanitize filename to prevent path traversal
-    const sanitizedFilename = path.basename(filename)
-    const filepath = path.join(UPLOAD_DIR, sanitizedFilename)
+    const supabase = await createClient()
+    const storagePath = `${userId}/${filename}`
 
-    // Check if file exists
-    try {
-      await stat(filepath)
-    } catch {
+    const { data, error } = await supabase.storage.from('media').download(storagePath)
+
+    if (error || !data) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 })
     }
 
-    // Read file
-    const buffer = await readFile(filepath)
-
-    // Get content type
-    const ext = path.extname(sanitizedFilename).toLowerCase()
+    // Get content type from extension
+    const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase()
     const contentType = CONTENT_TYPES[ext] || 'application/octet-stream'
+
+    const buffer = Buffer.from(await data.arrayBuffer())
 
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000',
+        'Cache-Control': 'private, max-age=31536000',
       },
     })
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error serving file:', error)
     return NextResponse.json({ error: 'Failed to serve file' }, { status: 500 })
   }
@@ -67,19 +57,33 @@ export async function DELETE(
   { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    // Require authentication to delete files
-    await requireAuth()
+    const { userId } = await requireAuth()
     const { filename } = await params
 
-    // Sanitize filename to prevent path traversal
-    const sanitizedFilename = path.basename(filename)
-    const filepath = path.join(UPLOAD_DIR, sanitizedFilename)
+    const supabase = await createClient()
+    const storagePath = `${userId}/${filename}`
 
-    // Try to delete file
-    try {
-      await unlink(filepath)
-    } catch {
-      // File might not exist, that's ok
+    // Get file size before deleting for storage tracking
+    const { data: files } = await supabase.storage.from('media').list(userId, {
+      search: filename,
+    })
+    const fileEntry = files?.find((f) => f.name === filename)
+    const fileSize = fileEntry?.metadata?.size ?? 0
+
+    // Delete from Supabase Storage
+    const { error } = await supabase.storage.from('media').remove([storagePath])
+
+    if (error) {
+      console.error('Supabase storage delete error:', error)
+      return NextResponse.json({ error: 'Failed to delete file' }, { status: 500 })
+    }
+
+    // Decrement storage usage
+    if (fileSize > 0) {
+      await supabase.rpc('decrement_storage_used', {
+        user_id_param: userId,
+        bytes_param: fileSize,
+      })
     }
 
     return NextResponse.json({ success: true })

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
 import crypto from 'crypto'
+import path from 'path'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceStorageLimit } from '@/lib/planEnforcement'
 import { createClient } from '@/lib/supabase/server'
-
-// Media upload directory (in public folder for easy serving)
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads')
 
 // Allowed file types (MIME types)
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
@@ -17,20 +13,6 @@ const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES]
 // File size limits
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
-
-// Generate a unique ID using crypto (built-in Node.js module)
-function generateId(): string {
-  return crypto.randomUUID()
-}
-
-// Ensure upload directory exists
-async function ensureUploadDir() {
-  try {
-    await mkdir(UPLOAD_DIR, { recursive: true })
-  } catch {
-    // Directory might already exist
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,8 +31,6 @@ export async function POST(request: NextRequest) {
       }
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
-
-    await ensureUploadDir()
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -91,18 +71,27 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate unique filename
+    // Generate unique filename and storage path
     const ext = path.extname(file.name).toLowerCase()
-    const filename = `${generateId()}${ext}`
-    const filepath = path.join(UPLOAD_DIR, filename)
+    const filename = `${crypto.randomUUID()}${ext}`
+    const storagePath = `${userId}/${filename}`
 
-    // Convert file to buffer and write
+    // Convert file to buffer and upload to Supabase Storage
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    await writeFile(filepath, buffer)
+
+    const supabase = await createClient()
+
+    const { error: uploadError } = await supabase.storage
+      .from('media')
+      .upload(storagePath, buffer, { contentType: file.type })
+
+    if (uploadError) {
+      console.error('Supabase storage upload error:', uploadError)
+      return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 })
+    }
 
     // Track storage usage
-    const supabase = await createClient()
     await supabase.rpc('increment_storage_used', {
       user_id_param: userId,
       bytes_param: file.size,
@@ -111,7 +100,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       filename,
-      url: `/uploads/${filename}`,
+      url: `/api/media/${filename}`,
     })
   } catch (error) {
     console.error('Error uploading file:', error)

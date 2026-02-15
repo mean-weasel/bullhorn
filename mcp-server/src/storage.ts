@@ -480,11 +480,19 @@ export async function uploadMedia(filePath: string): Promise<{ filename: string;
     formData
   )
 
-  // Construct full public URL
+  // Construct full public URL from relative path
   const baseUrl = (process.env.BULLHORN_API_URL || 'https://bullhorn.to').replace(/\/$/, '')
   const url = `${baseUrl}${res.url}`
 
   return { filename: res.filename, url }
+}
+
+export async function deleteMediaFile(filename: string): Promise<void> {
+  const client = getClient()
+  const res = await client.delete<{ success?: boolean; error?: string }>(`/media/${filename}`)
+  if (res.error) {
+    throw new Error(res.error)
+  }
 }
 
 export async function addImageToBlogDraft(
