@@ -32,6 +32,7 @@ import {
   addImageToBlogDraft,
   getDraftImages,
   uploadMedia,
+  deleteMediaFile,
   // Project functions
   createProject,
   getProject,
@@ -644,6 +645,21 @@ const TOOLS = [
         },
       },
       required: ['filePath'],
+    },
+  },
+  {
+    name: 'delete_media',
+    description:
+      'Delete a previously uploaded media file by filename. The filename is the UUID-based name returned by upload_media (e.g., "550e8400-e29b-41d4-a716-446655440000.jpg").',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        filename: {
+          type: 'string',
+          description: 'The filename to delete (UUID-based name from upload_media)',
+        },
+      },
+      required: ['filename'],
     },
   },
   // ==================
@@ -1748,6 +1764,32 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   url: uploadResult.url,
                   message: `File uploaded. Use this URL in post content: mediaUrls: ["${uploadResult.url}"] (Twitter) or mediaUrl: "${uploadResult.url}" (LinkedIn).`,
                 },
+                null,
+                2
+              ),
+            },
+          ],
+        }
+      }
+
+      case 'delete_media': {
+        const { filename } = args as { filename: string }
+
+        if (!filename) {
+          return {
+            content: [{ type: 'text', text: 'Error: filename is required' }],
+            isError: true,
+          }
+        }
+
+        await deleteMediaFile(filename)
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                { success: true, message: `File "${filename}" deleted.` },
                 null,
                 2
               ),

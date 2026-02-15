@@ -8,7 +8,8 @@ export const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 export const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
 
 // Accept string for file inputs
-export const ACCEPT_MEDIA = 'image/jpeg,image/png,image/gif,image/webp,video/mp4,video/quicktime,video/webm'
+export const ACCEPT_MEDIA =
+  'image/jpeg,image/png,image/gif,image/webp,video/mp4,video/quicktime,video/webm'
 
 export interface UploadResult {
   success: boolean
@@ -158,10 +159,16 @@ export async function deleteMedia(filename: string): Promise<boolean> {
 
 /**
  * Get the full URL for a media file
- * @param filename The filename (as stored in post data)
+ * @param urlOrFilename The URL or filename (as stored in post data)
  * @returns The full URL to access the media
  */
-export function getMediaUrl(filename: string): string {
-  // Files are stored in public/uploads and served directly by Next.js
-  return `/uploads/${filename}`
+export function getMediaUrl(urlOrFilename: string): string {
+  // Already a full URL or API path — return as-is
+  if (urlOrFilename.startsWith('http') || urlOrFilename.startsWith('/api/')) {
+    return urlOrFilename
+  }
+  // Legacy relative paths (e.g. "/uploads/file.jpg") — return as-is
+  if (urlOrFilename.startsWith('/')) return urlOrFilename
+  // Bare filename — route through auth-gated proxy
+  return `/api/media/${urlOrFilename}`
 }
