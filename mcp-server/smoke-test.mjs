@@ -6,7 +6,8 @@
  * messages over stdio and verifying responses.
  *
  * Covers: protocol, posts CRUD, campaigns CRUD + linking, projects CRUD,
- * blog drafts CRUD, launch posts CRUD, confirmation guards, and search.
+ * blog drafts CRUD, launch posts CRUD, media upload+delete, confirmation
+ * guards, and search.
  *
  * All test data uses a [SMOKE] prefix and is cleaned up after each run.
  *
@@ -155,6 +156,7 @@ const cleanup = {
   projectIds: [],
   draftIds: [],
   launchIds: [],
+  mediaFilenames: [],
 }
 
 async function runCleanup() {
@@ -181,6 +183,11 @@ async function runCleanup() {
   for (const id of cleanup.launchIds) {
     try {
       await callTool(nextId(), 'delete_launch_post', { id, confirmed: true })
+    } catch { /* best effort */ }
+  }
+  for (const filename of cleanup.mediaFilenames) {
+    try {
+      await callTool(nextId(), 'delete_media', { filename })
     } catch { /* best effort */ }
   }
 }
@@ -657,6 +664,46 @@ async function testLaunchPosts() {
   }
 }
 
+async function testMedia() {
+  console.log('\n  Media')
+
+  const testImagePath = join(__dirname, '..', 'e2e', 'fixtures', 'test-image.png')
+  let uploadedFilename = null
+
+  // 29. upload_media
+  try {
+    const data = await expectSuccess(nextId(), 'upload_media', { filePath: testImagePath })
+    uploadedFilename = data.filename
+    if (!uploadedFilename) throw new Error('No filename returned')
+    cleanup.mediaFilenames.push(uploadedFilename)
+    if (!data.url || !data.url.includes(uploadedFilename)) {
+      throw new Error(`Unexpected URL: ${data.url}`)
+    }
+    pass('upload_media', `file: ${uploadedFilename.slice(0, 8)}`)
+  } catch (e) {
+    fail('upload_media', e.message)
+  }
+
+  // 30. delete_media
+  if (uploadedFilename) {
+    try {
+      const data = await expectSuccess(nextId(), 'delete_media', {
+        filename: uploadedFilename,
+      })
+      if (data.success) {
+        cleanup.mediaFilenames = cleanup.mediaFilenames.filter((f) => f !== uploadedFilename)
+        pass('delete_media')
+      } else {
+        fail('delete_media', 'success was not true')
+      }
+    } catch (e) {
+      fail('delete_media', e.message)
+    }
+  } else {
+    skip('delete_media', 'no file uploaded')
+  }
+}
+
 async function testConfirmationGuards() {
   console.log('\n  Confirmation Guards')
 
@@ -699,6 +746,7 @@ async function run() {
     await testProjects()
     await testBlogDrafts()
     await testLaunchPosts()
+    await testMedia()
     await testConfirmationGuards()
   } finally {
     // Safety net: clean up any resources that weren't deleted during tests
