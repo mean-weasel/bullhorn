@@ -69,4 +69,30 @@ export class BullhornClient {
   async delete<T>(path: string): Promise<T> {
     return this.request<T>('DELETE', path)
   }
+
+  async postFormData<T>(path: string, formData: FormData): Promise<T> {
+    const url = `${this.baseUrl}/api${path}`
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+      body: formData,
+    })
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      let message: string
+      try {
+        const json = JSON.parse(text)
+        message = json.error || `HTTP ${res.status}`
+      } catch {
+        message = `HTTP ${res.status}: ${text.slice(0, 200)}`
+      }
+      throw new Error(message)
+    }
+
+    return res.json() as Promise<T>
+  }
 }
