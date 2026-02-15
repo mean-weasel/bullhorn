@@ -684,7 +684,24 @@ async function testMedia() {
     fail('upload_media', e.message)
   }
 
-  // 30. delete_media
+  // 30. list_media
+  if (uploadedFilename) {
+    try {
+      const data = await expectSuccess(nextId(), 'list_media')
+      const found = data.files?.some((f) => f.filename === uploadedFilename)
+      if (found) {
+        pass('list_media', `${data.count} file(s)`)
+      } else {
+        fail('list_media', 'uploaded file not found in list')
+      }
+    } catch (e) {
+      fail('list_media', e.message)
+    }
+  } else {
+    skip('list_media', 'no file uploaded')
+  }
+
+  // 31. delete_media
   if (uploadedFilename) {
     try {
       const data = await expectSuccess(nextId(), 'delete_media', {

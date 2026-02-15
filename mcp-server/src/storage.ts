@@ -487,6 +487,19 @@ export async function uploadMedia(filePath: string): Promise<{ filename: string;
   return { filename: res.filename, url }
 }
 
+export interface MediaFile {
+  filename: string
+  url: string
+  size: number | null
+  mimetype: string | null
+  createdAt: string
+}
+
+export async function listMediaFiles(): Promise<MediaFile[]> {
+  const res = await getClient().get<{ files: MediaFile[] }>('/media')
+  return res.files
+}
+
 export async function deleteMediaFile(filename: string): Promise<void> {
   const client = getClient()
   const res = await client.delete<{ success?: boolean; error?: string }>(`/media/${filename}`)
