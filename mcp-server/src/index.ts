@@ -63,6 +63,7 @@ import {
   type BlogDraftStatus,
   type Project,
   type LaunchPost,
+  type LaunchPlatform,
 } from './storage.js'
 
 // Create MCP server
@@ -294,8 +295,8 @@ const TOOLS = [
         },
         status: {
           type: 'string',
-          enum: ['draft', 'active', 'completed', 'archived'],
-          description: 'Campaign status (default: draft)',
+          enum: ['active', 'paused', 'completed', 'archived'],
+          description: 'Campaign status (default: active)',
         },
       },
       required: ['name'],
@@ -309,7 +310,7 @@ const TOOLS = [
       properties: {
         status: {
           type: 'string',
-          enum: ['all', 'draft', 'active', 'completed', 'archived'],
+          enum: ['all', 'active', 'paused', 'completed', 'archived'],
           description: 'Filter by status (default: all)',
         },
         limit: {
@@ -341,7 +342,7 @@ const TOOLS = [
         description: { type: 'string', description: 'New campaign description' },
         status: {
           type: 'string',
-          enum: ['draft', 'active', 'completed', 'archived'],
+          enum: ['active', 'paused', 'completed', 'archived'],
           description: 'New campaign status',
         },
       },
@@ -860,7 +861,7 @@ const TOOLS = [
         },
         status: {
           type: 'string',
-          enum: ['all', 'draft', 'active', 'completed', 'archived'],
+          enum: ['all', 'active', 'paused', 'completed', 'archived'],
           description: 'Filter by status (default: all)',
         },
         limit: {
@@ -882,8 +883,16 @@ const TOOLS = [
       properties: {
         platform: {
           type: 'string',
-          enum: ['twitter', 'linkedin', 'reddit', 'producthunt', 'hackernews', 'other'],
-          description: 'Target platform',
+          enum: [
+            'hacker_news_show',
+            'hacker_news_ask',
+            'hacker_news_link',
+            'product_hunt',
+            'dev_hunt',
+            'beta_list',
+            'indie_hackers',
+          ],
+          description: 'Target launch platform',
         },
         title: { type: 'string', description: 'Launch post title' },
         url: { type: 'string', description: 'URL for the launch post (optional)' },
@@ -922,7 +931,19 @@ const TOOLS = [
       type: 'object' as const,
       properties: {
         id: { type: 'string', description: 'Launch post ID to update' },
-        platform: { type: 'string', description: 'Updated platform' },
+        platform: {
+          type: 'string',
+          enum: [
+            'hacker_news_show',
+            'hacker_news_ask',
+            'hacker_news_link',
+            'product_hunt',
+            'dev_hunt',
+            'beta_list',
+            'indie_hackers',
+          ],
+          description: 'Updated platform',
+        },
         title: { type: 'string', description: 'Updated title' },
         url: { type: 'string', description: 'Updated URL' },
         description: { type: 'string', description: 'Updated description' },
@@ -930,7 +951,11 @@ const TOOLS = [
         campaignId: { type: 'string', description: 'Campaign ID' },
         scheduledAt: { type: 'string', description: 'Schedule datetime' },
         notes: { type: 'string', description: 'Private notes' },
-        status: { type: 'string', description: 'Updated status' },
+        status: {
+          type: 'string',
+          enum: ['draft', 'scheduled', 'posted'],
+          description: 'Updated status',
+        },
       },
       required: ['id'],
     },
@@ -956,7 +981,19 @@ const TOOLS = [
     inputSchema: {
       type: 'object' as const,
       properties: {
-        platform: { type: 'string', description: 'Filter by platform' },
+        platform: {
+          type: 'string',
+          enum: [
+            'hacker_news_show',
+            'hacker_news_ask',
+            'hacker_news_link',
+            'product_hunt',
+            'dev_hunt',
+            'beta_list',
+            'indie_hackers',
+          ],
+          description: 'Filter by platform',
+        },
         status: {
           type: 'string',
           enum: ['all', 'draft', 'scheduled', 'posted'],
@@ -1236,7 +1273,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const campaign = await createCampaign({
           name: name.trim(),
           description,
-          status: status || 'draft',
+          status: status || 'active',
         })
 
         return {
@@ -2219,7 +2256,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
 
         const launchPost = await createLaunchPost({
-          platform: platform as Platform,
+          platform: platform as LaunchPlatform,
           title,
           url,
           description,
@@ -2322,7 +2359,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'list_launch_posts': {
         const { platform, status, campaignId, limit } = args as {
-          platform?: Platform
+          platform?: LaunchPlatform
           status?: string
           campaignId?: string
           limit?: number

@@ -28,9 +28,17 @@ export function _resetClient(): void {
 
 export type Platform = 'twitter' | 'linkedin' | 'reddit'
 export type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed' | 'archived'
-export type CampaignStatus = 'draft' | 'active' | 'completed' | 'archived'
+export type CampaignStatus = 'active' | 'paused' | 'completed' | 'archived'
 export type GroupType = 'reddit-crosspost'
 export type BlogDraftStatus = 'draft' | 'scheduled' | 'published' | 'archived'
+export type LaunchPlatform =
+  | 'hacker_news_show'
+  | 'hacker_news_ask'
+  | 'hacker_news_link'
+  | 'product_hunt'
+  | 'dev_hunt'
+  | 'beta_list'
+  | 'indie_hackers'
 
 export interface TwitterContent {
   text: string
@@ -140,7 +148,7 @@ export interface LaunchPost {
   id: string
   createdAt: string
   updatedAt: string
-  platform: Platform
+  platform: LaunchPlatform
   status: string
   scheduledAt: string | null
   postedAt: string | null
@@ -733,7 +741,7 @@ export async function listCampaignsByProject(
 // ==================
 
 export async function createLaunchPost(data: {
-  platform: Platform
+  platform: LaunchPlatform
   title: string
   url?: string
   description?: string
@@ -791,7 +799,7 @@ export async function deleteLaunchPost(id: string): Promise<boolean> {
 }
 
 export async function listLaunchPosts(options?: {
-  platform?: Platform
+  platform?: LaunchPlatform
   status?: string
   campaignId?: string
   limit?: number
