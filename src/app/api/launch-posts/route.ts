@@ -4,6 +4,8 @@ import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createLaunchPostSchema = z.object({
   platform: z.enum([
     'hacker_news_show',

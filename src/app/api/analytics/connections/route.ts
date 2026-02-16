@@ -4,6 +4,8 @@ import { transformAnalyticsConnectionFromDb, type DbAnalyticsConnection } from '
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createAnalyticsConnectionSchema = z.object({
   propertyId: z.string().min(1),
   propertyName: z.string().max(500).optional().nullable(),

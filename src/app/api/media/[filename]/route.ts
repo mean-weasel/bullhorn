@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // Content type mapping
 const CONTENT_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',

@@ -9,6 +9,8 @@ import {
 import { requireAuth } from '@/lib/auth'
 import type { Post, Campaign } from '@/lib/posts'
 
+export const dynamic = 'force-dynamic'
+
 function getPostText(post: Post): string {
   const c = post.content
   if ('subreddit' in c) return c.body || c.title

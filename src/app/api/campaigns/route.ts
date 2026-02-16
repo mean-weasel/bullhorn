@@ -5,6 +5,8 @@ import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(2000).optional().nullable(),

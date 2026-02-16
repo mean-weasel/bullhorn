@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // Google OAuth token endpoint
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 

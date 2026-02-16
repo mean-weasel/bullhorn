@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updateLaunchPostSchema = z.object({
   platform: z
     .enum([

@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 interface RouteContext {
   params: Promise<{ id: string }>
 }

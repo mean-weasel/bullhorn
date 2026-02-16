@@ -4,6 +4,8 @@ import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updatePostSchema = z.object({
   platform: z.enum(['twitter', 'linkedin', 'reddit']).optional(),
   content: z.record(z.string(), z.unknown()).optional(),

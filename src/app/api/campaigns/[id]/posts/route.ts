@@ -4,6 +4,8 @@ import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const addPostToCampaignSchema = z.object({
   postId: z.string().uuid().optional(),
   post_id: z.string().uuid().optional(),

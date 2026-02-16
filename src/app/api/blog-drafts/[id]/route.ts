@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updateBlogDraftSchema = z.object({
   title: z.string().max(500).optional().nullable(),
   content: z.string().max(100000).optional().nullable(),

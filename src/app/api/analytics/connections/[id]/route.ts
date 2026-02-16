@@ -8,6 +8,8 @@ import {
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updateAnalyticsConnectionSchema = z.object({
   propertyId: z.string().min(1).optional(),
   propertyName: z.string().max(500).optional().nullable(),

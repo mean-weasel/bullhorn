@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // Google OAuth configuration
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
-const SCOPES = [
-  'https://www.googleapis.com/auth/analytics.readonly',
-]
+const SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
 
 // GET /api/analytics/auth/url - Generate OAuth URL for Google Analytics
 export async function GET() {
@@ -51,9 +51,6 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Error generating OAuth URL:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate OAuth URL' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate OAuth URL' }, { status: 500 })
   }
 }

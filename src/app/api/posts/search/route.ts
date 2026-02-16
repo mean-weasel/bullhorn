@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, escapeSearchPattern, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/posts/search - Search posts
 export async function GET(request: NextRequest) {
   try {

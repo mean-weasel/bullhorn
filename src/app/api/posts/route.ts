@@ -5,6 +5,8 @@ import { requireAuth, validateScopes, type ApiKeyScope } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createPostSchema = z.object({
   platform: z.enum(['twitter', 'linkedin', 'reddit']),
   content: z.record(z.string(), z.unknown()),

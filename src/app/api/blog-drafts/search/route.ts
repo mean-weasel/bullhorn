@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { escapeSearchPattern } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 // Transform snake_case Supabase response to camelCase for frontend
 function transformDraft(draft: Record<string, unknown>) {
   return {

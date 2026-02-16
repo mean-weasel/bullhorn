@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { transformCampaignFromDb, type DbCampaign } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 interface RouteContext {
   params: Promise<{ id: string }>
 }

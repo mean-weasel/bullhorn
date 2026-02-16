@@ -5,6 +5,8 @@ import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { escapeSearchPattern } from '@/lib/utils'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createBlogDraftSchema = z.object({
   title: z.string().max(500).optional().nullable(),
   content: z.string().max(100000).optional().nullable(),

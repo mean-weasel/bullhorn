@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // Google Analytics Admin API endpoint
 const GA_ADMIN_API = 'https://analyticsadmin.googleapis.com/v1beta'
 
@@ -17,10 +19,7 @@ export async function GET(request: NextRequest) {
     // Get access token from Authorization header
     const authHeader = request.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Access token required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Access token required' }, { status: 400 })
     }
 
     const accessToken = authHeader.substring(7)
@@ -57,14 +56,11 @@ export async function GET(request: NextRequest) {
       const accountName = account.displayName || account.name
 
       // List properties for this account
-      const propertiesResponse = await fetch(
-        `${GA_ADMIN_API}/${account.name}/properties`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      )
+      const propertiesResponse = await fetch(`${GA_ADMIN_API}/${account.name}/properties`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
 
       if (propertiesResponse.ok) {
         const propertiesData = await propertiesResponse.json()
@@ -88,14 +84,11 @@ export async function GET(request: NextRequest) {
 
     // If no properties found via accounts, try direct property listing
     if (allProperties.length === 0) {
-      const directPropertiesResponse = await fetch(
-        `${GA_ADMIN_API}/properties`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      )
+      const directPropertiesResponse = await fetch(`${GA_ADMIN_API}/properties`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
 
       if (directPropertiesResponse.ok) {
         const propertiesData = await directPropertiesResponse.json()
@@ -119,9 +112,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ properties: allProperties })
   } catch (error) {
     console.error('Error fetching GA4 properties:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch GA4 properties' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch GA4 properties' }, { status: 500 })
   }
 }

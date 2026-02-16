@@ -4,6 +4,8 @@ import { transformReminderFromDb, type DbReminder } from '@/lib/reminders'
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createReminderSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(2000).optional().nullable(),
