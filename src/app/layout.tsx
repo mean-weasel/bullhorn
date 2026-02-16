@@ -27,6 +27,13 @@ export const metadata: Metadata = {
     title: 'Bullhorn — Social Media Post Scheduler',
     description: 'Schedule and manage social media posts for Twitter, LinkedIn, and Reddit.',
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
