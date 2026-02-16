@@ -55,6 +55,84 @@ For local development, point to your dev server:
 | `BULLHORN_API_KEY` | Yes | — | API key from Settings → API Keys |
 | `BULLHORN_API_URL` | No | `https://bullhorn.to` | API base URL |
 
+## Rate Limits
+
+API requests are rate-limited to **10 requests per 10 seconds** per API key using a sliding window algorithm. If exceeded, requests return HTTP 429 with a `Retry-After` header.
+
+## Plan Limits
+
+Resource creation is subject to plan limits:
+
+| Resource | Free Plan | Pro Plan |
+|----------|-----------|----------|
+| Posts | 50 | 500 |
+| Campaigns | 5 | 50 |
+| Projects | 3 | 20 |
+| Blog Drafts | 10 | 100 |
+| Launch Posts | 10 | 100 |
+| Storage | 50 MB | 2 GB |
+
+When a limit is reached, creation tools return an error with the current usage.
+
+## Tool Examples
+
+### Create a Twitter Post
+```json
+{
+  "tool": "create_post",
+  "arguments": {
+    "platform": "twitter",
+    "content": { "text": "Launching our new feature today!" },
+    "status": "draft"
+  }
+}
+```
+
+### Create a LinkedIn Post
+```json
+{
+  "tool": "create_post",
+  "arguments": {
+    "platform": "linkedin",
+    "content": {
+      "text": "Excited to announce our Series A funding!",
+      "visibility": "public"
+    },
+    "status": "scheduled",
+    "scheduledAt": "2026-03-01T09:00:00Z"
+  }
+}
+```
+
+### Create a Reddit Post
+```json
+{
+  "tool": "create_post",
+  "arguments": {
+    "platform": "reddit",
+    "content": {
+      "subreddit": "SideProject",
+      "title": "Show r/SideProject: I built a social media scheduler",
+      "body": "After 6 months of development..."
+    },
+    "status": "draft"
+  }
+}
+```
+
+### Create Reddit Crossposts
+```json
+{
+  "tool": "create_reddit_crossposts",
+  "arguments": {
+    "subreddits": ["SideProject", "startups", "webdev"],
+    "title": "Show: I built Bullhorn",
+    "body": "A social media post scheduler...",
+    "status": "draft"
+  }
+}
+```
+
 ## Available Tools
 
 ### Posts
