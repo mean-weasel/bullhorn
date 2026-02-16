@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
+// Use window.setTimeout to get the browser `number` return type
+// instead of Node's `Timeout` (both work with vi.useFakeTimers)
+const setTimer = (fn: () => void, ms: number) => window.setTimeout(fn, ms)
+const clearTimer = (id: number | null) => {
+  if (id !== null) window.clearTimeout(id)
+}
+
 /**
  * Tests for useAutoSave hook logic.
  *
@@ -23,13 +30,13 @@ describe('useAutoSave logic', () => {
       const delay = 3000
 
       // Simulate the hook's debounce: schedule save after delay
-      const timeout = setTimeout(onSave, delay)
+      const timeout = setTimer(onSave, delay)
 
       expect(onSave).not.toHaveBeenCalled()
       vi.advanceTimersByTime(delay)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      clearTimeout(timeout)
+      clearTimer(timeout)
     })
 
     it('resets the timer when data changes again before delay expires', () => {
@@ -37,15 +44,15 @@ describe('useAutoSave logic', () => {
       const delay = 3000
 
       // First change triggers a timeout
-      let timeout: NodeJS.Timeout | null = setTimeout(onSave, delay)
+      let timeout: number | null = setTimer(onSave, delay)
 
       // Advance partway (not enough to trigger)
       vi.advanceTimersByTime(2000)
       expect(onSave).not.toHaveBeenCalled()
 
-      // New change resets the timer (simulates the hook's clearTimeout + setTimeout)
-      clearTimeout(timeout)
-      timeout = setTimeout(onSave, delay)
+      // New change resets the timer (simulates the hook's clearTimeout + setTimer)
+      clearTimer(timeout)
+      timeout = setTimer(onSave, delay)
 
       // Advance another 2000ms — still not enough since timer was reset
       vi.advanceTimersByTime(2000)
@@ -55,14 +62,14 @@ describe('useAutoSave logic', () => {
       vi.advanceTimersByTime(1000)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) clearTimer(timeout)
     })
 
     it('does not call save before the delay elapses', () => {
       const onSave = vi.fn()
       const delay = 3000
 
-      const timeout = setTimeout(onSave, delay)
+      const timeout = setTimer(onSave, delay)
 
       vi.advanceTimersByTime(2999)
       expect(onSave).not.toHaveBeenCalled()
@@ -70,14 +77,14 @@ describe('useAutoSave logic', () => {
       vi.advanceTimersByTime(1)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      clearTimeout(timeout)
+      clearTimer(timeout)
     })
 
     it('uses custom delay value', () => {
       const onSave = vi.fn()
       const customDelay = 500
 
-      const timeout = setTimeout(onSave, customDelay)
+      const timeout = setTimer(onSave, customDelay)
 
       vi.advanceTimersByTime(499)
       expect(onSave).not.toHaveBeenCalled()
@@ -85,7 +92,7 @@ describe('useAutoSave logic', () => {
       vi.advanceTimersByTime(1)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      clearTimeout(timeout)
+      clearTimer(timeout)
     })
   })
 
@@ -94,7 +101,7 @@ describe('useAutoSave logic', () => {
       const onSave = vi.fn()
       const delay = 3000
       let lastData = JSON.stringify({ title: 'Hello' })
-      let timeout: NodeJS.Timeout | null = null
+      let timeout: number | null = null
 
       // Simulate the hook's change detection logic
       const handleDataChange = (newData: unknown) => {
@@ -102,8 +109,8 @@ describe('useAutoSave logic', () => {
         if (serialized === lastData) return // No change — skip
         lastData = serialized
 
-        if (timeout) clearTimeout(timeout)
-        timeout = setTimeout(onSave, delay)
+        if (timeout) clearTimer(timeout)
+        timeout = setTimer(onSave, delay)
       }
 
       // Same data — should not schedule save
@@ -111,22 +118,22 @@ describe('useAutoSave logic', () => {
       vi.advanceTimersByTime(delay + 1000)
       expect(onSave).not.toHaveBeenCalled()
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) clearTimer(timeout)
     })
 
     it('triggers save when data changes', () => {
       const onSave = vi.fn()
       const delay = 3000
       let lastData = JSON.stringify({ title: 'Hello' })
-      let timeout: NodeJS.Timeout | null = null
+      let timeout: number | null = null
 
       const handleDataChange = (newData: unknown) => {
         const serialized = JSON.stringify(newData)
         if (serialized === lastData) return
         lastData = serialized
 
-        if (timeout) clearTimeout(timeout)
-        timeout = setTimeout(onSave, delay)
+        if (timeout) clearTimer(timeout)
+        timeout = setTimer(onSave, delay)
       }
 
       // Different data — should schedule save
@@ -134,22 +141,22 @@ describe('useAutoSave logic', () => {
       vi.advanceTimersByTime(delay)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) clearTimer(timeout)
     })
 
     it('detects changes in nested objects', () => {
       const onSave = vi.fn()
       const delay = 3000
       let lastData = JSON.stringify({ post: { title: 'A', body: 'B' } })
-      let timeout: NodeJS.Timeout | null = null
+      let timeout: number | null = null
 
       const handleDataChange = (newData: unknown) => {
         const serialized = JSON.stringify(newData)
         if (serialized === lastData) return
         lastData = serialized
 
-        if (timeout) clearTimeout(timeout)
-        timeout = setTimeout(onSave, delay)
+        if (timeout) clearTimer(timeout)
+        timeout = setTimer(onSave, delay)
       }
 
       // Change nested field
@@ -157,7 +164,7 @@ describe('useAutoSave logic', () => {
       vi.advanceTimersByTime(delay)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) clearTimer(timeout)
     })
   })
 
@@ -246,13 +253,13 @@ describe('useAutoSave logic', () => {
       const onSave = vi.fn()
       const delay = 3000
       const enabled = false
-      let timeout: NodeJS.Timeout | null = null
+      let timeout: number | null = null
 
       // Simulate the hook's guard clause
       const handleDataChange = () => {
         if (!enabled) return
-        if (timeout) clearTimeout(timeout)
-        timeout = setTimeout(onSave, delay)
+        if (timeout) clearTimer(timeout)
+        timeout = setTimer(onSave, delay)
       }
 
       handleDataChange()
@@ -264,19 +271,19 @@ describe('useAutoSave logic', () => {
       const onSave = vi.fn()
       const delay = 3000
       const enabled = true
-      let timeout: NodeJS.Timeout | null = null
+      let timeout: number | null = null
 
       const handleDataChange = () => {
         if (!enabled) return
-        if (timeout) clearTimeout(timeout)
-        timeout = setTimeout(onSave, delay)
+        if (timeout) clearTimer(timeout)
+        timeout = setTimer(onSave, delay)
       }
 
       handleDataChange()
       vi.advanceTimersByTime(delay)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) clearTimer(timeout)
     })
   })
 
@@ -287,7 +294,7 @@ describe('useAutoSave logic', () => {
       let hasInitialized = false // !skipInitialChange would be true; skipInitialChange=true means false
       let isFirstRender = true
       let lastData = ''
-      let timeout: NodeJS.Timeout | null = null
+      let timeout: number | null = null
 
       const handleDataChange = (newData: unknown) => {
         const serialized = JSON.stringify(newData)
@@ -308,8 +315,8 @@ describe('useAutoSave logic', () => {
           return
         }
 
-        if (timeout) clearTimeout(timeout)
-        timeout = setTimeout(onSave, delay)
+        if (timeout) clearTimer(timeout)
+        timeout = setTimer(onSave, delay)
       }
 
       // First render — sets initial data, skipped
@@ -327,7 +334,7 @@ describe('useAutoSave logic', () => {
       vi.advanceTimersByTime(delay)
       expect(onSave).toHaveBeenCalledTimes(1)
 
-      if (timeout) clearTimeout(timeout)
+      if (timeout) clearTimer(timeout)
     })
   })
 
@@ -336,10 +343,10 @@ describe('useAutoSave logic', () => {
       const onSave = vi.fn()
       const delay = 3000
 
-      const timeout = setTimeout(onSave, delay)
+      const timeout = setTimer(onSave, delay)
 
       // Simulate component unmounting — clear the timeout
-      clearTimeout(timeout)
+      clearTimer(timeout)
 
       vi.advanceTimersByTime(delay + 1000)
       expect(onSave).not.toHaveBeenCalled()

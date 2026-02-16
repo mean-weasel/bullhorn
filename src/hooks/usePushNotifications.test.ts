@@ -287,7 +287,7 @@ describe('usePushNotifications logic', () => {
       mockSendLocalNotification.mockResolvedValue(undefined)
 
       // Simulate the hook's sendTestNotification when permission is 'default'
-      let permission: NotificationPermission = 'default'
+      let permission = 'default' as NotificationPermission
 
       if (permission !== 'granted') {
         const granted = await requestPermission()
@@ -304,7 +304,7 @@ describe('usePushNotifications logic', () => {
     it('does not send notification when permission is denied', async () => {
       mockRequestPermission.mockResolvedValue(false)
 
-      let permission: NotificationPermission = 'default'
+      let permission = 'default' as NotificationPermission
       let notificationSent = false
 
       if (permission !== 'granted') {

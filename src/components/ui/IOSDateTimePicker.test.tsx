@@ -133,13 +133,11 @@ describe('IOSDateTimePicker', () => {
   })
 
   it('sets min and max on date input', () => {
+    // Use midday times to avoid timezone-related date shifts
+    const minDate = new Date(2026, 0, 1, 12, 0, 0) // Jan 1, 2026 noon local
+    const maxDate = new Date(2026, 11, 31, 12, 0, 0) // Dec 31, 2026 noon local
     const { container } = render(
-      <IOSDateTimePicker
-        {...defaultProps}
-        mode="date"
-        minDate={new Date('2026-01-01')}
-        maxDate={new Date('2026-12-31')}
-      />
+      <IOSDateTimePicker {...defaultProps} mode="date" minDate={minDate} maxDate={maxDate} />
     )
 
     const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement

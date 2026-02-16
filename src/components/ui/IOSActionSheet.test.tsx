@@ -71,11 +71,11 @@ describe('IOSActionSheet', () => {
 
   it('calls onClose when backdrop is clicked', () => {
     const onClose = vi.fn()
-    render(<IOSActionSheet {...defaultProps} onClose={onClose} />)
+    const { container } = render(<IOSActionSheet {...defaultProps} onClose={onClose} />)
 
-    // Click the outer overlay (first child of the rendered tree)
-    const overlay = screen.getByRole('dialog').parentElement!.parentElement!
-    fireEvent.click(overlay)
+    // Click the outer fixed wrapper div (has onClick={onClose})
+    const outerWrapper = container.firstElementChild!
+    fireEvent.click(outerWrapper)
 
     expect(onClose).toHaveBeenCalled()
   })
@@ -100,7 +100,7 @@ describe('IOSActionSheet', () => {
   })
 
   it('shows checkmark for the selected value', () => {
-    const { container } = render(<IOSActionSheet {...defaultProps} selectedValue="duplicate" />)
+    render(<IOSActionSheet {...defaultProps} selectedValue="duplicate" />)
 
     // The Check icon from lucide-react should render as an SVG near the selected option
     const duplicateButton = screen.getByText('Duplicate').closest('button')!
