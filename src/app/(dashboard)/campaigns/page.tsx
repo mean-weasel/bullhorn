@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, FolderOpen, FileText, Rocket, CheckCircle, Archive } from 'lucide-react'
+import { Plus, FolderOpen, PauseCircle, Rocket, CheckCircle, Archive } from 'lucide-react'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { useProjectsStore } from '@/lib/projects'
 import { Campaign, CampaignStatus } from '@/lib/posts'
@@ -18,10 +18,10 @@ type FilterStatus = 'all' | CampaignStatus
 
 const STATUS_CONFIG: Record<
   CampaignStatus,
-  { label: string; icon: typeof FileText; color: string }
+  { label: string; icon: typeof PauseCircle; color: string }
 > = {
-  draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   active: { label: 'Active', icon: Rocket, color: 'text-blue-400' },
+  paused: { label: 'Paused', icon: PauseCircle, color: 'text-muted-foreground' },
   completed: { label: 'Completed', icon: CheckCircle, color: 'text-green-400' },
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
 }
@@ -58,7 +58,7 @@ export default function CampaignsPage() {
   // Count by status
   const counts = {
     all: campaigns.filter((c) => c.status !== 'archived').length,
-    draft: campaigns.filter((c) => c.status === 'draft').length,
+    paused: campaigns.filter((c) => c.status === 'paused').length,
     active: campaigns.filter((c) => c.status === 'active').length,
     completed: campaigns.filter((c) => c.status === 'completed').length,
     archived: campaigns.filter((c) => c.status === 'archived').length,
@@ -130,10 +130,10 @@ export default function CampaignsPage() {
           options={[
             { value: 'all', label: 'All', count: counts.all },
             {
-              value: 'draft',
-              label: STATUS_CONFIG.draft.label,
-              icon: <FileText className="w-4 h-4" />,
-              count: counts.draft,
+              value: 'paused',
+              label: STATUS_CONFIG.paused.label,
+              icon: <PauseCircle className="w-4 h-4" />,
+              count: counts.paused,
             },
             {
               value: 'active',

@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { format } from 'date-fns'
 import {
   FolderOpen,
-  FileText,
+  PauseCircle,
   Rocket,
   CheckCircle,
   Archive,
@@ -21,10 +21,10 @@ import { getMediaUrl } from '@/lib/media'
 
 const STATUS_CONFIG: Record<
   CampaignStatus,
-  { label: string; icon: typeof FileText; color: string }
+  { label: string; icon: typeof PauseCircle; color: string }
 > = {
-  draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   active: { label: 'Active', icon: Rocket, color: 'text-blue-400' },
+  paused: { label: 'Paused', icon: PauseCircle, color: 'text-muted-foreground' },
   completed: { label: 'Completed', icon: CheckCircle, color: 'text-green-400' },
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
 }

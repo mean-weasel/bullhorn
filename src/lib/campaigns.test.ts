@@ -287,7 +287,7 @@ describe('useCampaignsStore', () => {
       useCampaignsStore.setState({
         campaigns: [
           makeCampaign({ id: '1', status: 'active' }),
-          makeCampaign({ id: '2', status: 'draft' }),
+          makeCampaign({ id: '2', status: 'paused' }),
           makeCampaign({ id: '3', status: 'active' }),
         ],
       })
