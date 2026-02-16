@@ -111,6 +111,13 @@ For local development, point to your dev server:
 | `add_image_to_draft` | Add image to a draft |
 | `get_draft_images` | List draft images |
 
+### Media
+| Tool | Description |
+|------|-------------|
+| `upload_media` | Upload an image or video file (JPG, PNG, GIF, WebP, MP4, MOV, WebM) |
+| `list_media` | List all uploaded media files |
+| `delete_media` | Delete an uploaded media file by filename |
+
 ### Launch Posts
 | Tool | Description |
 |------|-------------|

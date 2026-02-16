@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Zap,
   Globe,
+  Image,
 } from 'lucide-react'
 
 const postTools = [
@@ -108,6 +109,18 @@ const blogDraftTools = [
   { name: 'get_draft_images', description: 'Get list of images attached to a blog draft' },
 ]
 
+const mediaTools = [
+  {
+    name: 'upload_media',
+    description: 'Upload an image or video file (JPG, PNG, GIF, WebP, MP4, MOV, WebM)',
+  },
+  {
+    name: 'list_media',
+    description: 'List all uploaded media files with filename, URL, size, and mimetype',
+  },
+  { name: 'delete_media', description: 'Delete an uploaded media file by filename' },
+]
+
 const launchPostTools = [
   {
     name: 'create_launch_post',
@@ -146,6 +159,12 @@ const toolCategories = [
     color: 'bg-sticker-green/10 text-sticker-green',
     icon: PenLine,
     tools: blogDraftTools,
+  },
+  {
+    label: 'Media',
+    color: 'bg-sticker-yellow/10 text-sticker-yellow',
+    icon: Image,
+    tools: mediaTools,
   },
   {
     label: 'Launch Posts',
