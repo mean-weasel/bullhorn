@@ -4,6 +4,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js'
 
+import { validatePostContent } from './validation.js'
 import {
   createPost,
   getPost,
@@ -1050,6 +1051,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
+        const contentError = validatePostContent(platform, content as Record<string, unknown>)
+        if (contentError) {
+          return {
+            content: [{ type: 'text', text: `Error: ${contentError}` }],
+            isError: true,
+          }
+        }
+
         const post = await createPost({
           platform,
           content,
@@ -1094,6 +1103,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'update_post': {
         const { id, ...updates } = args as { id: string } & Partial<Post>
+
+        if (updates.platform && updates.content) {
+          const contentError = validatePostContent(
+            updates.platform,
+            updates.content as Record<string, unknown>
+          )
+          if (contentError) {
+            return {
+              content: [{ type: 'text', text: `Error: ${contentError}` }],
+              isError: true,
+            }
+          }
+        }
+
         const post = await updatePost(id, updates)
 
         if (!post) {
