@@ -21,7 +21,7 @@ export async function handleCreateCampaign(
   const campaign = await s.createCampaign({
     name: args.name.trim(),
     description: args.description,
-    status: args.status || 'draft',
+    status: args.status || 'active',
   })
   return ok({ campaign })
 }

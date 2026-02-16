@@ -62,7 +62,7 @@ describe('Campaign Tool Handlers', () => {
       expect(mockPost).toHaveBeenCalledWith('/campaigns', {
         name: 'Test',
         description: null,
-        status: 'draft',
+        status: 'active',
       })
     })
 
