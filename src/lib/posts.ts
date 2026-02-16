@@ -2,7 +2,7 @@
 
 export type Platform = 'twitter' | 'linkedin' | 'reddit'
 export type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed' | 'archived'
-export type CampaignStatus = 'draft' | 'active' | 'completed' | 'archived'
+export type CampaignStatus = 'active' | 'paused' | 'completed' | 'archived'
 
 // Campaign interface
 export interface Campaign {

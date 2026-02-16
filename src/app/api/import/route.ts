@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         user_id: userId,
         name: campaign.name,
         description: campaign.description || null,
-        status: campaign.status || 'draft',
+        status: campaign.status || 'active',
         project_id: campaign.projectId || null,
       })
 

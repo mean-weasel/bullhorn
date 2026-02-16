@@ -12,6 +12,7 @@ import {
   X,
   FolderOpen,
   FileText,
+  PauseCircle,
   Rocket,
   CheckCircle,
   Archive,
@@ -32,10 +33,10 @@ import { AddLaunchPostModal } from './AddLaunchPostModal'
 
 const CAMPAIGN_STATUS_CONFIG: Record<
   CampaignStatus,
-  { label: string; icon: typeof FileText; color: string }
+  { label: string; icon: typeof PauseCircle; color: string }
 > = {
-  draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   active: { label: 'Active', icon: Rocket, color: 'text-blue-400' },
+  paused: { label: 'Paused', icon: PauseCircle, color: 'text-muted-foreground' },
   completed: { label: 'Completed', icon: CheckCircle, color: 'text-green-400' },
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
 }
@@ -338,7 +339,7 @@ export default function CampaignDetailPage({ params }: { params: { id: string } 
         {/* Status selector */}
         {!editing && (
           <div className="flex gap-2 mt-4">
-            {(['draft', 'active', 'completed', 'archived'] as CampaignStatus[]).map((status) => {
+            {(['active', 'paused', 'completed', 'archived'] as CampaignStatus[]).map((status) => {
               const config = CAMPAIGN_STATUS_CONFIG[status]
               return (
                 <button
