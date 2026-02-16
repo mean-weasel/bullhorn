@@ -96,7 +96,12 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string; s
     throw new Error('Unauthorized')
   }
 
-  const serviceClient = createSupabaseJsClient(supabaseUrl, serviceKey)
+  const serviceClient = createSupabaseJsClient(supabaseUrl, serviceKey, {
+    global: {
+      fetch: (url: string | URL | Request, options?: RequestInit) =>
+        fetch(url, { ...options, cache: 'no-store' }),
+    },
+  })
 
   const { data: apiKey, error } = await serviceClient
     .from('api_keys')

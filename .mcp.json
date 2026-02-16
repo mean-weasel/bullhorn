@@ -30,8 +30,8 @@
       }
     },
     "bullhorn": {
-      "command": "npx",
-      "args": ["-y", "@neonwatty/bullhorn-mcp"],
+      "command": "doppler",
+      "args": ["run", "--project", "bullhorn", "--config", "prd", "--", "npx", "-y", "@neonwatty/bullhorn-mcp"],
       "env": {
         "BULLHORN_API_URL": "https://bullhorn.to"
       }
