@@ -63,7 +63,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Blog draft not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json(draft.images || [])
@@ -124,7 +125,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (fetchError.code === 'PGRST116') {
         return NextResponse.json({ error: 'Blog draft not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+      console.error('Database error:', fetchError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Add new image to array
@@ -146,7 +148,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform to camelCase for frontend

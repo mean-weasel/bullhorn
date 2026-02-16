@@ -123,12 +123,11 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string; s
     throw new Error('Unauthorized')
   }
 
-  // Fire-and-forget update to last_used_at
-  serviceClient
+  // Update last_used_at for audit trail
+  await serviceClient
     .from('api_keys')
     .update({ last_used_at: new Date().toISOString() })
     .eq('id', apiKey.id)
-    .then(() => {})
 
   return { userId: apiKey.user_id, scopes: (apiKey.scopes as string[]) || [] }
 }

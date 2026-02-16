@@ -39,7 +39,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       .eq('user_id', userId)
 
     if (campaignsError) {
-      return NextResponse.json({ error: campaignsError.message }, { status: 500 })
+      console.error('Database error:', campaignsError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const campaignIds = (campaigns || []).map((c) => c.id)
@@ -67,7 +68,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       .in('campaign_id', campaignIds)
 
     if (postsError) {
-      return NextResponse.json({ error: postsError.message }, { status: 500 })
+      console.error('Database error:', postsError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const postStatuses = posts || []

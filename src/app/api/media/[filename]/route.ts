@@ -24,6 +24,16 @@ export async function GET(
     const { userId } = await requireAuth()
     const { filename } = await params
 
+    // Path traversal protection
+    if (
+      filename.includes('..') ||
+      filename.includes('/') ||
+      filename.includes('\\') ||
+      filename.includes('\0')
+    ) {
+      return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
+    }
+
     const supabase = await createClient()
     const storagePath = `${userId}/${filename}`
 
@@ -61,6 +71,16 @@ export async function DELETE(
   try {
     const { userId } = await requireAuth()
     const { filename } = await params
+
+    // Path traversal protection
+    if (
+      filename.includes('..') ||
+      filename.includes('/') ||
+      filename.includes('\\') ||
+      filename.includes('\0')
+    ) {
+      return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
+    }
 
     const supabase = await createClient()
     const storagePath = `${userId}/${filename}`

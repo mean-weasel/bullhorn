@@ -1012,9 +1012,67 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   return { tools: TOOLS }
 })
 
+// Scope requirements for each tool — used for early validation
+const TOOL_SCOPES: Record<string, string[]> = {
+  // Posts
+  create_post: ['posts:write'],
+  get_post: ['posts:read'],
+  update_post: ['posts:write'],
+  delete_post: ['posts:write'],
+  archive_post: ['posts:write'],
+  restore_post: ['posts:write'],
+  list_posts: ['posts:read'],
+  search_posts: ['posts:read'],
+  create_reddit_crossposts: ['posts:write'],
+  // Campaigns
+  create_campaign: ['campaigns:write'],
+  get_campaign: ['campaigns:read'],
+  update_campaign: ['campaigns:write'],
+  delete_campaign: ['campaigns:write'],
+  list_campaigns: ['campaigns:read'],
+  add_post_to_campaign: ['campaigns:write'],
+  remove_post_from_campaign: ['campaigns:write'],
+  // Blog drafts
+  create_blog_draft: ['blog:write'],
+  get_blog_draft: ['blog:read'],
+  update_blog_draft: ['blog:write'],
+  delete_blog_draft: ['blog:write'],
+  archive_blog_draft: ['blog:write'],
+  restore_blog_draft: ['blog:write'],
+  list_blog_drafts: ['blog:read'],
+  search_blog_drafts: ['blog:read'],
+  add_image_to_draft: ['blog:write'],
+  get_draft_images: ['blog:read'],
+  // Media
+  upload_media: ['media:write'],
+  list_media: ['media:write'],
+  delete_media: ['media:write'],
+  // Projects
+  create_project: ['projects:write'],
+  get_project: ['projects:read'],
+  update_project: ['projects:write'],
+  delete_project: ['projects:write'],
+  list_projects: ['projects:read'],
+  get_project_campaigns: ['projects:read'],
+  get_project_analytics: ['projects:read', 'analytics:read'],
+  add_account_to_project: ['projects:write'],
+  remove_account_from_project: ['projects:write'],
+  get_project_accounts: ['projects:read'],
+  move_campaign_to_project: ['projects:write', 'campaigns:write'],
+  list_campaigns_by_project: ['projects:read'],
+  // Launch posts
+  create_launch_post: ['launches:write'],
+  get_launch_post: ['launches:read'],
+  update_launch_post: ['launches:write'],
+  delete_launch_post: ['launches:write'],
+  list_launch_posts: ['launches:read'],
+}
+
 // Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params
+  const startTime = Date.now()
+  console.error(`[mcp] START tool=${name}`)
 
   try {
     switch (name) {
@@ -2416,15 +2474,31 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
     }
   } catch (error) {
+    console.error(`[mcp] Tool error (${name}):`, error)
+    const message = error instanceof Error ? error.message : ''
+    let safeMessage: string
+    if (message === 'Unauthorized') {
+      safeMessage = 'Unauthorized. Check that your API key is valid and not expired.'
+    } else if (message === 'Forbidden') {
+      const scopes = TOOL_SCOPES[name]
+      safeMessage = scopes
+        ? `Forbidden. The "${name}" tool requires scope(s): ${scopes.join(', ')}. Update your API key permissions at https://bullhorn.to/settings.`
+        : 'Forbidden. Your API key lacks the required permissions for this operation.'
+    } else {
+      safeMessage = 'Operation failed. Please try again or check your API key permissions.'
+    }
     return {
       content: [
         {
           type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          text: `Error: ${safeMessage}`,
         },
       ],
       isError: true,
     }
+  } finally {
+    const duration = Date.now() - startTime
+    console.error(`[mcp] END tool=${name} duration=${duration}ms`)
   }
 })
 

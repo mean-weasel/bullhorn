@@ -54,7 +54,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       .order('updated_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const posts = (data || []).map((post) => transformPostFromDb(post as DbPost))
@@ -138,7 +139,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Post not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const post = transformPostFromDb(data as DbPost)

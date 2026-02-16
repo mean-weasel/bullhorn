@@ -73,6 +73,10 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename and storage path
     const ext = path.extname(file.name).toLowerCase()
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.webm']
+    if (!allowedExtensions.includes(ext)) {
+      return NextResponse.json({ success: false, error: 'Invalid file extension' }, { status: 400 })
+    }
     const filename = `${crypto.randomUUID()}${ext}`
     const storagePath = `${userId}/${filename}`
 

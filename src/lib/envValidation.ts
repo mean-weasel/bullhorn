@@ -38,6 +38,11 @@ const ENV_CHECKS: EnvCheck[] = [
     required: false,
     description: 'Upstash Redis token for rate limiting',
   },
+  {
+    name: 'NEXT_PUBLIC_SENTRY_DSN',
+    required: false,
+    description: 'Sentry DSN for error monitoring',
+  },
 ]
 
 /**
@@ -83,9 +88,7 @@ export function validateEnv(): void {
     recommendedMissing.forEach((m) => {
       console.warn(`  - ${m.name}: ${m.description}`)
     })
-    console.warn(
-      '[envValidation] ⚠️  Some features may be degraded. See docs for configuration.'
-    )
+    console.warn('[envValidation] ⚠️  Some features may be degraded. See docs for configuration.')
   }
 }
 

@@ -41,7 +41,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       .order('updated_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const campaigns = (data || []).map((campaign) =>

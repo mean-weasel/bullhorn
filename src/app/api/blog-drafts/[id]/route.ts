@@ -93,7 +93,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Blog draft not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform to camelCase for frontend
@@ -146,7 +147,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (fetchError.code === 'PGRST116') {
         return NextResponse.json({ error: 'Blog draft not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+      console.error('Database error:', fetchError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Validate status transition
@@ -162,7 +164,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Build update object
     const updates: Record<string, unknown> = {}
-    if (parsed.data.title !== undefined) updates.title = parsed.data.title
+    if (parsed.data.title !== undefined) {
+      const trimmedTitle = parsed.data.title?.trim() ?? null
+      if (trimmedTitle !== null && !trimmedTitle) {
+        return NextResponse.json({ error: 'Title cannot be empty' }, { status: 400 })
+      }
+      updates.title = trimmedTitle
+    }
     if (parsed.data.content !== undefined) {
       updates.content = parsed.data.content
       updates.word_count = calculateWordCount(parsed.data.content || '')
@@ -191,7 +199,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Blog draft not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform to camelCase for frontend
@@ -230,7 +239,8 @@ export async function DELETE(
     const { error } = await supabase.from('blog_drafts').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

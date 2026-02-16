@@ -126,7 +126,7 @@ describe('GET /api/posts/[id]', () => {
     const res = await GET(req, makeParams('post-1'))
     expect(res.status).toBe(500)
     const body = await res.json()
-    expect(body.error).toBe('Connection error')
+    expect(body.error).toBe('Internal server error')
   })
 })
 
@@ -270,6 +270,6 @@ describe('DELETE /api/posts/[id]', () => {
     const res = await DELETE(req, makeParams('post-1'))
     expect(res.status).toBe(500)
     const body = await res.json()
-    expect(body.error).toBe('Delete failed')
+    expect(body.error).toBe('Internal server error')
   })
 })

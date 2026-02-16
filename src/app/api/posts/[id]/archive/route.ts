@@ -26,7 +26,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       if (fetchError.code === 'PGRST116') {
         return NextResponse.json({ error: 'Post not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+      console.error('Database error:', fetchError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     if (currentPost.status === 'archived') {
@@ -42,7 +43,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform post from snake_case to camelCase

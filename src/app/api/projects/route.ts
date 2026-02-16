@@ -44,7 +44,8 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform projects from snake_case to camelCase
@@ -99,11 +100,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const name = parsed.data.name.trim()
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    }
+
     const { data, error } = await supabase
       .from('projects')
       .insert({
         user_id: userId,
-        name: parsed.data.name.trim(),
+        name,
         description: parsed.data.description || null,
         hashtags: parsed.data.hashtags || [],
         brand_colors: parsed.data.brandColors || {},
@@ -113,7 +119,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform project from snake_case to camelCase

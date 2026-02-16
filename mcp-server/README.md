@@ -224,6 +224,60 @@ API keys can be scoped to limit access. When creating a key without specifying s
 | `media:write` | Upload media files |
 | `analytics:read` | Read project analytics |
 
+## Tool Scope Requirements
+
+Each tool requires specific API key scope(s). If your key lacks a required scope, you'll get a `Forbidden` error with details on which scope is needed.
+
+| Tool | Required Scope(s) |
+|------|-------------------|
+| `create_post`, `update_post`, `delete_post`, `archive_post`, `restore_post`, `create_reddit_crossposts` | `posts:write` |
+| `get_post`, `list_posts`, `search_posts` | `posts:read` |
+| `create_campaign`, `update_campaign`, `delete_campaign`, `add_post_to_campaign`, `remove_post_from_campaign` | `campaigns:write` |
+| `get_campaign`, `list_campaigns` | `campaigns:read` |
+| `create_project`, `update_project`, `delete_project`, `add_account_to_project`, `remove_account_from_project` | `projects:write` |
+| `get_project`, `list_projects`, `get_project_campaigns`, `get_project_accounts`, `list_campaigns_by_project` | `projects:read` |
+| `move_campaign_to_project` | `projects:write` + `campaigns:write` |
+| `get_project_analytics` | `projects:read` + `analytics:read` |
+| `create_blog_draft`, `update_blog_draft`, `delete_blog_draft`, `archive_blog_draft`, `restore_blog_draft`, `add_image_to_draft` | `blog:write` |
+| `get_blog_draft`, `list_blog_drafts`, `search_blog_drafts`, `get_draft_images` | `blog:read` |
+| `create_launch_post`, `update_launch_post`, `delete_launch_post` | `launches:write` |
+| `get_launch_post`, `list_launch_posts` | `launches:read` |
+| `upload_media`, `list_media`, `delete_media` | `media:write` |
+
+## Troubleshooting
+
+### "Unauthorized" error
+
+Your API key is invalid, expired, or revoked.
+
+- Verify the key starts with `bh_` and is at least 20 characters
+- Check that `BULLHORN_API_KEY` is set in your environment
+- Create a new key at **Settings → API Keys** if the old one was revoked or expired
+
+### "Forbidden" error
+
+Your API key is valid but lacks the required scope for the operation.
+
+- The error message tells you which scope(s) are needed
+- Create a new key with the required scopes, or use a full-access key (all scopes)
+- Scopes are set when creating the key and cannot be changed after creation
+
+### Rate limited (HTTP 429)
+
+You've exceeded 10 requests per 10 seconds.
+
+- Wait for the `Retry-After` duration before retrying
+- Space out requests when doing bulk operations
+- Consider batching reads (e.g., `list_posts` with filters instead of many `get_post` calls)
+
+### "Operation failed" error
+
+An internal server error occurred. This is usually transient.
+
+- Retry the operation after a few seconds
+- If it persists, check that the Bullhorn service is available at your `BULLHORN_API_URL`
+- Check your API key hasn't been revoked
+
 ## Development
 
 ```bash

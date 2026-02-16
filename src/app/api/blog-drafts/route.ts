@@ -106,7 +106,8 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform to camelCase for frontend
@@ -160,6 +161,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const title = parsed.data.title?.trim() ?? null
+    if (title !== null && !title) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+
     const content = parsed.data.content || ''
     const wordCount = calculateWordCount(content)
 
@@ -167,7 +173,7 @@ export async function POST(request: NextRequest) {
       .from('blog_drafts')
       .insert({
         user_id: userId,
-        title: parsed.data.title,
+        title,
         content: content,
         date: parsed.data.date,
         status: parsed.data.status || 'draft',
@@ -182,7 +188,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform to camelCase for frontend
