@@ -214,7 +214,7 @@ test: ## Run unit tests in watch mode
 	npm run test
 
 test-run: ## Run unit tests once
-	npx vitest run --passWithNoTests
+	npx vitest run
 
 test-e2e: ## Run end-to-end tests
 	npm run test:e2e
@@ -226,7 +226,7 @@ test-e2e-debug: ## Run E2E tests in debug mode
 	npm run test:e2e:debug
 
 test-coverage: ## Run tests with coverage report
-	npx vitest run --coverage --passWithNoTests
+	npx vitest run --coverage
 
 test-all: test-run test-e2e ## Run all tests (unit + e2e)
 

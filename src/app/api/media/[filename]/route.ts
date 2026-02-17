@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // Content type mapping
 const CONTENT_TYPES: Record<string, string> = {
   '.jpg': 'image/jpeg',
@@ -21,6 +23,16 @@ export async function GET(
   try {
     const { userId } = await requireAuth()
     const { filename } = await params
+
+    // Path traversal protection
+    if (
+      filename.includes('..') ||
+      filename.includes('/') ||
+      filename.includes('\\') ||
+      filename.includes('\0')
+    ) {
+      return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
+    }
 
     const supabase = await createClient()
     const storagePath = `${userId}/${filename}`
@@ -59,6 +71,16 @@ export async function DELETE(
   try {
     const { userId } = await requireAuth()
     const { filename } = await params
+
+    // Path traversal protection
+    if (
+      filename.includes('..') ||
+      filename.includes('/') ||
+      filename.includes('\\') ||
+      filename.includes('\0')
+    ) {
+      return NextResponse.json({ error: 'Invalid filename' }, { status: 400 })
+    }
 
     const supabase = await createClient()
     const storagePath = `${userId}/${filename}`

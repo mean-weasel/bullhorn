@@ -41,6 +41,7 @@
     "@capacitor/status-bar": "^8.0.0",
     "@capgo/capacitor-social-login": "^8.3.0",
     "@octokit/rest": "^20.0.2",
+    "@sentry/nextjs": "^10.39.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.90.1",
     "@upstash/ratelimit": "^2.0.8",
@@ -63,6 +64,7 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",

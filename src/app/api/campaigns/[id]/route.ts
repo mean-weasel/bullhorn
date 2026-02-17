@@ -9,6 +9,8 @@ import {
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updateCampaignSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional().nullable(),
@@ -50,7 +52,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       if (campaignError.code === 'PGRST116') {
         return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: campaignError.message }, { status: 500 })
+      console.error('Database error:', campaignError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Get posts for this campaign (with ownership check)
@@ -62,7 +65,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       .order('updated_at', { ascending: false })
 
     if (postsError) {
-      return NextResponse.json({ error: postsError.message }, { status: 500 })
+      console.error('Database error:', postsError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform campaign and posts from snake_case to camelCase
@@ -106,7 +110,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const updates: Record<string, unknown> = {}
-    if (parsed.data.name !== undefined) updates.name = parsed.data.name
+    if (parsed.data.name !== undefined) {
+      const trimmedName = parsed.data.name.trim()
+      if (!trimmedName) {
+        return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 })
+      }
+      updates.name = trimmedName
+    }
     if (parsed.data.description !== undefined) updates.description = parsed.data.description
     if (parsed.data.status !== undefined) updates.status = parsed.data.status
     if (parsed.data.projectId !== undefined) updates.project_id = parsed.data.projectId || null
@@ -123,7 +133,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform campaign from snake_case to camelCase
@@ -183,7 +194,8 @@ export async function DELETE(
     const { error } = await supabase.from('campaigns').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

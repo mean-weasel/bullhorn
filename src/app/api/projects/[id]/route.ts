@@ -4,6 +4,8 @@ import { transformProjectFromDb, transformProjectToDb, type DbProject } from '@/
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updateProjectSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional().nullable(),
@@ -50,7 +52,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Project not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const project = transformProjectFromDb(data as DbProject)
@@ -91,6 +94,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       )
     }
 
+    if (parsed.data.name !== undefined) {
+      const trimmedName = parsed.data.name.trim()
+      if (!trimmedName) {
+        return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 })
+      }
+      parsed.data.name = trimmedName
+    }
+
     // Transform updates to snake_case
     const updates = transformProjectToDb(parsed.data)
 
@@ -107,7 +118,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Project not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const project = transformProjectFromDb(data as DbProject)
@@ -150,7 +162,8 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     const { error } = await supabase.from('projects').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json({

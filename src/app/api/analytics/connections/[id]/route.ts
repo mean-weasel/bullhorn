@@ -8,6 +8,8 @@ import {
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updateAnalyticsConnectionSchema = z.object({
   propertyId: z.string().min(1).optional(),
   propertyName: z.string().max(500).optional().nullable(),
@@ -51,7 +53,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Connection not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const connection = transformAnalyticsConnectionFromDb(data as DbAnalyticsConnection)
@@ -101,7 +104,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Connection not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const connection = transformAnalyticsConnectionFromDb(data as DbAnalyticsConnection)
@@ -135,7 +139,8 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       .eq('user_id', userId)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

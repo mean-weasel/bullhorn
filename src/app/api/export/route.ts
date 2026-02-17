@@ -7,7 +7,10 @@ import {
   type DbCampaign,
 } from '@/lib/utils'
 import { requireAuth } from '@/lib/auth'
+import { rateLimit } from '@/lib/rateLimit'
 import type { Post, Campaign } from '@/lib/posts'
+
+export const dynamic = 'force-dynamic'
 
 function getPostText(post: Post): string {
   const c = post.content
@@ -68,6 +71,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Stricter rate limit for exports (6 per minute per user)
+    const rateLimitResult = await rateLimit(`export:${userId}`)
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many export requests' }, { status: 429 })
+    }
+
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
 
@@ -108,7 +117,8 @@ export async function GET(request: NextRequest) {
 
       const { data, error } = await query
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        console.error('Database error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
       }
       posts = (data || []).map((p) => transformPostFromDb(p as DbPost))
     }
@@ -130,7 +140,8 @@ export async function GET(request: NextRequest) {
 
       const { data, error } = await query
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        console.error('Database error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
       }
       campaigns = (data || []).map((c) => transformCampaignFromDb(c as DbCampaign))
     }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 
 export default function GlobalError({
   error,
@@ -10,6 +11,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
+    Sentry.captureException(error)
     console.error('Global error:', error)
   }, [error])
 
@@ -36,9 +38,7 @@ export default function GlobalError({
               </div>
             </div>
 
-            <h1 className="text-2xl font-bold mb-2">
-              Critical Error
-            </h1>
+            <h1 className="text-2xl font-bold mb-2">Critical Error</h1>
 
             <p className="text-zinc-400 mb-6">
               The application encountered a critical error. Please try refreshing the page.
@@ -48,12 +48,7 @@ export default function GlobalError({
               onClick={reset}
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white font-medium hover:shadow-lg transition-all"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -64,11 +59,7 @@ export default function GlobalError({
               Refresh Page
             </button>
 
-            {error.digest && (
-              <p className="mt-6 text-xs text-zinc-500">
-                Error ID: {error.digest}
-              </p>
-            )}
+            {error.digest && <p className="mt-6 text-xs text-zinc-500">Error ID: {error.digest}</p>}
           </div>
         </div>
       </body>

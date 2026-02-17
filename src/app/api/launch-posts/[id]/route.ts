@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const updateLaunchPostSchema = z.object({
   platform: z
     .enum([
@@ -79,7 +81,8 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Launch post not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const launchPost = transformLaunchPost(data as Record<string, unknown>)
@@ -124,7 +127,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const updates: Record<string, unknown> = {}
     if (parsed.data.platform !== undefined) updates.platform = parsed.data.platform
     if (parsed.data.status !== undefined) updates.status = parsed.data.status
-    if (parsed.data.title !== undefined) updates.title = parsed.data.title
+    if (parsed.data.title !== undefined) {
+      const trimmedTitle = parsed.data.title.trim()
+      if (!trimmedTitle) {
+        return NextResponse.json({ error: 'Title cannot be empty' }, { status: 400 })
+      }
+      updates.title = trimmedTitle
+    }
     if (parsed.data.url !== undefined) updates.url = parsed.data.url
     if (parsed.data.description !== undefined) updates.description = parsed.data.description
     if (parsed.data.platformFields !== undefined)
@@ -146,7 +155,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Launch post not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const launchPost = transformLaunchPost(data as Record<string, unknown>)
@@ -189,7 +199,8 @@ export async function DELETE(
       .eq('user_id', userId)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

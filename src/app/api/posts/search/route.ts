@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, escapeSearchPattern, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/posts/search - Search posts
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +39,8 @@ export async function GET(request: NextRequest) {
       .limit(limit)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Additionally filter by content (JSON field) on the client side

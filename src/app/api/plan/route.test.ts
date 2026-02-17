@@ -1,0 +1,279 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
+vi.mock('@/lib/auth', () => ({
+  requireAuth: vi.fn(),
+}))
+
+const mockSingle = vi.fn()
+const mockEq = vi.fn(() => ({ eq: mockEq, single: mockSingle }))
+const mockSelect = vi.fn(() => ({ eq: mockEq }))
+const mockFrom = vi.fn(() => ({ select: mockSelect }))
+
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn(async () => ({
+    from: mockFrom,
+  })),
+}))
+
+import { GET } from './route'
+import { requireAuth } from '@/lib/auth'
+import { PLAN_LIMITS } from '@/lib/limits'
+
+const mockRequireAuth = vi.mocked(requireAuth)
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Set up mock responses for the plan route.
+ *
+ * The route calls `supabase.from(table)` for 6 tables in order:
+ *   1. user_profiles  -> .select().eq().single()
+ *   2. posts          -> .select().eq()
+ *   3. campaigns      -> .select().eq()
+ *   4. projects       -> .select().eq()
+ *   5. blog_drafts    -> .select().eq()
+ *   6. launch_posts   -> .select().eq()
+ *
+ * Because .eq() returns { eq, single }, the resource-count calls
+ * resolve from the final .eq() call (not .single()).
+ *
+ * The call sequence on mockEq is:
+ *   call 1: user_profiles .eq('id', userId)   -> returns { eq, single }
+ *   call 2: posts .eq('user_id', userId)       -> resolves as data
+ *   call 3: campaigns .eq('user_id', userId)
+ *   call 4: projects .eq('user_id', userId)
+ *   call 5: blog_drafts .eq('user_id', userId)
+ *   call 6: launch_posts .eq('user_id', userId)
+ */
+function setupMocks(opts: {
+  profile?: { plan: string; storage_used_bytes: number } | null
+  profileError?: { message: string } | null
+  postCount?: number
+  campaignCount?: number
+  projectCount?: number
+  blogDraftCount?: number
+  launchPostCount?: number
+}) {
+  const makeItems = (count: number) => Array.from({ length: count }, (_, i) => ({ id: `id-${i}` }))
+
+  // Reset mock implementations for each call
+  // mockSingle is called once for the user_profiles query
+  mockSingle.mockResolvedValue({
+    data: opts.profile ?? null,
+    error: opts.profileError ?? null,
+  })
+
+  // mockEq is called for every .eq() in the chain.
+  // For resource count queries, the final .eq() result is used as the Promise value.
+  // We need the resource count .eq() calls to resolve with { data, error }.
+  const resourceResults = [
+    { data: makeItems(opts.postCount ?? 0), error: null },
+    { data: makeItems(opts.campaignCount ?? 0), error: null },
+    { data: makeItems(opts.projectCount ?? 0), error: null },
+    { data: makeItems(opts.blogDraftCount ?? 0), error: null },
+    { data: makeItems(opts.launchPostCount ?? 0), error: null },
+  ]
+
+  // The first .eq() call is for user_profiles (returns { eq, single })
+  // Then 5 resource-count .eq() calls each need to resolve with data.
+  // Since mockEq returns { eq: mockEq, single: mockSingle } by default,
+  // the resource-count calls will also return that object. But Promise.all
+  // awaits the result of .eq(), so we need it to have a .then or be thenable.
+  //
+  // Actually, the supabase client returns a thenable from .eq() — it's a
+  // PostgrestFilterBuilder which is both chainable AND thenable. We need our
+  // mock .eq() to behave the same way for the resource queries.
+  //
+  // Strategy: track call index. For the profile .eq() (1st call), return
+  // the chainable object. For resource .eq() calls (2nd-6th), return the
+  // data result directly (which Promise.all will resolve).
+
+  let eqCallIndex = 0
+  // @ts-expect-error -- mock returns different shapes for profile vs resource queries
+  mockEq.mockImplementation(() => {
+    eqCallIndex++
+    if (eqCallIndex === 1) {
+      // user_profiles .eq('id', userId) — needs .single() chaining
+      return { eq: mockEq, single: mockSingle }
+    }
+    // Resource count queries — return thenable result directly
+    const result = resourceResults[eqCallIndex - 2]
+    return result ?? { data: [], error: null }
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+beforeEach(() => {
+  vi.clearAllMocks()
+})
+
+// ---------------------------------------------------------------------------
+// GET /api/plan
+// ---------------------------------------------------------------------------
+
+describe('GET /api/plan', () => {
+  it('returns 401 when not authenticated', async () => {
+    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
+    const res = await GET()
+    expect(res.status).toBe(401)
+    const body = await res.json()
+    expect(body.error).toBe('Unauthorized')
+  })
+
+  it('returns plan info and resource counts for authenticated user', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    setupMocks({
+      profile: { plan: 'free', storage_used_bytes: 1024 },
+      postCount: 5,
+      campaignCount: 2,
+      projectCount: 1,
+      blogDraftCount: 3,
+      launchPostCount: 0,
+    })
+
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+
+    expect(body.plan).toBe('free')
+    expect(body.limits.posts).toEqual({ current: 5, limit: PLAN_LIMITS.free.posts })
+    expect(body.limits.campaigns).toEqual({ current: 2, limit: PLAN_LIMITS.free.campaigns })
+    expect(body.limits.projects).toEqual({ current: 1, limit: PLAN_LIMITS.free.projects })
+    expect(body.limits.blogDrafts).toEqual({ current: 3, limit: PLAN_LIMITS.free.blogDrafts })
+    expect(body.limits.launchPosts).toEqual({ current: 0, limit: PLAN_LIMITS.free.launchPosts })
+    expect(body.storage).toEqual({
+      usedBytes: 1024,
+      limitBytes: PLAN_LIMITS.free.storageBytes,
+    })
+  })
+
+  it('returns correct limits for pro plan', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    setupMocks({
+      profile: { plan: 'pro', storage_used_bytes: 500000 },
+      postCount: 100,
+      campaignCount: 10,
+      projectCount: 5,
+      blogDraftCount: 20,
+      launchPostCount: 15,
+    })
+
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+
+    expect(body.plan).toBe('pro')
+    expect(body.limits.posts.limit).toBe(PLAN_LIMITS.pro.posts)
+    expect(body.limits.campaigns.limit).toBe(PLAN_LIMITS.pro.campaigns)
+    expect(body.limits.projects.limit).toBe(PLAN_LIMITS.pro.projects)
+    expect(body.limits.blogDrafts.limit).toBe(PLAN_LIMITS.pro.blogDrafts)
+    expect(body.limits.launchPosts.limit).toBe(PLAN_LIMITS.pro.launchPosts)
+    expect(body.storage.limitBytes).toBe(PLAN_LIMITS.pro.storageBytes)
+  })
+
+  it('returns correct response structure with all expected fields', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    setupMocks({
+      profile: { plan: 'free', storage_used_bytes: 0 },
+    })
+
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+
+    // Top-level keys
+    expect(body).toHaveProperty('plan')
+    expect(body).toHaveProperty('limits')
+    expect(body).toHaveProperty('storage')
+
+    // Limits sub-keys
+    expect(body.limits).toHaveProperty('posts')
+    expect(body.limits).toHaveProperty('campaigns')
+    expect(body.limits).toHaveProperty('projects')
+    expect(body.limits).toHaveProperty('blogDrafts')
+    expect(body.limits).toHaveProperty('launchPosts')
+
+    // Each limit has current and limit
+    for (const key of ['posts', 'campaigns', 'projects', 'blogDrafts', 'launchPosts']) {
+      expect(body.limits[key]).toHaveProperty('current')
+      expect(body.limits[key]).toHaveProperty('limit')
+      expect(typeof body.limits[key].current).toBe('number')
+      expect(typeof body.limits[key].limit).toBe('number')
+    }
+
+    // Storage has usedBytes and limitBytes
+    expect(body.storage).toHaveProperty('usedBytes')
+    expect(body.storage).toHaveProperty('limitBytes')
+    expect(typeof body.storage.usedBytes).toBe('number')
+    expect(typeof body.storage.limitBytes).toBe('number')
+  })
+
+  it('defaults to free plan when profile has no plan field', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    setupMocks({
+      profile: { plan: '', storage_used_bytes: 0 },
+    })
+
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+
+    expect(body.plan).toBe('free')
+    expect(body.limits.posts.limit).toBe(PLAN_LIMITS.free.posts)
+  })
+
+  it('defaults to free plan when profile is null', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    setupMocks({
+      profile: null,
+    })
+
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+
+    expect(body.plan).toBe('free')
+    expect(body.storage.usedBytes).toBe(0)
+  })
+
+  it('handles database errors gracefully', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+
+    // Make the supabase client throw an error
+    mockSelect.mockImplementationOnce(() => {
+      throw new Error('Connection refused')
+    })
+
+    const res = await GET()
+    expect(res.status).toBe(500)
+    const body = await res.json()
+    expect(body.error).toBe('Internal server error')
+  })
+
+  it('queries the correct tables with user_id filter', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-42' })
+    setupMocks({
+      profile: { plan: 'free', storage_used_bytes: 0 },
+    })
+
+    await GET()
+
+    // Verify from() was called with each expected table
+    const fromCalls = mockFrom.mock.calls.map((c: string[]) => c[0])
+    expect(fromCalls).toContain('user_profiles')
+    expect(fromCalls).toContain('posts')
+    expect(fromCalls).toContain('campaigns')
+    expect(fromCalls).toContain('projects')
+    expect(fromCalls).toContain('blog_drafts')
+    expect(fromCalls).toContain('launch_posts')
+  })
+})

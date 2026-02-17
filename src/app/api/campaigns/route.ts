@@ -5,6 +5,8 @@ import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createCampaignSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(2000).optional().nullable(),
@@ -58,7 +60,8 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform campaigns from snake_case to camelCase
@@ -110,11 +113,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const name = parsed.data.name.trim()
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    }
+
     const { data, error } = await supabase
       .from('campaigns')
       .insert({
         user_id: userId,
-        name: parsed.data.name,
+        name,
         description: parsed.data.description,
         status: parsed.data.status || 'active',
         project_id: parsed.data.projectId || null,
@@ -123,7 +131,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform campaign from snake_case to camelCase

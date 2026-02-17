@@ -51,7 +51,8 @@ export async function DELETE(
       if (fetchError.code === 'PGRST116') {
         return NextResponse.json({ error: 'Post not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+      console.error('Database error:', fetchError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     if (post.campaign_id !== id) {
@@ -68,7 +69,8 @@ export async function DELETE(
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json(data)

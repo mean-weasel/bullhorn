@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { transformCampaignFromDb, type DbCampaign } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 interface RouteContext {
   params: Promise<{ id: string }>
 }
@@ -39,7 +41,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       .order('updated_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const campaigns = (data || []).map((campaign) =>

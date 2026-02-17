@@ -3,7 +3,11 @@
   "entry": [
     "src/app/**/page.tsx",
     "src/app/**/layout.tsx",
-    "src/app/**/route.ts"
+    "src/app/**/route.ts",
+    "src/instrumentation.ts",
+    "sentry.client.config.ts",
+    "sentry.server.config.ts",
+    "sentry.edge.config.ts"
   ],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [

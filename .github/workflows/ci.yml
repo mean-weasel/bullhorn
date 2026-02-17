@@ -84,7 +84,7 @@ jobs:
         run: cd mcp-server && npm ci
 
       - name: Run frontend unit tests
-        run: npx vitest run --passWithNoTests
+        run: npx vitest run
 
       - name: Run MCP server unit tests
         run: cd mcp-server && npm test

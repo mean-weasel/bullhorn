@@ -3,6 +3,8 @@ import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { randomBytes, createHash } from 'crypto'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createApiKeySchema = z.object({
   name: z.string().min(1).max(200),
   expiresAt: z.string().optional().nullable(),

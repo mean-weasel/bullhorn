@@ -4,6 +4,8 @@ import { transformAnalyticsConnectionFromDb, type DbAnalyticsConnection } from '
 import { requireAuth } from '@/lib/auth'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createAnalyticsConnectionSchema = z.object({
   propertyId: z.string().min(1),
   propertyName: z.string().max(500).optional().nullable(),
@@ -37,7 +39,8 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform connections from snake_case to camelCase
@@ -107,7 +110,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform connection from snake_case to camelCase

@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { escapeSearchPattern } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 // Transform snake_case Supabase response to camelCase for frontend
 function transformDraft(draft: Record<string, unknown>) {
   return {
@@ -54,7 +56,8 @@ export async function GET(request: NextRequest) {
       .limit(limit)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform to camelCase for frontend

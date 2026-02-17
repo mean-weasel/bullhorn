@@ -3,6 +3,8 @@ import { requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 /** DB row shape for notification_preferences (snake_case) */
 interface DbNotificationPreferences {
   id: string

@@ -55,7 +55,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Reminder not found' }, { status: 404 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const reminder = transformReminderFromDb(data as DbReminder)
@@ -98,7 +99,8 @@ export async function DELETE(
     const { error } = await supabase.from('reminders').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })

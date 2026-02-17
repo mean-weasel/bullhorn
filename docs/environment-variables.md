@@ -49,6 +49,29 @@ UPSTASH_REDIS_REST_TOKEN=your-token
 
 ---
 
+### Error Monitoring (Sentry)
+
+```bash
+NEXT_PUBLIC_SENTRY_DSN=https://your-key@your-org.ingest.sentry.io/your-project-id
+SENTRY_AUTH_TOKEN=your-auth-token  # Optional: enables source map uploads
+```
+
+**Purpose**: Error tracking and monitoring in production
+**Where to get**: https://sentry.io/ → Project Settings → Client Keys (DSN)
+**Impact if missing**:
+- Error monitoring is disabled — errors only logged to console
+- Application functions normally
+
+**How to set up**:
+1. Create free Sentry account at https://sentry.io/
+2. Create a new Next.js project
+3. Copy the DSN from Project Settings → Client Keys
+4. Add `NEXT_PUBLIC_SENTRY_DSN` to Vercel environment variables
+5. (Optional) Create auth token at Settings → Auth Tokens for source map uploads
+6. Redeploy
+
+---
+
 ## Optional Variables
 
 ### Google OAuth (iOS/Mobile)

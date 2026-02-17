@@ -21,6 +21,9 @@ import {
   Zap,
   Globe,
   Image,
+  Shield,
+  Gauge,
+  Code,
 } from 'lucide-react'
 
 const postTools = [
@@ -185,6 +188,71 @@ const mcpConfig = `{
     }
   }
 }`
+
+const toolExamples = [
+  {
+    title: 'Create a Twitter Post',
+    json: `{
+  "tool": "create_post",
+  "arguments": {
+    "platform": "twitter",
+    "content": { "text": "Launching our new feature today!" },
+    "status": "draft"
+  }
+}`,
+  },
+  {
+    title: 'Create a LinkedIn Post',
+    json: `{
+  "tool": "create_post",
+  "arguments": {
+    "platform": "linkedin",
+    "content": {
+      "text": "Excited to announce our Series A funding!",
+      "visibility": "public"
+    },
+    "status": "scheduled",
+    "scheduledAt": "2026-03-01T09:00:00Z"
+  }
+}`,
+  },
+  {
+    title: 'Create a Reddit Post',
+    json: `{
+  "tool": "create_post",
+  "arguments": {
+    "platform": "reddit",
+    "content": {
+      "subreddit": "SideProject",
+      "title": "Show r/SideProject: I built a social media scheduler",
+      "body": "After 6 months of development..."
+    },
+    "status": "draft"
+  }
+}`,
+  },
+  {
+    title: 'Create Reddit Crossposts',
+    json: `{
+  "tool": "create_reddit_crossposts",
+  "arguments": {
+    "subreddits": ["SideProject", "startups", "webdev"],
+    "title": "Show: I built Bullhorn",
+    "body": "A social media post scheduler...",
+    "status": "draft"
+  }
+}`,
+  },
+]
+
+const planLimits = [
+  { resource: 'Posts', free: '50', pro: '500' },
+  { resource: 'Campaigns', free: '5', pro: '50' },
+  { resource: 'Projects', free: '3', pro: '20' },
+  { resource: 'Blog Drafts', free: '10', pro: '100' },
+  { resource: 'Launch Posts', free: '10', pro: '100' },
+  { resource: 'Storage', free: '50 MB', pro: '2 GB' },
+]
 
 function ToolTable({ tools }: { tools: { name: string; description: string }[] }) {
   return (
@@ -460,6 +528,90 @@ export default function McpDocsPage() {
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Rate Limits */}
+      <section className="border-y-[3px] border-border bg-card px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            <Gauge className="mr-2 inline-block h-7 w-7 text-primary" />
+            Rate Limits
+          </h2>
+          <p className="mb-8 text-muted-foreground">
+            API requests are rate-limited to{' '}
+            <strong className="text-foreground">10 requests per 10 seconds</strong> per API key
+            using a sliding window algorithm. If exceeded, requests return HTTP{' '}
+            <code className="rounded bg-[#1e1e2e] px-1.5 py-0.5 font-mono text-sm text-[#cdd6f4]">
+              429
+            </code>{' '}
+            with a{' '}
+            <code className="rounded bg-[#1e1e2e] px-1.5 py-0.5 font-mono text-sm text-[#cdd6f4]">
+              Retry-After
+            </code>{' '}
+            header.
+          </p>
+        </div>
+      </section>
+
+      {/* Plan Limits */}
+      <section className="px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            <Shield className="mr-2 inline-block h-7 w-7 text-primary" />
+            Plan Limits
+          </h2>
+          <p className="mb-8 text-muted-foreground">
+            Resource creation is subject to plan limits. When a limit is reached, creation tools
+            return an error with the current usage.
+          </p>
+
+          <div className="sticker-card overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b-[3px] border-border">
+                  <th className="px-4 py-3 text-left text-sm font-bold">Resource</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold">Free Plan</th>
+                  <th className="px-4 py-3 text-left text-sm font-bold">Pro Plan</th>
+                </tr>
+              </thead>
+              <tbody>
+                {planLimits.map((row) => (
+                  <tr key={row.resource} className="border-b-2 border-border/50">
+                    <td className="px-4 py-3 text-sm font-medium">{row.resource}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">{row.free}</td>
+                    <td className="px-4 py-3 text-sm text-muted-foreground">{row.pro}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Tool Examples */}
+      <section className="border-y-[3px] border-border bg-card px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+            <Code className="mr-2 inline-block h-7 w-7 text-primary" />
+            Tool Examples
+          </h2>
+          <p className="mb-10 text-muted-foreground">
+            Example tool calls showing the JSON arguments for common operations.
+          </p>
+
+          <div className="space-y-8">
+            {toolExamples.map((example) => (
+              <div key={example.title}>
+                <h3 className="mb-3 text-lg font-bold">{example.title}</h3>
+                <pre className="overflow-x-auto rounded-lg border-[3px] border-border bg-[#1e1e2e] p-4">
+                  <code className="font-mono text-sm leading-relaxed text-[#cdd6f4]">
+                    {example.json}
+                  </code>
+                </pre>
+              </div>
+            ))}
           </div>
         </div>
       </section>

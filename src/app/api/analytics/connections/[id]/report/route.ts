@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 interface RouteContext {
   params: Promise<{ id: string }>
 }
@@ -64,9 +66,7 @@ async function refreshTokenIfNeeded(
 
   const tokens = await tokenResponse.json()
   const newAccessToken = tokens.access_token
-  const newExpiresAt = new Date(
-    Date.now() + tokens.expires_in * 1000
-  ).toISOString()
+  const newExpiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString()
 
   // Update the connection with new tokens
   await supabase
@@ -131,10 +131,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       .single()
 
     if (connError || !connection) {
-      return NextResponse.json(
-        { error: 'Connection not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Connection not found' }, { status: 404 })
     }
 
     // Parse date range from query params
@@ -154,10 +151,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const { accessToken } = await refreshTokenIfNeeded(connection, supabase)
 
     // Update sync status to syncing
-    await supabase
-      .from('analytics_connections')
-      .update({ sync_status: 'syncing' })
-      .eq('id', id)
+    await supabase.from('analytics_connections').update({ sync_status: 'syncing' }).eq('id', id)
 
     // Fetch metrics from GA4 Data API
     const propertyId = connection.property_id
@@ -198,10 +192,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
         })
         .eq('id', id)
 
-      return NextResponse.json(
-        { error: 'Failed to fetch analytics data' },
-        { status: 502 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch analytics data' }, { status: 502 })
     }
 
     const reportData = await reportResponse.json()
@@ -245,9 +236,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ report })
   } catch (error) {
     console.error('Error fetching analytics report:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch analytics report' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch analytics report' }, { status: 500 })
   }
 }

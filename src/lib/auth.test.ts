@@ -30,13 +30,12 @@ vi.mock('@/lib/supabase/server', () => ({
 const mockServiceSingle = vi.fn()
 const mockServiceEq = vi.fn(() => ({ eq: mockServiceEq, single: mockServiceSingle }))
 const mockServiceSelect = vi.fn(() => ({ eq: mockServiceEq }))
+const mockServiceUpdate = vi.fn(() => ({
+  eq: vi.fn(() => Promise.resolve({ error: null })),
+}))
 const mockServiceFrom = vi.fn(() => ({
   select: mockServiceSelect,
-  update: vi.fn(() => ({
-    eq: vi.fn(() => ({
-      then: vi.fn(),
-    })),
-  })),
+  update: mockServiceUpdate,
 }))
 
 vi.mock('@supabase/supabase-js', () => ({

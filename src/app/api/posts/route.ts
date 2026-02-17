@@ -5,6 +5,8 @@ import { requireAuth, validateScopes, type ApiKeyScope } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createPostSchema = z.object({
   platform: z.enum(['twitter', 'linkedin', 'reddit']),
   content: z.record(z.string(), z.unknown()),
@@ -76,7 +78,8 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform posts from snake_case to camelCase
@@ -146,7 +149,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     // Transform post from snake_case to camelCase

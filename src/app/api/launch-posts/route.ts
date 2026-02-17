@@ -4,6 +4,8 @@ import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const createLaunchPostSchema = z.object({
   platform: z.enum([
     'hacker_news_show',
@@ -92,7 +94,8 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const launchPosts = (data || []).map(transformLaunchPost)
@@ -145,13 +148,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const title = parsed.data.title.trim()
+    if (!title) {
+      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+    }
+
     const { data, error } = await supabase
       .from('launch_posts')
       .insert({
         user_id: userId,
         platform: parsed.data.platform,
         status: parsed.data.status || 'draft',
-        title: parsed.data.title,
+        title,
         url: parsed.data.url || null,
         description: parsed.data.description || null,
         platform_fields: parsed.data.platformFields || {},
@@ -163,7 +171,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      console.error('Database error:', error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
     const launchPost = transformLaunchPost(data as Record<string, unknown>)
