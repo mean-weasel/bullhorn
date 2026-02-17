@@ -57,9 +57,7 @@ export function IOSToggleSwitch({
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
         'border-2 border-border',
         config.track,
-        checked
-          ? 'bg-sticker-green'
-          : 'bg-muted',
+        checked ? 'bg-sticker-green' : 'bg-muted',
         disabled && 'opacity-50 cursor-not-allowed',
         !label && !description && className
       )}
@@ -97,12 +95,8 @@ export function IOSToggleSwitch({
       )}
     >
       <div className="flex-1 min-w-0">
-        {label && (
-          <p className="font-bold text-sm text-foreground">{label}</p>
-        )}
-        {description && (
-          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
-        )}
+        {label && <p className="font-bold text-sm text-foreground">{label}</p>}
+        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
       </div>
       <div
         className={cn(
@@ -110,9 +104,7 @@ export function IOSToggleSwitch({
           'transition-all duration-200 ease-in-out',
           'border-2 border-border',
           config.track,
-          checked
-            ? 'bg-sticker-green'
-            : 'bg-muted'
+          checked ? 'bg-sticker-green' : 'bg-muted'
         )}
       >
         <span

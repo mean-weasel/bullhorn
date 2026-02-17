@@ -16,21 +16,19 @@ interface UseKeyboardShortcutsOptions {
   enabled?: boolean
 }
 
-export function useKeyboardShortcuts({
-  shortcuts,
-  enabled = true,
-}: UseKeyboardShortcutsOptions) {
+export function useKeyboardShortcuts({ shortcuts, enabled = true }: UseKeyboardShortcutsOptions) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!enabled) return
 
       // Don't trigger shortcuts when typing in inputs (except for meta/ctrl shortcuts)
       const target = e.target as HTMLElement
-      const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
+      const isInput =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
 
       for (const shortcut of shortcuts) {
         const ctrlOrMeta = shortcut.ctrl || shortcut.meta
-        const modifierMatch = ctrlOrMeta ? (e.ctrlKey || e.metaKey) : true
+        const modifierMatch = ctrlOrMeta ? e.ctrlKey || e.metaKey : true
         const shiftMatch = shortcut.shift ? e.shiftKey : !e.shiftKey
         const keyMatch = e.key.toLowerCase() === shortcut.key.toLowerCase()
 

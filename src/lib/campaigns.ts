@@ -14,7 +14,12 @@ interface CampaignsState {
 
 interface CampaignsActions {
   fetchCampaigns: (options?: { projectId?: string | 'unassigned' }) => Promise<void>
-  addCampaign: (campaign: { name: string; description?: string; status?: CampaignStatus; projectId?: string }) => Promise<Campaign>
+  addCampaign: (campaign: {
+    name: string
+    description?: string
+    status?: CampaignStatus
+    projectId?: string
+  }) => Promise<Campaign>
   updateCampaign: (id: string, updates: Partial<Campaign>) => Promise<void>
   deleteCampaign: (id: string) => Promise<void>
   getCampaign: (id: string) => Campaign | undefined

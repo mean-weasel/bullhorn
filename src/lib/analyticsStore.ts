@@ -115,9 +115,7 @@ export const useAnalyticsStore = create<AnalyticsState & AnalyticsActions>()((se
       const updatedConnection = data.connection as AnalyticsConnection
 
       set((state) => ({
-        connections: state.connections.map((c) =>
-          c.id === id ? updatedConnection : c
-        ),
+        connections: state.connections.map((c) => (c.id === id ? updatedConnection : c)),
         loading: false,
       }))
     } catch (error) {
@@ -139,9 +137,7 @@ export const useAnalyticsStore = create<AnalyticsState & AnalyticsActions>()((se
 
       set((state) => ({
         connections: state.connections.filter((c) => c.id !== id),
-        reports: Object.fromEntries(
-          Object.entries(state.reports).filter(([key]) => key !== id)
-        ),
+        reports: Object.fromEntries(Object.entries(state.reports).filter(([key]) => key !== id)),
         loading: false,
       }))
     } catch (error) {
@@ -201,11 +197,7 @@ export const useAnalyticsStore = create<AnalyticsState & AnalyticsActions>()((se
 }))
 
 // Selector hooks for common queries
-export const useAnalyticsConnections = () =>
-  useAnalyticsStore((state) => state.connections)
-export const useAnalyticsLoading = () =>
-  useAnalyticsStore((state) => state.loading)
-export const useAnalyticsError = () =>
-  useAnalyticsStore((state) => state.error)
-export const useAnalyticsInitialized = () =>
-  useAnalyticsStore((state) => state.initialized)
+export const useAnalyticsConnections = () => useAnalyticsStore((state) => state.connections)
+export const useAnalyticsLoading = () => useAnalyticsStore((state) => state.loading)
+export const useAnalyticsError = () => useAnalyticsStore((state) => state.error)
+export const useAnalyticsInitialized = () => useAnalyticsStore((state) => state.initialized)

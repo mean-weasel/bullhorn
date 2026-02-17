@@ -16,8 +16,10 @@ export function AutoSaveIndicator({ status, className }: AutoSaveIndicatorProps)
         'border-2 border-border',
         status === 'idle' && 'opacity-0',
         status === 'saving' && 'bg-muted text-muted-foreground opacity-100',
-        status === 'saved' && 'bg-sticker-green/10 text-sticker-green border-sticker-green/30 opacity-100',
-        status === 'error' && 'bg-destructive/10 text-destructive border-destructive/30 opacity-100',
+        status === 'saved' &&
+          'bg-sticker-green/10 text-sticker-green border-sticker-green/30 opacity-100',
+        status === 'error' &&
+          'bg-destructive/10 text-destructive border-destructive/30 opacity-100',
         className
       )}
     >

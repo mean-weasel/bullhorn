@@ -58,24 +58,12 @@ interface MetricCardProps {
   compact?: boolean
 }
 
-function MetricCard({
-  label,
-  value,
-  icon,
-  compact = false,
-}: MetricCardProps) {
+function MetricCard({ label, value, icon, compact = false }: MetricCardProps) {
   return (
-    <div
-      className={cn(
-        'bg-card border border-border rounded-xl',
-        compact ? 'p-3' : 'p-4'
-      )}
-    >
+    <div className={cn('bg-card border border-border rounded-xl', compact ? 'p-3' : 'p-4')}>
       <div className="flex items-center gap-2 mb-2">
         <div className="text-muted-foreground">{icon}</div>
-        <span className="text-xs uppercase tracking-wider text-muted-foreground">
-          {label}
-        </span>
+        <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
       </div>
       <div
         className={cn(
@@ -140,9 +128,7 @@ export function AnalyticsDashboard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-blue-500" />
-          <h3 className="font-semibold">
-            {connection.propertyName || 'Analytics'}
-          </h3>
+          <h3 className="font-semibold">{connection.propertyName || 'Analytics'}</h3>
         </div>
         <div className="flex items-center gap-2">
           {/* Date range selector */}
@@ -174,9 +160,7 @@ export function AnalyticsDashboard({
             )}
             title="Refresh data"
           >
-            <RefreshCw
-              className={cn('w-4 h-4', isLoading && 'animate-spin')}
-            />
+            <RefreshCw className={cn('w-4 h-4', isLoading && 'animate-spin')} />
           </button>
         </div>
       </div>
@@ -199,12 +183,7 @@ export function AnalyticsDashboard({
 
       {/* Metrics grid */}
       {report && (
-        <div
-          className={cn(
-            'grid gap-3',
-            compact ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'
-          )}
-        >
+        <div className={cn('grid gap-3', compact ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4')}>
           <MetricCard
             label="Active Users"
             value={formatNumber(report.metrics.activeUsers)}

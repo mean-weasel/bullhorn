@@ -60,10 +60,7 @@ export function IOSActionSheet<T = string>({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" />
 
@@ -84,9 +81,7 @@ export function IOSActionSheet<T = string>({
           {/* Title */}
           {title && (
             <div className="px-4 py-3 text-center border-b-2 border-border bg-secondary">
-              <span className="text-sm font-bold text-foreground">
-                {title}
-              </span>
+              <span className="text-sm font-bold text-foreground">{title}</span>
             </div>
           )}
 
@@ -108,20 +103,24 @@ export function IOSActionSheet<T = string>({
               >
                 {/* Icon */}
                 {option.icon && (
-                  <span className={cn(
-                    'flex-shrink-0',
-                    option.destructive ? 'text-destructive' : 'text-muted-foreground'
-                  )}>
+                  <span
+                    className={cn(
+                      'flex-shrink-0',
+                      option.destructive ? 'text-destructive' : 'text-muted-foreground'
+                    )}
+                  >
                     {option.icon}
                   </span>
                 )}
 
                 {/* Label and description */}
                 <div className="flex-1 min-w-0">
-                  <span className={cn(
-                    'text-base font-bold block',
-                    option.destructive ? 'text-destructive' : 'text-foreground'
-                  )}>
+                  <span
+                    className={cn(
+                      'text-base font-bold block',
+                      option.destructive ? 'text-destructive' : 'text-foreground'
+                    )}
+                  >
                     {option.label}
                   </span>
                   {option.description && (
@@ -168,8 +167,7 @@ export function useIsIOS() {
   if (typeof window === 'undefined') return false
 
   const ua = window.navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua) ||
-    (ua.includes('Mac') && 'ontouchend' in document)
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document)
 
   return isIOS
 }
@@ -178,10 +176,12 @@ export function useIsIOS() {
 export function useIsMobile() {
   if (typeof window === 'undefined') return false
 
-  return window.innerWidth < 768 ||
+  return (
+    window.innerWidth < 768 ||
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       window.navigator.userAgent
     )
+  )
 }
 
 // Re-export iOS components for convenience

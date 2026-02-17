@@ -96,7 +96,10 @@ export const LAUNCH_CHAR_LIMITS: Partial<Record<LaunchPlatform, Record<string, n
 }
 
 // Platform display info
-export const LAUNCH_PLATFORM_INFO: Record<LaunchPlatform, { name: string; label: string; color: string; bgColor: string; icon: string }> = {
+export const LAUNCH_PLATFORM_INFO: Record<
+  LaunchPlatform,
+  { name: string; label: string; color: string; bgColor: string; icon: string }
+> = {
   hacker_news_show: {
     name: 'Show HN',
     label: 'Show HN',
