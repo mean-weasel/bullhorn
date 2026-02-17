@@ -60,33 +60,43 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       })
     }
 
-    // Get post counts by status for all campaigns in project (defense-in-depth)
-    const { data: posts, error: postsError } = await supabase
-      .from('posts')
-      .select('status')
-      .eq('user_id', userId)
-      .in('campaign_id', campaignIds)
+    // Get post counts by status in parallel (head: true returns only count, no rows)
+    const baseQuery = () =>
+      supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .in('campaign_id', campaignIds)
+
+    const [totalResult, scheduledResult, publishedResult, draftResult, failedResult] =
+      await Promise.all([
+        baseQuery(),
+        baseQuery().eq('status', 'scheduled'),
+        baseQuery().eq('status', 'published'),
+        baseQuery().eq('status', 'draft'),
+        baseQuery().eq('status', 'failed'),
+      ])
+
+    const postsError =
+      totalResult.error ||
+      scheduledResult.error ||
+      publishedResult.error ||
+      draftResult.error ||
+      failedResult.error
 
     if (postsError) {
       console.error('Database error:', postsError)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const postStatuses = posts || []
-    const totalPosts = postStatuses.length
-    const scheduledPosts = postStatuses.filter((p) => p.status === 'scheduled').length
-    const publishedPosts = postStatuses.filter((p) => p.status === 'published').length
-    const draftPosts = postStatuses.filter((p) => p.status === 'draft').length
-    const failedPosts = postStatuses.filter((p) => p.status === 'failed').length
-
     return NextResponse.json({
       analytics: {
         totalCampaigns,
-        totalPosts,
-        scheduledPosts,
-        publishedPosts,
-        draftPosts,
-        failedPosts,
+        totalPosts: totalResult.count ?? 0,
+        scheduledPosts: scheduledResult.count ?? 0,
+        publishedPosts: publishedResult.count ?? 0,
+        draftPosts: draftResult.count ?? 0,
+        failedPosts: failedResult.count ?? 0,
       },
     })
   } catch (error) {

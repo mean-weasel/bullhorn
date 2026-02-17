@@ -142,7 +142,8 @@ describe('POST /api/import', () => {
   it('skips duplicate campaigns by name', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
 
-    fromCallbacks.campaigns.selectCb = () => buildSelectChain([{ id: 'existing-campaign' }])
+    fromCallbacks.campaigns.selectCb = () =>
+      buildSelectChain([{ id: 'existing-campaign', name: 'Existing Campaign' }])
 
     const { POST } = await import('./route')
     const request = new Request('http://localhost/api/import', {

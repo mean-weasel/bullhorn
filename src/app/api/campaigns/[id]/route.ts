@@ -40,34 +40,32 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const { id } = await params
     const supabase = await createClient()
 
-    // Get campaign (with ownership check)
-    const { data: campaign, error: campaignError } = await supabase
-      .from('campaigns')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single()
+    // Fetch campaign and posts in parallel (independent queries)
+    const [campaignResult, postsResult] = await Promise.all([
+      supabase.from('campaigns').select('*').eq('id', id).eq('user_id', userId).single(),
+      supabase
+        .from('posts')
+        .select('*')
+        .eq('campaign_id', id)
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false }),
+    ])
 
-    if (campaignError) {
-      if (campaignError.code === 'PGRST116') {
+    if (campaignResult.error) {
+      if (campaignResult.error.code === 'PGRST116') {
         return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
       }
-      console.error('Database error:', campaignError)
+      console.error('Database error:', campaignResult.error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Get posts for this campaign (with ownership check)
-    const { data: posts, error: postsError } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('campaign_id', id)
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false })
-
-    if (postsError) {
-      console.error('Database error:', postsError)
+    if (postsResult.error) {
+      console.error('Database error:', postsResult.error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
+
+    const campaign = campaignResult.data
+    const posts = postsResult.data
 
     // Transform campaign and posts from snake_case to camelCase
     const transformedCampaign = transformCampaignFromDb(campaign as DbCampaign)

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
+import { transformDraftFromDb, calculateWordCount } from '@/lib/utils'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -18,38 +19,6 @@ const updateBlogDraftSchema = z.object({
   images: z.array(z.unknown()).optional(),
   tags: z.array(z.string().max(50)).max(10).optional(),
 })
-
-// Transform snake_case Supabase response to camelCase for frontend
-function transformDraft(draft: Record<string, unknown>) {
-  return {
-    id: draft.id,
-    createdAt: draft.created_at,
-    updatedAt: draft.updated_at,
-    scheduledAt: draft.scheduled_at,
-    status: draft.status,
-    title: draft.title,
-    date: draft.date,
-    content: draft.content,
-    notes: draft.notes,
-    wordCount: draft.word_count,
-    campaignId: draft.campaign_id,
-    images: draft.images || [],
-    tags: (draft.tags as string[]) || [],
-  }
-}
-
-// Calculate word count from markdown content
-function calculateWordCount(content: string): number {
-  if (!content) return 0
-  const text = content
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/`[^`]*`/g, '')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/[#*_~>\-|]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-  return text ? text.split(' ').length : 0
-}
 
 // Valid status transitions for blog drafts
 const validTransitions: Record<string, string[]> = {
@@ -98,7 +67,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     }
 
     // Transform to camelCase for frontend
-    return NextResponse.json({ draft: transformDraft(data) })
+    return NextResponse.json({ draft: transformDraftFromDb(data) })
   } catch (error) {
     console.error('Error fetching blog draft:', error)
     return NextResponse.json({ error: 'Failed to fetch blog draft' }, { status: 500 })
@@ -204,7 +173,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     // Transform to camelCase for frontend
-    return NextResponse.json({ draft: transformDraft(data) })
+    return NextResponse.json({ draft: transformDraftFromDb(data) })
   } catch (error) {
     console.error('Error updating blog draft:', error)
     return NextResponse.json({ error: 'Failed to update blog draft' }, { status: 500 })

@@ -60,8 +60,6 @@ function setupMocks(opts: {
   blogDraftCount?: number
   launchPostCount?: number
 }) {
-  const makeItems = (count: number) => Array.from({ length: count }, (_, i) => ({ id: `id-${i}` }))
-
   // Reset mock implementations for each call
   // mockSingle is called once for the user_profiles query
   mockSingle.mockResolvedValue({
@@ -70,29 +68,25 @@ function setupMocks(opts: {
   })
 
   // mockEq is called for every .eq() in the chain.
-  // For resource count queries, the final .eq() result is used as the Promise value.
-  // We need the resource count .eq() calls to resolve with { data, error }.
+  // For resource count queries (using head: true), the result contains
+  // { count: N, data: null, error: null } instead of row arrays.
   const resourceResults = [
-    { data: makeItems(opts.postCount ?? 0), error: null },
-    { data: makeItems(opts.campaignCount ?? 0), error: null },
-    { data: makeItems(opts.projectCount ?? 0), error: null },
-    { data: makeItems(opts.blogDraftCount ?? 0), error: null },
-    { data: makeItems(opts.launchPostCount ?? 0), error: null },
+    { count: opts.postCount ?? 0, data: null, error: null },
+    { count: opts.campaignCount ?? 0, data: null, error: null },
+    { count: opts.projectCount ?? 0, data: null, error: null },
+    { count: opts.blogDraftCount ?? 0, data: null, error: null },
+    { count: opts.launchPostCount ?? 0, data: null, error: null },
   ]
 
   // The first .eq() call is for user_profiles (returns { eq, single })
-  // Then 5 resource-count .eq() calls each need to resolve with data.
-  // Since mockEq returns { eq: mockEq, single: mockSingle } by default,
-  // the resource-count calls will also return that object. But Promise.all
-  // awaits the result of .eq(), so we need it to have a .then or be thenable.
-  //
-  // Actually, the supabase client returns a thenable from .eq() — it's a
+  // Then 5 resource-count .eq() calls each need to resolve with count.
+  // The supabase client returns a thenable from .eq() — it's a
   // PostgrestFilterBuilder which is both chainable AND thenable. We need our
   // mock .eq() to behave the same way for the resource queries.
   //
   // Strategy: track call index. For the profile .eq() (1st call), return
   // the chainable object. For resource .eq() calls (2nd-6th), return the
-  // data result directly (which Promise.all will resolve).
+  // count result directly (which Promise.all will resolve).
 
   let eqCallIndex = 0
   // @ts-expect-error -- mock returns different shapes for profile vs resource queries
@@ -102,9 +96,9 @@ function setupMocks(opts: {
       // user_profiles .eq('id', userId) — needs .single() chaining
       return { eq: mockEq, single: mockSingle }
     }
-    // Resource count queries — return thenable result directly
+    // Resource count queries — return result with count field
     const result = resourceResults[eqCallIndex - 2]
-    return result ?? { data: [], error: null }
+    return result ?? { count: 0, data: null, error: null }
   })
 }
 

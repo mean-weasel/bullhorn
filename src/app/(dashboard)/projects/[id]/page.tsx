@@ -97,13 +97,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
       setLoading(false)
     }
     loadProject()
-  }, [
-    projectId,
-    fetchProjectWithCampaigns,
-    fetchProjectAnalytics,
-    fetchConnections,
-    getConnectionsByProject,
-  ])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, fetchProjectWithCampaigns, fetchProjectAnalytics, fetchConnections])
 
   const handleSave = async () => {
     if (!project || !editName.trim()) return

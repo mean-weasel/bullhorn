@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
+import { transformDraftFromDb } from '@/lib/utils'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -10,24 +11,6 @@ const addImageSchema = z.object({
   url: z.string().url().optional(),
   sourcePath: z.string().max(1000).optional(),
 })
-
-// Transform snake_case Supabase response to camelCase for frontend
-function transformDraft(draft: Record<string, unknown>) {
-  return {
-    id: draft.id,
-    createdAt: draft.created_at,
-    updatedAt: draft.updated_at,
-    scheduledAt: draft.scheduled_at,
-    status: draft.status,
-    title: draft.title,
-    date: draft.date,
-    content: draft.content,
-    notes: draft.notes,
-    wordCount: draft.word_count,
-    campaignId: draft.campaign_id,
-    images: draft.images || [],
-  }
-}
 
 // GET /api/blog-drafts/[id]/images - List images for a blog draft
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -153,7 +136,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Transform to camelCase for frontend
-    return NextResponse.json(transformDraft(data), { status: 201 })
+    return NextResponse.json(transformDraftFromDb(data), { status: 201 })
   } catch (error) {
     console.error('Error adding image to blog draft:', error)
     return NextResponse.json({ error: 'Failed to add image' }, { status: 500 })

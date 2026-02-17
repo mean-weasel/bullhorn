@@ -35,16 +35,23 @@ export async function POST() {
       })
     }
 
-    // Delete all test data (order matters due to foreign keys)
+    // Delete all test data in parallel batches (respecting foreign key constraints)
     // Note: In test mode, RLS is bypassed so this works without auth
-    await supabase.from('posts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabase.from('launch_posts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabase.from('campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabase.from('blog_drafts').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabase
-      .from('project_accounts')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000')
+
+    // Batch 1: posts, launch_posts, blog_drafts (no FK deps between them)
+    await Promise.all([
+      supabase.from('posts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('launch_posts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('blog_drafts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+    ])
+
+    // Batch 2: campaigns, project_accounts (depend on posts being deleted)
+    await Promise.all([
+      supabase.from('campaigns').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      supabase.from('project_accounts').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+    ])
+
+    // Batch 3: projects (depends on campaigns and project_accounts)
     await supabase.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
     // Reset plan to free and storage to 0 for E2E limit testing

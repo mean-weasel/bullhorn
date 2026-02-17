@@ -100,45 +100,56 @@ export async function GET(request: NextRequest) {
     let posts: Post[] = []
     let campaigns: Campaign[] = []
 
-    // Fetch posts
-    if (type === 'posts' || type === 'all') {
+    // Build queries
+    const buildPostsQuery = () => {
       let query = supabase
         .from('posts')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
-
-      if (status) {
-        query = query.eq('status', status)
-      }
-      if (campaignId) {
-        query = query.eq('campaign_id', campaignId)
-      }
-
-      const { data, error } = await query
-      if (error) {
-        console.error('Database error:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-      }
-      posts = (data || []).map((p) => transformPostFromDb(p as DbPost))
+      if (status) query = query.eq('status', status)
+      if (campaignId) query = query.eq('campaign_id', campaignId)
+      return query
     }
 
-    // Fetch campaigns
-    if (type === 'campaigns' || type === 'all') {
+    const buildCampaignsQuery = () => {
       let query = supabase
         .from('campaigns')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
+      if (status) query = query.eq('status', status)
+      if (projectId) query = query.eq('project_id', projectId)
+      return query
+    }
 
-      if (status) {
-        query = query.eq('status', status)
+    if (type === 'all') {
+      // Fetch posts and campaigns in parallel
+      const [postsResult, campaignsResult] = await Promise.all([
+        buildPostsQuery(),
+        buildCampaignsQuery(),
+      ])
+
+      if (postsResult.error) {
+        console.error('Database error:', postsResult.error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
       }
-      if (projectId) {
-        query = query.eq('project_id', projectId)
+      if (campaignsResult.error) {
+        console.error('Database error:', campaignsResult.error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
       }
 
-      const { data, error } = await query
+      posts = (postsResult.data || []).map((p) => transformPostFromDb(p as DbPost))
+      campaigns = (campaignsResult.data || []).map((c) => transformCampaignFromDb(c as DbCampaign))
+    } else if (type === 'posts') {
+      const { data, error } = await buildPostsQuery()
+      if (error) {
+        console.error('Database error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+      }
+      posts = (data || []).map((p) => transformPostFromDb(p as DbPost))
+    } else if (type === 'campaigns') {
+      const { data, error } = await buildCampaignsQuery()
       if (error) {
         console.error('Database error:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

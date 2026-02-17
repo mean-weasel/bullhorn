@@ -1,27 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
-import { escapeSearchPattern } from '@/lib/utils'
+import { escapeSearchPattern, transformDraftFromDb } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
-
-// Transform snake_case Supabase response to camelCase for frontend
-function transformDraft(draft: Record<string, unknown>) {
-  return {
-    id: draft.id,
-    createdAt: draft.created_at,
-    updatedAt: draft.updated_at,
-    scheduledAt: draft.scheduled_at,
-    status: draft.status,
-    title: draft.title,
-    date: draft.date,
-    content: draft.content,
-    notes: draft.notes,
-    wordCount: draft.word_count,
-    campaignId: draft.campaign_id,
-    images: draft.images || [],
-  }
-}
 
 // GET /api/blog-drafts/search - Search blog drafts
 export async function GET(request: NextRequest) {
@@ -61,7 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform to camelCase for frontend
-    const drafts = (data || []).map(transformDraft)
+    const drafts = (data || []).map(transformDraftFromDb)
     return NextResponse.json({ drafts })
   } catch (error) {
     if (error instanceof Error && error.message === 'Forbidden') {

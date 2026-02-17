@@ -32,6 +32,7 @@ export async function GET() {
       .select('*')
       .eq('user_id', userId)
       .order('remind_at', { ascending: true })
+      .limit(100)
 
     if (error) {
       console.error('Database error:', error)

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
+import { transformLaunchPostFromDb } from '@/lib/utils'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -25,25 +26,6 @@ const createLaunchPostSchema = z.object({
   scheduledAt: z.string().optional().nullable(),
   notes: z.string().max(5000).optional().nullable(),
 })
-
-// Transform snake_case DB response to camelCase for frontend
-function transformLaunchPost(data: Record<string, unknown>) {
-  return {
-    id: data.id,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-    platform: data.platform,
-    status: data.status,
-    scheduledAt: data.scheduled_at,
-    postedAt: data.posted_at,
-    title: data.title,
-    url: data.url,
-    description: data.description,
-    platformFields: data.platform_fields || {},
-    campaignId: data.campaign_id,
-    notes: data.notes,
-  }
-}
 
 // GET /api/launch-posts - List launch posts with optional filters
 export async function GET(request: NextRequest) {
@@ -98,7 +80,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const launchPosts = (data || []).map(transformLaunchPost)
+    const launchPosts = (data || []).map(transformLaunchPostFromDb)
     return NextResponse.json({ launchPosts })
   } catch (error) {
     console.error('Error fetching launch posts:', error)
@@ -175,7 +157,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const launchPost = transformLaunchPost(data as Record<string, unknown>)
+    const launchPost = transformLaunchPostFromDb(data as Record<string, unknown>)
     return NextResponse.json({ launchPost }, { status: 201 })
   } catch (error) {
     console.error('Error creating launch post:', error)

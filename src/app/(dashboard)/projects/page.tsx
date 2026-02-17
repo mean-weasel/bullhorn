@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, FolderKanban, AlertCircle, RefreshCw } from 'lucide-react'
 import { useProjectsStore, useProjectsLoading, useProjectsError } from '@/lib/projects'
@@ -31,9 +31,20 @@ export default function ProjectsPage() {
     }
   }, [campaignsInitialized, fetchCampaigns])
 
-  const getCampaignCount = (projectId: string) => {
-    return campaigns.filter((c) => c.projectId === projectId && c.status !== 'archived').length
-  }
+  // Pre-compute campaign counts per project (O(n) instead of O(n*p))
+  const campaignCountsByProject = useMemo(
+    () =>
+      campaigns.reduce(
+        (acc, c) => {
+          if (c.status !== 'archived' && c.projectId) {
+            acc[c.projectId] = (acc[c.projectId] || 0) + 1
+          }
+          return acc
+        },
+        {} as Record<string, number>
+      ),
+    [campaigns]
+  )
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.preventDefault()
@@ -135,7 +146,7 @@ export default function ProjectsPage() {
             <ProjectCard
               key={project.id}
               project={project}
-              campaignCount={getCampaignCount(project.id)}
+              campaignCount={campaignCountsByProject[project.id] || 0}
               index={i}
               variant="list"
               onDelete={(e) => handleDelete(project.id, e)}

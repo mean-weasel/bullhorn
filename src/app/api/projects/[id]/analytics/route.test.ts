@@ -25,9 +25,39 @@ const mockCampaignsEqUserId = vi.fn(() => mockCampaignsResult)
 const mockCampaignsEqProjectId = vi.fn(() => ({ eq: mockCampaignsEqUserId }))
 const mockCampaignsSelect = vi.fn(() => ({ eq: mockCampaignsEqProjectId }))
 
-// posts query: .select('status').eq('user_id',y).in('campaign_id',ids)
-let mockPostsResult: { data: unknown; error: unknown } = { data: [], error: null }
-const mockPostsIn = vi.fn(() => mockPostsResult)
+// posts query: .select('*',{count:'exact',head:true}).eq('user_id',y).in('campaign_id',ids)
+// The route calls baseQuery() which ends at .in(), then optionally chains .eq('status', x).
+// We need .in() to return an object that:
+//   - acts as a thenable (resolves to totalResult) when awaited directly
+//   - has .eq('status', x) that returns the per-status result
+let mockPostsCounts: {
+  total: { count: number | null; data: null; error: unknown }
+  scheduled: { count: number | null; data: null; error: unknown }
+  published: { count: number | null; data: null; error: unknown }
+  draft: { count: number | null; data: null; error: unknown }
+  failed: { count: number | null; data: null; error: unknown }
+} = {
+  total: { count: 0, data: null, error: null },
+  scheduled: { count: 0, data: null, error: null },
+  published: { count: 0, data: null, error: null },
+  draft: { count: 0, data: null, error: null },
+  failed: { count: 0, data: null, error: null },
+}
+
+const mockPostsIn = vi.fn(() => {
+  const statusCounts = mockPostsCounts
+  return {
+    // When awaited directly (totalResult = baseQuery()), resolve to the total count
+    then(resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) {
+      return Promise.resolve(statusCounts.total).then(resolve, reject)
+    },
+    // When chained with .eq('status', x), return per-status count as a thenable
+    eq: (_col: string, value: string) => {
+      const key = value as keyof typeof statusCounts
+      return Promise.resolve(statusCounts[key] ?? statusCounts.total)
+    },
+  }
+})
 const mockPostsEqUserId = vi.fn(() => ({ in: mockPostsIn }))
 const mockPostsSelect = vi.fn(() => ({ eq: mockPostsEqUserId }))
 
@@ -75,7 +105,13 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockProjectResult = { data: { id: 'proj-1' }, error: null }
   mockCampaignsResult = { data: [], error: null }
-  mockPostsResult = { data: [], error: null }
+  mockPostsCounts = {
+    total: { count: 0, data: null, error: null },
+    scheduled: { count: 0, data: null, error: null },
+    published: { count: 0, data: null, error: null },
+    draft: { count: 0, data: null, error: null },
+    failed: { count: 0, data: null, error: null },
+  }
 })
 
 describe('GET /api/projects/[id]/analytics', () => {
@@ -132,17 +168,12 @@ describe('GET /api/projects/[id]/analytics', () => {
       data: [{ id: 'camp-1' }, { id: 'camp-2' }],
       error: null,
     }
-    mockPostsResult = {
-      data: [
-        { status: 'scheduled' },
-        { status: 'scheduled' },
-        { status: 'published' },
-        { status: 'published' },
-        { status: 'published' },
-        { status: 'draft' },
-        { status: 'failed' },
-      ],
-      error: null,
+    mockPostsCounts = {
+      total: { count: 7, data: null, error: null },
+      scheduled: { count: 2, data: null, error: null },
+      published: { count: 3, data: null, error: null },
+      draft: { count: 1, data: null, error: null },
+      failed: { count: 1, data: null, error: null },
     }
     const req = createRequest('/api/projects/proj-1/analytics')
     const res = await GET(req, createContext('proj-1'))
@@ -176,7 +207,13 @@ describe('GET /api/projects/[id]/analytics', () => {
       data: [{ id: 'camp-1' }],
       error: null,
     }
-    mockPostsResult = { data: null, error: { message: 'DB error' } }
+    mockPostsCounts = {
+      total: { count: null, data: null, error: { message: 'DB error' } },
+      scheduled: { count: null, data: null, error: { message: 'DB error' } },
+      published: { count: null, data: null, error: { message: 'DB error' } },
+      draft: { count: null, data: null, error: { message: 'DB error' } },
+      failed: { count: null, data: null, error: { message: 'DB error' } },
+    }
     const req = createRequest('/api/projects/proj-1/analytics')
     const res = await GET(req, createContext('proj-1'))
     expect(res.status).toBe(500)
@@ -191,7 +228,13 @@ describe('GET /api/projects/[id]/analytics', () => {
       data: [{ id: 'camp-1' }, { id: 'camp-2' }, { id: 'camp-3' }],
       error: null,
     }
-    mockPostsResult = { data: [], error: null }
+    mockPostsCounts = {
+      total: { count: 0, data: null, error: null },
+      scheduled: { count: 0, data: null, error: null },
+      published: { count: 0, data: null, error: null },
+      draft: { count: 0, data: null, error: null },
+      failed: { count: 0, data: null, error: null },
+    }
     const req = createRequest('/api/projects/proj-1/analytics')
     const res = await GET(req, createContext('proj-1'))
     expect(res.status).toBe(200)
