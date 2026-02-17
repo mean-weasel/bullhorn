@@ -28,7 +28,9 @@ test.describe('Campaigns', () => {
 
       // Fill campaign details in modal
       await page.getByPlaceholder(/enter campaign name/i).fill('Product Launch 2024')
-      await page.getByPlaceholder(/describe this campaign/i).fill('Marketing campaign for new product release')
+      await page
+        .getByPlaceholder(/describe this campaign/i)
+        .fill('Marketing campaign for new product release')
 
       // Submit
       await page.getByRole('button', { name: /create campaign/i }).click()
@@ -154,7 +156,9 @@ test.describe('Campaigns', () => {
       await dropdown.getByText('Twitter Only Campaign').click()
 
       // Verify campaign was selected (button should now show campaign name)
-      await expect(page.locator('button').filter({ hasText: 'Twitter Only Campaign' })).toBeVisible()
+      await expect(
+        page.locator('button').filter({ hasText: 'Twitter Only Campaign' })
+      ).toBeVisible()
 
       // Save draft
       await saveDraft(page)
@@ -198,7 +202,9 @@ test.describe('Campaigns', () => {
       const posts = await getCampaignPosts(page, campaignId)
       expect(posts.length).toBe(1)
       expect(posts[0].platform).toBe('linkedin')
-      expect((posts[0].content as { text: string }).text).toContain('Professional update for LinkedIn')
+      expect((posts[0].content as { text: string }).text).toContain(
+        'Professional update for LinkedIn'
+      )
     })
   })
 
@@ -305,7 +311,10 @@ test.describe('Campaigns', () => {
         subreddit: 'webdev',
         title: 'I built a thing - feedback welcome!',
       })
-      await fillContent(page, 'Here is what I built and why I think it could be useful for the community.')
+      await fillContent(
+        page,
+        'Here is what I built and why I think it could be useful for the community.'
+      )
       await page.getByRole('button', { name: /no campaign|select campaign/i }).click()
       await page.getByText('Twitter Reddit Campaign').click()
       await saveDraft(page)
@@ -350,7 +359,10 @@ test.describe('Campaigns', () => {
         subreddit: 'opensource',
         title: 'Our open source contribution - looking for collaborators',
       })
-      await fillContent(page, 'We just released this tool as open source. Looking for contributors!')
+      await fillContent(
+        page,
+        'We just released this tool as open source. Looking for contributors!'
+      )
       await page.getByRole('button', { name: /no campaign|select campaign/i }).click()
       await page.getByText('LinkedIn Reddit Campaign').click()
       await saveDraft(page)
@@ -372,9 +384,9 @@ test.describe('Campaigns', () => {
       await page.goto('/campaigns')
       await page.getByRole('button', { name: /new campaign|new$/i }).click()
       await page.getByPlaceholder(/enter campaign name/i).fill('Full Platform Launch')
-      await page.getByPlaceholder(/describe this campaign/i).fill(
-        'Cross-platform marketing campaign covering Twitter, LinkedIn, and Reddit'
-      )
+      await page
+        .getByPlaceholder(/describe this campaign/i)
+        .fill('Cross-platform marketing campaign covering Twitter, LinkedIn, and Reddit')
       await page.getByRole('button', { name: /create campaign/i }).click()
       await page.waitForURL(/\/campaigns\//)
       const campaignId = page.url().split('/campaigns/')[1]
@@ -407,7 +419,10 @@ test.describe('Campaigns', () => {
         subreddit: 'startups',
         title: '[Launch] We just launched our product - feedback welcome!',
       })
-      await fillContent(page, 'Hey r/startups! We have been working on this for 6 months and would love your feedback.')
+      await fillContent(
+        page,
+        'Hey r/startups! We have been working on this for 6 months and would love your feedback.'
+      )
       await page.getByRole('button', { name: /no campaign|select campaign/i }).click()
       await page.getByText('Full Platform Launch').click()
       await saveDraft(page)
@@ -504,7 +519,11 @@ test.describe('Campaigns', () => {
       await page.goto(`/campaigns/${campaignId}`)
 
       // Find and click remove button for the post
-      await page.locator('button').filter({ has: page.locator('svg.lucide-x') }).first().click()
+      await page
+        .locator('button')
+        .filter({ has: page.locator('svg.lucide-x') })
+        .first()
+        .click()
 
       // Wait for the post card to disappear from the UI
       await expect(page.getByText('Post to be removed from campaign')).not.toBeVisible()
@@ -544,22 +563,26 @@ test.describe('Campaigns', () => {
       await expect(page.getByText('Second Campaign')).toBeVisible()
 
       // Filter by active should show both
-      const activeFilter = page.locator('button').filter({ hasText: /active/i }).first()
+      const activeFilter = page.getByRole('tab', { name: /active/i })
       await activeFilter.click()
       await expect(page.getByText('First Campaign')).toBeVisible()
       await expect(page.getByText('Second Campaign')).toBeVisible()
 
-      // Filter by draft should show none (since default is active)
-      const draftFilter = page.locator('button').filter({ hasText: /draft/i }).first()
-      await draftFilter.click()
+      // Filter by paused should show none (since default status is active)
+      const pausedFilter = page.getByRole('tab', { name: /paused/i })
+      await pausedFilter.click()
       // Wait for the empty state to appear
-      await expect(page.getByText(/no draft campaigns/i)).toBeVisible()
-      // Campaign cards should be hidden - check for campaign links
-      await expect(page.locator('a[href^="/campaigns/"]').filter({ hasText: 'First Campaign' })).not.toBeVisible()
-      await expect(page.locator('a[href^="/campaigns/"]').filter({ hasText: 'Second Campaign' })).not.toBeVisible()
+      await expect(page.getByText(/no paused campaigns/i)).toBeVisible()
+      // Campaign cards should be hidden
+      await expect(
+        page.locator('a[href^="/campaigns/"]').filter({ hasText: 'First Campaign' })
+      ).not.toBeVisible()
+      await expect(
+        page.locator('a[href^="/campaigns/"]').filter({ hasText: 'Second Campaign' })
+      ).not.toBeVisible()
 
       // Show all should show both again
-      const allFilter = page.locator('button').filter({ hasText: /all/i }).first()
+      const allFilter = page.getByRole('tab', { name: /all/i })
       await allFilter.click()
       await expect(page.getByText('First Campaign')).toBeVisible()
       await expect(page.getByText('Second Campaign')).toBeVisible()
@@ -653,7 +676,11 @@ test.describe('Campaigns', () => {
       await expect(page.getByText('2 posts')).toBeVisible()
 
       // Remove one post via the X button
-      await page.locator('button').filter({ has: page.locator('svg.lucide-x') }).first().click()
+      await page
+        .locator('button')
+        .filter({ has: page.locator('svg.lucide-x') })
+        .first()
+        .click()
 
       // Wait for UI to update and verify count changed to "1 post"
       await expect(page.getByText('1 post')).toBeVisible({ timeout: 5000 })
