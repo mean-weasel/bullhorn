@@ -289,6 +289,7 @@ Examples:
 | `/gen-test <file>` | Generate unit tests for a file | After implementing new code |
 | `/ship` | Build, lint, typecheck, and deploy | Ready to deploy changes |
 | `/monitor-ci` | Watch CI pipeline and debug failures | After pushing to remote |
+| `/deploy-check` | Check Vercel deployment status and drift | After merging or to verify production state |
 
 ### Agents
 
@@ -297,12 +298,16 @@ Examples:
 | `code-reviewer` | Review code against project conventions | After completing a feature or PR |
 | `security-reviewer` | Focused security audit (OWASP, auth, RLS) | After auth/API/database changes |
 | `ios-tester` | Test workflows on iOS Simulator | After UI changes affecting mobile |
+| `performance-analyzer` | Find query, store, and bundle performance issues | After adding API routes, stores, or heavy components |
 
 ### Hooks (automatic)
 
 - **protect-files** (PreToolUse): Blocks edits to `.env.local`, `package-lock.json`, and existing migrations
 - **auto-format** (PostToolUse): Runs Prettier on `.ts`, `.tsx`, `.css` files after edits
 - **typecheck** (PostToolUse): Runs `tsc --noEmit` after `.ts`/`.tsx` edits to surface type errors
+- **lint-security** (PostToolUse): Runs ESLint security rules on edited `.ts`/`.tsx` files
+- **run-related-tests** (PostToolUse): Runs sibling `.test.ts`/`.test.tsx` files after source edits
+- **pre-commit** (git): Runs lint, typecheck, unit tests, and format check before every commit. Install with `make install-hooks`
 
 ### MCP Servers
 
@@ -312,7 +317,6 @@ Examples:
 | `playwright` | Browser automation for E2E testing |
 | `github` | GitHub API (PRs, issues, repos) |
 | `supabase` | Database queries, migrations, edge functions |
-
 ## Guardrails
 
 ### General
