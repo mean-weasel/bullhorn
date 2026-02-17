@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, FolderOpen, PauseCircle, Rocket, CheckCircle, Archive } from 'lucide-react'
 import { useCampaignsStore } from '@/lib/campaigns'
@@ -27,8 +27,12 @@ const STATUS_CONFIG: Record<
 }
 
 export default function CampaignsPage() {
-  const { campaigns, fetchCampaigns, initialized, loading, addCampaign, deleteCampaign } =
-    useCampaignsStore()
+  const campaigns = useCampaignsStore((s) => s.campaigns)
+  const fetchCampaigns = useCampaignsStore((s) => s.fetchCampaigns)
+  const initialized = useCampaignsStore((s) => s.initialized)
+  const loading = useCampaignsStore((s) => s.loading)
+  const addCampaign = useCampaignsStore((s) => s.addCampaign)
+  const deleteCampaign = useCampaignsStore((s) => s.deleteCampaign)
   const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
   const [filter, setFilter] = useState<FilterStatus>('all')
   const [showNewModal, setShowNewModal] = useState(false)
@@ -56,13 +60,16 @@ export default function CampaignsPage() {
   )
 
   // Count by status
-  const counts = {
-    all: campaigns.filter((c) => c.status !== 'archived').length,
-    paused: campaigns.filter((c) => c.status === 'paused').length,
-    active: campaigns.filter((c) => c.status === 'active').length,
-    completed: campaigns.filter((c) => c.status === 'completed').length,
-    archived: campaigns.filter((c) => c.status === 'archived').length,
-  }
+  const counts = useMemo(
+    () => ({
+      all: campaigns.filter((c) => c.status !== 'archived').length,
+      paused: campaigns.filter((c) => c.status === 'paused').length,
+      active: campaigns.filter((c) => c.status === 'active').length,
+      completed: campaigns.filter((c) => c.status === 'completed').length,
+      archived: campaigns.filter((c) => c.status === 'archived').length,
+    }),
+    [campaigns]
+  )
 
   const handleCreateCampaign = async (name: string, description?: string) => {
     try {

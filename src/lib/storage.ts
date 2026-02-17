@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Post, PostStatus } from './posts'
+import { dedup, createDedupKey } from './requestDedup'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -29,15 +30,18 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
   initialized: false,
 
   fetchPosts: async () => {
-    set({ loading: true, error: null })
-    try {
-      const res = await fetch(`${API_BASE}/posts`)
-      if (!res.ok) throw new Error('Failed to fetch posts')
-      const data = await res.json()
-      set({ posts: data.posts || [], loading: false, initialized: true })
-    } catch (error) {
-      set({ error: (error as Error).message, loading: false })
-    }
+    const key = createDedupKey('fetchPosts')
+    return dedup(key, async () => {
+      set({ loading: true, error: null })
+      try {
+        const res = await fetch(`${API_BASE}/posts`)
+        if (!res.ok) throw new Error('Failed to fetch posts')
+        const data = await res.json()
+        set({ posts: data.posts || [], loading: false, initialized: true })
+      } catch (error) {
+        set({ error: (error as Error).message, loading: false })
+      }
+    })
   },
 
   addPost: async (postData) => {

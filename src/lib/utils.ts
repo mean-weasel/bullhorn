@@ -329,3 +329,75 @@ export function transformAnalyticsConnectionToDb(
   if (connection.syncError !== undefined) result.sync_error = connection.syncError
   return result
 }
+
+// ---------------------------------------------------------------------------
+// Blog draft transforms
+// ---------------------------------------------------------------------------
+
+/**
+ * Transform a blog draft from Supabase format (snake_case) to frontend format (camelCase)
+ */
+export function transformDraftFromDb(draft: Record<string, unknown>) {
+  return {
+    id: draft.id,
+    createdAt: draft.created_at,
+    updatedAt: draft.updated_at,
+    scheduledAt: draft.scheduled_at,
+    status: draft.status,
+    title: draft.title,
+    date: draft.date,
+    content: draft.content,
+    notes: draft.notes,
+    wordCount: draft.word_count,
+    campaignId: draft.campaign_id,
+    images: draft.images || [],
+    tags: (draft.tags as string[]) || [],
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Launch post transforms
+// ---------------------------------------------------------------------------
+
+/**
+ * Transform a launch post from Supabase format (snake_case) to frontend format (camelCase)
+ */
+export function transformLaunchPostFromDb(data: Record<string, unknown>) {
+  return {
+    id: data.id,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    platform: data.platform,
+    status: data.status,
+    scheduledAt: data.scheduled_at,
+    postedAt: data.posted_at,
+    title: data.title,
+    url: data.url,
+    description: data.description,
+    platformFields: data.platform_fields || {},
+    campaignId: data.campaign_id,
+    notes: data.notes,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Content utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Calculate word count from markdown content.
+ * Strips markdown syntax (code blocks, inline code, links, formatting chars)
+ * before counting words.
+ */
+export function calculateWordCount(content: string): number {
+  if (!content) return 0
+  // Remove markdown syntax and count words
+  const text = content
+    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+    .replace(/`[^`]*`/g, '') // Remove inline code
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // Convert links to text
+    .replace(/[#*_~>\-|]/g, '') // Remove markdown characters
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .trim()
+  return text ? text.split(' ').length : 0
+}

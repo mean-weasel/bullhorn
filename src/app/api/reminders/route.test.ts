@@ -9,8 +9,9 @@ vi.mock('@/lib/auth', () => ({
   requireAuth: vi.fn(),
 }))
 
-// GET chain: .from().select().eq().order()
-const mockOrder = vi.fn()
+// GET chain: .from().select().eq().order().limit()
+const mockLimit = vi.fn()
+const mockOrder = vi.fn(() => ({ limit: mockLimit }))
 const mockQueryEq = vi.fn(() => ({ order: mockOrder }))
 const mockSelect = vi.fn(() => ({ eq: mockQueryEq }))
 
@@ -79,7 +80,7 @@ describe('GET /api/reminders', () => {
 
   it('returns reminders for authenticated user', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockOrder.mockResolvedValue({ data: [sampleDbReminder], error: null })
+    mockLimit.mockResolvedValue({ data: [sampleDbReminder], error: null })
     const res = await GET()
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -91,7 +92,7 @@ describe('GET /api/reminders', () => {
 
   it('returns empty array when user has no reminders', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockOrder.mockResolvedValue({ data: [], error: null })
+    mockLimit.mockResolvedValue({ data: [], error: null })
     const res = await GET()
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -100,7 +101,7 @@ describe('GET /api/reminders', () => {
 
   it('returns 500 when database query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockOrder.mockResolvedValue({ data: null, error: { message: 'DB error' } })
+    mockLimit.mockResolvedValue({ data: null, error: { message: 'DB error' } })
     const res = await GET()
     expect(res.status).toBe(500)
     const body = await res.json()

@@ -19,9 +19,13 @@ vi.mock('@/lib/planEnforcement', () => ({
   })),
 }))
 
-vi.mock('@/lib/utils', () => ({
-  escapeSearchPattern: vi.fn((s: string) => s),
-}))
+vi.mock('@/lib/utils', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/utils')>('@/lib/utils')
+  return {
+    ...actual,
+    escapeSearchPattern: vi.fn((s: string) => s),
+  }
+})
 
 // The GET query chain: .from().select().eq().order() then optional .eq()/.or()/.limit()
 // Final await returns { data, error }

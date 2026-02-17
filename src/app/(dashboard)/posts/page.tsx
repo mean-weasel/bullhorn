@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import {
@@ -111,14 +111,17 @@ export default function PostsPage() {
   )
 
   // Count by status - 'all' count excludes archived
-  const counts = {
-    all: allPosts.filter((p) => p.status !== 'archived').length,
-    draft: allPosts.filter((p) => p.status === 'draft').length,
-    scheduled: allPosts.filter((p) => p.status === 'scheduled').length,
-    published: allPosts.filter((p) => p.status === 'published').length,
-    failed: allPosts.filter((p) => p.status === 'failed').length,
-    archived: allPosts.filter((p) => p.status === 'archived').length,
-  }
+  const counts = useMemo(
+    () => ({
+      all: allPosts.filter((p) => p.status !== 'archived').length,
+      draft: allPosts.filter((p) => p.status === 'draft').length,
+      scheduled: allPosts.filter((p) => p.status === 'scheduled').length,
+      published: allPosts.filter((p) => p.status === 'published').length,
+      failed: allPosts.filter((p) => p.status === 'failed').length,
+      archived: allPosts.filter((p) => p.status === 'archived').length,
+    }),
+    [allPosts]
+  )
 
   if (loading && !initialized) {
     return <SkeletonListPage count={5} />

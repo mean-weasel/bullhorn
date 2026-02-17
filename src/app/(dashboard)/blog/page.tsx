@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useEffect, useState, useCallback, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FileText, Plus, Search, X, Tag } from 'lucide-react'
@@ -116,13 +116,16 @@ function BlogDraftsContent() {
   )
 
   // Count by status
-  const counts = {
-    all: drafts.filter((d) => d.status !== 'archived').length,
-    draft: drafts.filter((d) => d.status === 'draft').length,
-    scheduled: drafts.filter((d) => d.status === 'scheduled').length,
-    published: drafts.filter((d) => d.status === 'published').length,
-    archived: drafts.filter((d) => d.status === 'archived').length,
-  }
+  const counts = useMemo(
+    () => ({
+      all: drafts.filter((d) => d.status !== 'archived').length,
+      draft: drafts.filter((d) => d.status === 'draft').length,
+      scheduled: drafts.filter((d) => d.status === 'scheduled').length,
+      published: drafts.filter((d) => d.status === 'published').length,
+      archived: drafts.filter((d) => d.status === 'archived').length,
+    }),
+    [drafts]
+  )
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto animate-fade-in">

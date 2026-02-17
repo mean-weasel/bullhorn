@@ -29,23 +29,29 @@ export async function GET() {
     const storageUsedBytes = profile?.storage_used_bytes || 0
     const planLimits = PLAN_LIMITS[plan]
 
-    // Count all resources in parallel
+    // Count all resources in parallel (head: true returns only the count header, no rows)
     const [posts, campaigns, projects, blogDrafts, launchPosts] = await Promise.all([
-      supabase.from('posts').select('id').eq('user_id', userId),
-      supabase.from('campaigns').select('id').eq('user_id', userId),
-      supabase.from('projects').select('id').eq('user_id', userId),
-      supabase.from('blog_drafts').select('id').eq('user_id', userId),
-      supabase.from('launch_posts').select('id').eq('user_id', userId),
+      supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('campaigns').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+      supabase
+        .from('blog_drafts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId),
+      supabase
+        .from('launch_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId),
     ])
 
     return NextResponse.json({
       plan,
       limits: {
-        posts: { current: posts.data?.length ?? 0, limit: planLimits.posts },
-        campaigns: { current: campaigns.data?.length ?? 0, limit: planLimits.campaigns },
-        projects: { current: projects.data?.length ?? 0, limit: planLimits.projects },
-        blogDrafts: { current: blogDrafts.data?.length ?? 0, limit: planLimits.blogDrafts },
-        launchPosts: { current: launchPosts.data?.length ?? 0, limit: planLimits.launchPosts },
+        posts: { current: posts.count ?? 0, limit: planLimits.posts },
+        campaigns: { current: campaigns.count ?? 0, limit: planLimits.campaigns },
+        projects: { current: projects.count ?? 0, limit: planLimits.projects },
+        blogDrafts: { current: blogDrafts.count ?? 0, limit: planLimits.blogDrafts },
+        launchPosts: { current: launchPosts.count ?? 0, limit: planLimits.launchPosts },
       },
       storage: {
         usedBytes: storageUsedBytes,

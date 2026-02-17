@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('project_id', projectId)
     }
 
-    const { data, error } = await query
+    const { data, error } = await query.limit(100)
 
     if (error) {
       console.error('Database error:', error)

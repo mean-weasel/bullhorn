@@ -1,24 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
-
-// Transform snake_case Supabase response to camelCase for frontend
-function transformDraft(draft: Record<string, unknown>) {
-  return {
-    id: draft.id,
-    createdAt: draft.created_at,
-    updatedAt: draft.updated_at,
-    scheduledAt: draft.scheduled_at,
-    status: draft.status,
-    title: draft.title,
-    date: draft.date,
-    content: draft.content,
-    notes: draft.notes,
-    wordCount: draft.word_count,
-    campaignId: draft.campaign_id,
-    images: draft.images || [],
-  }
-}
+import { transformDraftFromDb } from '@/lib/utils'
 
 // POST /api/blog-drafts/[id]/restore - Restore an archived blog draft
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -65,7 +48,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     }
 
     // Transform to camelCase for frontend
-    return NextResponse.json({ draft: transformDraft(data) })
+    return NextResponse.json({ draft: transformDraftFromDb(data) })
   } catch (error) {
     if (error instanceof Error && error.message === 'Forbidden') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

@@ -20,15 +20,22 @@ vi.mock('@/lib/planEnforcement', () => ({
 
 // mockQueryData holds { data, error } for the final await
 let mockQueryData: { data: unknown; error: unknown } = { data: [], error: null }
-// .order() is the terminal call before await, so it returns a thenable
-const mockOrder = vi.fn(() => ({
+// .limit() is the terminal call before await, so it returns a thenable
+const mockLimit = vi.fn(() => ({
   then: (resolve: (val: unknown) => void) => resolve(mockQueryData),
+}))
+// .order() now chains to limit
+const mockOrder = vi.fn(() => ({
+  eq: mockQueryEq,
+  is: mockIs,
+  limit: mockLimit,
 }))
 // Each chained method returns an object with all chainable methods
 const chainable = (): Record<string, unknown> => ({
   eq: mockQueryEq,
   order: mockOrder,
   is: mockIs,
+  limit: mockLimit,
 })
 const mockIs = vi.fn(chainable)
 const mockQueryEq = vi.fn(chainable)

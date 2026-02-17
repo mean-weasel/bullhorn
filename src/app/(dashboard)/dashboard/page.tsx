@@ -33,13 +33,13 @@ export default function DashboardPage() {
   const allPosts = usePostsStore((state) => state.posts)
   const fetchPosts = usePostsStore((state) => state.fetchPosts)
   const postsInitialized = usePostsStore((state) => state.initialized)
-  const {
-    campaigns,
-    fetchCampaigns,
-    initialized: campaignsInitialized,
-    getCampaignsByProject,
-  } = useCampaignsStore()
-  const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
+  const campaigns = useCampaignsStore((s) => s.campaigns)
+  const fetchCampaigns = useCampaignsStore((s) => s.fetchCampaigns)
+  const campaignsInitialized = useCampaignsStore((s) => s.initialized)
+  const getCampaignsByProject = useCampaignsStore((s) => s.getCampaignsByProject)
+  const projects = useProjectsStore((s) => s.projects)
+  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
+  const projectsInitialized = useProjectsStore((s) => s.initialized)
 
   // Project filter state
   const [selectedProject, setSelectedProject] = useState<'all' | 'unassigned' | string>('all')

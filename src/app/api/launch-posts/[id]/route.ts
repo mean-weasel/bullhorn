@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
+import { transformLaunchPostFromDb } from '@/lib/utils'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -27,25 +28,6 @@ const updateLaunchPostSchema = z.object({
   postedAt: z.string().optional().nullable(),
   notes: z.string().max(5000).optional().nullable(),
 })
-
-// Transform snake_case DB response to camelCase for frontend
-function transformLaunchPost(data: Record<string, unknown>) {
-  return {
-    id: data.id,
-    createdAt: data.created_at,
-    updatedAt: data.updated_at,
-    platform: data.platform,
-    status: data.status,
-    scheduledAt: data.scheduled_at,
-    postedAt: data.posted_at,
-    title: data.title,
-    url: data.url,
-    description: data.description,
-    platformFields: data.platform_fields || {},
-    campaignId: data.campaign_id,
-    notes: data.notes,
-  }
-}
 
 // GET /api/launch-posts/[id] - Get single launch post
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -85,7 +67,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const launchPost = transformLaunchPost(data as Record<string, unknown>)
+    const launchPost = transformLaunchPostFromDb(data as Record<string, unknown>)
     return NextResponse.json({ launchPost })
   } catch (error) {
     console.error('Error fetching launch post:', error)
@@ -159,7 +141,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const launchPost = transformLaunchPost(data as Record<string, unknown>)
+    const launchPost = transformLaunchPostFromDb(data as Record<string, unknown>)
     return NextResponse.json({ launchPost })
   } catch (error) {
     console.error('Error updating launch post:', error)

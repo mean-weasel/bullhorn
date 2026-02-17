@@ -32,11 +32,12 @@ vi.mock('@/lib/utils', () => ({
   })),
 }))
 
-// GET query chain: .from().select().eq().order() returns { data, error }
+// GET query chain: .from().select().eq().order().limit() returns { data, error }
 let mockQueryData: { data: unknown; error: unknown } = { data: [], error: null }
-const mockOrder = vi.fn(() => ({
+const mockLimit = vi.fn(() => ({
   then: (resolve: (val: unknown) => void) => resolve(mockQueryData),
 }))
+const mockOrder = vi.fn(() => ({ limit: mockLimit }))
 const mockChainEq = vi.fn(() => ({ order: mockOrder }))
 const mockSelect = vi.fn(() => ({ eq: mockChainEq }))
 
