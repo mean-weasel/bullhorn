@@ -90,7 +90,10 @@ export function IOSDateTimePicker({
 
   const getDisplayText = () => {
     if (!value) {
-      return placeholder || (mode === 'time' ? 'Select time' : mode === 'date' ? 'Select date' : 'Select date & time')
+      return (
+        placeholder ||
+        (mode === 'time' ? 'Select time' : mode === 'date' ? 'Select date' : 'Select date & time')
+      )
     }
     if (mode === 'date') {
       return format(value, 'MMM d, yyyy')
@@ -161,9 +164,7 @@ export function IOSDateTimePicker({
             data-testid={dataTestId ? `${dataTestId}-input` : undefined}
             value={value ? format(value, 'HH:mm') : ''}
             onChange={(e) => {
-              const dateStr = value
-                ? format(value, 'yyyy-MM-dd')
-                : format(new Date(), 'yyyy-MM-dd')
+              const dateStr = value ? format(value, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd')
               onChange(new Date(`${dateStr}T${e.target.value}:00`))
             }}
             className="sr-only"
@@ -227,7 +228,11 @@ export function IOSDateTimePicker({
                 Clear
               </button>
               <span className="text-sm font-extrabold">
-                {mode === 'time' ? '🕐 Select Time' : mode === 'date' ? '📅 Select Date' : '📅 Select Date & Time'}
+                {mode === 'time'
+                  ? '🕐 Select Time'
+                  : mode === 'date'
+                    ? '📅 Select Date'
+                    : '📅 Select Date & Time'}
               </span>
               <button
                 type="button"
@@ -294,9 +299,17 @@ export function IOSDateTimePicker({
               {tempDate && (
                 <div className="pt-2 text-center">
                   <span className="inline-block px-4 py-2 bg-primary/10 rounded-md text-sm font-bold text-foreground">
-                    {mode === 'date' && format(new Date(`${tempDate}T12:00:00`), 'EEEE, MMMM d, yyyy')}
-                    {mode === 'time' && tempTime && format(new Date(`2024-01-01T${tempTime}:00`), 'h:mm a')}
-                    {mode === 'datetime' && tempTime && format(new Date(`${tempDate}T${tempTime}:00`), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+                    {mode === 'date' &&
+                      format(new Date(`${tempDate}T12:00:00`), 'EEEE, MMMM d, yyyy')}
+                    {mode === 'time' &&
+                      tempTime &&
+                      format(new Date(`2024-01-01T${tempTime}:00`), 'h:mm a')}
+                    {mode === 'datetime' &&
+                      tempTime &&
+                      format(
+                        new Date(`${tempDate}T${tempTime}:00`),
+                        "EEEE, MMMM d, yyyy 'at' h:mm a"
+                      )}
                   </span>
                 </div>
               )}

@@ -54,7 +54,9 @@ export default function EditLaunchPostPage() {
           <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-destructive/10 flex items-center justify-center">
             <AlertCircle className="w-6 h-6 text-destructive" />
           </div>
-          <h3 className="font-semibold mb-2 text-destructive">{error || 'Launch post not found'}</h3>
+          <h3 className="font-semibold mb-2 text-destructive">
+            {error || 'Launch post not found'}
+          </h3>
           <button
             onClick={() => router.push('/launch-posts')}
             className="mt-4 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors"

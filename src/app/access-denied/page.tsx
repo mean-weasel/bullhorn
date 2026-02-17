@@ -29,9 +29,7 @@ export default function AccessDeniedPage() {
           </div>
 
           {/* Header */}
-          <h1 className="text-2xl font-extrabold text-foreground mb-2">
-            Access Restricted
-          </h1>
+          <h1 className="text-2xl font-extrabold text-foreground mb-2">Access Restricted</h1>
           <p className="text-muted-foreground mb-6">
             This environment is currently in private beta and restricted to authorized users only.
           </p>
@@ -61,9 +59,7 @@ export default function AccessDeniedPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          Bullhorn Private Beta
-        </p>
+        <p className="text-center text-xs text-muted-foreground mt-6">Bullhorn Private Beta</p>
       </div>
     </div>
   )

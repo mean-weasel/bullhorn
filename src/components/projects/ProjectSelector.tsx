@@ -82,7 +82,8 @@ export function ProjectSelector({
   const selectedProject = value !== 'all' && value !== 'unassigned' ? getProject(value) : null
 
   const handleSelect = (newValue: SelectionValue) => {
-    const project = newValue !== 'all' && newValue !== 'unassigned' ? getProject(newValue) ?? null : null
+    const project =
+      newValue !== 'all' && newValue !== 'unassigned' ? (getProject(newValue) ?? null) : null
     onChange(newValue, project)
     setIsOpen(false)
   }
@@ -215,7 +216,9 @@ export function ProjectSelector({
                 <span className="flex-1 truncate">{project.name}</span>
 
                 {/* Brand colors preview */}
-                {(project.brandColors.primary || project.brandColors.secondary || project.brandColors.accent) && (
+                {(project.brandColors.primary ||
+                  project.brandColors.secondary ||
+                  project.brandColors.accent) && (
                   <span className="flex gap-0.5">
                     {project.brandColors.primary && (
                       <span
@@ -254,16 +257,24 @@ export function ProjectSelector({
         title="Select Project"
         selectedValue={value}
         options={[
-          ...(showAllOption ? [{
-            value: 'all' as SelectionValue,
-            label: 'All Projects',
-            icon: <Layers className="w-5 h-5" />,
-          }] : []),
-          ...(showUnassignedOption ? [{
-            value: 'unassigned' as SelectionValue,
-            label: 'Unassigned',
-            icon: <FolderX className="w-5 h-5" />,
-          }] : []),
+          ...(showAllOption
+            ? [
+                {
+                  value: 'all' as SelectionValue,
+                  label: 'All Projects',
+                  icon: <Layers className="w-5 h-5" />,
+                },
+              ]
+            : []),
+          ...(showUnassignedOption
+            ? [
+                {
+                  value: 'unassigned' as SelectionValue,
+                  label: 'Unassigned',
+                  icon: <FolderX className="w-5 h-5" />,
+                },
+              ]
+            : []),
           ...projects.map((project) => ({
             value: project.id as SelectionValue,
             label: project.name,

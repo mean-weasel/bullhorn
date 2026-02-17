@@ -45,12 +45,11 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-green/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               ✉️
             </div>
-            <h2 className="text-xl font-extrabold text-foreground mb-2">
-              Check your email
-            </h2>
+            <h2 className="text-xl font-extrabold text-foreground mb-2">Check your email</h2>
             <p className="text-muted-foreground mb-4">
-              We&apos;ve sent a password reset link to <strong className="text-foreground">{email}</strong>.
-              Click the link to reset your password.
+              We&apos;ve sent a password reset link to{' '}
+              <strong className="text-foreground">{email}</strong>. Click the link to reset your
+              password.
             </p>
             <Link
               href="/login"
@@ -86,9 +85,7 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-orange/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
               🔑
             </div>
-            <h1 className="text-3xl font-extrabold text-foreground">
-              Reset password
-            </h1>
+            <h1 className="text-3xl font-extrabold text-foreground">Reset password</h1>
             <p className="mt-2 text-muted-foreground">
               Enter your email and we&apos;ll send you a reset link
             </p>

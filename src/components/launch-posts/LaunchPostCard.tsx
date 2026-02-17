@@ -23,13 +23,7 @@ interface LaunchPostCardProps {
   onCopy?: () => void
 }
 
-export function LaunchPostCard({
-  post,
-  index = 0,
-  onEdit,
-  onDelete,
-  onCopy,
-}: LaunchPostCardProps) {
+export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: LaunchPostCardProps) {
   const [showMenu, setShowMenu] = useState(false)
   const platformInfo = LAUNCH_PLATFORM_INFO[post.platform]
   const platformUrl = LAUNCH_PLATFORM_URLS[post.platform]
@@ -110,9 +104,7 @@ export function LaunchPostCard({
           <h3 className="font-bold mb-1 line-clamp-1">{post.title}</h3>
 
           {post.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-              {post.description}
-            </p>
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{post.description}</p>
           )}
 
           <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground font-medium">

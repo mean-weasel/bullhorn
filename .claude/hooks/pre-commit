@@ -1,0 +1,42 @@
+#!/bin/bash
+# Git pre-commit hook: run lint, typecheck, and unit tests before allowing commits.
+# Install with: make install-hooks
+
+set -e
+
+BLUE='\033[34m'
+GREEN='\033[32m'
+RED='\033[31m'
+RESET='\033[0m'
+
+echo -e "${BLUE}Running pre-commit checks...${RESET}"
+
+# Lint
+echo -e "${BLUE}  ESLint...${RESET}"
+npm run lint --silent || {
+  echo -e "${RED}✗ ESLint failed. Fix errors before committing.${RESET}"
+  exit 1
+}
+
+# Typecheck
+echo -e "${BLUE}  TypeScript...${RESET}"
+npm run typecheck --silent || {
+  echo -e "${RED}✗ Type checking failed. Fix errors before committing.${RESET}"
+  exit 1
+}
+
+# Unit tests
+echo -e "${BLUE}  Unit tests...${RESET}"
+npx vitest run --reporter=dot 2>&1 || {
+  echo -e "${RED}✗ Tests failed. Fix failures before committing.${RESET}"
+  exit 1
+}
+
+# Format check (don't auto-fix — just fail if unformatted)
+echo -e "${BLUE}  Prettier...${RESET}"
+npm run format:check --silent || {
+  echo -e "${RED}✗ Unformatted files found. Run 'make fix' then re-stage.${RESET}"
+  exit 1
+}
+
+echo -e "${GREEN}✓ All pre-commit checks passed!${RESET}"

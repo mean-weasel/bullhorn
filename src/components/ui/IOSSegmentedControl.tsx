@@ -90,9 +90,7 @@ export function IOSSegmentedControl<T extends string = string>({
           >
             {/* Icon */}
             {option.icon && (
-              <span className={cn(iconSizeClasses[size], 'flex-shrink-0')}>
-                {option.icon}
-              </span>
+              <span className={cn(iconSizeClasses[size], 'flex-shrink-0')}>{option.icon}</span>
             )}
 
             {/* Label */}

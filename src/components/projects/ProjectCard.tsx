@@ -4,15 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { format } from 'date-fns'
-import {
-  FolderKanban,
-  Edit2,
-  Trash2,
-  MoreVertical,
-  FolderOpen,
-  Hash,
-  Palette,
-} from 'lucide-react'
+import { FolderKanban, Edit2, Trash2, MoreVertical, FolderOpen, Hash, Palette } from 'lucide-react'
 import { Project } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 import { getMediaUrl } from '@/lib/media'
@@ -37,7 +29,11 @@ export function ProjectCard({
   const [showMenu, setShowMenu] = useState(false)
   const hasLogo = !!project.logoUrl
   const hasHashtags = project.hashtags.length > 0
-  const hasBrandColors = !!(project.brandColors.primary || project.brandColors.secondary || project.brandColors.accent)
+  const hasBrandColors = !!(
+    project.brandColors.primary ||
+    project.brandColors.secondary ||
+    project.brandColors.accent
+  )
 
   if (variant === 'grid') {
     return (
@@ -64,7 +60,8 @@ export function ProjectCard({
               sizes="(max-width: 640px) 100vw, 300px"
               className="object-contain"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none'
+                const target = e.target as HTMLImageElement
+                target.style.display = 'none'
               }}
             />
           ) : (
@@ -184,7 +181,9 @@ export function ProjectCard({
               }}
             />
           ) : null}
-          <FolderKanban className={cn('w-5 h-5 md:w-6 md:h-6 text-sticker-purple', hasLogo && 'hidden')} />
+          <FolderKanban
+            className={cn('w-5 h-5 md:w-6 md:h-6 text-sticker-purple', hasLogo && 'hidden')}
+          />
         </div>
 
         {/* Content */}

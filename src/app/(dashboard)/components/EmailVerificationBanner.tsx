@@ -38,8 +38,8 @@ export function EmailVerificationBanner({ email }: EmailVerificationBannerProps)
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
-        }
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
 
       if (resendError) {
@@ -91,13 +91,9 @@ export function EmailVerificationBanner({ email }: EmailVerificationBannerProps)
     <div className="flex items-center gap-3 px-4 py-3 bg-primary/10 text-foreground border-b-2 border-primary/30 font-medium">
       <span className="text-lg">📧</span>
       <Mail className="w-5 h-5 flex-shrink-0 text-primary" />
-      <p className="flex-1 text-sm">
-        Please verify your email address to ensure account security.
-      </p>
+      <p className="flex-1 text-sm">Please verify your email address to ensure account security.</p>
 
-      {error && (
-        <span className="text-xs text-destructive font-bold">{error}</span>
-      )}
+      {error && <span className="text-xs text-destructive font-bold">{error}</span>}
 
       <button
         onClick={handleResend}

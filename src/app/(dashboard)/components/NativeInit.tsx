@@ -15,9 +15,8 @@ export function NativeInit() {
     async function init() {
       // Register push notifications
       try {
-        const { registerPushNotifications, addPushListeners, savePushToken } = await import(
-          '@/lib/pushNotifications'
-        )
+        const { registerPushNotifications, addPushListeners, savePushToken } =
+          await import('@/lib/pushNotifications')
         const token = await registerPushNotifications()
         if (token) {
           await savePushToken(token)

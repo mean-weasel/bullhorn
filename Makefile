@@ -1,7 +1,7 @@
 # Bullhorn - Makefile
 # Run `make help` to see available commands
 
-.PHONY: help install dev dev-full build test test-e2e lint typecheck knip format check fix clean all
+.PHONY: help install install-hooks dev dev-full build test test-e2e lint typecheck knip format check fix clean all
 
 # Default target
 .DEFAULT_GOAL := help
@@ -49,7 +49,12 @@ install: ## Install all dependencies
 	@echo ""
 	@echo "$(GREEN)✓ Dependencies installed! Run 'make setup' for first-time setup.$(RESET)"
 
-setup: install ## First-time setup (install deps + start Supabase + reset DB)
+install-hooks: ## Install git pre-commit hook (runs lint, typecheck, tests)
+	@cp .claude/hooks/pre-commit .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
+	@echo "$(GREEN)✓ Pre-commit hook installed$(RESET)"
+
+setup: install install-hooks ## First-time setup (install deps + hooks + start Supabase + reset DB)
 	@echo "$(BLUE)Starting local Supabase...$(RESET)"
 	supabase start
 	@echo "$(BLUE)Resetting database with migrations...$(RESET)"

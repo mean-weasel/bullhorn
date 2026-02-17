@@ -93,7 +93,7 @@ export const linkedinConnectionsOnlyFixture: Post = createBasePost({
   platform: 'linkedin',
   status: 'draft',
   content: {
-    text: 'A more personal update for my network. Sometimes it\'s good to share with just your connections.',
+    text: "A more personal update for my network. Sometimes it's good to share with just your connections.",
     visibility: 'connections',
   } as LinkedInContent,
 })
@@ -104,7 +104,7 @@ export const linkedinScheduledFixture: Post = createBasePost({
   status: 'scheduled',
   scheduledAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // In 2 days
   content: {
-    text: 'Big announcement coming soon! We\'ve been working on something special and can\'t wait to share it with the LinkedIn community.',
+    text: "Big announcement coming soon! We've been working on something special and can't wait to share it with the LinkedIn community.",
     visibility: 'public',
   } as LinkedInContent,
 })
@@ -115,7 +115,7 @@ export const linkedinPublishedFixture: Post = createBasePost({
   status: 'published',
   scheduledAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(), // 2 days ago
   content: {
-    text: 'Successfully published LinkedIn post about our team\'s latest achievement!',
+    text: "Successfully published LinkedIn post about our team's latest achievement!",
     visibility: 'public',
   } as LinkedInContent,
   publishResult: {
@@ -173,7 +173,7 @@ export const redditScheduledFixture: Post = createBasePost({
   content: {
     subreddit: 'startups',
     title: 'Launching next week - would love early feedback',
-    body: 'We\'re launching our product next week and would love to get some early adopters from this community.',
+    body: "We're launching our product next week and would love to get some early adopters from this community.",
   } as RedditContent,
 })
 
@@ -313,8 +313,4 @@ export const allPublishedFixtures = [
   redditPublishedFixture,
 ]
 
-export const allFixtures = [
-  ...allTwitterFixtures,
-  ...allLinkedInFixtures,
-  ...allRedditFixtures,
-]
+export const allFixtures = [...allTwitterFixtures, ...allLinkedInFixtures, ...allRedditFixtures]

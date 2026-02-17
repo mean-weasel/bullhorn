@@ -9,11 +9,13 @@ interface UploadProgressProps {
 
 export function UploadProgress({ progress, filename, className }: UploadProgressProps) {
   return (
-    <div className={cn(
-      'flex items-center gap-3 p-4 bg-card rounded-md',
-      'border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]',
-      className
-    )}>
+    <div
+      className={cn(
+        'flex items-center gap-3 p-4 bg-card rounded-md',
+        'border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]',
+        className
+      )}
+    >
       <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0" />
       <div className="flex-1 min-w-0">
         {filename && (
@@ -26,9 +28,7 @@ export function UploadProgress({ progress, filename, className }: UploadProgress
           />
         </div>
       </div>
-      <span className="text-sm text-foreground font-bold tabular-nums">
-        {progress}%
-      </span>
+      <span className="text-sm text-foreground font-bold tabular-nums">{progress}%</span>
     </div>
   )
 }
