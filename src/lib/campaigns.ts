@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Campaign, CampaignStatus, Post } from './posts'
 import { dedup, createDedupKey } from './requestDedup'
+import { hapticSuccess } from './haptics'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -72,6 +73,7 @@ export const useCampaignsStore = create<CampaignsState & CampaignsActions>()((se
         campaigns: [newCampaign, ...state.campaigns],
         loading: false,
       }))
+      hapticSuccess()
       return newCampaign
     } catch (error) {
       set({ error: (error as Error).message, loading: false })

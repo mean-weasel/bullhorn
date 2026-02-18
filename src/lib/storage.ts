@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Post, PostStatus } from './posts'
 import { dedup, createDedupKey } from './requestDedup'
+import { hapticSuccess } from './haptics'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -59,6 +60,7 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
         posts: [newPost, ...state.posts],
         loading: false,
       }))
+      hapticSuccess()
       return newPost
     } catch (error) {
       set({ error: (error as Error).message, loading: false })

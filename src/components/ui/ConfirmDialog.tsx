@@ -8,6 +8,7 @@ import {
   ResponsiveDialogActions,
   ResponsiveDialogButton,
 } from './ResponsiveDialog'
+import { showNativeConfirm, isNativeDialogAvailable } from '@/lib/nativeDialog'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -33,6 +34,29 @@ export function ConfirmDialog({
   children,
 }: ConfirmDialogProps) {
   const confirmButtonRef = useRef<HTMLButtonElement>(null)
+  const nativeHandled = useRef(false)
+
+  // Show native dialog on iOS when no custom children
+  useEffect(() => {
+    if (!open || children || !isNativeDialogAvailable()) {
+      nativeHandled.current = false
+      return
+    }
+
+    nativeHandled.current = true
+    showNativeConfirm({
+      title,
+      message: description,
+      okButtonTitle: confirmText,
+      cancelButtonTitle: cancelText,
+    }).then((result) => {
+      if (result === true) {
+        onConfirm()
+      } else {
+        onCancel()
+      }
+    })
+  }, [open, children, title, description, confirmText, cancelText, onConfirm, onCancel])
 
   // Focus confirm button when opened
   useEffect(() => {
@@ -40,6 +64,11 @@ export function ConfirmDialog({
       setTimeout(() => confirmButtonRef.current?.focus(), 100)
     }
   }, [open])
+
+  // If native dialog is handling this, don't render web dialog
+  if (open && !children && isNativeDialogAvailable()) {
+    return null
+  }
 
   const iconWrapper = (
     <div
