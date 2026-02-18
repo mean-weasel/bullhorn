@@ -13,6 +13,7 @@ import { ApiKeyManager } from '@/components/ui/ApiKeyManager'
 import { ThemeSection, AnalyticsSection, AboutSection } from './SettingsSections'
 import { DataManagementSection } from './DataManagementSection'
 import { PlanSection } from './PlanSection'
+import { BiometricSection } from './BiometricSection'
 import {
   PushNotificationsSection,
   EmailNotificationsSection,
@@ -215,6 +216,9 @@ export default function SettingsPage() {
 
       {/* Theme */}
       <ThemeSection theme={theme} setTheme={setTheme} />
+
+      {/* Biometric Lock (iOS only) */}
+      <BiometricSection />
 
       {/* Notifications */}
       <PushNotificationsSection

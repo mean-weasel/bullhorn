@@ -30,15 +30,23 @@
     "api:start": "next dev --port 3001"
   },
   "dependencies": {
+    "@capacitor-community/in-app-review": "^8.0.0",
     "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.1",
     "@capacitor/cli": "^8.0.2",
+    "@capacitor/clipboard": "^8.0.1",
     "@capacitor/core": "^8.0.2",
+    "@capacitor/dialog": "^8.0.1",
     "@capacitor/haptics": "^8.0.0",
     "@capacitor/ios": "^8.0.2",
     "@capacitor/keyboard": "^8.0.0",
+    "@capacitor/local-notifications": "^8.0.1",
+    "@capacitor/network": "^8.0.1",
     "@capacitor/push-notifications": "^8.0.0",
+    "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.0",
     "@capacitor/status-bar": "^8.0.0",
+    "@capawesome/capacitor-badge": "^8.0.0",
     "@capgo/capacitor-social-login": "^8.3.0",
     "@octokit/rest": "^20.0.2",
     "@sentry/nextjs": "^10.39.0",
@@ -62,6 +70,7 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

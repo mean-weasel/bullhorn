@@ -31,6 +31,8 @@ import {
   EditorActions,
   PreviewPanel,
 } from '@/components/editor'
+import { copyToClipboard } from '@/lib/nativeClipboard'
+import { trackMilestone } from '@/lib/appReview'
 
 export default function EditorPage() {
   const params = useParams()
@@ -333,6 +335,7 @@ export default function EditorPage() {
         }
         await updatePost(finalPost.id, finalPost)
       }
+      trackMilestone()
       router.push('/')
     } catch (error) {
       toast.error('Failed to save post')
@@ -506,18 +509,8 @@ export default function EditorPage() {
 
   // Copy content to clipboard
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(content)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-      toast.success('Copied to clipboard')
-    } catch {
-      const textarea = document.createElement('textarea')
-      textarea.value = content
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
+    const success = await copyToClipboard(content)
+    if (success) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
       toast.success('Copied to clipboard')

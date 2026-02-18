@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Key, Plus, Copy, Check, Trash2, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { copyToClipboard } from '@/lib/nativeClipboard'
 
 interface ApiKey {
   id: string
@@ -87,7 +88,7 @@ export function ApiKeyManager() {
   }
 
   const handleCopy = async (text: string) => {
-    await navigator.clipboard.writeText(text)
+    await copyToClipboard(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

@@ -38,6 +38,10 @@ const config: CapacitorConfig = {
         webClientId: '95354811469-6dk6cb54kuee0t91dtsiu9mndumk14jv.apps.googleusercontent.com',
       },
     },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_icon_config_sample',
+      iconColor: '#ce9a08',
+    },
   },
 }
 

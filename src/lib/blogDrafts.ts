@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { dedup } from './requestDedup'
+import { hapticSuccess } from './haptics'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -85,6 +86,7 @@ export const useBlogDraftsStore = create<BlogDraftsState & BlogDraftsActions>()(
         drafts: [newDraft, ...state.drafts],
         loading: false,
       }))
+      hapticSuccess()
       return newDraft
     } catch (error) {
       set({ error: (error as Error).message, loading: false })

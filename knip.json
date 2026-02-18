@@ -3,11 +3,7 @@
   "entry": [
     "src/app/**/page.tsx",
     "src/app/**/layout.tsx",
-    "src/app/**/route.ts",
-    "src/instrumentation.ts",
-    "sentry.client.config.ts",
-    "sentry.server.config.ts",
-    "sentry.edge.config.ts"
+    "src/app/**/route.ts"
   ],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
@@ -17,7 +13,7 @@
   ],
   "ignoreDependencies": [
     "@capacitor/ios",
-    "@capacitor/haptics",
+    "@capacitor/assets",
     "@capacitor/keyboard",
     "@capacitor/splash-screen",
     "@capacitor/status-bar",

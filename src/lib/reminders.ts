@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { dedup, createDedupKey } from './requestDedup'
+import { scheduleLocalNotification, cancelLocalNotification } from './localNotifications'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -146,6 +147,14 @@ export const useRemindersStore = create<RemindersState & RemindersActions>()((se
         reminders: [newReminder, ...state.reminders],
         loading: false,
       }))
+      // Schedule native local notification
+      scheduleLocalNotification(
+        newReminder.id,
+        newReminder.title,
+        newReminder.description || 'Reminder is due!',
+        new Date(newReminder.remindAt),
+        { url: '/dashboard' }
+      )
       return newReminder
     } catch (error) {
       set({ error: (error as Error).message, loading: false })
@@ -181,6 +190,7 @@ export const useRemindersStore = create<RemindersState & RemindersActions>()((se
         method: 'DELETE',
       })
       if (!res.ok) throw new Error('Failed to delete reminder')
+      cancelLocalNotification(id)
       set((state) => ({
         reminders: state.reminders.filter((r) => r.id !== id),
         loading: false,
@@ -193,6 +203,7 @@ export const useRemindersStore = create<RemindersState & RemindersActions>()((se
 
   completeReminder: async (id) => {
     await get().updateReminder(id, { isCompleted: true })
+    cancelLocalNotification(id)
   },
 
   getUpcomingReminders: (limit = 5) => {

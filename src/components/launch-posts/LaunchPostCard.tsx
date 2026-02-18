@@ -11,9 +11,13 @@ import {
   Clock,
   CheckCircle2,
   FileText,
+  Share2,
 } from 'lucide-react'
 import { LaunchPost, LAUNCH_PLATFORM_INFO, LAUNCH_PLATFORM_URLS } from '@/lib/launchPosts'
 import { cn } from '@/lib/utils'
+import { openInBrowser } from '@/lib/nativeBrowser'
+import { copyToClipboard } from '@/lib/nativeClipboard'
+import { shareContent, isShareAvailable } from '@/lib/nativeShare'
 
 interface LaunchPostCardProps {
   post: LaunchPost
@@ -39,7 +43,7 @@ export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: La
   const handleOpenPlatform = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    window.open(platformUrl, '_blank', 'noopener,noreferrer')
+    openInBrowser(platformUrl)
   }
 
   const handleCopyFields = (e: React.MouseEvent) => {
@@ -51,8 +55,19 @@ export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: La
     if (post.url) copyText += `URL: ${post.url}\n`
     if (post.description) copyText += `Description: ${post.description}\n`
 
-    navigator.clipboard.writeText(copyText)
+    copyToClipboard(copyText)
     onCopy?.()
+    setShowMenu(false)
+  }
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    await shareContent({
+      title: post.title,
+      text: post.description || post.title,
+      url: post.url || platformUrl,
+    })
     setShowMenu(false)
   }
 
@@ -176,6 +191,16 @@ export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: La
                   <Copy className="w-4 h-4" />
                   Copy Fields
                 </button>
+
+                {isShareAvailable() && (
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium hover:bg-accent transition-colors w-full text-left"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
+                )}
 
                 <button
                   onClick={handleOpenPlatform}
