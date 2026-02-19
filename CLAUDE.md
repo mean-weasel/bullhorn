@@ -317,6 +317,77 @@ Examples:
 | `playwright` | Browser automation for E2E testing |
 | `github` | GitHub API (PRs, issues, repos) |
 | `supabase` | Database queries, migrations, edge functions |
+## iOS App (Capacitor)
+
+- **Mode**: Remote URL — WKWebView loads `bullhorn.to`, not a local bundle
+- **Platform detection**: User agent marker `BullhornCapacitor` via `isNativePlatform()` in `src/lib/capacitor.ts`
+- **Bundle ID**: `to.bullhorn.app`
+- **Team ID**: `B3A6AN2HA4` (Mean Weasel LLC)
+- **Apple App ID**: `6759327017`
+
+### Local iOS Testing
+
+Test server-side changes (CSP, headers, API routes, components) in the Capacitor WebView **before** deploying:
+
+```bash
+make dev                                              # Start Next.js dev server (port 3000)
+CAPACITOR_SERVER_URL=http://localhost:3000 npx cap sync ios   # Point WebView at localhost
+npx cap open ios                                      # Open Xcode, then Cmd+R to run on Simulator
+```
+
+Debug the WebView: Safari → Develop menu → Simulator → inspect page (full console/network/DOM).
+
+Reset to production when done: `npx cap sync ios` (no env var defaults to `bullhorn.to`).
+
+**Note**: Server-side-only fixes (CSP, headers) don't require an iOS rebuild — the existing TestFlight build loads from `bullhorn.to`, so deploying to Vercel is enough.
+
+### iOS Build & Deploy
+
+```bash
+npx cap sync ios                    # Sync web assets + plugins to iOS project
+npx cap open ios                    # Open Xcode project
+
+# Archive (command line)
+xcodebuild -project ios/App/App.xcodeproj -scheme App \
+  -destination "generic/platform=iOS" -configuration Release \
+  -archivePath ios/App/build/Bullhorn.xcarchive archive \
+  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=B3A6AN2HA4 \
+  -allowProvisioningUpdates
+
+# Export IPA for App Store
+xcodebuild -exportArchive \
+  -archivePath ios/App/build/Bullhorn.xcarchive \
+  -exportPath ios/App/build/export \
+  -exportOptionsPlist ExportOptions.plist \
+  -allowProvisioningUpdates
+
+# Upload to App Store Connect
+asc builds upload --file ios/App/build/export/App.ipa
+```
+
+### App Store Connect CLI (`asc`)
+
+Install: `brew tap rudrankriyam/tap && brew install rudrankriyam/tap/asc`
+
+Authentication requires an App Store Connect API key:
+1. Generate at [appstoreconnect.apple.com/access/integrations/api](https://appstoreconnect.apple.com/access/integrations/api)
+2. Download the `.p8` file (one-time download), store in `~/.appstoreconnect/private_keys/`
+3. Register: `asc auth login --name "Bullhorn" --key-id <KEY_ID> --issuer-id <ISSUER_ID> --private-key ~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8`
+4. Store `ASC_KEY_ID` and `ASC_ISSUER_ID` in Vercel for backup/CI use
+
+Key commands:
+- `asc builds list` — list uploaded builds
+- `asc builds upload --file <ipa>` — upload IPA to App Store Connect
+- `asc apps list` — list apps
+- `asc testflight beta-groups list` — list TestFlight groups
+
+### Signing Prerequisites (new machine setup)
+
+1. Add Apple ID in **Xcode > Settings > Accounts**
+2. Register at least one device at [developer.apple.com/account/resources/devices](https://developer.apple.com/account/resources/devices/list)
+3. Enable "Automatically manage signing" in App target > Signing & Capabilities
+4. Unlock keychain for CLI codesign: `security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "<password>" ~/Library/Keychains/login.keychain-db`
+
 ## Guardrails
 
 ### General
@@ -331,7 +402,9 @@ Examples:
 
 ### Environment & Secrets
 
-- This project uses Doppler for secrets management. Always ensure the session/environment is started with `doppler run` when Supabase, Vercel, or other service credentials are needed. Never suggest redundant secret storage across Doppler and Vercel — Doppler is the source of truth.
+- **Vercel is the source of truth** for all secrets. Runtime secrets (Supabase keys, Google OAuth client IDs, etc.) live in Vercel environment variables across Production/Preview/Development.
+- **Doppler** is legacy — only contains `SUPABASE_ACCESS_TOKEN` (CLI-only, not runtime). Use `doppler run` when running Supabase CLI commands locally (`supabase db push`, etc.).
+- **App Store Connect API keys** (`ASC_KEY_ID`, `ASC_ISSUER_ID`) are stored in Vercel. The `.p8` private key file is stored locally at `~/.appstoreconnect/private_keys/` and registered with the `asc` CLI keychain.
 - **Environment variables are validated on startup** - see `src/lib/envValidation.ts` and `docs/environment-variables.md` for details
 - **Upstash Redis** (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) is **recommended but optional** - enables rate limiting (10 req/10sec per IP). If not configured, rate limiting is disabled with warnings logged.
 

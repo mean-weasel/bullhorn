@@ -6,19 +6,24 @@ class BullhornViewController: CAPBridgeViewController {
 
     private var offlineVC: OfflineViewController?
 
-    override func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        super.webView(webView, didFail: navigation, withError: error)
-        handleWebViewError(error)
+    override open func capacitorDidLoad() {
+        // Register for navigation error notifications to show offline page
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNavigationError(_:)),
+            name: NSNotification.Name("CAPWebViewDidFailNavigation"),
+            object: nil
+        )
     }
 
-    override func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        super.webView(webView, didFailProvisionalNavigation: navigation, withError: error)
-        handleWebViewError(error)
+    @objc private func handleNavigationError(_ notification: Notification) {
+        if let error = notification.userInfo?["error"] as? Error {
+            handleWebViewError(error)
+        }
     }
 
     private func handleWebViewError(_ error: Error) {
         let nsError = error as NSError
-        // NSURLErrorNotConnectedToInternet or NSURLErrorTimedOut
         if nsError.domain == NSURLErrorDomain &&
            (nsError.code == NSURLErrorNotConnectedToInternet ||
             nsError.code == NSURLErrorCannotFindHost ||

@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAM_ID.to.bullhorn.app",
+        "appID": "B3A6AN2HA4.to.bullhorn.app",
         "paths": ["/posts/*", "/campaigns/*", "/projects/*", "/new", "/dashboard"]
       }
     ]
