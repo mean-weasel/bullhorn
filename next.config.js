@@ -24,7 +24,7 @@ const nextConfig = {
     const isDev = process.env.NODE_ENV === 'development'
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self'"
+      : "script-src 'self' 'unsafe-inline'"
     const csp = [
       "default-src 'self'",
       scriptSrc,
