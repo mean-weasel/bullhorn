@@ -36,6 +36,51 @@ make clean          # Remove build artifacts
 make ci             # Run full CI checks locally (lint + typecheck + tests)
 ```
 
+## iOS Build & TestFlight
+
+The iOS app is a Capacitor 8 wrapper that loads `bullhorn.to` in a WKWebView (remote URL mode).
+
+### Prerequisites
+
+- Xcode with signing configured (Team ID: `B3A6AN2HA4`, Bundle ID: `to.bullhorn.app`)
+- App Store Connect API key at `~/.appstoreconnect/private_keys/AuthKey_X9Z3DHN64Y.p8`
+- ASC config at `~/.asc/config.json` (key_id, issuer_id)
+
+### Build & Upload
+
+```bash
+# 1. Bump build number in project.pbxproj (both Debug and Release configs)
+#    CURRENT_PROJECT_VERSION must be unique per TestFlight upload
+#    MARKETING_VERSION is the user-facing version (e.g., 1.0)
+
+# 2. Sync Capacitor plugins
+npx cap sync ios
+
+# 3. Clean, archive, export, upload
+cd ios/App
+xcodebuild clean -project App.xcodeproj -scheme App -configuration Release
+xcodebuild archive -project App.xcodeproj -scheme App -configuration Release \
+  -archivePath /tmp/Bullhorn.xcarchive -destination 'generic/platform=iOS' \
+  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=B3A6AN2HA4
+xcodebuild -exportArchive -archivePath /tmp/Bullhorn.xcarchive \
+  -exportOptionsPlist ../../ExportOptions.plist -exportPath /tmp/BullhornExport \
+  -allowProvisioningUpdates
+xcrun altool --upload-app -f /tmp/BullhornExport/App.ipa -t ios \
+  --apiKey X9Z3DHN64Y --apiIssuer 36da0220-c107-4a01-aa33-63ff5f110172
+```
+
+### Versioning
+
+- `MARKETING_VERSION` (e.g., `1.0`): User-facing version, bump for feature releases
+- `CURRENT_PROJECT_VERSION` (e.g., `2`): Build number, must increment for each TestFlight upload
+- `package.json` version is web-only and independent of iOS versioning
+
+### TestFlight
+
+- **Internal testing**: Available immediately after App Store Connect finishes processing (~5-15 min)
+- **External beta review**: Required for first build to external testers; subsequent builds auto-approved unless major changes
+- Build processing status visible at appstoreconnect.apple.com > Apps > Bullhorn > TestFlight
+
 ## Architecture
 
 ### App Router Structure
