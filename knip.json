@@ -20,7 +20,10 @@
     "@capgo/capacitor-social-login",
     "@octokit/rest",
     "gh-pages",
-    "tsx"
+    "tsx",
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/github"
   ],
   "rules": {
     "exports": "off"
