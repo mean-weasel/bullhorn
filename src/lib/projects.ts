@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { Project, ProjectAnalytics, Campaign } from './posts'
 import { dedup } from './requestDedup'
+import { usePlanStore } from './planStore'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -87,6 +88,7 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
         projects: [newProject, ...state.projects],
         loading: false,
       }))
+      usePlanStore.getState().incrementCount('projects')
 
       return newProject
     } catch (error) {
@@ -136,6 +138,7 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
         projects: state.projects.filter((p) => p.id !== id),
         loading: false,
       }))
+      usePlanStore.getState().decrementCount('projects')
 
       return { campaignsAffected: data.deleted?.campaignsAffected || 0 }
     } catch (error) {

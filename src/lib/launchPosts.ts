@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { dedup } from './requestDedup'
+import { usePlanStore } from './planStore'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -258,6 +259,7 @@ export const useLaunchPostsStore = create<LaunchPostsState & LaunchPostsActions>
         launchPosts: [newPost, ...state.launchPosts],
         loading: false,
       }))
+      usePlanStore.getState().incrementCount('launchPosts')
       return newPost
     } catch (error) {
       set({ error: (error as Error).message, loading: false })
@@ -297,6 +299,7 @@ export const useLaunchPostsStore = create<LaunchPostsState & LaunchPostsActions>
         launchPosts: state.launchPosts.filter((p) => p.id !== id),
         loading: false,
       }))
+      usePlanStore.getState().decrementCount('launchPosts')
     } catch (error) {
       set({ error: (error as Error).message, loading: false })
       throw error

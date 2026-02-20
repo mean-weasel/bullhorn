@@ -264,12 +264,12 @@ describe('POST /api/campaigns/[id]/posts', () => {
     expect(body.error).toBe('Campaign not found')
   })
 
-  it('returns 404 when post not found', async () => {
+  it('returns 404 when post not found (update matches 0 rows)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    // Campaign check passes, post check fails
+    // Campaign check passes, update returns PGRST116 (post not found or not owned)
     fromCallResults = [
       { singleData: { data: { id: 'camp-1' }, error: null } },
-      { singleData: { data: null, error: { code: 'PGRST116', message: 'not found' } } },
+      { updateSingleData: { data: null, error: { code: 'PGRST116', message: 'not found' } } },
     ]
 
     const req = createRequest('/api/campaigns/camp-1/posts', {
@@ -285,10 +285,9 @@ describe('POST /api/campaigns/[id]/posts', () => {
   it('adds post to campaign successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const updatedPost = { ...dbPost, id: validPostId, campaign_id: 'camp-1' }
-    // Campaign check passes, post check passes, update succeeds
+    // Campaign check passes, update succeeds
     fromCallResults = [
       { singleData: { data: { id: 'camp-1' }, error: null } },
-      { singleData: { data: { id: validPostId }, error: null } },
       { updateSingleData: { data: updatedPost, error: null } },
     ]
 
@@ -306,9 +305,9 @@ describe('POST /api/campaigns/[id]/posts', () => {
   it('accepts post_id (snake_case) as well as postId', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const updatedPost = { ...dbPost, id: validPostId, campaign_id: 'camp-1' }
+    // Campaign check passes, update succeeds
     fromCallResults = [
       { singleData: { data: { id: 'camp-1' }, error: null } },
-      { singleData: { data: { id: validPostId }, error: null } },
       { updateSingleData: { data: updatedPost, error: null } },
     ]
 
@@ -324,9 +323,9 @@ describe('POST /api/campaigns/[id]/posts', () => {
 
   it('returns 500 when update fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    // Campaign check passes, update fails with non-PGRST116 error
     fromCallResults = [
       { singleData: { data: { id: 'camp-1' }, error: null } },
-      { singleData: { data: { id: validPostId }, error: null } },
       { updateSingleData: { data: null, error: { code: 'OTHER', message: 'DB error' } } },
     ]
 

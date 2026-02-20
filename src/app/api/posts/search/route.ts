@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { transformPostFromDb, escapeSearchPattern, type DbPost } from '@/lib/utils'
+import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
@@ -23,35 +23,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Search query is required' }, { status: 400 })
     }
 
-    // Search in content (as text), notes, and platform
-    // Note: Supabase textSearch requires full-text search setup
-    // Using ilike for simple search
-    const searchPattern = `%${escapeSearchPattern(query)}%`
-
-    // Defense-in-depth: filter by user_id alongside RLS
+    // Fetch all non-archived posts, then filter in Node.js.
+    // PostgREST can't search within JSONB text (content field), so we
+    // fetch a larger buffer and filter across all text fields client-side.
     const { data, error } = await supabase
       .from('posts')
       .select('*')
       .eq('user_id', userId)
       .neq('status', 'archived')
-      .or(`notes.ilike.${searchPattern},platform.ilike.${searchPattern}`)
       .order('updated_at', { ascending: false })
-      .limit(limit)
+      .limit(500)
 
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Additionally filter by content (JSON field) on the client side
-    // since Supabase doesn't easily search within JSONB text
-    const filtered = data.filter(
+    // Filter by search query across all text fields (content JSON, notes, platform)
+    const searchLower = query.toLowerCase()
+    const filtered = (data || []).filter(
       (post: { content?: unknown; notes?: string; platform?: string }) => {
         const contentStr = JSON.stringify(post.content || {}).toLowerCase()
         const notesStr = (post.notes || '').toLowerCase()
         const platformStr = (post.platform || '').toLowerCase()
-        const searchLower = query.toLowerCase()
-
         return (
           contentStr.includes(searchLower) ||
           notesStr.includes(searchLower) ||
@@ -60,8 +54,8 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    // Transform posts from snake_case to camelCase
-    const posts = filtered.map((post) => transformPostFromDb(post as DbPost))
+    // Transform and apply the requested limit
+    const posts = filtered.slice(0, limit).map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ posts })
   } catch (error) {
     if (error instanceof Error && error.message === 'Forbidden') {

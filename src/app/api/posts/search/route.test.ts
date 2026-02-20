@@ -10,11 +10,10 @@ vi.mock('@/lib/auth', () => ({
   validateScopes: vi.fn(),
 }))
 
-// Search chain: .from().select().eq().neq().or().order().limit()
+// Search chain: .from().select().eq().neq().order().limit()
 const mockLimit = vi.fn()
 const mockOrder = vi.fn(() => ({ limit: mockLimit }))
-const mockOr = vi.fn(() => ({ order: mockOrder }))
-const mockNeq = vi.fn(() => ({ or: mockOr }))
+const mockNeq = vi.fn(() => ({ order: mockOrder }))
 const mockSelectEq1 = vi.fn(() => ({ neq: mockNeq }))
 const mockSelect = vi.fn(() => ({ eq: mockSelectEq1 }))
 
@@ -222,19 +221,37 @@ describe('GET /api/posts/search', () => {
     expect(mockNeq).toHaveBeenCalledWith('status', 'archived')
   })
 
-  it('respects custom limit parameter', async () => {
+  it('respects custom limit parameter via client-side slice', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockLimit.mockResolvedValue({ data: [], error: null })
-    const req = createRequest('/api/posts/search?q=hello&limit=10')
-    await GET(req)
-    expect(mockLimit).toHaveBeenCalledWith(10)
+    const dbPosts = Array.from({ length: 5 }, (_, i) => ({
+      id: `post-${i}`,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-02T00:00:00Z',
+      scheduled_at: null,
+      status: 'draft',
+      platform: 'twitter',
+      notes: 'match',
+      campaign_id: null,
+      group_id: null,
+      group_type: null,
+      content: { text: 'match' },
+      publish_result: null,
+      user_id: 'user-1',
+    }))
+    mockLimit.mockResolvedValue({ data: dbPosts, error: null })
+    const req = createRequest('/api/posts/search?q=match&limit=2')
+    const res = await GET(req)
+    const body = await res.json()
+    expect(body.posts).toHaveLength(2)
+    // DB always fetches buffer of 500
+    expect(mockLimit).toHaveBeenCalledWith(500)
   })
 
-  it('uses default limit of 50 when not specified', async () => {
+  it('fetches 500-row buffer from DB regardless of requested limit', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockLimit.mockResolvedValue({ data: [], error: null })
     const req = createRequest('/api/posts/search?q=hello')
     await GET(req)
-    expect(mockLimit).toHaveBeenCalledWith(50)
+    expect(mockLimit).toHaveBeenCalledWith(500)
   })
 })
