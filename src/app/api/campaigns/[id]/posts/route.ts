@@ -114,19 +114,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
     }
 
-    // CRITICAL: Verify user owns the post being added
-    const { data: postCheck, error: postCheckError } = await supabase
-      .from('posts')
-      .select('id')
-      .eq('id', postId)
-      .eq('user_id', userId)
-      .single()
-
-    if (postCheckError || !postCheck) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
-    }
-
-    // Update post with campaign_id (with ownership check)
+    // Update post with campaign_id (user_id check ensures ownership)
+    // If the post doesn't exist or belong to the user, the update matches
+    // 0 rows and returns PGRST116, which is handled as 404 below.
     const { data, error } = await supabase
       .from('posts')
       .update({ campaign_id: id })

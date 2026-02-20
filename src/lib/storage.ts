@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { Post, PostStatus } from './posts'
 import { dedup, createDedupKey } from './requestDedup'
 import { hapticSuccess } from './haptics'
+import { usePlanStore } from './planStore'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -61,6 +62,7 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
         loading: false,
       }))
       hapticSuccess()
+      usePlanStore.getState().incrementCount('posts')
       return newPost
     } catch (error) {
       set({ error: (error as Error).message, loading: false })
@@ -100,6 +102,7 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
         posts: state.posts.filter((p) => p.id !== id),
         loading: false,
       }))
+      usePlanStore.getState().decrementCount('posts')
     } catch (error) {
       set({ error: (error as Error).message, loading: false })
       throw error

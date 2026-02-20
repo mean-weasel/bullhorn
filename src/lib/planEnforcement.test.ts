@@ -301,6 +301,52 @@ describe('enforceResourceLimit', () => {
 })
 
 // ---------------------------------------------------------------------------
+// enforceResourceLimit with pre-fetched plan
+// ---------------------------------------------------------------------------
+
+describe('enforceResourceLimit with pre-fetched plan', () => {
+  it('skips profile query when plan is provided', async () => {
+    // Only set up count mock (no profile mock needed)
+    mockFrom.mockImplementation(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn().mockResolvedValue({ count: 10, error: null }),
+      })),
+    }))
+
+    const result = await enforceResourceLimit('user-1', 'posts', 'free')
+    expect(result.allowed).toBe(true)
+    expect(result.current).toBe(10)
+    expect(result.limit).toBe(50)
+    expect(result.plan).toBe('free')
+    // Should only have called from() once (count query only, no profile query)
+    expect(mockFrom).toHaveBeenCalledTimes(1)
+  })
+
+  it('uses pro limits when pro plan is provided', async () => {
+    mockFrom.mockImplementation(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn().mockResolvedValue({ count: 100, error: null }),
+      })),
+    }))
+
+    const result = await enforceResourceLimit('user-1', 'posts', 'pro')
+    expect(result.allowed).toBe(true)
+    expect(result.current).toBe(100)
+    expect(result.limit).toBe(500)
+    expect(result.plan).toBe('pro')
+    expect(mockFrom).toHaveBeenCalledTimes(1)
+  })
+
+  it('still queries profile when plan is not provided', async () => {
+    setupResourceMocks('free', 10)
+    const result = await enforceResourceLimit('user-1', 'posts')
+    expect(result.plan).toBe('free')
+    // Should have called from() twice (profile + count)
+    expect(mockFrom).toHaveBeenCalledTimes(2)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // enforceStorageLimit
 // ---------------------------------------------------------------------------
 

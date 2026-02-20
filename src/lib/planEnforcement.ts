@@ -24,17 +24,23 @@ export async function getUserPlan(userId: string): Promise<PlanType> {
 
 export async function enforceResourceLimit(
   userId: string,
-  resource: Exclude<ResourceType, 'storageBytes'>
+  resource: Exclude<ResourceType, 'storageBytes'>,
+  preloadedPlan?: PlanType
 ): Promise<{ allowed: boolean; current: number; limit: number; plan: PlanType }> {
   const supabase = await createClient()
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('plan')
-    .eq('id', userId)
-    .single()
+  let plan: PlanType
+  if (preloadedPlan) {
+    plan = preloadedPlan
+  } else {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('plan')
+      .eq('id', userId)
+      .single()
+    plan = (profile?.plan as PlanType) || 'free'
+  }
 
-  const plan = (profile?.plan as PlanType) || 'free'
   const limit = PLAN_LIMITS[plan][resource]
   const { table, countCol } = TABLE_MAP[resource]
 
