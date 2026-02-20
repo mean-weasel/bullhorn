@@ -313,14 +313,33 @@ Sticker palette: `sticker-yellow`, `sticker-pink`, `sticker-purple`, `sticker-gr
 
 ## Git Conventions
 
-Commit format: `<type>: <description> [(#PR)]`
+Commit format: `<type>: <description>`
 
-Types: `feat`, `fix`, `test`, `docs`, `chore`, `security`, `perf`
+**Every commit MUST start with an allowed type prefix.** These prefixes drive automatic
+versioning via semantic-release. Using the wrong type will create an incorrect version bump.
+Commits are validated by a commitlint git hook — invalid messages will be rejected.
 
-Examples:
-- `feat: add campaign detail page (#45)`
-- `fix: resolve auth redirect loop`
-- `test: add E2E tests for launch posts (#73)`
+| Type | Version Bump | When to Use |
+|------|-------------|-------------|
+| `feat` | Minor (1.0→1.1) | New feature or user-facing capability |
+| `fix` | Patch (1.0.0→1.0.1) | Bug fix |
+| `perf` | Patch | Performance improvement |
+| `security` | Patch | Security fix |
+| `docs` | No release | Documentation only |
+| `test` | No release | Adding/updating tests |
+| `chore` | No release | Maintenance, deps, config |
+| `refactor` | No release | Code restructure, no behavior change |
+| `ci` | No release | CI/CD pipeline changes |
+| `style` | No release | Formatting, whitespace |
+
+For breaking changes, add `!` after the type: `feat!: redesign auth flow`
+This triggers a major version bump (1.0→2.0).
+
+Guidelines:
+- First line: 50 chars max, imperative mood ("add feature" not "added feature")
+- Use `feat` only for genuinely new capabilities — not for extending existing ones (use `fix` or `refactor`)
+- Use `chore` for dependency updates, config changes, and anything that doesn't affect the shipped product
+- When in doubt between `feat` and `fix`, prefer `fix` — it's safer (patch bump vs minor bump)
 
 ## Automations
 
