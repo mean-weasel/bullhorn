@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 10
+    groups:
+      capacitor:
+        patterns:
+          - "@capacitor/*"
+          - "@capawesome/*"
+          - "@capgo/*"
+      testing:
+        patterns:
+          - "@testing-library/*"
+          - "@playwright/*"
+          - vitest
+          - "@vitest/*"
+          - jsdom
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint/*"
+          - eslint
+          - eslint-plugin-*
+      sentry:
+        patterns:
+          - "@sentry/*"
+      supabase:
+        patterns:
+          - "@supabase/*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
