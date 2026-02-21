@@ -95,8 +95,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2]
-        shardTotal: [2]
+        shardIndex: [1, 2, 3]
+        shardTotal: [3]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -135,6 +135,7 @@ jobs:
           CI: true
           E2E_TEST_MODE: 'true'
           TZ: UTC
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v6
