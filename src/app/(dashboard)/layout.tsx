@@ -6,6 +6,7 @@ import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import { VerificationSuccessBanner } from './components/VerificationSuccessBanner'
 import { NativeInit } from './components/NativeInit'
 import { PlanInitializer } from './components/PlanInitializer'
+import { Toaster } from 'react-hot-toast'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   let userEmail: string | undefined
@@ -40,6 +41,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: 'border-2 border-border shadow-[3px_3px_0_hsl(var(--border))] font-sans',
+          duration: 4000,
+        }}
+      />
       <NativeInit />
       <PlanInitializer />
       {/* Skip to content link for keyboard users */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -41,8 +41,8 @@ const CAMPAIGN_STATUS_CONFIG: Record<
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
 }
 
-export default function CampaignDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default function CampaignDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const { getCampaignWithPosts, updateCampaign, deleteCampaign, removePostFromCampaign } =
     useCampaignsStore()

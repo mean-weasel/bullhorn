@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const platform = searchParams.get('platform')
     const status = searchParams.get('status')
     const campaignId = searchParams.get('campaignId')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50') || 50, 1), 200)
 
     let query = supabase
       .from('launch_posts')

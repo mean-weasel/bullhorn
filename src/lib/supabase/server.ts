@@ -30,7 +30,9 @@ export async function createClient() {
   // for application-level ownership enforcement.
   const apiKey = await getApiKeyFromHeaders()
   if (apiKey && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.log(`[supabase] Service role client via API key (prefix: ${apiKey.slice(0, 12)})`)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[supabase] Service role client via API key (prefix: ${apiKey.slice(0, 6)})`)
+    }
     return createSupabaseJsClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY,

@@ -11,19 +11,6 @@ vi.mock('@/lib/auth', () => ({
   validateScopes: vi.fn(),
 }))
 
-// Mock fs/promises — need default export for CJS interop
-vi.mock('fs/promises', () => {
-  const writeFile = vi.fn(async () => undefined)
-  const mkdir = vi.fn(async () => undefined)
-  const unlink = vi.fn(async () => undefined)
-  return {
-    default: { writeFile, mkdir, unlink },
-    writeFile,
-    mkdir,
-    unlink,
-  }
-})
-
 // Mock crypto
 vi.mock('crypto', () => ({
   default: {
@@ -44,6 +31,12 @@ let mockUpdateResult: { error: unknown } = { error: null }
 const mockUpdateEq = vi.fn(() => mockUpdateResult)
 const mockUpdate = vi.fn(() => ({ eq: mockUpdateEq }))
 
+const mockStorageUpload = vi.fn(async () => ({ error: null }))
+const mockStorageRemove = vi.fn(async () => ({ error: null }))
+const mockStorageGetPublicUrl = vi.fn(() => ({
+  data: { publicUrl: 'https://storage.example.com/logos/test.png' },
+}))
+
 const mockFrom = vi.fn(() => ({
   select: mockProjectSelect,
   update: mockUpdate,
@@ -52,6 +45,13 @@ const mockFrom = vi.fn(() => ({
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({
     from: mockFrom,
+    storage: {
+      from: vi.fn(() => ({
+        upload: mockStorageUpload,
+        remove: mockStorageRemove,
+        getPublicUrl: mockStorageGetPublicUrl,
+      })),
+    },
   })),
 }))
 
@@ -194,7 +194,7 @@ describe('POST /api/projects/[id]/logo', () => {
     const res = await POST(req, createContext('proj-1'))
     expect(res.status).toBe(400)
     const body = await res.json()
-    expect(body.error).toBe('Unsupported file type. Allowed: JPG, PNG, SVG, WebP')
+    expect(body.error).toBe('Unsupported file type. Allowed: JPG, PNG, WebP')
   })
 
   it('uploads logo successfully', async () => {
@@ -213,8 +213,7 @@ describe('POST /api/projects/[id]/logo', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
-    expect(body.logoUrl).toContain('/uploads/logos/')
-    expect(body.logoUrl).toContain('proj-1')
+    expect(body.logoUrl).toBeDefined()
   })
 
   it('returns 500 when database update fails', async () => {
@@ -272,7 +271,7 @@ describe('DELETE /api/projects/[id]/logo', () => {
   it('returns 403 when user does not own the project', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
-      data: { id: 'proj-1', logo_url: '/uploads/logos/old.png', user_id: 'user-other' },
+      data: { id: 'proj-1', logo_url: '/storage/logos/old.png', user_id: 'user-other' },
       error: null,
     }
     const req = createRequest('/api/projects/proj-1/logo', { method: 'DELETE' })
@@ -285,7 +284,7 @@ describe('DELETE /api/projects/[id]/logo', () => {
   it('deletes logo successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
-      data: { id: 'proj-1', logo_url: '/uploads/logos/old.png', user_id: 'user-1' },
+      data: { id: 'proj-1', logo_url: '/storage/logos/old.png', user_id: 'user-1' },
       error: null,
     }
     mockUpdateResult = { error: null }
@@ -313,7 +312,7 @@ describe('DELETE /api/projects/[id]/logo', () => {
   it('returns 500 when database update fails on delete', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
-      data: { id: 'proj-1', logo_url: '/uploads/logos/old.png', user_id: 'user-1' },
+      data: { id: 'proj-1', logo_url: '/storage/logos/old.png', user_id: 'user-1' },
       error: null,
     }
     mockUpdateResult = { error: { message: 'Update failed' } }

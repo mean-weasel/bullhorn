@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // DELETE /api/blog-drafts/[id]/images/[filename] - Remove image from blog draft
 export async function DELETE(
   _request: NextRequest,

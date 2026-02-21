@@ -1,34 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile, mkdir, unlink } from 'fs/promises'
-import path from 'path'
 import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
-// Logo upload directory
-const LOGO_DIR = path.join(process.cwd(), 'public', 'uploads', 'logos')
+export const dynamic = 'force-dynamic'
 
-// Allowed file types for logos
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp']
+// Allowed file types for logos (SVG removed - XSS vector)
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
 interface RouteContext {
   params: Promise<{ id: string }>
 }
 
-// Ensure directory exists
-async function ensureLogoDir() {
-  try {
-    await mkdir(LOGO_DIR, { recursive: true })
-  } catch {
-    // Directory might already exist
-  }
-}
-
 // POST /api/projects/[id]/logo - Upload project logo
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    // Require authentication
     const auth = await requireAuth()
     if (auth.scopes) {
       validateScopes(auth.scopes, ['projects:write'])
@@ -47,12 +34,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    // Defense in depth: verify ownership even though RLS should handle it
     if (project.user_id !== auth.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
-
-    await ensureLogoDir()
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -61,40 +45,41 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Unsupported file type. Allowed: JPG, PNG, SVG, WebP' },
+        { error: 'Unsupported file type. Allowed: JPG, PNG, WebP' },
         { status: 400 }
       )
     }
 
-    // Validate file size
     if (file.size > MAX_SIZE) {
       return NextResponse.json({ error: 'File too large. Maximum size: 5MB' }, { status: 400 })
     }
 
-    // Delete old logo if exists
+    // Delete old logo from storage if exists
     if (project.logo_url) {
-      try {
-        const oldPath = path.join(process.cwd(), 'public', project.logo_url)
-        await unlink(oldPath)
-      } catch {
-        // Old file might not exist, that's okay
+      const oldPath = project.logo_url.replace(/^\/storage\/logos\//, '')
+      if (oldPath && !oldPath.includes('..')) {
+        await supabase.storage.from('logos').remove([oldPath])
       }
     }
 
-    // Generate unique filename
-    const ext = path.extname(file.name).toLowerCase() || '.png'
-    const filename = `${projectId}-${crypto.randomUUID().slice(0, 8)}${ext}`
-    const filepath = path.join(LOGO_DIR, filename)
+    // Generate unique filename and upload to Supabase Storage
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'png'
+    const filename = `${auth.userId}/${projectId}-${crypto.randomUUID().slice(0, 8)}.${ext}`
 
-    // Write file
     const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    await writeFile(filepath, buffer)
+    const { error: uploadError } = await supabase.storage.from('logos').upload(filename, bytes, {
+      contentType: file.type,
+      upsert: false,
+    })
 
-    const logoUrl = `/uploads/logos/${filename}`
+    if (uploadError) {
+      console.error('Logo upload error:', uploadError)
+      return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    }
+
+    const logoUrl = `/storage/logos/${filename}`
 
     // Update project with new logo URL
     const { error: updateError } = await supabase
@@ -103,18 +88,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
       .eq('id', projectId)
 
     if (updateError) {
-      // Try to clean up uploaded file
-      try {
-        await unlink(filepath)
-      } catch {
-        // Ignore cleanup errors
-      }
+      // Clean up uploaded file
+      await supabase.storage.from('logos').remove([filename])
       return NextResponse.json({ error: 'Failed to update project' }, { status: 500 })
     }
 
+    // Get public URL for the logo
+    const { data: urlData } = supabase.storage.from('logos').getPublicUrl(filename)
+
     return NextResponse.json({
       success: true,
-      logoUrl,
+      logoUrl: urlData.publicUrl || logoUrl,
     })
   } catch (error) {
     if (error instanceof Error && error.message === 'Forbidden') {
@@ -131,7 +115,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 // DELETE /api/projects/[id]/logo - Remove project logo
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
-    // Require authentication
     const auth = await requireAuth()
     if (auth.scopes) {
       validateScopes(auth.scopes, ['projects:write'])
@@ -150,18 +133,15 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
-    // Defense in depth: verify ownership
     if (project.user_id !== auth.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Delete file if exists
+    // Delete file from Supabase Storage if exists
     if (project.logo_url) {
-      try {
-        const filepath = path.join(process.cwd(), 'public', project.logo_url)
-        await unlink(filepath)
-      } catch {
-        // File might not exist, that's okay
+      const storagePath = project.logo_url.replace(/^\/storage\/logos\//, '')
+      if (storagePath && !storagePath.includes('..')) {
+        await supabase.storage.from('logos').remove([storagePath])
       }
     }
 

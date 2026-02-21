@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,8 +25,21 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const code = searchParams.get('code')
     const error = searchParams.get('error')
+    const state = searchParams.get('state')
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+    // Validate OAuth state parameter (CSRF protection)
+    const cookieStore = await cookies()
+    const storedState = cookieStore.get('oauth_state')?.value
+
+    // Clear the state cookie regardless of outcome
+    cookieStore.set('oauth_state', '', { maxAge: 0, path: '/' })
+
+    if (!state || !storedState || state !== storedState) {
+      console.error('OAuth state mismatch:', { received: !!state, stored: !!storedState })
+      return NextResponse.redirect(`${baseUrl}/settings?error=invalid_state`)
+    }
 
     // Check for error from Google
     if (error) {

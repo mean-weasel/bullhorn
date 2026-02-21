@@ -20,10 +20,12 @@ const importCampaignSchema = z.object({
 })
 
 const importSchema = z.object({
-  posts: z.array(importPostSchema).optional().default([]),
-  campaigns: z.array(importCampaignSchema).optional().default([]),
+  posts: z.array(importPostSchema).max(500).optional().default([]),
+  campaigns: z.array(importCampaignSchema).max(100).optional().default([]),
   version: z.string().optional(),
 })
+
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
