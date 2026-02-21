@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,16 @@ export async function GET() {
 
     // Generate a state parameter for CSRF protection
     const state = crypto.randomUUID()
+
+    // Store state in HTTP-only cookie (5 min expiry)
+    const cookieStore = await cookies()
+    cookieStore.set('oauth_state', state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 300,
+      path: '/',
+    })
 
     // Build OAuth URL
     const params = new URLSearchParams({
