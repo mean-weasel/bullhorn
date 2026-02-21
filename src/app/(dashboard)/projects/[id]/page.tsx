@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -28,7 +28,8 @@ import { ProjectSettingsTab } from './ProjectSettingsTab'
 
 type TabType = 'campaigns' | 'settings'
 
-export default function ProjectDetailPage({ params }: { params: { id: string } }) {
+export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: paramId } = use(params)
   const router = useRouter()
   const { fetchProjectWithCampaigns, fetchProjectAnalytics, updateProject, deleteProject } =
     useProjectsStore()
@@ -61,8 +62,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
   // Set project ID from params
   useEffect(() => {
-    setProjectId(params.id)
-  }, [params.id])
+    setProjectId(paramId)
+  }, [paramId])
 
   // Load project data
   useEffect(() => {
