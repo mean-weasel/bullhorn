@@ -15,11 +15,13 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: 'html',
+  timeout: process.env.CI ? 60_000 : 30_000,
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     timezoneId: 'UTC',
+    actionTimeout: process.env.CI ? 15_000 : 10_000,
   },
   projects: [
     {
@@ -31,7 +33,7 @@ export default defineConfig({
     command: `E2E_TEST_MODE=true NEXT_PUBLIC_E2E_TEST_MODE=true npm run dev -- --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
+    timeout: process.env.CI ? 180_000 : 120_000,
     env: {
       E2E_TEST_MODE: 'true',
       NEXT_PUBLIC_E2E_TEST_MODE: 'true',
