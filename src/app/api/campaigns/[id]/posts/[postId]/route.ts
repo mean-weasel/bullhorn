@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 // DELETE /api/campaigns/[id]/posts/[postId] - Remove post from campaign
 export async function DELETE(
   _request: NextRequest,

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // Test user ID - must match the one in auth.ts
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
 const TEST_USER_EMAIL = 'test@example.com'

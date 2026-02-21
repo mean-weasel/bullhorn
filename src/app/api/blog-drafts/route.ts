@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     const status = searchParams.get('status')
     const campaignId = searchParams.get('campaignId')
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50') || 50, 1), 200)
     const search = searchParams.get('search')
 
     let query = supabase

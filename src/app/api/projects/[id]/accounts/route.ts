@@ -78,8 +78,10 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
     // Require authentication
+    let userId: string
     try {
       const auth = await requireAuth()
+      userId = auth.userId
       if (auth.scopes) {
         validateScopes(auth.scopes, ['projects:write'])
       }
@@ -102,11 +104,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
       )
     }
 
-    // Verify project exists (RLS handles ownership)
+    // Verify project exists and user owns it (defense-in-depth alongside RLS)
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')
       .eq('id', projectId)
+      .eq('user_id', userId)
       .single()
 
     if (projectError || !project) {
@@ -156,8 +159,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     // Require authentication
+    let userId: string
     try {
       const auth = await requireAuth()
+      userId = auth.userId
       if (auth.scopes) {
         validateScopes(auth.scopes, ['projects:write'])
       }
@@ -178,7 +183,19 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'accountId query parameter is required' }, { status: 400 })
     }
 
-    // Delete association (RLS handles ownership via project)
+    // Verify project ownership (defense-in-depth alongside RLS)
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('id', projectId)
+      .eq('user_id', userId)
+      .single()
+
+    if (projectError || !project) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 })
+    }
+
+    // Delete association
     const { error } = await supabase
       .from('project_accounts')
       .delete()

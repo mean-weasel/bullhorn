@@ -5,6 +5,8 @@ import { requireAuth, validateScopes } from '@/lib/auth'
 import { enforceStorageLimit } from '@/lib/planEnforcement'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // Allowed file types (MIME types)
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']

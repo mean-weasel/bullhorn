@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { transformDraftFromDb } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/blog-drafts/[id]/restore - Restore an archived blog draft
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

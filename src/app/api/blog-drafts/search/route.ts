@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
 
     const query = searchParams.get('q') || searchParams.get('query') || ''
-    const limit = parseInt(searchParams.get('limit') || '50')
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50') || 50, 1), 200)
 
     if (!query) {
       return NextResponse.json({ error: 'Search query is required' }, { status: 400 })
