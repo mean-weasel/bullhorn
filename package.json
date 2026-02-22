@@ -96,7 +96,7 @@
     "gh-pages": "^6.3.0",
     "husky": "^9.1.7",
     "jsdom": "^27.4.0",
-    "knip": "^5.79.0",
+    "knip": "^5.85.0",
     "postcss": "^8.4.33",
     "prettier": "^3.7.4",
     "semantic-release": "^25.0.3",
