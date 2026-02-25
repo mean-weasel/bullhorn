@@ -2,9 +2,9 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Ship Bullhorn to closed beta testers as a post drafting/scheduling/organizing tool. Fix legal compliance, security vulnerabilities, monitoring gaps, and onboarding UX. Platform publishing (Twitter/LinkedIn/Reddit) deferred to post-beta.
+**Goal:** Ship Bullhorn to closed beta testers as a post drafting/scheduling/organizing tool. Fix legal compliance, security vulnerabilities, monitoring gaps, and onboarding UX. Prepare the repo for open-sourcing under AGPL-3.0. Platform publishing (Twitter/LinkedIn/Reddit) deferred to post-beta.
 
-**Architecture:** 5 independent worktrees executed in parallel via Agent Teams. Each teammate gets an isolated git worktree with zero file overlap. All 5 can run simultaneously.
+**Architecture:** 6 independent worktrees executed in parallel via Agent Teams. Each teammate gets an isolated git worktree with zero file overlap. All 6 can run simultaneously.
 
 **Tech Stack:** Next.js 15, Supabase, Sentry, Zod, Tailwind CSS
 
@@ -13,13 +13,14 @@
 ## Team Execution Map
 
 ```
-ALL 5 TEAMMATES START SIMULTANEOUSLY — zero dependencies between them
+ALL 6 TEAMMATES START SIMULTANEOUSLY — zero dependencies between them
 
 Teammate 1 (legal):             Terms + Privacy + Cookie Consent + legal links
-Teammate 2 (security):         Pre-launch security fixes (OAuth CSRF, ownership, logo, force-dynamic)
+Teammate 2 (security):          Pre-launch security fixes (OAuth CSRF, ownership, logo, force-dynamic)
 Teammate 3 (account-deletion):  Server-side account deletion endpoint (GDPR)
 Teammate 4 (monitoring):        Sentry tracing + error context + About section fix
 Teammate 5 (onboarding):        Welcome modal + empty states + usage limit banner
+Teammate 6 (open-source-prep):  AGPL-3.0 license, redact identifiers, .gitignore, README, CONTRIBUTING
 
 FILE OWNERSHIP (no overlap):
   Teammate 1: src/app/terms/*, src/app/privacy/*, src/components/ui/CookieConsent.tsx, src/app/layout.tsx, src/app/(auth)/login/page.tsx
@@ -27,6 +28,7 @@ FILE OWNERSHIP (no overlap):
   Teammate 3: src/app/api/account/*, src/app/(dashboard)/profile/page.tsx, src/app/(dashboard)/profile/ProfileSections.tsx
   Teammate 4: sentry.client.config.ts, sentry.server.config.ts, src/lib/auth.ts, src/app/(dashboard)/settings/SettingsSections.tsx
   Teammate 5: src/components/ui/WelcomeModal.tsx, src/components/ui/UsageBanner.tsx, src/app/(dashboard)/dashboard/page.tsx, src/lib/planStore.ts, src/app/(dashboard)/components/AppHeader.tsx
+  Teammate 6: LICENSE, README.md, CONTRIBUTING.md, DEPLOY.md, CLAUDE.md, .gitignore, .mcp.json, capacitor.config.ts, .claude/skills/audit-rls/SKILL.md, mcp-server/src/api-key-lifecycle.e2e.test.ts, docs/plans/ (stale file cleanup)
 ```
 
 ---
@@ -1114,6 +1116,505 @@ EOF
 
 ---
 
+## Teammate 6: Open Source Prep
+
+**Branch:** `chore/open-source-prep`
+**Worktree:** Yes
+
+### Task 6.1: Add AGPL-3.0 License
+
+**Files:**
+- Create: `LICENSE`
+
+**Step 1: Create the LICENSE file**
+
+Create `LICENSE` with the full text of the GNU Affero General Public License v3.0. Use the exact text from https://www.gnu.org/licenses/agpl-3.0.txt. Set the copyright line to:
+
+```
+Copyright (C) 2026 Mean Weasel LLC
+```
+
+**Step 2: Commit**
+
+```bash
+git add LICENSE
+git commit -m "$(cat <<'EOF'
+chore: add AGPL-3.0 license
+EOF
+)"
+```
+
+---
+
+### Task 6.2: Harden .gitignore
+
+**Files:**
+- Modify: `.gitignore`
+
+**Step 1: Add missing entries to .gitignore**
+
+Append these entries to the end of `.gitignore`:
+
+```gitignore
+# Apple signing keys and certificates
+*.p8
+*.pem
+*.p12
+*.cer
+*.mobileprovision
+
+# iOS build artifacts
+*.ipa
+*.dSYM.zip
+ios/App/build/
+
+# App Store Connect config
+.asc/
+
+# Screenshots (debug/temp)
+screenshots/
+
+# Deployment config (private)
+DEPLOY.md
+```
+
+**Step 2: Commit**
+
+```bash
+git add .gitignore
+git commit -m "$(cat <<'EOF'
+chore: harden .gitignore for open-source (signing keys, build artifacts, deploy config)
+EOF
+)"
+```
+
+---
+
+### Task 6.3: Redact Supabase Project Ref from Tracked Files
+
+The Supabase project ref `jvoppjybagyeffklbohr` is hardcoded in 4 files. Replace with a placeholder so contributors know to set their own.
+
+**Files:**
+- Modify: `.mcp.json`
+- Modify: `CLAUDE.md`
+- Modify: `.claude/skills/audit-rls/SKILL.md`
+- Modify: `mcp-server/src/api-key-lifecycle.e2e.test.ts`
+
+**Step 1: Replace in `.mcp.json`**
+
+Replace:
+```json
+"SUPABASE_PROJECT_REF": "jvoppjybagyeffklbohr"
+```
+
+With:
+```json
+"SUPABASE_PROJECT_REF": "<your-supabase-project-ref>"
+```
+
+**Step 2: Replace in `CLAUDE.md`**
+
+Find `jvoppjybagyeffklbohr` and replace with `<your-supabase-project-ref>`.
+
+**Step 3: Replace in `.claude/skills/audit-rls/SKILL.md`**
+
+Find `jvoppjybagyeffklbohr` and replace with `<your-supabase-project-ref>`.
+
+**Step 4: Replace in `mcp-server/src/api-key-lifecycle.e2e.test.ts`**
+
+Find `jvoppjybagyeffklbohr` and replace with `<your-supabase-project-ref>`.
+
+**Step 5: Commit**
+
+```bash
+git add .mcp.json CLAUDE.md .claude/skills/audit-rls/SKILL.md mcp-server/src/api-key-lifecycle.e2e.test.ts
+git commit -m "$(cat <<'EOF'
+chore: replace hardcoded Supabase project ref with placeholder
+EOF
+)"
+```
+
+---
+
+### Task 6.4: Move Google OAuth Client IDs to Env Vars in capacitor.config.ts
+
+Google OAuth client IDs are public (embedded in every app bundle), but using env vars makes it cleaner for contributors to set up their own.
+
+**Files:**
+- Modify: `capacitor.config.ts`
+
+**Step 1: Replace hardcoded IDs with env var references**
+
+Current (lines 37-38):
+```typescript
+google: {
+  iOSClientId: '95354811469-3hvu64aje2dnp1oj3fiv4cqd2ajcr0qc.apps.googleusercontent.com',
+  webClientId: '95354811469-6dk6cb54kuee0t91dtsiu9mndumk14jv.apps.googleusercontent.com',
+},
+```
+
+Replace with:
+```typescript
+google: {
+  iOSClientId: process.env.GOOGLE_IOS_CLIENT_ID || '',
+  webClientId: process.env.GOOGLE_WEB_CLIENT_ID || '',
+},
+```
+
+**Note:** The `ios/App/App/Info.plist` also contains the reversed iOS client ID in `CFBundleURLSchemes`. This is generated by `npx cap sync` and is fine to leave as-is — it's build-time config that each contributor will have their own copy of. Document this in CONTRIBUTING.md.
+
+**Step 2: Commit**
+
+```bash
+git add capacitor.config.ts
+git commit -m "$(cat <<'EOF'
+chore: move Google OAuth client IDs to env vars in capacitor config
+EOF
+)"
+```
+
+---
+
+### Task 6.5: Split Deploy/Signing Sections from CLAUDE.md to DEPLOY.md
+
+Move the private deployment instructions (App Store Connect keys, signing prerequisites, TestFlight upload commands) out of the public `CLAUDE.md` into a gitignored `DEPLOY.md`.
+
+**Files:**
+- Create: `DEPLOY.md`
+- Modify: `CLAUDE.md`
+
+**Step 1: Create DEPLOY.md**
+
+Create `DEPLOY.md` with the following content extracted from `CLAUDE.md`:
+
+1. The **iOS Build & TestFlight** section (from "### Prerequisites" through the `xcrun altool --upload-app` command) — contains ASC API key ID `X9Z3DHN64Y` and issuer ID `36da0220-c107-4a01-aa33-63ff5f110172`
+2. The **Versioning** subsection
+3. The **TestFlight** subsection
+4. The **App Store Connect CLI (`asc`)** section
+5. The **Signing Prerequisites** subsection
+6. The **iOS Build & Deploy** code block (the second one under "## iOS App (Capacitor)")
+
+Add a header:
+```markdown
+# Bullhorn Deploy Guide (Private)
+
+> This file is gitignored. It contains deployment secrets and signing config.
+> See CLAUDE.md for public development instructions.
+```
+
+**Step 2: Replace removed sections in CLAUDE.md**
+
+In `CLAUDE.md`, replace the extracted sections with:
+
+```markdown
+### iOS Build & Deploy
+
+See `DEPLOY.md` (gitignored) for build commands, TestFlight upload, and signing configuration.
+
+Contributors: You will need your own Apple Developer account and App Store Connect API key. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions.
+```
+
+Keep the following in CLAUDE.md (they're not sensitive):
+- The `## iOS App (Capacitor)` header and the bullet points about mode, platform detection, bundle ID, team ID, Apple App ID
+- The **Local iOS Testing** section (uses localhost, no secrets)
+
+**Step 3: Commit**
+
+```bash
+git add DEPLOY.md CLAUDE.md
+git commit -m "$(cat <<'EOF'
+chore: split private deploy/signing config from CLAUDE.md to DEPLOY.md (gitignored)
+EOF
+)"
+```
+
+---
+
+### Task 6.6: Delete Stale Plan Docs
+
+**Files:**
+- Delete: `docs/plans/2026-02-16-beta-readiness-remediation-design.md` (superseded by this plan)
+- Delete: `docs/plans/2026-02-16-beta-readiness-remediation.md` (superseded by this plan)
+- Delete: `docs/plans/2026-02-17-ios-app-store-design.md` (completed — TestFlight Build 2 uploaded)
+- Delete: `docs/plans/2026-02-17-ios-app-store-plan.md` (completed — TestFlight Build 2 uploaded)
+- Delete: `docs/plans/2026-02-19-asc-internal-groups-pr.md` (external PR for asc CLI, not Bullhorn)
+- Delete: `docs/plans/cross-repo-setup.md` (lists private repos — must not be public)
+
+Keep:
+- `2026-02-20-performance-optimizations.md` (not yet applied)
+- `2026-02-21-dependency-vulnerability-fixes.md` (partially applied, still useful)
+- `2026-02-21-pre-launch-fixes.md` (referenced by Teammate 2)
+- `2026-02-25-beta-launch-plan.md` (this plan)
+- `semantic-release-setup.md` (general guide, useful for contributors)
+
+**Step 1: Delete the stale files**
+
+```bash
+git rm docs/plans/2026-02-16-beta-readiness-remediation-design.md
+git rm docs/plans/2026-02-16-beta-readiness-remediation.md
+git rm docs/plans/2026-02-17-ios-app-store-design.md
+git rm docs/plans/2026-02-17-ios-app-store-plan.md
+git rm docs/plans/2026-02-19-asc-internal-groups-pr.md
+git rm docs/plans/cross-repo-setup.md
+```
+
+**Step 2: Commit**
+
+```bash
+git commit -m "$(cat <<'EOF'
+chore: remove stale and completed plan docs before open-sourcing
+EOF
+)"
+```
+
+---
+
+### Task 6.7: Create CONTRIBUTING.md
+
+**Files:**
+- Create: `CONTRIBUTING.md`
+
+**Step 1: Create CONTRIBUTING.md**
+
+```markdown
+# Contributing to Bullhorn
+
+Thanks for your interest in contributing to Bullhorn! This guide will help you get set up.
+
+## Prerequisites
+
+- Node.js 20+
+- A [Supabase](https://supabase.com) project (free tier works)
+- A [Vercel](https://vercel.com) account (for deployment, optional for local dev)
+
+## Local Development Setup
+
+1. **Fork and clone** the repository
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Fill in your Supabase URL, anon key, and service role key. See `docs/environment-variables.md` for all options.
+
+4. **Start the dev server:**
+   ```bash
+   make dev
+   ```
+
+5. **Run checks before committing:**
+   ```bash
+   make ci    # lint + typecheck + tests
+   ```
+
+## Code Style
+
+- **Prettier** handles formatting (runs automatically via pre-commit hook)
+- **ESLint** enforces code quality rules
+- **TypeScript** strict mode — no `any` types
+- Run `make fix` to auto-fix lint and formatting issues
+
+## Commit Messages
+
+We use [Conventional Commits](https://www.conventionalcommits.org/). A commitlint hook validates your messages.
+
+| Prefix | When to use |
+|--------|-------------|
+| `feat:` | New feature |
+| `fix:` | Bug fix |
+| `chore:` | Maintenance, deps |
+| `refactor:` | Code restructure |
+| `docs:` | Documentation |
+| `test:` | Tests |
+
+## Testing
+
+```bash
+make test          # Unit tests (watch mode)
+make test-run      # Unit tests (single run)
+make test-e2e      # E2E tests (Playwright)
+```
+
+## Project Structure
+
+See `CLAUDE.md` for a detailed architecture overview including:
+- App Router structure
+- API route patterns
+- Zustand store patterns
+- Design system (sticker bomb aesthetic)
+
+## iOS Development (Optional)
+
+The iOS app is a Capacitor 8 wrapper. To work on it:
+1. Set `GOOGLE_IOS_CLIENT_ID` and `GOOGLE_WEB_CLIENT_ID` in your environment
+2. Run `npx cap sync ios` to generate the Xcode project
+3. You'll need your own Apple Developer account for signing
+
+## Pull Requests
+
+1. Create a feature branch from `main`
+2. Make your changes with tests
+3. Run `make ci` to verify everything passes
+4. Open a PR with a clear description
+5. PRs require passing CI before merge
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the [AGPL-3.0 License](LICENSE).
+```
+
+**Step 2: Create `.env.example`**
+
+Create `.env.example` with placeholder values for all required env vars:
+
+```bash
+# Supabase (required)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Sentry (recommended)
+SENTRY_DSN=
+SENTRY_AUTH_TOKEN=
+
+# Upstash Redis — rate limiting (recommended, optional)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+
+# Google OAuth — iOS Capacitor (optional, for iOS dev only)
+GOOGLE_IOS_CLIENT_ID=
+GOOGLE_WEB_CLIENT_ID=
+```
+
+**Step 3: Commit**
+
+```bash
+git add CONTRIBUTING.md .env.example
+git commit -m "$(cat <<'EOF'
+docs: add CONTRIBUTING.md and .env.example for open-source contributors
+EOF
+)"
+```
+
+---
+
+### Task 6.8: Create README.md
+
+**Files:**
+- Create: `README.md`
+
+**Step 1: Create README.md**
+
+```markdown
+# Bullhorn
+
+> Social media post scheduler for Twitter, LinkedIn, and Reddit.
+
+Bullhorn helps builders, indie hackers, and product engineers plan, draft, and schedule their social media content. Organize posts into campaigns and projects, schedule publish dates, and manage your content pipeline from idea to published.
+
+**Live at [bullhorn.to](https://bullhorn.to)**
+
+## Features
+
+- **Multi-platform drafting** — Write posts for Twitter, LinkedIn, and Reddit with platform-specific formatting and character limits
+- **Campaigns & projects** — Organize posts into campaigns, group campaigns into projects
+- **Scheduling** — Set publish dates and track your content pipeline
+- **Blog drafts** — Write long-form content with Markdown support
+- **Launch posts** — Dedicated workspace for product launch announcements
+- **Media uploads** — Attach images to posts with Supabase Storage
+- **API & MCP** — Programmatic access via API keys, plus an MCP server for AI-native workflows
+- **iOS app** — Native iOS app via Capacitor (TestFlight)
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15 (App Router) |
+| Database | Supabase (PostgreSQL + Auth + Storage) |
+| State | Zustand |
+| Styling | Tailwind CSS |
+| Hosting | Vercel |
+| iOS | Capacitor 8 |
+| Monitoring | Sentry |
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env.local
+# Fill in your Supabase credentials
+
+# Start dev server
+make dev
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
+
+## Development
+
+```bash
+make dev          # Start dev server
+make check        # Lint + typecheck
+make test         # Unit tests (watch)
+make test-e2e     # E2E tests
+make ci           # Full CI checks
+```
+
+Run `make help` to see all available commands.
+
+## Architecture
+
+See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation including app structure, API patterns, store patterns, and design system.
+
+## License
+
+[AGPL-3.0](LICENSE)
+
+Copyright (C) 2026 Mean Weasel LLC
+```
+
+**Step 2: Commit**
+
+```bash
+git add README.md
+git commit -m "$(cat <<'EOF'
+docs: add README.md for open-source repository
+EOF
+)"
+```
+
+---
+
+### Task 6.9: Run Validation
+
+**Step 1:** Run `make check` (lint + typecheck)
+**Step 2:** Run `make test-run` (unit tests)
+**Step 3:** Verify no Supabase project ref `jvoppjybagyeffklbohr` remains in tracked files:
+
+```bash
+git grep 'jvoppjybagyeffklbohr' -- ':!DEPLOY.md'
+```
+
+Expected: No matches (DEPLOY.md is gitignored and excluded).
+
+**Step 4:** Verify no ASC key IDs remain in public files:
+
+```bash
+git grep 'X9Z3DHN64Y\|36da0220' -- ':!DEPLOY.md'
+```
+
+Expected: No matches.
+
+---
+
 ## Final Verification (Lead — after all worktrees merge)
 
 ### Step 1: Merge all branches into main working branch
@@ -1124,6 +1625,7 @@ git merge fix/security-hardening
 git merge feat/account-deletion-api
 git merge fix/monitoring
 git merge feat/onboarding
+git merge chore/open-source-prep
 ```
 
 ### Step 2: Run full CI
@@ -1161,6 +1663,21 @@ doppler run -- supabase db push
 9. Usage banner appears when near plan limits
 10. Sentry receives test errors (check sentry.io dashboard)
 
-### Step 6: Beta tester invitation
+### Step 6: Open-source verification
+
+1. `LICENSE` file exists at repo root with AGPL-3.0 text
+2. `README.md` renders correctly on GitHub with features, tech stack, and setup instructions
+3. `CONTRIBUTING.md` has clear setup guide with `.env.example` reference
+4. `DEPLOY.md` is gitignored (not visible on GitHub)
+5. No Supabase project refs in public files: `git grep 'jvoppjybagyeffklbohr' -- ':!DEPLOY.md'` returns nothing
+6. No ASC key IDs in public files: `git grep 'X9Z3DHN64Y\|36da0220' -- ':!DEPLOY.md'` returns nothing
+7. Stale plan docs removed (only 4 active plans + semantic-release guide remain)
+8. `capacitor.config.ts` uses env vars for Google Client IDs
+
+### Step 7: Beta tester invitation
 
 Once smoke test passes, invite beta testers via email whitelist (`ALLOWED_EMAILS` env var in Vercel).
+
+### Step 8: Make repository public
+
+Once beta is stable and all verification passes, flip the GitHub repo to public.
