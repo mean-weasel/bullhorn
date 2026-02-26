@@ -1,8 +1,22 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const response = await updateSession(request)
+
+  // Set user_country cookie from Vercel's geo header for GDPR cookie consent logic
+  const country = request.headers.get('x-vercel-ip-country')
+  if (country && response instanceof NextResponse) {
+    response.cookies.set('user_country', country, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 86400, // 1 day
+      path: '/',
+    })
+  }
+
+  return response
 }
 
 export const config = {
