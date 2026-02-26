@@ -34,8 +34,8 @@ const config: CapacitorConfig = {
     },
     SocialLogin: {
       google: {
-        iOSClientId: '95354811469-3hvu64aje2dnp1oj3fiv4cqd2ajcr0qc.apps.googleusercontent.com',
-        webClientId: '95354811469-6dk6cb54kuee0t91dtsiu9mndumk14jv.apps.googleusercontent.com',
+        iOSClientId: process.env.GOOGLE_IOS_CLIENT_ID || '',
+        webClientId: process.env.GOOGLE_WEB_CLIENT_ID || '',
       },
     },
     LocalNotifications: {
