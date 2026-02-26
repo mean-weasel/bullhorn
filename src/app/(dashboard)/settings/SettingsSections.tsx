@@ -183,9 +183,17 @@ export function AboutSection() {
           <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
             3
           </span>
-          <span>All data is stored locally in your browser.</span>
+          <span>Your data is securely stored and encrypted in the cloud.</span>
         </li>
       </ul>
+      <div className="mt-4 pt-4 border-t border-border flex gap-4 text-xs text-muted-foreground">
+        <a href="/terms" className="hover:text-primary font-bold">
+          Terms of Service
+        </a>
+        <a href="/privacy" className="hover:text-primary font-bold">
+          Privacy Policy
+        </a>
+      </div>
     </div>
   )
 }

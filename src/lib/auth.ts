@@ -1,4 +1,5 @@
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
+import * as Sentry from '@sentry/nextjs'
 import { headers } from 'next/headers'
 import { createClient } from './supabase/server'
 
@@ -172,7 +173,9 @@ export async function requireAuth(): Promise<{ userId: string; scopes?: string[]
   // Check for API key auth first
   const apiKey = await getApiKeyFromHeaders()
   if (apiKey) {
-    return resolveApiKey(apiKey)
+    const resolved = await resolveApiKey(apiKey)
+    Sentry.setUser({ id: resolved.userId })
+    return resolved
   }
 
   // Fall through to cookie-based session auth
@@ -186,6 +189,7 @@ export async function requireAuth(): Promise<{ userId: string; scopes?: string[]
     throw new Error('Unauthorized')
   }
 
+  Sentry.setUser({ id: user.id })
   return { userId: user.id }
 }
 

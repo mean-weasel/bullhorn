@@ -4,10 +4,10 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Error capture only — no performance tracing
-  tracesSampleRate: 0,
+  // Performance tracing at 10%, error replays at 50%
+  tracesSampleRate: 0.1,
   replaysSessionSampleRate: 0,
-  replaysOnErrorSampleRate: 0,
+  replaysOnErrorSampleRate: 0.5,
 
   // Filter noisy errors
   ignoreErrors: [
