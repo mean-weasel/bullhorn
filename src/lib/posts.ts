@@ -1,7 +1,7 @@
 // Post type definitions and utilities
 
 export type Platform = 'twitter' | 'linkedin' | 'reddit'
-export type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed' | 'archived'
+export type PostStatus = 'draft' | 'scheduled' | 'publishing' | 'published' | 'failed' | 'archived'
 export type CampaignStatus = 'active' | 'paused' | 'completed' | 'archived'
 
 // Campaign interface
@@ -63,9 +63,18 @@ export interface RedditContent {
 
 export interface PublishResult {
   success: boolean
-  postId?: string
-  postUrl?: string
+  platform?: Platform
+  // Platform-specific IDs
+  postId?: string // Tweet ID, Reddit post ID
+  postUrl?: string // URL to the published post
+  postUrn?: string // LinkedIn URN (urn:li:share:xxx)
+  threadIds?: string[] // Twitter thread tweet IDs
+  subreddit?: string // Reddit subreddit posted to
+  // Error tracking
   error?: string
+  retryable?: boolean
+  retryCount?: number
+  lastAttemptAt?: string
   publishedAt?: string
 }
 
@@ -85,6 +94,7 @@ export interface Post {
   campaignId?: string // Optional reference to a campaign
   groupId?: string // Groups related posts (e.g., Reddit crossposts)
   groupType?: GroupType // Type of grouping
+  socialAccountId?: string
   content: PlatformContent
   publishResult?: PublishResult
 }

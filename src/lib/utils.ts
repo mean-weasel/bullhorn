@@ -41,6 +41,7 @@ export interface DbPost {
   campaign_id?: string | null
   group_id?: string | null
   group_type?: GroupType | null
+  social_account_id?: string | null
   content: PlatformContent
   publish_result?: PublishResult | null
   user_id: string
@@ -58,6 +59,7 @@ export interface DbPostInsert {
   campaign_id?: string | null
   group_id?: string | null
   group_type?: GroupType | null
+  social_account_id?: string | null
   content?: PlatformContent
   publish_result?: PublishResult | null
 }
@@ -203,6 +205,7 @@ export function transformPostFromDb(dbPost: DbPost): Post {
     campaignId: dbPost.campaign_id ?? undefined,
     groupId: dbPost.group_id ?? undefined,
     groupType: dbPost.group_type ?? undefined,
+    socialAccountId: dbPost.social_account_id ?? undefined,
     content: dbPost.content,
     publishResult: dbPost.publish_result ?? undefined,
   }
@@ -223,6 +226,7 @@ export function transformPostToDb(post: Partial<Post>): DbPostInsert {
     campaign_id: post.campaignId,
     group_id: post.groupId,
     group_type: post.groupType,
+    social_account_id: post.socialAccountId,
     content: post.content,
     publish_result: post.publishResult,
   }

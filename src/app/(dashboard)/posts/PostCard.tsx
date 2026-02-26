@@ -2,7 +2,16 @@
 
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { Clock, Edit2, FileText, Calendar, CheckCircle, AlertCircle, Archive } from 'lucide-react'
+import {
+  Clock,
+  Edit2,
+  FileText,
+  Calendar,
+  CheckCircle,
+  AlertCircle,
+  Archive,
+  Loader2,
+} from 'lucide-react'
 import { Post, PostStatus, getPostPreviewText, PLATFORM_INFO } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +21,7 @@ export const STATUS_CONFIG: Record<
 > = {
   draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground', emoji: '📝' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-sticker-blue', emoji: '📅' },
+  publishing: { label: 'Publishing', icon: Loader2, color: 'text-sticker-orange', emoji: '🔄' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-sticker-green', emoji: '✅' },
   failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive', emoji: '❌' },
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground', emoji: '📦' },
