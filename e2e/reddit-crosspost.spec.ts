@@ -504,6 +504,7 @@ test.describe('Reddit Cross-posting', () => {
       const posts = await getAllPosts(page)
       expect(posts.length).toBe(1)
       await page.goto(`/edit/${posts[0].id}`)
+      await waitForRedditEditForm(page, 'webdev')
 
       // Verify the title is loaded in the card
       const titleInput = page.locator('[data-testid="subreddit-title-webdev"]')

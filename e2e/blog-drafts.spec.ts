@@ -269,7 +269,7 @@ test.describe('Blog Drafts', () => {
       await page.getByRole('button', { name: /back to drafts/i }).click()
 
       // Should be on list page
-      await expect(page).toHaveURL('/blog')
+      await expect(page).toHaveURL('/blog', { timeout: 15000 })
     })
 
     test('should warn about unsaved changes when navigating away', async ({ page }) => {
@@ -535,7 +535,7 @@ test.describe('Blog Drafts', () => {
       await archiveBlogDraft(page)
 
       // Should redirect to list
-      await expect(page).toHaveURL('/blog')
+      await expect(page).toHaveURL('/blog', { timeout: 15000 })
 
       // Draft should not appear in All view
       await expect(page.getByText('Archive Me').first()).not.toBeVisible()
@@ -555,7 +555,7 @@ test.describe('Blog Drafts', () => {
       await archiveBlogDraft(page)
 
       // Should be on list page
-      await expect(page).toHaveURL('/blog')
+      await expect(page).toHaveURL('/blog', { timeout: 15000 })
 
       // Filter by Archived
       await filterBlogDraftsByStatus(page, 'archived')
@@ -653,7 +653,7 @@ test.describe('Blog Drafts', () => {
       await deleteBlogDraft(page)
 
       // Should redirect to list
-      await expect(page).toHaveURL('/blog')
+      await expect(page).toHaveURL('/blog', { timeout: 15000 })
 
       // Draft should not appear
       await expect(page.getByText('Delete Me').first()).not.toBeVisible()

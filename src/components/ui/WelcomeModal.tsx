@@ -9,6 +9,9 @@ export function WelcomeModal() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    // Never show in E2E test mode — modal intercepts pointer events
+    if (process.env.NEXT_PUBLIC_E2E_TEST_MODE === 'true') return
+
     const completed = localStorage.getItem('onboarding_complete')
     if (!completed) {
       setVisible(true)

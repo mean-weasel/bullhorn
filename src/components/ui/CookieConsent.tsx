@@ -52,6 +52,9 @@ export function CookieConsent() {
     // Never show in native iOS app
     if (isNativePlatform()) return
 
+    // Never show in E2E test mode — banner intercepts pointer events
+    if (process.env.NEXT_PUBLIC_E2E_TEST_MODE === 'true') return
+
     // Only show for EU/EEA countries that require GDPR consent
     const country = getCookie('user_country')
     if (country && !GDPR_COUNTRIES.has(country)) return
