@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import {
@@ -11,6 +12,8 @@ import {
   AlertCircle,
   Archive,
   Loader2,
+  ExternalLink,
+  RotateCcw,
 } from 'lucide-react'
 import { Post, PostStatus, getPostPreviewText, PLATFORM_INFO } from '@/lib/posts'
 import { cn } from '@/lib/utils'
@@ -27,8 +30,33 @@ export const STATUS_CONFIG: Record<
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground', emoji: '📦' },
 }
 
+function truncateError(error: string, maxLen = 40): string {
+  if (error.length <= maxLen) return error
+  return error.slice(0, maxLen) + '…'
+}
+
 export function PostCard({ post, index }: { post: Post; index: number }) {
   const statusConfig = STATUS_CONFIG[post.status]
+  const [retrying, setRetrying] = useState(false)
+
+  const handleRetry = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setRetrying(true)
+    try {
+      const res = await fetch(`/api/posts/${post.id}/publish`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+      if (data.success) {
+        window.location.reload()
+      }
+    } catch (err) {
+      console.error('Retry failed:', err)
+    } finally {
+      setRetrying(false)
+    }
+  }
 
   return (
     <Link
@@ -39,7 +67,8 @@ export function PostCard({ post, index }: { post: Post; index: number }) {
         'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
         'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
         'transition-all',
-        'animate-slide-up'
+        'animate-slide-up',
+        post.status === 'archived' && 'opacity-60'
       )}
       style={{ animationDelay: `${index * 30}ms` }}
     >
@@ -48,7 +77,8 @@ export function PostCard({ post, index }: { post: Post; index: number }) {
         <div className="flex flex-col gap-1.5 pt-1">
           <span
             className={cn(
-              'w-8 h-8 rounded-md flex items-center justify-center border-2 font-bold text-xs',
+              'w-8 h-8 rounded-md flex items-center justify-center',
+              'border-2 font-bold text-xs',
               post.platform === 'twitter' && 'bg-twitter/10 border-twitter/30 text-twitter',
               post.platform === 'linkedin' && 'bg-linkedin/10 border-linkedin/30 text-linkedin',
               post.platform === 'reddit' && 'bg-reddit/10 border-reddit/30 text-reddit'
@@ -68,7 +98,12 @@ export function PostCard({ post, index }: { post: Post; index: number }) {
               <span className="text-muted-foreground italic">No content</span>
             )}
           </p>
-          <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-muted-foreground">
+          <div
+            className={cn(
+              'flex flex-wrap items-center gap-2 md:gap-4',
+              'text-xs text-muted-foreground'
+            )}
+          >
             {/* Status */}
             <span className={cn('flex items-center gap-1.5 font-bold', statusConfig.color)}>
               <span>{statusConfig.emoji}</span>
@@ -93,6 +128,41 @@ export function PostCard({ post, index }: { post: Post; index: number }) {
               </span>
             )}
 
+            {/* Published post link */}
+            {post.status === 'published' && post.publishResult?.postUrl && (
+              <a
+                href={post.publishResult.postUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className={cn('flex items-center gap-1 text-sticker-green', 'hover:underline')}
+              >
+                <ExternalLink className="w-3 h-3" />
+                View post
+              </a>
+            )}
+
+            {/* Failed error message and retry */}
+            {post.status === 'failed' && post.publishResult?.error && (
+              <span className="flex items-center gap-1.5 text-destructive">
+                {truncateError(post.publishResult.error)}
+              </span>
+            )}
+            {post.status === 'failed' && (
+              <button
+                onClick={handleRetry}
+                disabled={retrying}
+                className={cn(
+                  'flex items-center gap-1 text-xs font-bold',
+                  'text-sticker-orange hover:text-sticker-orange/80',
+                  'disabled:opacity-50'
+                )}
+              >
+                <RotateCcw className={cn('w-3 h-3', retrying && 'animate-spin')} />
+                {retrying ? 'Retrying…' : 'Retry'}
+              </button>
+            )}
+
             {/* Last updated for drafts */}
             {post.status === 'draft' && (
               <span className="flex items-center gap-1.5">
@@ -112,7 +182,8 @@ export function PostCard({ post, index }: { post: Post; index: number }) {
           className={cn(
             'p-2 rounded-md text-muted-foreground hover:text-foreground',
             'hover:bg-accent border-2 border-transparent hover:border-border',
-            'transition-all min-w-[40px] min-h-[40px] flex items-center justify-center'
+            'transition-all min-w-[40px] min-h-[40px]',
+            'flex items-center justify-center'
           )}
         >
           <Edit2 className="w-4 h-4" />
