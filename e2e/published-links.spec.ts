@@ -90,8 +90,12 @@ test.describe('Published Links', () => {
       // Click on the post to edit
       await clickPost(page, 0)
 
-      // Published Links should be expanded and URL should be present
-      await expect(page.getByPlaceholder('https://twitter.com/user/status/...')).toHaveValue(twitterUrl)
+      // Wait for editor to load, then check Published Links input
+      await expect(page.locator('textarea').first()).not.toHaveValue('', { timeout: 15000 })
+      await expect(page.getByPlaceholder('https://twitter.com/user/status/...')).toHaveValue(
+        twitterUrl,
+        { timeout: 15000 }
+      )
     })
   })
 
@@ -130,8 +134,12 @@ test.describe('Published Links', () => {
       // Click on the post to edit
       await clickPost(page, 0)
 
-      // Published Links should be expanded and URL should be present
-      await expect(page.getByPlaceholder('https://linkedin.com/posts/...')).toHaveValue(linkedInUrl)
+      // Wait for editor to load, then check Published Links input
+      await expect(page.locator('textarea').first()).not.toHaveValue('', { timeout: 15000 })
+      await expect(page.getByPlaceholder('https://linkedin.com/posts/...')).toHaveValue(
+        linkedInUrl,
+        { timeout: 15000 }
+      )
     })
   })
 
@@ -195,8 +203,11 @@ test.describe('Published Links', () => {
       // Click on the post to edit
       await clickPost(page, 0)
 
-      // Published Links should be expanded and URL should be present
-      await expect(page.getByPlaceholder('https://reddit.com/r/...')).toHaveValue(reactUrl)
+      // Wait for editor to load, then check Published Links input
+      await expect(page.locator('textarea').first()).not.toHaveValue('', { timeout: 15000 })
+      await expect(page.getByPlaceholder('https://reddit.com/r/...')).toHaveValue(reactUrl, {
+        timeout: 15000,
+      })
     })
   })
 
@@ -207,15 +218,20 @@ test.describe('Published Links', () => {
       await selectPlatform(page, 'twitter')
       await fillContent(page, 'Auto-expand test')
       await page.getByRole('button', { name: /published links/i }).click()
-      await page.getByPlaceholder('https://twitter.com/user/status/...').fill('https://twitter.com/autoexpand')
+      await page
+        .getByPlaceholder('https://twitter.com/user/status/...')
+        .fill('https://twitter.com/autoexpand')
       await saveDraft(page)
       await waitForNavigation(page, '/')
 
       // Navigate to edit
       await clickPost(page, 0)
 
-      // Published Links should be auto-expanded (input visible without clicking)
-      await expect(page.getByPlaceholder('https://twitter.com/user/status/...')).toBeVisible()
+      // Wait for editor to load, then check Published Links auto-expanded
+      await expect(page.locator('textarea').first()).not.toHaveValue('', { timeout: 15000 })
+      await expect(page.getByPlaceholder('https://twitter.com/user/status/...')).toBeVisible({
+        timeout: 15000,
+      })
     })
   })
 })
