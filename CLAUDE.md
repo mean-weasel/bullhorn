@@ -4,7 +4,7 @@ Social media post scheduler for Twitter, LinkedIn, and Reddit.
 
 ## Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 15 (App Router)
 - **Database**: Supabase (PostgreSQL + Auth + Storage)
 - **State**: Zustand stores
 - **Styling**: Tailwind CSS with custom sticker bomb design system
@@ -35,51 +35,6 @@ make db-reset       # Reset local database
 make clean          # Remove build artifacts
 make ci             # Run full CI checks locally (lint + typecheck + tests)
 ```
-
-## iOS Build & TestFlight
-
-The iOS app is a Capacitor 8 wrapper that loads `bullhorn.to` in a WKWebView (remote URL mode).
-
-### Prerequisites
-
-- Xcode with signing configured (Team ID: `B3A6AN2HA4`, Bundle ID: `to.bullhorn.app`)
-- App Store Connect API key at `~/.appstoreconnect/private_keys/AuthKey_X9Z3DHN64Y.p8`
-- ASC config at `~/.asc/config.json` (key_id, issuer_id)
-
-### Build & Upload
-
-```bash
-# 1. Bump build number in project.pbxproj (both Debug and Release configs)
-#    CURRENT_PROJECT_VERSION must be unique per TestFlight upload
-#    MARKETING_VERSION is the user-facing version (e.g., 1.0)
-
-# 2. Sync Capacitor plugins
-npx cap sync ios
-
-# 3. Clean, archive, export, upload
-cd ios/App
-xcodebuild clean -project App.xcodeproj -scheme App -configuration Release
-xcodebuild archive -project App.xcodeproj -scheme App -configuration Release \
-  -archivePath /tmp/Bullhorn.xcarchive -destination 'generic/platform=iOS' \
-  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=B3A6AN2HA4
-xcodebuild -exportArchive -archivePath /tmp/Bullhorn.xcarchive \
-  -exportOptionsPlist ../../ExportOptions.plist -exportPath /tmp/BullhornExport \
-  -allowProvisioningUpdates
-xcrun altool --upload-app -f /tmp/BullhornExport/App.ipa -t ios \
-  --apiKey X9Z3DHN64Y --apiIssuer 36da0220-c107-4a01-aa33-63ff5f110172
-```
-
-### Versioning
-
-- `MARKETING_VERSION` (e.g., `1.0`): User-facing version, bump for feature releases
-- `CURRENT_PROJECT_VERSION` (e.g., `2`): Build number, must increment for each TestFlight upload
-- `package.json` version is web-only and independent of iOS versioning
-
-### TestFlight
-
-- **Internal testing**: Available immediately after App Store Connect finishes processing (~5-15 min)
-- **External beta review**: Required for first build to external testers; subsequent builds auto-approved unless major changes
-- Build processing status visible at appstoreconnect.apple.com > Apps > Bullhorn > TestFlight
 
 ## Architecture
 
@@ -407,50 +362,9 @@ Reset to production when done: `npx cap sync ios` (no env var defaults to `bullh
 
 ### iOS Build & Deploy
 
-```bash
-npx cap sync ios                    # Sync web assets + plugins to iOS project
-npx cap open ios                    # Open Xcode project
+See `DEPLOY.md` (gitignored) for build commands, TestFlight upload, and signing configuration.
 
-# Archive (command line)
-xcodebuild -project ios/App/App.xcodeproj -scheme App \
-  -destination "generic/platform=iOS" -configuration Release \
-  -archivePath ios/App/build/Bullhorn.xcarchive archive \
-  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=B3A6AN2HA4 \
-  -allowProvisioningUpdates
-
-# Export IPA for App Store
-xcodebuild -exportArchive \
-  -archivePath ios/App/build/Bullhorn.xcarchive \
-  -exportPath ios/App/build/export \
-  -exportOptionsPlist ExportOptions.plist \
-  -allowProvisioningUpdates
-
-# Upload to App Store Connect
-asc builds upload --file ios/App/build/export/App.ipa
-```
-
-### App Store Connect CLI (`asc`)
-
-Install: `brew tap rudrankriyam/tap && brew install rudrankriyam/tap/asc`
-
-Authentication requires an App Store Connect API key:
-1. Generate at [appstoreconnect.apple.com/access/integrations/api](https://appstoreconnect.apple.com/access/integrations/api)
-2. Download the `.p8` file (one-time download), store in `~/.appstoreconnect/private_keys/`
-3. Register: `asc auth login --name "Bullhorn" --key-id <KEY_ID> --issuer-id <ISSUER_ID> --private-key ~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8`
-4. Store `ASC_KEY_ID` and `ASC_ISSUER_ID` in Vercel for backup/CI use
-
-Key commands:
-- `asc builds list` — list uploaded builds
-- `asc builds upload --file <ipa>` — upload IPA to App Store Connect
-- `asc apps list` — list apps
-- `asc testflight beta-groups list` — list TestFlight groups
-
-### Signing Prerequisites (new machine setup)
-
-1. Add Apple ID in **Xcode > Settings > Accounts**
-2. Register at least one device at [developer.apple.com/account/resources/devices](https://developer.apple.com/account/resources/devices/list)
-3. Enable "Automatically manage signing" in App target > Signing & Capabilities
-4. Unlock keychain for CLI codesign: `security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "<password>" ~/Library/Keychains/login.keychain-db`
+Contributors: You will need your own Apple Developer account and App Store Connect API key. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions.
 
 ## Guardrails
 
