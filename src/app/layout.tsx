@@ -4,6 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Providers } from './providers'
 import '../index.css'
 import '@/lib/envValidation' // Validate env vars on startup
+import { CookieConsent } from '@/components/ui/CookieConsent'
 
 // eslint-disable-next-line react-refresh/only-export-components -- metadata export is required by Next.js App Router
 export const metadata: Metadata = {
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>{children}</Providers>
         <Analytics />
         <SpeedInsights />
+        <CookieConsent />
       </body>
     </html>
   )
