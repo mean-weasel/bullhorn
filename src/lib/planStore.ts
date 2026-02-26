@@ -19,6 +19,7 @@ interface PlanState {
 interface PlanActions {
   fetchPlan: () => Promise<void>
   isAtLimit: (resource: Exclude<ResourceType, 'storageBytes'>) => boolean
+  isNearAnyLimit: () => { resource: string; current: number; limit: number } | null
   incrementCount: (resource: Exclude<ResourceType, 'storageBytes'>) => void
   decrementCount: (resource: Exclude<ResourceType, 'storageBytes'>) => void
   reset: () => void
@@ -67,6 +68,17 @@ export const usePlanStore = create<PlanState & PlanActions>()((set, get) => ({
   isAtLimit: (resource) => {
     const info = get().limits[resource]
     return info.current >= info.limit
+  },
+
+  isNearAnyLimit: () => {
+    const state = get()
+    const resources = Object.entries(state.limits) as [string, LimitInfo][]
+    for (const [resource, info] of resources) {
+      if (info.limit > 0 && info.current / info.limit >= 0.8) {
+        return { resource, current: info.current, limit: info.limit }
+      }
+    }
+    return null
   },
 
   incrementCount: (resource) => {

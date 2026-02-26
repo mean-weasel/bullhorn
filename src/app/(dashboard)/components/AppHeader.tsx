@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Settings, Plus, FolderOpen, FileText, FolderKanban, Rocket } from 'lucide-react'
 import { UserMenu } from './UserMenu'
+import { UsageBanner } from '@/components/ui/UsageBanner'
 
 interface AppHeaderProps {
   userEmail?: string
@@ -20,100 +21,113 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
     pathname?.startsWith('/blog/edit')
 
   return (
-    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b-[3px] border-border">
-      <div className="flex items-center justify-between h-16 px-6">
-        <div className="flex items-center gap-3">
-          {isEditorPage && (
-            <Link
-              href="/dashboard"
-              aria-label="Back to dashboard"
-              className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors border-2 border-transparent hover:border-border"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+    <>
+      <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-xl border-b-[3px] border-border">
+        <div className="flex items-center justify-between h-16 px-6">
+          <div className="flex items-center gap-3">
+            {isEditorPage && (
+              <Link
+                href="/dashboard"
+                aria-label="Back to dashboard"
+                className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors border-2 border-transparent hover:border-border"
               >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m15 18-6-6 6-6" />
+                </svg>
+              </Link>
+            )}
+            <Link href="/dashboard" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-xl">
+                📢
+              </div>
+              <span className="font-extrabold text-xl md:text-2xl tracking-tight">Bullhorn</span>
             </Link>
-          )}
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-xl">
-              📢
-            </div>
-            <span className="font-extrabold text-xl md:text-2xl tracking-tight">Bullhorn</span>
-          </Link>
-        </div>
+          </div>
 
-        {/* Desktop nav icons - hidden on mobile */}
-        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-2">
-          <Link
-            href="/projects"
-            className={cn(
-              'p-2 rounded-md text-muted-foreground transition-all',
-              'hover:text-foreground hover:bg-secondary',
-              'border-2 border-transparent hover:border-border',
-              pathname?.startsWith('/projects') && 'bg-secondary text-foreground border-border'
-            )}
-            aria-label="Projects"
-          >
-            <FolderKanban className="w-5 h-5" />
-          </Link>
-          <Link
-            href="/campaigns"
-            className={cn(
-              'p-2 rounded-md text-muted-foreground transition-all',
-              'hover:text-foreground hover:bg-secondary',
-              'border-2 border-transparent hover:border-border',
-              pathname?.startsWith('/campaigns') && 'bg-secondary text-foreground border-border'
-            )}
-            aria-label="Campaigns"
-          >
-            <FolderOpen className="w-5 h-5" />
-          </Link>
-          <Link
-            href="/blog"
-            className={cn(
-              'p-2 rounded-md text-muted-foreground transition-all',
-              'hover:text-foreground hover:bg-secondary',
-              'border-2 border-transparent hover:border-border',
-              pathname?.startsWith('/blog') && 'bg-secondary text-foreground border-border'
-            )}
-            aria-label="Blog Drafts"
-          >
-            <FileText className="w-5 h-5" />
-          </Link>
-          <Link
-            href="/launch-posts"
-            className={cn(
-              'p-2 rounded-md text-muted-foreground transition-all',
-              'hover:text-foreground hover:bg-secondary',
-              'border-2 border-transparent hover:border-border',
-              pathname?.startsWith('/launch-posts') && 'bg-secondary text-foreground border-border'
-            )}
-            aria-label="Launch Posts"
-          >
-            <Rocket className="w-5 h-5" />
-          </Link>
-          <Link
-            href="/settings"
-            className={cn(
-              'p-2 rounded-md text-muted-foreground transition-all',
-              'hover:text-foreground hover:bg-secondary',
-              'border-2 border-transparent hover:border-border',
-              pathname === '/settings' && 'bg-secondary text-foreground border-border'
-            )}
-            aria-label="Settings"
-          >
-            <Settings className="w-5 h-5" />
-          </Link>
-          <div className="ml-2">
+          {/* Desktop nav icons - hidden on mobile */}
+          <nav aria-label="Main navigation" className="hidden md:flex items-center gap-2">
+            <Link
+              href="/projects"
+              className={cn(
+                'p-2 rounded-md text-muted-foreground transition-all',
+                'hover:text-foreground hover:bg-secondary',
+                'border-2 border-transparent hover:border-border',
+                pathname?.startsWith('/projects') && 'bg-secondary text-foreground border-border'
+              )}
+              aria-label="Projects"
+            >
+              <FolderKanban className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/campaigns"
+              className={cn(
+                'p-2 rounded-md text-muted-foreground transition-all',
+                'hover:text-foreground hover:bg-secondary',
+                'border-2 border-transparent hover:border-border',
+                pathname?.startsWith('/campaigns') && 'bg-secondary text-foreground border-border'
+              )}
+              aria-label="Campaigns"
+            >
+              <FolderOpen className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/blog"
+              className={cn(
+                'p-2 rounded-md text-muted-foreground transition-all',
+                'hover:text-foreground hover:bg-secondary',
+                'border-2 border-transparent hover:border-border',
+                pathname?.startsWith('/blog') && 'bg-secondary text-foreground border-border'
+              )}
+              aria-label="Blog Drafts"
+            >
+              <FileText className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/launch-posts"
+              className={cn(
+                'p-2 rounded-md text-muted-foreground transition-all',
+                'hover:text-foreground hover:bg-secondary',
+                'border-2 border-transparent hover:border-border',
+                pathname?.startsWith('/launch-posts') &&
+                  'bg-secondary text-foreground border-border'
+              )}
+              aria-label="Launch Posts"
+            >
+              <Rocket className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/settings"
+              className={cn(
+                'p-2 rounded-md text-muted-foreground transition-all',
+                'hover:text-foreground hover:bg-secondary',
+                'border-2 border-transparent hover:border-border',
+                pathname === '/settings' && 'bg-secondary text-foreground border-border'
+              )}
+              aria-label="Settings"
+            >
+              <Settings className="w-5 h-5" />
+            </Link>
+            <div className="ml-2">
+              {userEmail ? (
+                <UserMenu email={userEmail} displayName={userDisplayName} />
+              ) : (
+                <div className="w-9 h-9 rounded-md bg-sticker-purple flex items-center justify-center text-xs font-bold text-white border-2 border-border">
+                  U
+                </div>
+              )}
+            </div>
+          </nav>
+          {/* Mobile user avatar only */}
+          <div className="md:hidden">
             {userEmail ? (
               <UserMenu email={userEmail} displayName={userDisplayName} />
             ) : (
@@ -122,21 +136,12 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               </div>
             )}
           </div>
-        </nav>
-        {/* Mobile user avatar only */}
-        <div className="md:hidden">
-          {userEmail ? (
-            <UserMenu email={userEmail} displayName={userDisplayName} />
-          ) : (
-            <div className="w-9 h-9 rounded-md bg-sticker-purple flex items-center justify-center text-xs font-bold text-white border-2 border-border">
-              U
-            </div>
-          )}
         </div>
-      </div>
-      {/* Colorful gradient bar under header */}
-      <div className="h-1 gradient-bar" />
-    </header>
+        {/* Colorful gradient bar under header */}
+        <div className="h-1 gradient-bar" />
+      </header>
+      <UsageBanner />
+    </>
   )
 }
 
