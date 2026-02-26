@@ -215,6 +215,7 @@ export default function EditorPage() {
   const { status: autoSaveStatus } = useAutoSave({
     data: { post, content, mediaUrls, linkedInMediaUrl, redditUrl },
     onSave: async () => {
+      if (isSaving) return // Manual save in progress, skip auto-save
       const toSave = { ...post, status: 'draft' as const }
       try {
         if (isNew) {
@@ -229,10 +230,7 @@ export default function EditorPage() {
       }
     },
     delay: 2000,
-    enabled:
-      (post.status === 'draft' || isNew) &&
-      !(isNew && hasMultipleSubreddits) &&
-      process.env.NEXT_PUBLIC_E2E_TEST_MODE !== 'true',
+    enabled: (post.status === 'draft' || isNew) && !(isNew && hasMultipleSubreddits),
     skipInitialChange: !isNew,
   })
 
