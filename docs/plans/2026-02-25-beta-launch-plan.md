@@ -1192,7 +1192,7 @@ EOF
 
 ### Task 6.3: Redact Supabase Project Ref from Tracked Files
 
-The Supabase project ref `jvoppjybagyeffklbohr` is hardcoded in 4 files. Replace with a placeholder so contributors know to set their own.
+The Supabase project ref `<your-supabase-project-ref>` is hardcoded in 4 files. Replace with a placeholder so contributors know to set their own.
 
 **Files:**
 - Modify: `.mcp.json`
@@ -1204,7 +1204,7 @@ The Supabase project ref `jvoppjybagyeffklbohr` is hardcoded in 4 files. Replace
 
 Replace:
 ```json
-"SUPABASE_PROJECT_REF": "jvoppjybagyeffklbohr"
+"SUPABASE_PROJECT_REF": "<your-supabase-project-ref>"
 ```
 
 With:
@@ -1214,15 +1214,15 @@ With:
 
 **Step 2: Replace in `CLAUDE.md`**
 
-Find `jvoppjybagyeffklbohr` and replace with `<your-supabase-project-ref>`.
+Find `<your-supabase-project-ref>` and replace with `<your-supabase-project-ref>`.
 
 **Step 3: Replace in `.claude/skills/audit-rls/SKILL.md`**
 
-Find `jvoppjybagyeffklbohr` and replace with `<your-supabase-project-ref>`.
+Find `<your-supabase-project-ref>` and replace with `<your-supabase-project-ref>`.
 
 **Step 4: Replace in `mcp-server/src/api-key-lifecycle.e2e.test.ts`**
 
-Find `jvoppjybagyeffklbohr` and replace with `<your-supabase-project-ref>`.
+Find `<your-supabase-project-ref>` and replace with `<your-supabase-project-ref>`.
 
 **Step 5: Commit**
 
@@ -1248,8 +1248,8 @@ Google OAuth client IDs are public (embedded in every app bundle), but using env
 Current (lines 37-38):
 ```typescript
 google: {
-  iOSClientId: '95354811469-3hvu64aje2dnp1oj3fiv4cqd2ajcr0qc.apps.googleusercontent.com',
-  webClientId: '95354811469-6dk6cb54kuee0t91dtsiu9mndumk14jv.apps.googleusercontent.com',
+  iOSClientId: '<GOOGLE_IOS_CLIENT_ID>',
+  webClientId: '<GOOGLE_WEB_CLIENT_ID>',
 },
 ```
 
@@ -1287,7 +1287,7 @@ Move the private deployment instructions (App Store Connect keys, signing prereq
 
 Create `DEPLOY.md` with the following content extracted from `CLAUDE.md`:
 
-1. The **iOS Build & TestFlight** section (from "### Prerequisites" through the `xcrun altool --upload-app` command) — contains ASC API key ID `X9Z3DHN64Y` and issuer ID `36da0220-c107-4a01-aa33-63ff5f110172`
+1. The **iOS Build & TestFlight** section (from "### Prerequisites" through the `xcrun altool --upload-app` command) — contains ASC API key ID `<ASC_KEY_ID>` and issuer ID `<ASC_ISSUER_ID>`
 2. The **Versioning** subsection
 3. The **TestFlight** subsection
 4. The **App Store Connect CLI (`asc`)** section
@@ -1597,10 +1597,10 @@ EOF
 
 **Step 1:** Run `make check` (lint + typecheck)
 **Step 2:** Run `make test-run` (unit tests)
-**Step 3:** Verify no Supabase project ref `jvoppjybagyeffklbohr` remains in tracked files:
+**Step 3:** Verify no Supabase project ref `<your-supabase-project-ref>` remains in tracked files:
 
 ```bash
-git grep 'jvoppjybagyeffklbohr' -- ':!DEPLOY.md'
+git grep '<your-supabase-project-ref>' -- ':!DEPLOY.md'
 ```
 
 Expected: No matches (DEPLOY.md is gitignored and excluded).
@@ -1608,7 +1608,7 @@ Expected: No matches (DEPLOY.md is gitignored and excluded).
 **Step 4:** Verify no ASC key IDs remain in public files:
 
 ```bash
-git grep 'X9Z3DHN64Y\|36da0220' -- ':!DEPLOY.md'
+git grep '<ASC_KEY_ID>\|36da0220' -- ':!DEPLOY.md'
 ```
 
 Expected: No matches.
@@ -1669,8 +1669,8 @@ doppler run -- supabase db push
 2. `README.md` renders correctly on GitHub with features, tech stack, and setup instructions
 3. `CONTRIBUTING.md` has clear setup guide with `.env.example` reference
 4. `DEPLOY.md` is gitignored (not visible on GitHub)
-5. No Supabase project refs in public files: `git grep 'jvoppjybagyeffklbohr' -- ':!DEPLOY.md'` returns nothing
-6. No ASC key IDs in public files: `git grep 'X9Z3DHN64Y\|36da0220' -- ':!DEPLOY.md'` returns nothing
+5. No Supabase project refs in public files: `git grep '<your-supabase-project-ref>' -- ':!DEPLOY.md'` returns nothing
+6. No ASC key IDs in public files: `git grep '<ASC_KEY_ID>\|36da0220' -- ':!DEPLOY.md'` returns nothing
 7. Stale plan docs removed (only 4 active plans + semantic-release guide remain)
 8. `capacitor.config.ts` uses env vars for Google Client IDs
 
