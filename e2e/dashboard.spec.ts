@@ -129,7 +129,9 @@ test.describe('Dashboard', () => {
   // Empty state tests need serial execution to ensure no posts exist
   test.describe.serial('Empty State', () => {
     test('should show welcome message when no posts exist', async ({ page }) => {
-      await expect(page.getByRole('heading', { name: /welcome to bullhorn/i })).toBeVisible()
+      await expect(
+        page.getByRole('heading', { name: /welcome to bullhorn/i }).first()
+      ).toBeVisible()
       await expect(page.getByText('Create your first post to get started')).toBeVisible()
     })
 
@@ -145,7 +147,9 @@ test.describe('Dashboard', () => {
       await createTestPost(page, { platform: 'twitter', content: 'Test post', asDraft: true })
       await gotoDashboard(page)
 
-      await expect(page.getByRole('heading', { name: /welcome to bullhorn/i })).not.toBeVisible()
+      await expect(
+        page.getByRole('heading', { name: /welcome to bullhorn/i }).first()
+      ).not.toBeVisible()
     })
   })
 

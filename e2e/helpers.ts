@@ -43,6 +43,12 @@ export async function enterDemoMode(page: Page) {
   // Reset the database before each test to ensure clean state
   await resetDatabase()
 
+  // Dismiss overlays that intercept pointer events in E2E tests
+  await page.addInitScript(() => {
+    localStorage.setItem('cookie_consent', 'accepted')
+    localStorage.setItem('onboarding_complete', 'true')
+  })
+
   await page.goto('/')
   // Wait for the dashboard to load - look for the header
   // The link contains emoji + text, so use regex to match "Bullhorn"

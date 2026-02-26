@@ -8,6 +8,9 @@ export function CookieConsent() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    // Never show in E2E test mode — banner intercepts pointer events
+    if (process.env.NEXT_PUBLIC_E2E_TEST_MODE === 'true') return
+
     const consent = localStorage.getItem('cookie_consent')
     if (!consent) {
       setVisible(true)
