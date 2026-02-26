@@ -10,7 +10,7 @@ Social media post scheduler for Twitter, LinkedIn, and Reddit.
 - **Styling**: Tailwind CSS with custom sticker bomb design system
 - **Hosting**: Vercel
 - **Production URL**: https://bullhorn.to
-- **Supabase project ref**: `jvoppjybagyeffklbohr`
+- **Supabase project ref**: `<your-supabase-project-ref>`
 
 ## Dev Commands
 

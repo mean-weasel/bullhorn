@@ -13,7 +13,7 @@ import path from 'path'
 const MCP_SERVER_DIR = path.resolve(__dirname, '..')
 const APP_ROOT = path.resolve(__dirname, '../..')
 const API_URL = 'http://localhost:3001'
-const SUPABASE_PROJECT_REF = 'jvoppjybagyeffklbohr'
+const SUPABASE_PROJECT_REF = '<your-supabase-project-ref>'
 
 /** Generate a test API key with matching SHA-256 hash. */
 function generateTestKey(): { rawKey: string; keyHash: string; keyPrefix: string } {

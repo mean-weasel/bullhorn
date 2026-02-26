@@ -77,3 +77,6 @@ screenshots/
 
 # Deployment config (private)
 DEPLOY.md
+
+# MCP config (contains project-specific identifiers)
+.mcp.json

@@ -7,7 +7,7 @@ Audit all tables in the Supabase database for missing or incomplete Row Level Se
 
 ## Steps
 
-1. **List tables** — Use the Supabase MCP `list_tables` tool to get all tables in the `public` schema for project `jvoppjybagyeffklbohr`.
+1. **List tables** — Use the Supabase MCP `list_tables` tool to get all tables in the `public` schema for project `<your-supabase-project-ref>`.
 
 2. **Check RLS status** — Use the Supabase MCP `execute_sql` tool to query which tables have RLS enabled:
 

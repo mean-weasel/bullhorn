@@ -26,7 +26,7 @@
         "@supabase/mcp-server-supabase@latest"
       ],
       "env": {
-        "SUPABASE_PROJECT_REF": "jvoppjybagyeffklbohr"
+        "SUPABASE_PROJECT_REF": "<your-supabase-project-ref>"
       }
     },
     "bullhorn": {
