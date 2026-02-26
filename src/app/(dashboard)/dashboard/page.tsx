@@ -184,21 +184,36 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))]">
           <div className="flex-1 flex items-center gap-4 sm:gap-6 overflow-x-auto">
             <div className="text-center flex-shrink-0">
-              <div className="text-2xl font-extrabold text-sticker-blue">{stats.scheduled}</div>
+              <div
+                data-testid="stat-scheduled"
+                className="text-2xl font-extrabold text-sticker-blue"
+              >
+                {stats.scheduled}
+              </div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                 📅 Scheduled
               </div>
             </div>
             <div className="w-px h-8 bg-border flex-shrink-0" />
             <div className="text-center flex-shrink-0">
-              <div className="text-2xl font-extrabold text-sticker-orange">{stats.drafts}</div>
+              <div
+                data-testid="stat-drafts"
+                className="text-2xl font-extrabold text-sticker-orange"
+              >
+                {stats.drafts}
+              </div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                 📝 Drafts
               </div>
             </div>
             <div className="w-px h-8 bg-border flex-shrink-0" />
             <div className="text-center flex-shrink-0">
-              <div className="text-2xl font-extrabold text-sticker-green">{stats.published}</div>
+              <div
+                data-testid="stat-published"
+                className="text-2xl font-extrabold text-sticker-green"
+              >
+                {stats.published}
+              </div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                 ✅ Published
               </div>

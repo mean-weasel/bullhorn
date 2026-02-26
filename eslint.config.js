@@ -6,7 +6,7 @@ import security from 'eslint-plugin-security'
 
 export default [
   {
-    ignores: ['dist/**', 'bleep/**', 'node_modules/**', '**/*.d.ts', '.next/**', 'ios/**', 'coverage/**'],
+    ignores: ['dist/**', 'bleep/**', 'node_modules/**', '**/*.d.ts', '.next/**', 'ios/**', 'coverage/**', '.claude/**'],
   },
   {
     files: ['**/*.ts', '**/*.tsx'],

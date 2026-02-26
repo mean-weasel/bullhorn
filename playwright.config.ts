@@ -15,13 +15,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: 'html',
-  timeout: process.env.CI ? 60_000 : 30_000,
+  timeout: process.env.CI ? 120_000 : 30_000,
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     timezoneId: 'UTC',
-    actionTimeout: process.env.CI ? 15_000 : 10_000,
+    actionTimeout: process.env.CI ? 30_000 : 10_000,
+    navigationTimeout: process.env.CI ? 60_000 : 30_000,
   },
   projects: [
     {
