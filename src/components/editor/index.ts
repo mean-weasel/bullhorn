@@ -1,6 +1,7 @@
 export { PlatformIcon } from './PlatformIcon'
 export { PlatformSelector } from './PlatformSelector'
 export { CampaignSelector } from './CampaignSelector'
+export { AccountSelector } from './AccountSelector'
 export { NotesSection } from './NotesSection'
 export { ContentEditor } from './ContentEditor'
 export { MediaSection } from './MediaSection'

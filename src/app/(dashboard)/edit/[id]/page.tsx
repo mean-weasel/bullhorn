@@ -10,11 +10,11 @@ import {
   Post,
   Platform,
   PostStatus,
+  PLATFORM_INFO,
   createPost,
   isTwitterContent,
   isLinkedInContent,
   isRedditContent,
-  PLATFORM_INFO,
 } from '@/lib/posts'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
@@ -24,6 +24,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import {
   PlatformSelector,
   CampaignSelector,
+  AccountSelector,
   NotesSection,
   ContentEditor,
   MediaSection,
@@ -53,8 +54,8 @@ export default function EditorPage() {
     initialized: postsInitialized,
   } = usePostsStore()
   const { campaigns, fetchCampaigns, initialized: campaignsInitialized } = useCampaignsStore()
-
   const {
+    getAccountsByProvider,
     fetchAccounts,
     getActiveAccount,
     initialized: accountsInitialized,
@@ -117,6 +118,20 @@ export default function EditorPage() {
   const [subredditSchedules, setSubredditSchedules] = useState<Record<string, string>>({})
   const [subredditTitles, setSubredditTitles] = useState<Record<string, string>>({})
   const [expandedSubreddits, setExpandedSubreddits] = useState<Record<string, boolean>>({})
+
+  // Get active accounts for current platform
+  const platformAccounts = getAccountsByProvider(post.platform).filter((a) => a.status === 'active')
+
+  // Auto-select single account
+  useEffect(() => {
+    if (platformAccounts.length === 1 && !post.socialAccountId) {
+      setPost((prev) => ({ ...prev, socialAccountId: platformAccounts[0].id }))
+    }
+  }, [platformAccounts, post.socialAccountId])
+
+  const handleAccountSelect = (accountId: string) => {
+    setPost((prev) => ({ ...prev, socialAccountId: accountId }))
+  }
 
   // Helper functions for subreddit card management
   const toggleSubredditExpanded = (subreddit: string) => {
@@ -419,7 +434,7 @@ export default function EditorPage() {
   }
 
   const executePlatformSwitch = (platform: Platform) => {
-    setPost((prev) => ({ ...prev, platform }))
+    setPost((prev) => ({ ...prev, platform, socialAccountId: undefined }))
     if (platform !== 'reddit') {
       setSubredditsInput([])
       setSubredditTitles({})
@@ -694,6 +709,15 @@ export default function EditorPage() {
           onScheduleChange={(isoString) => setPost((prev) => ({ ...prev, scheduledAt: isoString }))}
           className="mb-4 md:mb-6"
         />
+
+        {platformAccounts.length > 1 && (
+          <AccountSelector
+            accounts={platformAccounts}
+            selectedAccountId={post.socialAccountId}
+            onSelect={handleAccountSelect}
+            platform={PLATFORM_INFO[post.platform].name}
+          />
+        )}
 
         <EditorActions
           isNew={isNew}
