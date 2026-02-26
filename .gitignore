@@ -56,3 +56,24 @@ workflows/screenshots/
 
 # Temp scripts
 scripts/seed-*.ts
+
+# Apple signing keys and certificates
+*.p8
+*.pem
+*.p12
+*.cer
+*.mobileprovision
+
+# iOS build artifacts
+*.ipa
+*.dSYM.zip
+ios/App/build/
+
+# App Store Connect config
+.asc/
+
+# Screenshots (debug/temp)
+screenshots/
+
+# Deployment config (private)
+DEPLOY.md
