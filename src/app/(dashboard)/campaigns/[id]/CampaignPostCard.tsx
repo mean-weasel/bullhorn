@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Archive,
   Clock,
+  Loader2,
 } from 'lucide-react'
 import { Post, PostStatus, getPostPreviewText, PLATFORM_INFO } from '@/lib/posts'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,7 @@ const POST_STATUS_CONFIG: Record<
 > = {
   draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-blue-400' },
+  publishing: { label: 'Publishing', icon: Loader2, color: 'text-orange-400' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-green-400' },
   failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive' },
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },

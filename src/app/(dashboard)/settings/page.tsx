@@ -7,10 +7,16 @@ import { useTheme } from '@/lib/theme'
 import { useNotificationStore } from '@/lib/notifications'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { useAnalyticsStore, useAnalyticsConnections } from '@/lib/analyticsStore'
+import {
+  useSocialAccountsStore,
+  useSocialAccounts,
+  useSocialAccountsLoading,
+} from '@/lib/socialAccounts'
 import { ConnectAnalyticsModal } from '@/components/analytics/ConnectAnalyticsModal'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ApiKeyManager } from '@/components/ui/ApiKeyManager'
 import { ThemeSection, AnalyticsSection, AboutSection } from './SettingsSections'
+import { ConnectedAccountsSection } from './ConnectedAccountsSection'
 import { DataManagementSection } from './DataManagementSection'
 import { PlanSection } from './PlanSection'
 import { BiometricSection } from './BiometricSection'
@@ -39,6 +45,9 @@ export default function SettingsPage() {
   const [connectionToDelete, setConnectionToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Social accounts state
+  const [accountToDisconnect, setAccountToDisconnect] = useState<string | null>(null)
+
   const {
     isSupported: pushSupported,
     permission: pushPermission,
@@ -52,9 +61,14 @@ export default function SettingsPage() {
   const { fetchConnections, deleteConnection, loading: analyticsLoading } = useAnalyticsStore()
   const connections = useAnalyticsConnections()
 
+  const { fetchAccounts, deleteAccount } = useSocialAccountsStore()
+  const socialAccounts = useSocialAccounts()
+  const socialAccountsLoading = useSocialAccountsLoading()
+
   useEffect(() => {
     fetchConnections()
-  }, [fetchConnections])
+    fetchAccounts()
+  }, [fetchConnections, fetchAccounts])
 
   // Fetch email notification preferences on mount
   const fetchEmailPrefs = useCallback(async () => {
@@ -106,13 +120,22 @@ export default function SettingsPage() {
   useEffect(() => {
     const analyticsAuth = searchParams.get('analytics_auth')
     const connectionId = searchParams.get('connection_id')
+    const connectedPlatform = searchParams.get('connected')
     const errorParam = searchParams.get('error')
 
     if (analyticsAuth === 'success' && connectionId) {
       setPendingConnectionId(connectionId)
       setShowConnectModal(true)
-
-      // Clean up URL params
+      window.history.replaceState({}, '', '/settings')
+    } else if (connectedPlatform) {
+      const names: Record<string, string> = {
+        twitter: 'Twitter/X',
+        linkedin: 'LinkedIn',
+        reddit: 'Reddit',
+      }
+      setSuccess(`${names[connectedPlatform] || connectedPlatform} connected successfully!`)
+      fetchAccounts()
+      setTimeout(() => setSuccess(null), 3000)
       window.history.replaceState({}, '', '/settings')
     } else if (errorParam) {
       const errorMessages: Record<string, string> = {
@@ -125,11 +148,9 @@ export default function SettingsPage() {
         callback_failed: 'OAuth callback failed',
       }
       setError(errorMessages[errorParam] || 'Connection failed')
-
-      // Clean up URL params
       window.history.replaceState({}, '', '/settings')
     }
-  }, [searchParams])
+  }, [searchParams, fetchAccounts])
 
   const handleToggleNotifications = (enabled: boolean) => {
     setNotificationsEnabled(enabled)
@@ -181,6 +202,19 @@ export default function SettingsPage() {
     } finally {
       setIsDeleting(false)
       setConnectionToDelete(null)
+    }
+  }
+
+  const handleDisconnectAccount = async () => {
+    if (!accountToDisconnect) return
+    try {
+      await deleteAccount(accountToDisconnect)
+      setSuccess('Account disconnected')
+      setTimeout(() => setSuccess(null), 3000)
+    } catch {
+      setError('Failed to disconnect account')
+    } finally {
+      setAccountToDisconnect(null)
     }
   }
 
@@ -249,6 +283,14 @@ export default function SettingsPage() {
         onDeleteConnection={(id) => setConnectionToDelete(id)}
       />
 
+      {/* Connected Social Accounts */}
+      <ConnectedAccountsSection
+        accounts={socialAccounts}
+        loading={socialAccountsLoading}
+        onConnect={() => {}}
+        onDisconnect={(id) => setAccountToDisconnect(id)}
+      />
+
       {/* API Keys */}
       <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
         <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
@@ -280,7 +322,7 @@ export default function SettingsPage() {
         onSuccess={handleConnectSuccess}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Analytics Connection Dialog */}
       <ConfirmDialog
         open={!!connectionToDelete}
         onConfirm={handleDeleteConnection}
@@ -288,6 +330,17 @@ export default function SettingsPage() {
         title="Remove Analytics Connection"
         description="Are you sure you want to remove this Google Analytics connection? You can reconnect it later."
         confirmText={isDeleting ? 'Removing...' : 'Remove'}
+        variant="danger"
+      />
+
+      {/* Disconnect Social Account Dialog */}
+      <ConfirmDialog
+        open={!!accountToDisconnect}
+        onConfirm={handleDisconnectAccount}
+        onCancel={() => setAccountToDisconnect(null)}
+        title="Disconnect Account"
+        description="Are you sure you want to disconnect this social media account? You can reconnect it later."
+        confirmText="Disconnect"
         variant="danger"
       />
     </div>

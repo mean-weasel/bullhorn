@@ -14,6 +14,7 @@ import {
   LayoutGrid,
   Search,
   X,
+  Loader2,
 } from 'lucide-react'
 import { usePostsStore } from '@/lib/storage'
 import { PostStatus, getPostPreviewText } from '@/lib/posts'
@@ -32,6 +33,7 @@ const STATUS_CONFIG: Record<
 > = {
   draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground', emoji: '📝' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-sticker-blue', emoji: '📅' },
+  publishing: { label: 'Publishing', icon: Loader2, color: 'text-sticker-orange', emoji: '🔄' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-sticker-green', emoji: '✅' },
   failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive', emoji: '❌' },
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground', emoji: '📦' },
@@ -116,6 +118,7 @@ export default function PostsPage() {
       all: allPosts.filter((p) => p.status !== 'archived').length,
       draft: allPosts.filter((p) => p.status === 'draft').length,
       scheduled: allPosts.filter((p) => p.status === 'scheduled').length,
+      publishing: allPosts.filter((p) => p.status === 'publishing').length,
       published: allPosts.filter((p) => p.status === 'published').length,
       failed: allPosts.filter((p) => p.status === 'failed').length,
       archived: allPosts.filter((p) => p.status === 'archived').length,
@@ -239,30 +242,41 @@ export default function PostsPage() {
               >
                 All <span className="ml-1 text-xs opacity-70">({counts.all})</span>
               </button>
-              {(['draft', 'scheduled', 'published', 'failed', 'archived'] as PostStatus[]).map(
-                (status) => {
-                  const config = STATUS_CONFIG[status]
-                  const count = counts[status]
-                  // Hide failed and archived tabs when empty
-                  if ((status === 'failed' || status === 'archived') && count === 0) return null
-                  return (
-                    <button
-                      key={status}
-                      onClick={() => setFilter(status)}
-                      className={cn(
-                        'flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
-                        filter === status
-                          ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                      )}
-                    >
-                      <span>{config.emoji}</span>
-                      <span className="hidden sm:inline">{config.label}</span>
-                      <span className="text-xs opacity-70">({count})</span>
-                    </button>
-                  )
-                }
-              )}
+              {(
+                [
+                  'draft',
+                  'scheduled',
+                  'publishing',
+                  'published',
+                  'failed',
+                  'archived',
+                ] as PostStatus[]
+              ).map((status) => {
+                const config = STATUS_CONFIG[status]
+                const count = counts[status]
+                // Hide publishing, failed, and archived tabs when empty
+                if (
+                  (status === 'publishing' || status === 'failed' || status === 'archived') &&
+                  count === 0
+                )
+                  return null
+                return (
+                  <button
+                    key={status}
+                    onClick={() => setFilter(status)}
+                    className={cn(
+                      'flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
+                      filter === status
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                    )}
+                  >
+                    <span>{config.emoji}</span>
+                    <span className="hidden sm:inline">{config.label}</span>
+                    <span className="text-xs opacity-70">({count})</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
