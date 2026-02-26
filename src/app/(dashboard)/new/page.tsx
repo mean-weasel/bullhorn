@@ -5,13 +5,16 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { usePostsStore } from '@/lib/storage'
 import { useCampaignsStore } from '@/lib/campaigns'
+import { useSocialAccountsStore } from '@/lib/socialAccounts'
 import {
   Post,
   Platform,
+  PostStatus,
   createPost,
   isTwitterContent,
   isLinkedInContent,
   isRedditContent,
+  PLATFORM_INFO,
 } from '@/lib/posts'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
@@ -50,10 +53,16 @@ export default function EditorPage() {
     initialized: postsInitialized,
   } = usePostsStore()
   const { campaigns, fetchCampaigns, initialized: campaignsInitialized } = useCampaignsStore()
+  const {
+    fetchAccounts,
+    getActiveAccount,
+    initialized: accountsInitialized,
+  } = useSocialAccountsStore()
 
   const isNew = !id
   const existingPost = id ? getPost(id) : undefined
   const [isSaving, setIsSaving] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
   const [copied, setCopied] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
@@ -74,6 +83,11 @@ export default function EditorPage() {
       fetchCampaigns()
     }
   }, [campaignsInitialized, fetchCampaigns])
+
+  // Fetch social accounts on mount
+  useEffect(() => {
+    if (!accountsInitialized) fetchAccounts()
+  }, [accountsInitialized, fetchAccounts])
 
   // Form state
   const [post, setPost] = useState<Post>(() => {
@@ -492,19 +506,60 @@ export default function EditorPage() {
     toast.success('Post scheduled')
   }
 
-  // Publish Now
-  const handlePublishNow = () => {
+  // Publish Now via API
+  const activeAccount = getActiveAccount(post.platform)
+  const hasConnectedAccount = !!activeAccount
+
+  const handlePublishNow = async () => {
     if (!content.trim()) {
       toast.error('Please add some content')
       return
     }
-    const toSave = {
-      ...post,
-      status: 'scheduled' as const,
-      scheduledAt: new Date().toISOString(),
+
+    const platformLabel = PLATFORM_INFO[post.platform].name
+
+    if (!hasConnectedAccount) {
+      toast.error(`Connect your ${platformLabel} account in Settings`)
+      return
     }
-    handleSave(toSave)
-    toast.success('Ready to publish!')
+
+    // For new posts, save as draft first so we get an id
+    let postId = post.id
+    if (isNew) {
+      try {
+        const draft = { ...post, status: 'draft' as PostStatus }
+        const created = await addPost(draft)
+        postId = created.id
+      } catch {
+        toast.error('Failed to save post before publishing')
+        return
+      }
+    }
+
+    setIsPublishing(true)
+    try {
+      const res = await fetch(`/api/posts/${postId}/publish`, {
+        method: 'POST',
+      })
+      const data = await res.json()
+
+      if (data.success) {
+        toast.success('Post published!')
+        setPost((prev) => ({
+          ...prev,
+          status: 'published' as PostStatus,
+          publishResult: data.publishResult,
+        }))
+        fetchPosts()
+      } else {
+        toast.error(data.error || 'Failed to publish')
+      }
+    } catch (err) {
+      toast.error('Failed to publish post')
+      console.error('Publish error:', err)
+    } finally {
+      setIsPublishing(false)
+    }
   }
 
   // Copy content to clipboard
@@ -653,6 +708,9 @@ export default function EditorPage() {
           onSaveDraft={handleSaveDraft}
           onSchedule={handleSchedule}
           onPublishNow={handlePublishNow}
+          isPublishing={isPublishing}
+          hasConnectedAccount={hasConnectedAccount}
+          platformName={PLATFORM_INFO[post.platform].name}
           onMarkAsPosted={handleMarkAsPosted}
           onArchive={handleArchive}
           onRestore={handleRestore}
