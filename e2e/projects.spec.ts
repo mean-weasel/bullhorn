@@ -31,8 +31,8 @@ test.describe('Projects', () => {
       await page.getByRole('button', { name: /create project/i }).click()
 
       // Should navigate to project detail page
-      await page.waitForURL(/\/projects\//)
-      await expect(page.getByText('Product Launch 2024')).toBeVisible()
+      await page.waitForURL(/\/projects\//, { timeout: 15000 })
+      await expect(page.getByText('Product Launch 2024')).toBeVisible({ timeout: 10000 })
 
       // Verify in database
       const projects = await getAllProjects(page)

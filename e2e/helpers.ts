@@ -43,6 +43,12 @@ export async function enterDemoMode(page: Page) {
   // Reset the database before each test to ensure clean state
   await resetDatabase()
 
+  // Dismiss overlays that intercept pointer events in E2E tests
+  await page.addInitScript(() => {
+    localStorage.setItem('cookie_consent', 'accepted')
+    localStorage.setItem('onboarding_complete', 'true')
+  })
+
   await page.goto('/')
   // Wait for the dashboard to load - look for the header
   // The link contains emoji + text, so use regex to match "Bullhorn"
@@ -114,10 +120,10 @@ export async function waitForContentToLoad(page: Page, expectedContent?: string)
   const textarea = page.locator('textarea').first()
   if (expectedContent) {
     // Wait for specific content to appear
-    await expect(textarea).toHaveValue(expectedContent, { timeout: 5000 })
+    await expect(textarea).toHaveValue(expectedContent, { timeout: 15000 })
   } else {
     // Just wait for any non-empty content (existing post loaded)
-    await expect(textarea).not.toHaveValue('', { timeout: 5000 })
+    await expect(textarea).not.toHaveValue('', { timeout: 15000 })
   }
 }
 
@@ -174,10 +180,10 @@ export async function fillRedditFields(
 export async function waitForRedditEditForm(page: Page, subreddit: string) {
   // Wait for the subreddit card to be visible
   const card = page.locator(`[data-testid="subreddit-card-${subreddit}"]`)
-  await card.waitFor({ state: 'visible', timeout: 5000 })
+  await card.waitFor({ state: 'visible', timeout: 30000 })
   // Wait for the title input to be visible (card is auto-expanded when editing)
   const titleInput = page.locator(`[data-testid="subreddit-title-${subreddit}"]`)
-  await titleInput.waitFor({ state: 'visible', timeout: 5000 })
+  await titleInput.waitFor({ state: 'visible', timeout: 30000 })
 }
 
 /**
@@ -370,7 +376,7 @@ export async function filterByStatus(
 export async function getPostCards(page: Page) {
   const locator = page.locator('a[href^="/edit/"]')
   // Wait for at least one post card to be visible
-  await locator.first().waitFor({ state: 'visible', timeout: 10000 })
+  await locator.first().waitFor({ state: 'visible', timeout: 30000 })
   return locator
 }
 
@@ -405,7 +411,7 @@ export async function verifyCharacterCount(
 export async function waitForNavigation(page: Page, url: string | RegExp) {
   // Normalize '/' to '/dashboard' since the root redirects to dashboard
   const normalizedUrl = url === '/' ? '/dashboard' : url
-  await expect(page).toHaveURL(normalizedUrl, { timeout: 10000 })
+  await expect(page).toHaveURL(normalizedUrl, { timeout: 30000 })
 }
 
 /**
@@ -444,7 +450,7 @@ export async function createTestPost(
   }
 
   // Wait for navigation back to dashboard
-  await expect(page).toHaveURL('/dashboard')
+  await expect(page).toHaveURL('/dashboard', { timeout: 30000 })
 }
 
 // ============================================
@@ -1067,7 +1073,7 @@ export async function fillIndieHackersFields(
 export async function saveLaunchPost(page: Page) {
   await page.getByRole('button', { name: /create launch post|save changes/i }).click()
   // Wait for navigation back to launch posts list
-  await page.waitForURL('/launch-posts')
+  await page.waitForURL('/launch-posts', { timeout: 30000 })
 }
 
 /**

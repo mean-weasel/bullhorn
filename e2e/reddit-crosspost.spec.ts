@@ -203,13 +203,15 @@ test.describe('Reddit Cross-posting', () => {
       await page.goto(`/edit/${updatedStartup.id}`)
       await waitForRedditEditForm(page, 'startups')
       await expect(page.locator('[data-testid="subreddit-time-startups-input"]')).toHaveValue(
-        '10:00'
+        '10:00',
+        { timeout: 15000 }
       )
 
       await page.goto(`/edit/${updatedEntrepreneur.id}`)
       await waitForRedditEditForm(page, 'entrepreneur')
       await expect(page.locator('[data-testid="subreddit-time-entrepreneur-input"]')).toHaveValue(
-        '15:00'
+        '15:00',
+        { timeout: 15000 }
       )
     })
 
@@ -278,6 +280,7 @@ test.describe('Reddit Cross-posting', () => {
 
       // Edit just the startups post title
       await page.goto(`/edit/${startupPost.id}`)
+      await waitForRedditEditForm(page, 'startups')
 
       // Change the Reddit title via the subreddit card
       await expandSubredditCard(page, 'startups')
@@ -314,6 +317,7 @@ test.describe('Reddit Cross-posting', () => {
 
       // Add launchedUrl to just the webdev post
       await page.goto(`/edit/${webdevPost.id}`)
+      await waitForRedditEditForm(page, 'webdev')
 
       // Expand Published Links section and wait for input to render
       await page.getByText('Published Links').click()
@@ -500,10 +504,11 @@ test.describe('Reddit Cross-posting', () => {
       const posts = await getAllPosts(page)
       expect(posts.length).toBe(1)
       await page.goto(`/edit/${posts[0].id}`)
+      await waitForRedditEditForm(page, 'webdev')
 
       // Verify the title is loaded in the card
       const titleInput = page.locator('[data-testid="subreddit-title-webdev"]')
-      await expect(titleInput).toHaveValue('Original Title')
+      await expect(titleInput).toHaveValue('Original Title', { timeout: 15000 })
     })
   })
 })

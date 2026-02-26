@@ -1,145 +1,68 @@
 # Bullhorn
 
-**Bold scheduling for bold brands.** A social media post scheduler for Twitter, LinkedIn, and Reddit -- built with a sticker bomb aesthetic that is as loud as your content.
+> Social media post scheduler for Twitter, LinkedIn, and Reddit.
 
-Bullhorn lets you draft, organize, and schedule social media posts across multiple platforms from a single dashboard. Group posts into campaigns, manage them under projects, and track performance with built-in analytics.
+Bullhorn helps builders, indie hackers, and product engineers plan, draft, and schedule their social media content. Organize posts into campaigns and projects, schedule publish dates, and manage your content pipeline from idea to published.
+
+**Live at [bullhorn.to](https://bullhorn.to)**
 
 ## Features
 
-- **Multi-platform scheduling** -- compose and schedule posts for Twitter, LinkedIn, and Reddit from one place
-- **Campaigns** -- group related posts into campaigns for coordinated launches and themed content runs
-- **Projects** -- organize campaigns and posts under projects to keep workspaces clean
-- **Launch posts** -- dedicated workflow for product launches with platform-specific variants
-- **Blog drafts** -- write and manage long-form blog content alongside your social posts
-- **Analytics** -- connect accounts and track engagement metrics from the analytics dashboard
-- **Media uploads** -- attach images and media to posts with Supabase Storage
-- **Dark mode** -- toggle between light and dark themes
-- **Mobile-ready** -- responsive UI with iOS Capacitor support
+- **Multi-platform drafting** — Write posts for Twitter, LinkedIn, and Reddit with platform-specific formatting and character limits
+- **Campaigns & projects** — Organize posts into campaigns, group campaigns into projects
+- **Scheduling** — Set publish dates and track your content pipeline
+- **Blog drafts** — Write long-form content with Markdown support
+- **Launch posts** — Dedicated workspace for product launch announcements
+- **Media uploads** — Attach images to posts with Supabase Storage
+- **API & MCP** — Programmatic access via API keys, plus an MCP server for AI-native workflows
+- **iOS app** — Native iOS app via Capacitor (TestFlight)
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|------------|
-| Framework | [Next.js 14](https://nextjs.org) (App Router) |
-| Database | [Supabase](https://supabase.com) (PostgreSQL + Auth + Storage) |
-| State management | [Zustand](https://zustand-demo.pmnd.rs) |
-| Styling | [Tailwind CSS](https://tailwindcss.com) with custom sticker bomb design system |
-| Hosting | [Vercel](https://vercel.com) |
-| Testing | [Vitest](https://vitest.dev) (unit) + [Playwright](https://playwright.dev) (E2E) |
-| Mobile | [Capacitor](https://capacitorjs.com) (iOS) |
+|-------|-----------|
+| Framework | Next.js 15 (App Router) |
+| Database | Supabase (PostgreSQL + Auth + Storage) |
+| State | Zustand |
+| Styling | Tailwind CSS |
+| Hosting | Vercel |
+| iOS | Capacitor 8 |
+| Monitoring | Sentry |
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js 18+
-- npm
-- [Supabase CLI](https://supabase.com/docs/guides/cli) (for local development)
-
-### Installation
-
 ```bash
-# Clone the repository
-git clone https://github.com/mean-weasel/bullhorn.git
-cd bullhorn
-
 # Install dependencies
 npm install
-```
 
-### Environment Setup
-
-Copy the example environment file and fill in your Supabase credentials:
-
-```bash
+# Set up environment
 cp .env.example .env.local
-```
+# Fill in your Supabase credentials
 
-See [`.env.example`](.env.example) for the required variables. For local development, run `supabase start` and grab the values from `supabase status`.
-
-### Start the Dev Server
-
-```bash
+# Start dev server
 make dev
 ```
 
-The app will be available at [http://localhost:3000](http://localhost:3000).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 
-To start Supabase and Next.js together:
-
-```bash
-make dev-full
-```
-
-## Available Commands
-
-This project uses a Makefile for common tasks. Run `make help` to see all available targets.
-
-```
-make dev            # Start Next.js dev server (port 3000)
-make dev-full       # Start Supabase + Next.js together
-make build          # Build for production
-make check          # Run ESLint + TypeScript type checking
-make fix            # Auto-fix ESLint + Prettier
-make format         # Format with Prettier
-make test           # Unit tests (Vitest, watch mode)
-make test-run       # Unit tests (single run)
-make test-e2e       # E2E tests (Playwright)
-make lint           # ESLint only
-make typecheck      # TypeScript only
-make knip           # Dead code / unused dependency check
-make db-new name=x  # Create new migration
-make db-push        # Push migrations to remote Supabase
-make db-reset       # Reset local database
-make clean          # Remove build artifacts
-make ci             # Full CI checks (lint + typecheck + tests)
-```
-
-## Testing
-
-**Unit tests** are written with Vitest. Test files live alongside source code at `src/**/*.test.ts`.
+## Development
 
 ```bash
-make test       # Watch mode
-make test-run   # Single run (CI)
+make dev          # Start dev server
+make check        # Lint + typecheck
+make test         # Unit tests (watch)
+make test-e2e     # E2E tests
+make ci           # Full CI checks
 ```
 
-**End-to-end tests** use Playwright. Test files are in the `e2e/` directory.
+Run `make help` to see all available commands.
 
-```bash
-make test-e2e   # Run E2E tests
-```
+## Architecture
 
-## Project Structure
-
-```
-src/
-  app/
-    (auth)/         # Login, signup, password reset
-    (dashboard)/    # Authenticated pages (dashboard, posts, campaigns, projects, etc.)
-    api/            # API routes
-  components/
-    ui/             # Shared UI components
-    projects/       # Project-related components
-    campaigns/      # Campaign-related components
-    launch-posts/   # Launch post components
-    analytics/      # Analytics components
-  hooks/            # Custom React hooks
-  lib/              # Utilities, stores, Supabase clients, auth helpers
-```
-
-## Production
-
-Bullhorn is live at [https://bullhorn.to](https://bullhorn.to).
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
-
-## Security
-
-To report a vulnerability, see [SECURITY.md](SECURITY.md).
+See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation including app structure, API patterns, store patterns, and design system.
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+[AGPL-3.0](LICENSE)
+
+Copyright (C) 2026 Mean Weasel LLC

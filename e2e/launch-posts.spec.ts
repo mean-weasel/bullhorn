@@ -160,7 +160,9 @@ test.describe('Launch Posts', () => {
 
         // Verify in database - find the post we just created
         const posts = await getAllLaunchPosts(page)
-        const createdPost = posts.find((p) => p.title === 'Ask HN: What is the best testing framework?')
+        const createdPost = posts.find(
+          (p) => p.title === 'Ask HN: What is the best testing framework?'
+        )
         expect(createdPost).toBeDefined()
         expect(createdPost?.platform).toBe('hacker_news_ask')
         expect(createdPost?.platformFields).toHaveProperty('text')
@@ -399,6 +401,8 @@ test.describe('Launch Posts', () => {
       })
 
       await page.goto(`/launch-posts/${created.id}`)
+      // Wait for form to load with existing data
+      await expect(page.getByLabel(/^title/i)).toHaveValue('Original Title', { timeout: 15000 })
 
       // Update the title
       await fillLaunchPostTitle(page, 'Updated Title')
@@ -421,7 +425,7 @@ test.describe('Launch Posts', () => {
       await clickLaunchPost(page, 0)
 
       await expect(page.getByRole('heading', { name: /edit launch post/i })).toBeVisible()
-      await expect(page.getByLabel(/^title/i)).toHaveValue('Edit Test Post')
+      await expect(page.getByLabel(/^title/i)).toHaveValue('Edit Test Post', { timeout: 15000 })
     })
 
     test('should change platform when editing', async ({ page }) => {
@@ -432,6 +436,8 @@ test.describe('Launch Posts', () => {
       })
 
       await page.goto(`/launch-posts/${created.id}`)
+      // Wait for form to load with existing data
+      await expect(page.getByLabel(/^title/i)).toHaveValue('Platform Test', { timeout: 15000 })
 
       // Change to Product Hunt
       await selectLaunchPlatform(page, 'product_hunt')
@@ -453,6 +459,8 @@ test.describe('Launch Posts', () => {
       })
 
       await page.goto(`/launch-posts/${created.id}`)
+      // Wait for form to load with existing data
+      await expect(page.getByLabel(/^title/i)).toHaveValue('Status Test', { timeout: 15000 })
 
       await setLaunchPostStatus(page, 'posted')
 

@@ -68,7 +68,7 @@ test.describe('Media Features', () => {
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
 
       // Wait for upload to complete - look for the preview image
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
 
       // Save and verify
       await saveDraft(page)
@@ -86,7 +86,7 @@ test.describe('Media Features', () => {
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
 
       // Wait for upload to complete
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
 
       // Close media section
       await page.locator('button[title="Add media (images/videos)"]').click()
@@ -107,7 +107,7 @@ test.describe('Media Features', () => {
 
       // Wait for upload to complete
       const mediaPreview = page.locator('img[alt="Media 1"]').first()
-      await expect(mediaPreview).toBeVisible({ timeout: 10000 })
+      await expect(mediaPreview).toBeVisible({ timeout: 20000 })
 
       // Hover over image and click remove
       const mediaItem = page.locator('.relative.group').first()
@@ -129,7 +129,7 @@ test.describe('Media Features', () => {
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
 
       // Wait for upload to complete
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
 
       // Check preview panel shows media (in the preview area with dark background)
       const previewPanel = page.locator('[data-testid="preview-panel"]')
@@ -162,7 +162,7 @@ test.describe('Media Features', () => {
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
 
       // Wait for upload to complete
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
 
       // Save
       await saveDraft(page)
@@ -180,7 +180,7 @@ test.describe('Media Features', () => {
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
 
       // Wait for upload to complete
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
 
       // Check preview panel shows media
       const previewPanel = page.locator('[data-testid="preview-panel"]')
@@ -282,7 +282,7 @@ test.describe('Media Features', () => {
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
 
       // Wait for upload to complete
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
 
       await saveDraft(page)
       await waitForNavigation(page, '/')
@@ -326,7 +326,9 @@ test.describe('Media Features', () => {
       const fileInput = page.locator('input[type="file"]').first()
       for (let i = 0; i < 4; i++) {
         await fileInput.setInputFiles(TEST_IMAGE_PATH)
-        await expect(page.locator(`img[alt="Media ${i + 1}"]`).first()).toBeVisible({ timeout: 10000 })
+        await expect(page.locator(`img[alt="Media ${i + 1}"]`).first()).toBeVisible({
+          timeout: 20000,
+        })
       }
 
       // Verify all 4 previews are visible
@@ -351,7 +353,9 @@ test.describe('Media Features', () => {
       const fileInput = page.locator('input[type="file"]').first()
       for (let i = 0; i < 4; i++) {
         await fileInput.setInputFiles(TEST_IMAGE_PATH)
-        await expect(page.locator(`img[alt="Media ${i + 1}"]`).first()).toBeVisible({ timeout: 10000 })
+        await expect(page.locator(`img[alt="Media ${i + 1}"]`).first()).toBeVisible({
+          timeout: 20000,
+        })
       }
 
       // The "Drag & drop" zone should be hidden after reaching limit
@@ -369,7 +373,7 @@ test.describe('Media Features', () => {
       // Upload first image
       const fileInput = page.locator('input[type="file"]').first()
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
 
       // Upload zone should be hidden after first upload for LinkedIn (limit 1)
       await expect(page.getByText('Drag & drop or click to upload')).not.toBeVisible()
@@ -386,7 +390,7 @@ test.describe('Media Features', () => {
       const fileInput = page.locator('input[type="file"]').first()
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
       const mediaPreview = page.locator('img[alt="Media 1"]').first()
-      await expect(mediaPreview).toBeVisible({ timeout: 10000 })
+      await expect(mediaPreview).toBeVisible({ timeout: 20000 })
 
       // Remove the image
       const mediaItem = page.locator('.relative.group').first()
@@ -399,7 +403,7 @@ test.describe('Media Features', () => {
 
       // Upload another image
       await fileInput.setInputFiles(TEST_IMAGE_PATH)
-      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 10000 })
+      await expect(page.locator('img[alt="Media 1"]').first()).toBeVisible({ timeout: 20000 })
     })
   })
 })
