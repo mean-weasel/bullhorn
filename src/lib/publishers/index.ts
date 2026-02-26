@@ -18,7 +18,7 @@ export interface PublishOutput {
   retryable?: boolean
 }
 
-export type Publisher = (input: PublishInput) => Promise<PublishOutput>
+type Publisher = (input: PublishInput) => Promise<PublishOutput>
 
 const publishers: Record<Platform, Publisher> = {
   twitter: publishToTwitter,

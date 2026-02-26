@@ -3,7 +3,7 @@ import { dedup } from './requestDedup'
 import type { SocialAccount, SocialProvider } from './utils'
 
 // Re-export types for consumer convenience
-export type { SocialAccount, SocialProvider, SocialAccountStatus } from './utils'
+export type { SocialAccount, SocialProvider } from './utils'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api/social-accounts'
