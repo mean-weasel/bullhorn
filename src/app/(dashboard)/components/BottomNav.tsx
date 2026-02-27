@@ -14,7 +14,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: Home, label: 'Home', path: '/dashboard' },
-  { icon: Calendar, label: 'Posts', path: '/posts' },
+  { icon: Calendar, label: 'Calendar', path: '/calendar' },
   { icon: Plus, label: 'New', path: '/new', isAction: true },
   { icon: FileText, label: 'Blog', path: '/blog' },
   { icon: Settings, label: 'More', path: '/settings' },
