@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Settings, Plus, FolderOpen, FileText, FolderKanban, Rocket } from 'lucide-react'
+import { Settings, Plus, FolderOpen, FileText, FolderKanban, Rocket, Calendar } from 'lucide-react'
 import { UserMenu } from './UserMenu'
 import { UsageBanner } from '@/components/ui/UsageBanner'
 
@@ -55,6 +55,18 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
 
           {/* Desktop nav icons - hidden on mobile */}
           <nav aria-label="Main navigation" className="hidden md:flex items-center gap-2">
+            <Link
+              href="/calendar"
+              className={cn(
+                'p-2 rounded-md text-muted-foreground transition-all',
+                'hover:text-foreground hover:bg-secondary',
+                'border-2 border-transparent hover:border-border',
+                pathname?.startsWith('/calendar') && 'bg-secondary text-foreground border-border'
+              )}
+              aria-label="Calendar"
+            >
+              <Calendar className="w-5 h-5" />
+            </Link>
             <Link
               href="/projects"
               className={cn(

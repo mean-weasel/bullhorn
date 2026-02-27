@@ -35,6 +35,7 @@ import {
   EditorActions,
   PreviewPanel,
 } from '@/components/editor'
+import RecurrencePicker from '@/components/editor/RecurrencePicker'
 import { copyToClipboard } from '@/lib/nativeClipboard'
 import { trackMilestone } from '@/lib/appReview'
 
@@ -714,6 +715,13 @@ export default function EditorPage() {
         <SchedulePicker
           scheduledAt={post.scheduledAt}
           onScheduleChange={(isoString) => setPost((prev) => ({ ...prev, scheduledAt: isoString }))}
+          className="mb-4 md:mb-6"
+        />
+
+        <RecurrencePicker
+          value={post.recurrenceRule ?? null}
+          onChange={(rule) => setPost((prev) => ({ ...prev, recurrenceRule: rule }))}
+          scheduledAt={post.scheduledAt}
           className="mb-4 md:mb-6"
         />
 

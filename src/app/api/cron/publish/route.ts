@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { publishPost } from '@/lib/publishers'
+import { getNextOccurrence } from '@/lib/rrule'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,6 +70,43 @@ async function markPostFailed(
     .eq('id', postId)
 }
 
+/**
+ * If the published post has a recurrence_rule, compute the next occurrence
+ * and insert a new scheduled copy of the post.
+ */
+async function scheduleNextRecurrence(
+  post: DbPostRow,
+  supabase: ReturnType<typeof createServiceClient>
+) {
+  if (!post.recurrence_rule || !post.scheduled_at) return
+
+  const nextDate = getNextOccurrence(post.recurrence_rule, new Date(post.scheduled_at))
+  if (!nextDate) return
+
+  const { error } = await supabase.from('posts').insert({
+    id: crypto.randomUUID(),
+    user_id: post.user_id,
+    platform: post.platform,
+    content: post.content,
+    status: 'scheduled',
+    scheduled_at: nextDate.toISOString(),
+    recurrence_rule: post.recurrence_rule,
+    campaign_id: post.campaign_id ?? null,
+    social_account_id: post.social_account_id ?? null,
+    group_id: post.group_id ?? null,
+    group_type: post.group_type ?? null,
+    notes: post.notes ?? null,
+  })
+
+  if (error) {
+    console.error(`[cron/publish] Failed to schedule next recurrence for ${post.id}:`, error)
+  } else {
+    console.log(
+      `[cron/publish] Scheduled next recurrence for ${post.id} at ${nextDate.toISOString()}`
+    )
+  }
+}
+
 async function processPost(
   post: DbPostRow,
   supabase: ReturnType<typeof createServiceClient>
@@ -134,6 +172,11 @@ export async function GET(request: NextRequest) {
       try {
         const result = await processPost(dbPost as DbPostRow, supabase)
         results.push(result)
+
+        // On successful publish, schedule the next recurrence if applicable
+        if (result.outcome === 'published') {
+          await scheduleNextRecurrence(dbPost as DbPostRow, supabase)
+        }
       } catch (err) {
         console.error(`[cron/publish] Post ${dbPost.id} error:`, err)
         results.push({

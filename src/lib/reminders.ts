@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { dedup, createDedupKey } from './requestDedup'
 import { scheduleLocalNotification, cancelLocalNotification } from './localNotifications'
+import { getOccurrencesInRange } from './rrule'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,6 +15,8 @@ export interface Reminder {
   postId?: string
   campaignId?: string
   isCompleted: boolean
+  recurrenceRule?: string | null
+  sourceEventId?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -24,6 +27,8 @@ interface CreateReminderInput {
   remindAt: string
   postId?: string
   campaignId?: string
+  recurrenceRule?: string
+  sourceEventId?: string
 }
 
 interface UpdateReminderInput {
@@ -33,6 +38,8 @@ interface UpdateReminderInput {
   postId?: string | null
   campaignId?: string | null
   isCompleted?: boolean
+  recurrenceRule?: string | null
+  sourceEventId?: string | null
 }
 
 /** Row shape returned by `select('*')` on the `reminders` table */
@@ -45,6 +52,8 @@ export interface DbReminder {
   post_id: string | null
   campaign_id: string | null
   is_completed: boolean
+  recurrence_rule: string | null
+  source_event_id: string | null
   created_at: string
   updated_at: string
 }
@@ -57,6 +66,8 @@ interface DbReminderInsert {
   post_id?: string | null
   campaign_id?: string | null
   is_completed?: boolean
+  recurrence_rule?: string | null
+  source_event_id?: string | null
 }
 
 // ---------------------------------------------------------------------------
@@ -72,6 +83,8 @@ export function transformReminderFromDb(dbReminder: DbReminder): Reminder {
     postId: dbReminder.post_id ?? undefined,
     campaignId: dbReminder.campaign_id ?? undefined,
     isCompleted: dbReminder.is_completed,
+    recurrenceRule: dbReminder.recurrence_rule,
+    sourceEventId: dbReminder.source_event_id,
     createdAt: dbReminder.created_at,
     updatedAt: dbReminder.updated_at,
   }
@@ -85,7 +98,60 @@ export function transformReminderToDb(reminder: UpdateReminderInput): DbReminder
   if (reminder.postId !== undefined) result.post_id = reminder.postId
   if (reminder.campaignId !== undefined) result.campaign_id = reminder.campaignId
   if (reminder.isCompleted !== undefined) result.is_completed = reminder.isCompleted
+  if (reminder.recurrenceRule !== undefined) result.recurrence_rule = reminder.recurrenceRule
+  if (reminder.sourceEventId !== undefined) result.source_event_id = reminder.sourceEventId
   return result
+}
+
+// ---------------------------------------------------------------------------
+// Recurrence expansion (pure function, exported for testability)
+// ---------------------------------------------------------------------------
+
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
+
+/**
+ * Expand recurring reminders into virtual instances and merge with one-time
+ * reminders.  Only uncompleted, future reminders are included.
+ *
+ * @param reminders  All reminders from the store
+ * @param now        Current timestamp (injectable for testing)
+ * @param limit      Maximum number of results
+ */
+export function expandUpcomingReminders(
+  reminders: Reminder[],
+  now: Date = new Date(),
+  limit = 5
+): Reminder[] {
+  const rangeEnd = new Date(now.getTime() + THIRTY_DAYS_MS)
+  const result: Reminder[] = []
+
+  for (const reminder of reminders) {
+    // Skip completed reminders entirely
+    if (reminder.isCompleted) continue
+
+    if (reminder.recurrenceRule) {
+      // Expand the recurrence rule into concrete dates within the window
+      const occurrences = getOccurrencesInRange(reminder.recurrenceRule, now, rangeEnd)
+
+      for (const date of occurrences) {
+        result.push({
+          ...reminder,
+          id: `${reminder.id}-${date.toISOString()}`,
+          remindAt: date.toISOString(),
+        })
+      }
+    } else {
+      // One-time reminder — include only if in the future
+      if (new Date(reminder.remindAt) > now) {
+        result.push(reminder)
+      }
+    }
+  }
+
+  // Sort by remindAt ascending, then apply limit
+  result.sort((a, b) => new Date(a.remindAt).getTime() - new Date(b.remindAt).getTime())
+
+  return result.slice(0, limit)
 }
 
 // ---------------------------------------------------------------------------
@@ -207,10 +273,6 @@ export const useRemindersStore = create<RemindersState & RemindersActions>()((se
   },
 
   getUpcomingReminders: (limit = 5) => {
-    const reminders = get().reminders
-    return reminders
-      .filter((r) => !r.isCompleted && new Date(r.remindAt) > new Date())
-      .sort((a, b) => new Date(a.remindAt).getTime() - new Date(b.remindAt).getTime())
-      .slice(0, limit)
+    return expandUpcomingReminders(get().reminders, new Date(), limit)
   },
 }))

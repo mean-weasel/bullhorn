@@ -20,6 +20,8 @@ import { cn } from '@/lib/utils'
 import { ProjectSelector } from '@/components/projects/ProjectSelector'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { RemindersList } from '@/components/reminders/RemindersList'
+import { useRemindersStore } from '@/lib/reminders'
+import { CalendarWidget } from './CalendarWidget'
 import {
   DashboardPostCard as PostCard,
   ProjectMiniCard,
@@ -28,6 +30,7 @@ import {
 } from './DashboardComponents'
 import { SkeletonCard, SkeletonStatBar } from '@/components/ui/Skeleton'
 import { WelcomeModal } from '@/components/ui/WelcomeModal'
+import { NudgeBanner } from '@/components/calendar/NudgeBanner'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -41,6 +44,9 @@ export default function DashboardPage() {
   const projects = useProjectsStore((s) => s.projects)
   const fetchProjects = useProjectsStore((s) => s.fetchProjects)
   const projectsInitialized = useProjectsStore((s) => s.initialized)
+  const allReminders = useRemindersStore((s) => s.reminders)
+  const fetchReminders = useRemindersStore((s) => s.fetchReminders)
+  const remindersInitialized = useRemindersStore((s) => s.initialized)
 
   // Project filter state
   const [selectedProject, setSelectedProject] = useState<'all' | 'unassigned' | string>('all')
@@ -64,6 +70,18 @@ export default function DashboardPage() {
       fetchProjects()
     }
   }, [projectsInitialized, fetchProjects])
+
+  useEffect(() => {
+    if (!remindersInitialized) {
+      fetchReminders()
+    }
+  }, [remindersInitialized, fetchReminders])
+
+  // Memoized: Scheduled posts for calendar widget
+  const scheduledPostsForCalendar = useMemo(
+    () => allPosts.filter((p) => p.status === 'scheduled' && p.scheduledAt),
+    [allPosts]
+  )
 
   // Memoized: Exclude archived posts
   const activePosts = useMemo(() => allPosts.filter((p) => p.status !== 'archived'), [allPosts])
@@ -180,6 +198,9 @@ export default function DashboardPage() {
     <>
       <WelcomeModal />
       <div className="min-h-[calc(100vh-4rem)] p-4 md:p-6 max-w-5xl mx-auto">
+        {/* Smart nudge banner for upcoming events */}
+        <NudgeBanner className="mb-4" />
+
         {/* Stats bar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))]">
           <div className="flex-1 flex items-center gap-4 sm:gap-6 overflow-x-auto">
@@ -329,17 +350,22 @@ export default function DashboardPage() {
               ))}
             </Section>
 
-            {/* Reminders section - full width */}
-            <div className="lg:col-span-2 xl:col-span-3">
-              <Section
-                title="Upcoming Reminders"
-                icon={Bell}
-                viewAllLink="/dashboard"
-                viewAllLabel="Manage reminders"
-                isEmpty={false}
-              >
-                <RemindersList limit={5} showAddButton={true} />
-              </Section>
+            {/* Week Ahead + Reminders - full width, side-by-side on lg+ */}
+            <div className="lg:col-span-2 xl:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <CalendarWidget posts={scheduledPostsForCalendar} reminders={allReminders} />
+              </div>
+              <div className="lg:col-span-2">
+                <Section
+                  title="Upcoming Reminders"
+                  icon={Bell}
+                  viewAllLink="/dashboard"
+                  viewAllLabel="Manage reminders"
+                  isEmpty={false}
+                >
+                  <RemindersList limit={5} showAddButton={true} />
+                </Section>
+              </div>
             </div>
 
             {/* Projects section - full width */}

@@ -44,6 +44,7 @@ export interface DbPost {
   social_account_id?: string | null
   content: PlatformContent
   publish_result?: PublishResult | null
+  recurrence_rule?: string | null
   user_id: string
 }
 
@@ -62,6 +63,7 @@ export interface DbPostInsert {
   social_account_id?: string | null
   content?: PlatformContent
   publish_result?: PublishResult | null
+  recurrence_rule?: string | null
 }
 
 /** Row shape returned by `select('*')` on the `campaigns` table */
@@ -208,6 +210,7 @@ export function transformPostFromDb(dbPost: DbPost): Post {
     socialAccountId: dbPost.social_account_id ?? undefined,
     content: dbPost.content,
     publishResult: dbPost.publish_result ?? undefined,
+    recurrenceRule: dbPost.recurrence_rule ?? null,
   }
 }
 
@@ -229,6 +232,7 @@ export function transformPostToDb(post: Partial<Post>): DbPostInsert {
     social_account_id: post.socialAccountId,
     content: post.content,
     publish_result: post.publishResult,
+    recurrence_rule: post.recurrenceRule ?? null,
   }
 }
 
