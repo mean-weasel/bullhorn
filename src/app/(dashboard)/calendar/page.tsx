@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { format, isToday, isSameDay } from 'date-fns'
 import { Calendar, Bell } from 'lucide-react'
-import { usePostsStore } from '@/lib/storage'
+import { useCalendarStore } from '@/lib/calendarStore'
 import { useRemindersStore } from '@/lib/reminders'
 import { getPostPreviewText } from '@/lib/posts'
 import { cn } from '@/lib/utils'
@@ -15,30 +15,25 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>('month')
 
-  // Posts store
-  const allPosts = usePostsStore((s) => s.posts)
-  const fetchPosts = usePostsStore((s) => s.fetchPosts)
-  const postsInitialized = usePostsStore((s) => s.initialized)
+  // Calendar store — fetches posts + reminders via /api/calendar
+  const calendarPosts = useCalendarStore((s) => s.posts)
+  const fetchCalendarData = useCalendarStore((s) => s.fetchCalendarData)
 
-  // Reminders store
+  // Reminders store (for today's agenda sidebar)
   const reminders = useRemindersStore((s) => s.reminders)
   const fetchReminders = useRemindersStore((s) => s.fetchReminders)
   const remindersInitialized = useRemindersStore((s) => s.initialized)
 
-  // Fetch data on mount
+  // Fetch calendar data for the current month range
   useEffect(() => {
-    if (!postsInitialized) fetchPosts()
-  }, [postsInitialized, fetchPosts])
+    const start = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+    const end = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59)
+    fetchCalendarData(start.toISOString(), end.toISOString())
+  }, [currentDate, fetchCalendarData])
 
   useEffect(() => {
     if (!remindersInitialized) fetchReminders()
   }, [remindersInitialized, fetchReminders])
-
-  // Filter posts: non-archived with scheduledAt
-  const calendarPosts = useMemo(
-    () => allPosts.filter((p) => p.status !== 'archived' && p.scheduledAt),
-    [allPosts]
-  )
 
   // Today's posts
   const todayPosts = useMemo(

@@ -3,8 +3,8 @@ import { dedup, createDedupKey } from './requestDedup'
 import { Post } from './posts'
 import { Reminder } from './reminders'
 
-// Re-export Reminder as CalendarReminder for calendar-specific usage
-export type CalendarReminder = Reminder
+// Alias for calendar-specific usage
+type CalendarReminder = Reminder
 
 const API_BASE = '/api'
 
