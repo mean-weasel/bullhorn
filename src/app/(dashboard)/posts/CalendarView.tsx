@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   format,
@@ -15,9 +16,11 @@ import {
   isBefore,
   startOfDay,
 } from 'date-fns'
-import { ChevronLeft, ChevronRight, Bell } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Bell, Megaphone } from 'lucide-react'
 import { Post, getPostPreviewText } from '@/lib/posts'
 import { cn } from '@/lib/utils'
+import type { CommunityEvent, EventSubscription } from '@/lib/communityEvents'
+import { getOccurrencesInRange } from '@/lib/rrule'
 
 export interface CalendarReminder {
   id: string
@@ -26,9 +29,15 @@ export interface CalendarReminder {
   isCompleted: boolean
 }
 
+export interface SubscribedEventEntry {
+  event: CommunityEvent
+  subscription: EventSubscription
+}
+
 interface CalendarViewProps {
   posts: Post[]
   reminders?: CalendarReminder[]
+  subscribedEvents?: SubscribedEventEntry[]
   currentDate: Date
   onDateChange: (date: Date) => void
   viewMode?: 'month' | 'week'
@@ -126,29 +135,70 @@ function groupRemindersByDate(reminders: CalendarReminder[]) {
   )
 }
 
+/** Expand subscribed events into a date-keyed map of event names + platforms. */
+function expandEventsByDate(
+  entries: SubscribedEventEntry[],
+  rangeStart: Date,
+  rangeEnd: Date
+): Record<string, { name: string; platform: string }[]> {
+  const result: Record<string, { name: string; platform: string }[]> = {}
+  for (const { event } of entries) {
+    const dates = getOccurrencesInRange(event.recurrenceRule, rangeStart, rangeEnd)
+    for (const d of dates) {
+      const key = format(d, 'yyyy-MM-dd')
+      if (!result[key]) result[key] = []
+      result[key].push({ name: event.name, platform: event.platform })
+    }
+  }
+  return result
+}
+
+/** Small colored dot representing a community event on a calendar day. */
+function EventDot({ name, platform }: { name: string; platform: string }) {
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold truncate border',
+        'bg-sticker-purple/10 border-sticker-purple/30 text-sticker-purple',
+        platform === 'twitter' && 'bg-twitter/5 border-twitter/20 text-twitter',
+        platform === 'linkedin' && 'bg-linkedin/5 border-linkedin/20 text-linkedin',
+        platform === 'reddit' && 'bg-reddit/5 border-reddit/20 text-reddit'
+      )}
+      title={name}
+    >
+      <Megaphone className="w-2.5 h-2.5 flex-shrink-0" />
+      {name.slice(0, 16)}
+    </div>
+  )
+}
+
 /** A single day cell in the month grid. */
 function MonthDayCell({
   day,
   currentDate,
   dayPosts,
   dayReminders,
+  dayEvents = [],
 }: {
   day: Date
   currentDate: Date
   dayPosts: Post[]
   dayReminders: CalendarReminder[]
+  dayEvents?: { name: string; platform: string }[]
 }) {
   const router = useRouter()
   const dateKey = format(day, 'yyyy-MM-dd')
   const isCurrentMonth = isSameMonth(day, currentDate)
   const isCurrentDay = isToday(day)
   const isPast = isBefore(startOfDay(day), startOfDay(new Date())) && !isCurrentDay
-  const totalItems = dayPosts.length + dayReminders.length
+  const totalItems = dayPosts.length + dayReminders.length + dayEvents.length
   const maxVisible = 3
   const visiblePosts = dayPosts.slice(0, maxVisible)
-  const remainingPostSlots = maxVisible - visiblePosts.length
-  const visibleReminders = dayReminders.slice(0, Math.max(0, remainingPostSlots))
-  const overflow = totalItems - visiblePosts.length - visibleReminders.length
+  const slotsAfterPosts = maxVisible - visiblePosts.length
+  const visibleReminders = dayReminders.slice(0, Math.max(0, slotsAfterPosts))
+  const slotsAfterReminders = slotsAfterPosts - visibleReminders.length
+  const visibleEvents = dayEvents.slice(0, Math.max(0, slotsAfterReminders))
+  const overflow = totalItems - visiblePosts.length - visibleReminders.length - visibleEvents.length
 
   return (
     <div
@@ -186,6 +236,9 @@ function MonthDayCell({
         {visibleReminders.map((r) => (
           <ReminderBadge key={r.id} reminder={r} />
         ))}
+        {visibleEvents.map((evt, idx) => (
+          <EventDot key={`evt-${idx}`} name={evt.name} platform={evt.platform} />
+        ))}
         {overflow > 0 && (
           <span className="text-[10px] text-muted-foreground font-medium">+{overflow} more</span>
         )}
@@ -199,10 +252,12 @@ function MonthGrid({
   currentDate,
   postsByDate,
   remindersByDate,
+  eventsByDate = {},
 }: {
   currentDate: Date
   postsByDate: Record<string, Post[]>
   remindersByDate: Record<string, CalendarReminder[]>
+  eventsByDate?: Record<string, { name: string; platform: string }[]>
 }) {
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
@@ -241,6 +296,7 @@ function MonthGrid({
                 currentDate={currentDate}
                 dayPosts={postsByDate[dateKey] || []}
                 dayReminders={remindersByDate[dateKey] || []}
+                dayEvents={eventsByDate[dateKey] || []}
               />
             )
           })}
@@ -255,10 +311,12 @@ function WeekDayRow({
   day,
   dayPosts,
   dayReminders,
+  dayEvents = [],
 }: {
   day: Date
   dayPosts: Post[]
   dayReminders: CalendarReminder[]
+  dayEvents?: { name: string; platform: string }[]
 }) {
   const router = useRouter()
   const isCurrentDay = isToday(day)
@@ -281,6 +339,8 @@ function WeekDayRow({
       reminder: r,
     })),
   ].sort((a, b) => a.time.getTime() - b.time.getTime())
+
+  const hasContent = items.length > 0 || dayEvents.length > 0
 
   return (
     <div
@@ -307,7 +367,7 @@ function WeekDayRow({
       </div>
 
       <div className="flex-1 flex flex-col gap-1 min-h-[48px]">
-        {items.length === 0 && (
+        {!hasContent && (
           <div
             onClick={() => !isPast && router.push(`/new?date=${dateKey}`)}
             className={cn(
@@ -318,6 +378,9 @@ function WeekDayRow({
             {isPast ? 'No items' : 'Click to add a post'}
           </div>
         )}
+        {dayEvents.map((evt, idx) => (
+          <WeekEventItem key={`evt-${idx}`} name={evt.name} platform={evt.platform} />
+        ))}
         {items.map((item) => {
           if (item.kind === 'post') {
             return <WeekPostItem key={item.post.id} post={item.post} time={item.time} />
@@ -387,15 +450,37 @@ function WeekReminderItem({ reminder, time }: { reminder: CalendarReminder; time
   )
 }
 
+/** A community event item rendered in week view. */
+function WeekEventItem({ name, platform }: { name: string; platform: string }) {
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-2 px-2 py-1.5 rounded border',
+        'bg-sticker-purple/10 border-sticker-purple/30',
+        platform === 'twitter' && 'bg-twitter/5 border-twitter/20',
+        platform === 'linkedin' && 'bg-linkedin/5 border-linkedin/20',
+        platform === 'reddit' && 'bg-reddit/5 border-reddit/20'
+      )}
+      title={name}
+    >
+      <Megaphone className="w-3 h-3 text-sticker-purple flex-shrink-0" />
+      <span className="text-[11px] font-bold text-muted-foreground w-12 flex-shrink-0">Event</span>
+      <span className="text-xs font-semibold truncate">{name.slice(0, 50)}</span>
+    </div>
+  )
+}
+
 /** Week view: vertical list of 7 days with time-sorted posts and reminders. */
 function WeekGrid({
   currentDate,
   postsByDate,
   remindersByDate,
+  eventsByDate = {},
 }: {
   currentDate: Date
   postsByDate: Record<string, Post[]>
   remindersByDate: Record<string, CalendarReminder[]>
+  eventsByDate?: Record<string, { name: string; platform: string }[]>
 }) {
   const weekStart = startOfWeek(currentDate)
   const weekEnd = endOfWeek(currentDate)
@@ -411,6 +496,7 @@ function WeekGrid({
             day={day}
             dayPosts={postsByDate[dateKey] || []}
             dayReminders={remindersByDate[dateKey] || []}
+            dayEvents={eventsByDate[dateKey] || []}
           />
         )
       })}
@@ -421,6 +507,7 @@ function WeekGrid({
 export function CalendarView({
   posts,
   reminders = [],
+  subscribedEvents = [],
   currentDate,
   onDateChange,
   viewMode = 'month',
@@ -429,6 +516,14 @@ export function CalendarView({
   const postsByDate = groupPostsByDate(posts)
   const remindersByDate = groupRemindersByDate(reminders)
   const isWeek = viewMode === 'week'
+
+  // Expand subscribed community events into the current view range
+  const eventsByDate = useMemo(() => {
+    if (subscribedEvents.length === 0) return {}
+    const rangeStart = isWeek ? startOfWeek(currentDate) : startOfMonth(currentDate)
+    const rangeEnd = isWeek ? endOfWeek(currentDate) : endOfMonth(currentDate)
+    return expandEventsByDate(subscribedEvents, rangeStart, rangeEnd)
+  }, [subscribedEvents, currentDate, isWeek])
 
   const navigatePrev = () => {
     if (isWeek) {
@@ -506,12 +601,14 @@ export function CalendarView({
           currentDate={currentDate}
           postsByDate={postsByDate}
           remindersByDate={remindersByDate}
+          eventsByDate={eventsByDate}
         />
       ) : (
         <MonthGrid
           currentDate={currentDate}
           postsByDate={postsByDate}
           remindersByDate={remindersByDate}
+          eventsByDate={eventsByDate}
         />
       )}
     </div>
