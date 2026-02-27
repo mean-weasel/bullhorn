@@ -97,6 +97,7 @@ export interface Post {
   socialAccountId?: string
   content: PlatformContent
   publishResult?: PublishResult
+  recurrenceRule?: string | null
 }
 
 // Character limits per platform
