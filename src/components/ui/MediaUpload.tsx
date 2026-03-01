@@ -241,6 +241,7 @@ function MediaPreviewItem({ filename, index, onRemove }: MediaPreviewItemProps) 
             src={url}
             className="w-full h-full object-cover"
             onError={() => setHasError(true)}
+            controls
             muted
             playsInline
           />
@@ -255,14 +256,14 @@ function MediaPreviewItem({ filename, index, onRemove }: MediaPreviewItemProps) 
       </div>
       <button
         onClick={onRemove}
+        aria-label="Remove media"
         className={cn(
           'absolute -top-2 -right-2 p-1.5 rounded-full',
           'bg-destructive text-white border-2 border-border',
-          'opacity-0 group-hover:opacity-100 transition-opacity',
+          'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 transition-opacity',
           'shadow-[2px_2px_0_hsl(var(--border))]',
           'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]'
         )}
-        title="Remove media"
       >
         <X className="w-3 h-3" />
       </button>

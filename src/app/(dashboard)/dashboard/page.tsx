@@ -52,30 +52,24 @@ export default function DashboardPage() {
   const [selectedProject, setSelectedProject] = useState<'all' | 'unassigned' | string>('all')
   const [showCreateProjectModal, setShowCreateProjectModal] = useState(false)
 
-  // Fetch posts, campaigns, and projects on mount
+  // Fetch all stores in parallel on mount
   useEffect(() => {
-    if (!postsInitialized) {
-      fetchPosts()
-    }
-  }, [postsInitialized, fetchPosts])
-
-  useEffect(() => {
-    if (!campaignsInitialized) {
-      fetchCampaigns()
-    }
-  }, [campaignsInitialized, fetchCampaigns])
-
-  useEffect(() => {
-    if (!projectsInitialized) {
-      fetchProjects()
-    }
-  }, [projectsInitialized, fetchProjects])
-
-  useEffect(() => {
-    if (!remindersInitialized) {
-      fetchReminders()
-    }
-  }, [remindersInitialized, fetchReminders])
+    const fetches: Promise<void>[] = []
+    if (!postsInitialized) fetches.push(fetchPosts())
+    if (!campaignsInitialized) fetches.push(fetchCampaigns())
+    if (!projectsInitialized) fetches.push(fetchProjects())
+    if (!remindersInitialized) fetches.push(fetchReminders())
+    if (fetches.length > 0) Promise.all(fetches)
+  }, [
+    postsInitialized,
+    fetchPosts,
+    campaignsInitialized,
+    fetchCampaigns,
+    projectsInitialized,
+    fetchProjects,
+    remindersInitialized,
+    fetchReminders,
+  ])
 
   // Memoized: Scheduled posts for calendar widget
   const scheduledPostsForCalendar = useMemo(

@@ -29,6 +29,11 @@ const ENV_CHECKS: EnvCheck[] = [
 
   // Recommended (app works but features are degraded)
   {
+    name: 'CRON_SECRET',
+    required: false,
+    description: 'Bearer token for cron endpoint authentication',
+  },
+  {
     name: 'UPSTASH_REDIS_REST_URL',
     required: false,
     description: 'Upstash Redis URL for rate limiting',
@@ -109,7 +114,7 @@ export function validateEnv(): void {
   }
 }
 
-// Run validation on module load in production
-if (process.env.NODE_ENV === 'production') {
+// Run validation on module load in non-development environments
+if (process.env.NODE_ENV !== 'development') {
   validateEnv()
 }

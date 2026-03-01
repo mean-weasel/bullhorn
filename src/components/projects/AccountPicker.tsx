@@ -171,7 +171,7 @@ export function AccountPicker({
                       {account.avatarUrl ? (
                         <img
                           src={account.avatarUrl}
-                          alt=""
+                          alt={`${account.displayName || account.handle} avatar`}
                           className="w-full h-full object-cover"
                         />
                       ) : (
