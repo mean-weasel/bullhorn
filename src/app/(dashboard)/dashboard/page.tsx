@@ -198,8 +198,10 @@ export default function DashboardPage() {
     <>
       <WelcomeModal />
       <div className="min-h-[calc(100vh-4rem)] p-4 md:p-6 max-w-5xl mx-auto">
-        {/* Smart nudge banner for upcoming events */}
-        <NudgeBanner className="mb-4" />
+        {/* Smart nudge banner for upcoming events — deferred until core data loads */}
+        {postsInitialized && campaignsInitialized && projectsInitialized && (
+          <NudgeBanner className="mb-4" />
+        )}
 
         {/* Stats bar */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))]">

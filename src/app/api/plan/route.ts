@@ -18,19 +18,9 @@ export async function GET() {
 
     const supabase = await createClient()
 
-    // Get user plan and storage info
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('plan, storage_used_bytes')
-      .eq('id', userId)
-      .single()
-
-    const plan = (profile?.plan as PlanType) || 'free'
-    const storageUsedBytes = profile?.storage_used_bytes || 0
-    const planLimits = PLAN_LIMITS[plan]
-
-    // Count all resources in parallel (head: true returns only the count header, no rows)
-    const [posts, campaigns, projects, blogDrafts, launchPosts] = await Promise.all([
+    // Fetch profile and all resource counts in parallel
+    const [profileResult, posts, campaigns, projects, blogDrafts, launchPosts] = await Promise.all([
+      supabase.from('user_profiles').select('plan, storage_used_bytes').eq('id', userId).single(),
       supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
       supabase.from('campaigns').select('*', { count: 'exact', head: true }).eq('user_id', userId),
       supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', userId),
@@ -43,6 +33,10 @@ export async function GET() {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId),
     ])
+
+    const plan = (profileResult.data?.plan as PlanType) || 'free'
+    const storageUsedBytes = profileResult.data?.storage_used_bytes || 0
+    const planLimits = PLAN_LIMITS[plan]
 
     return NextResponse.json({
       plan,

@@ -150,7 +150,7 @@ export const useCommunityEventsStore = create<CommunityEventsState & CommunityEv
           const res = await fetch(`${API_BASE}/community-events/subscriptions`)
           if (!res.ok) throw new Error('Failed to fetch subscriptions')
           const data = await res.json()
-          set({ subscriptions: data.subscriptions || [], loading: false })
+          set({ subscriptions: data.subscriptions || [], loading: false, initialized: true })
         } catch (error) {
           set({ error: (error as Error).message, loading: false })
         }

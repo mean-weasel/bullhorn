@@ -85,16 +85,14 @@ export function NudgeBanner({ className }: NudgeBannerProps) {
   const subscriptions = useCommunityEventsStore((s) => s.subscriptions)
   const events = useCommunityEventsStore((s) => s.events)
   const initialized = useCommunityEventsStore((s) => s.initialized)
-  const fetchEvents = useCommunityEventsStore((s) => s.fetchEvents)
   const fetchSubscriptions = useCommunityEventsStore((s) => s.fetchSubscriptions)
 
-  // Fetch data on mount if not initialized
+  // Fetch subscriptions on mount (subscriptions include joined event data)
   useEffect(() => {
     if (!initialized) {
-      fetchEvents()
       fetchSubscriptions()
     }
-  }, [initialized, fetchEvents, fetchSubscriptions])
+  }, [initialized, fetchSubscriptions])
 
   const checkNudges = useCallback(async () => {
     if (subscriptions.length === 0) {
