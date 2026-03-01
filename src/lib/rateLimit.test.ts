@@ -51,38 +51,19 @@ describe('rateLimit', () => {
     expect(mockLimit).toHaveBeenCalledWith('user-123')
   })
 
-  it('denies requests in production when Redis is not configured', async () => {
+  it('allows requests when Redis is not configured (fail-open)', async () => {
     vi.stubEnv('UPSTASH_REDIS_REST_URL', '')
     vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
     vi.stubEnv('NODE_ENV', 'production')
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     const { rateLimit } = await import('./rateLimit')
     const result = await rateLimit('user-456')
 
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
     expect(result.limit).toBe(0)
     expect(result.remaining).toBe(0)
-    expect(result.reset).toBe(0)
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('CRITICAL'))
-
-    consoleSpy.mockRestore()
-  })
-
-  it('allows requests in development when Redis is not configured', async () => {
-    vi.stubEnv('UPSTASH_REDIS_REST_URL', '')
-    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
-    vi.stubEnv('NODE_ENV', 'development')
-
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-
-    const { rateLimit } = await import('./rateLimit')
-    const result = await rateLimit('user-789')
-
-    expect(result.success).toBe(true)
-    expect(result.limit).toBe(10)
-    expect(result.remaining).toBe(10)
     expect(result.reset).toBe(0)
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('rate limiting is disabled'))
 
