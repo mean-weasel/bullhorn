@@ -18,13 +18,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (process.env.E2E_TEST_MODE !== 'true') {
     const supabase = await createClient()
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
 
-    if (!user) {
+    if (!session?.user) {
       redirect('/login')
     }
 
+    const user = session.user
     userEmail = user.email
     isEmailVerified = !!user.email_confirmed_at
     isOAuthUser = user.app_metadata?.provider === 'google'
