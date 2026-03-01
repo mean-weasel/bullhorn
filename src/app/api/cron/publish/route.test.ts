@@ -86,29 +86,12 @@ describe('GET /api/cron/publish', () => {
     expect(body.error).toBe('Unauthorized')
   })
 
-  it('allows request when no CRON_SECRET is set (dev mode)', async () => {
-    // No CRON_SECRET in env
-    const postsLimit = vi.fn(() => Promise.resolve({ data: [], error: null }))
-    mockCreateClient.mockReturnValue({
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            lte: vi.fn(() => ({
-              gte: vi.fn(() => ({
-                order: vi.fn(() => ({ limit: postsLimit })),
-              })),
-            })),
-          })),
-        })),
-      })),
-    })
-
+  it('rejects request when no CRON_SECRET is set', async () => {
+    // No CRON_SECRET in env — should fail closed
     const req = makeRequest() // no auth header
     const res = await GET(req)
 
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.processed).toBe(0)
+    expect(res.status).toBe(401)
   })
 
   it('processes scheduled posts that are due', async () => {

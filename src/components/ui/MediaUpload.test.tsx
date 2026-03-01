@@ -124,7 +124,7 @@ describe('MediaUpload', () => {
     )
 
     // Remove buttons are titled "Remove media"
-    const removeButtons = screen.getAllByTitle('Remove media')
+    const removeButtons = screen.getAllByLabelText('Remove media')
     expect(removeButtons).toHaveLength(3)
 
     fireEvent.click(removeButtons[1]) // remove b.jpg
@@ -272,7 +272,7 @@ describe('MediaUpload', () => {
       />
     )
 
-    const removeButton = screen.getByTitle('Remove media')
+    const removeButton = screen.getByLabelText('Remove media')
     fireEvent.click(removeButton)
 
     expect(onMediaChange).toHaveBeenCalledWith([])

@@ -59,6 +59,9 @@ export default function CampaignsPage() {
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   )
 
+  // Pre-compute project lookup map to avoid O(n²) find in render
+  const projectMap = useMemo(() => new Map(projects.map((p) => [p.id, p])), [projects])
+
   // Count by status
   const counts = useMemo(
     () => ({
@@ -200,7 +203,7 @@ export default function CampaignsPage() {
               key={campaign.id}
               campaign={campaign}
               index={i}
-              project={projects.find((p) => p.id === campaign.projectId)}
+              project={campaign.projectId ? projectMap.get(campaign.projectId) : undefined}
               onDelete={(e) => handleDeleteCampaign(campaign.id, e)}
               onMove={() => setMovingCampaign(campaign)}
             />

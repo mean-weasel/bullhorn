@@ -103,8 +103,8 @@ function BlogDraftsContent() {
   const filteredDrafts = searchQuery.trim()
     ? tagFilteredDrafts.filter((d) => {
         const query = searchQuery.toLowerCase()
-        const title = d.title.toLowerCase()
-        const content = d.content.toLowerCase()
+        const title = (d.title || '').toLowerCase()
+        const content = (d.content || '').toLowerCase()
         const notes = (d.notes || '').toLowerCase()
         return title.includes(query) || content.includes(query) || notes.includes(query)
       })
