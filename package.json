@@ -66,6 +66,7 @@
     "react-hot-toast": "^2.6.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "resend": "^6.9.3",
     "rrule": "^2.8.1",
     "tailwind-merge": "^2.2.0",
     "web-push": "^3.6.7",

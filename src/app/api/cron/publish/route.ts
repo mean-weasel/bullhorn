@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { getNextOccurrence } from '@/lib/rrule'
 import { sendPushToUser } from '@/lib/webPushSender'
+import { sendPostReadyEmail } from '@/lib/emailSender'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,7 +145,26 @@ export async function GET(request: NextRequest) {
         console.error(`[notify-due-posts] Push failed for ${dbPost.id}:`, pushErr)
       }
 
-      // TODO: Fire Resend email notification (Workstream 5)
+      // Fire email notification
+      try {
+        const { data: userData } = await supabase.auth.admin.getUserById(dbPost.user_id)
+        if (userData?.user?.email) {
+          const preview =
+            typeof dbPost.content === 'object' && dbPost.content !== null
+              ? (dbPost.content as Record<string, string>).text ||
+                (dbPost.content as Record<string, string>).title ||
+                ''
+              : ''
+          await sendPostReadyEmail(userData.user.email, {
+            id: dbPost.id,
+            platform: dbPost.platform,
+            preview,
+          })
+        }
+      } catch (emailErr) {
+        console.error(`[notify-due-posts] Email failed for ${dbPost.id}:`, emailErr)
+      }
+
       notified++
 
       // Schedule next recurrence if applicable
