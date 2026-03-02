@@ -35,7 +35,7 @@ export function ResponsiveDialog({
   const dialogRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
 
-  // Handle escape key, prevent body scroll, and trap focus via inert
+  // Handle escape key and prevent body scroll
   useEffect(() => {
     if (!open) return
 
@@ -48,20 +48,11 @@ export function ResponsiveDialog({
     document.addEventListener('keydown', handleKeyDown)
     document.body.style.overflow = 'hidden'
 
-    // Set inert on main content to trap focus inside dialog
-    const mainContent = document.getElementById('main-content')
-    if (mainContent) {
-      mainContent.setAttribute('inert', '')
-    }
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
-      if (mainContent) {
-        mainContent.removeAttribute('inert')
-      }
     }
-  }, [open, onClose])
+  }, [open, onClose, preventBackdropClose])
 
   if (!open) return null
 
