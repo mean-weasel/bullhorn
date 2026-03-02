@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, FolderOpen, PauseCircle, Rocket, CheckCircle, Archive } from 'lucide-react'
+import {
+  Plus,
+  FolderOpen,
+  PauseCircle,
+  Rocket,
+  CheckCircle,
+  Archive,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { useProjectsStore } from '@/lib/projects'
 import { Campaign, CampaignStatus } from '@/lib/posts'
@@ -31,6 +40,7 @@ export default function CampaignsPage() {
   const fetchCampaigns = useCampaignsStore((s) => s.fetchCampaigns)
   const initialized = useCampaignsStore((s) => s.initialized)
   const loading = useCampaignsStore((s) => s.loading)
+  const error = useCampaignsStore((s) => s.error)
   const addCampaign = useCampaignsStore((s) => s.addCampaign)
   const deleteCampaign = useCampaignsStore((s) => s.deleteCampaign)
   const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
@@ -98,6 +108,27 @@ export default function CampaignsPage() {
 
   if (loading && !initialized) {
     return <SkeletonListPage count={4} />
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 max-w-5xl mx-auto animate-fade-in">
+        <div className="text-center py-12 bg-card border border-destructive/30 rounded-xl">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-destructive/10 flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-destructive" />
+          </div>
+          <h3 className="font-semibold mb-2 text-destructive">Failed to load campaigns</h3>
+          <p className="text-sm text-muted-foreground mb-4">{error}</p>
+          <button
+            onClick={() => fetchCampaigns()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
