@@ -40,14 +40,16 @@ export async function GET(request: NextRequest) {
         .not('scheduled_at', 'is', null)
         .gte('scheduled_at', `${start}T00:00:00.000Z`)
         .lte('scheduled_at', `${end}T23:59:59.999Z`)
-        .order('scheduled_at', { ascending: true }),
+        .order('scheduled_at', { ascending: true })
+        .limit(500),
       supabase
         .from('reminders')
         .select('*')
         .eq('user_id', userId)
         .gte('remind_at', `${start}T00:00:00.000Z`)
         .lte('remind_at', `${end}T23:59:59.999Z`)
-        .order('remind_at', { ascending: true }),
+        .order('remind_at', { ascending: true })
+        .limit(500),
     ])
 
     const { data: postsData, error: postsError } = postsResult

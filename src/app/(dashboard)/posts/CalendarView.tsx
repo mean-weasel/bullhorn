@@ -202,7 +202,20 @@ function MonthDayCell({
 
   return (
     <div
+      role={!isPast ? 'button' : undefined}
+      tabIndex={!isPast ? 0 : undefined}
+      aria-label={!isPast ? `Create post on ${format(day, 'MMMM d, yyyy')}` : undefined}
       onClick={() => !isPast && router.push(`/new?date=${dateKey}`)}
+      onKeyDown={
+        !isPast
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                router.push(`/new?date=${dateKey}`)
+              }
+            }
+          : undefined
+      }
       className={cn(
         'min-h-[80px] md:min-h-[100px] p-1.5 md:p-2 border-r border-b border-border',
         'flex flex-col gap-1 transition-colors',
@@ -558,6 +571,7 @@ export function CalendarView({
           <div className="flex items-center gap-1">
             <button
               onClick={navigatePrev}
+              aria-label={isWeek ? 'Previous week' : 'Previous month'}
               className={cn(
                 'p-1.5 rounded-md',
                 'text-muted-foreground hover:text-foreground',
@@ -579,6 +593,7 @@ export function CalendarView({
             </button>
             <button
               onClick={navigateNext}
+              aria-label={isWeek ? 'Next week' : 'Next month'}
               className={cn(
                 'p-1.5 rounded-md',
                 'text-muted-foreground hover:text-foreground',

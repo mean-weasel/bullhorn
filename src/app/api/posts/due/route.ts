@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       .eq('user_id', userId)
       .or(`status.eq.ready,and(status.eq.scheduled,scheduled_at.lte.${now})`)
       .order('scheduled_at', { ascending: true })
+      .limit(200)
 
     if (platform) {
       query = query.eq('platform', platform)

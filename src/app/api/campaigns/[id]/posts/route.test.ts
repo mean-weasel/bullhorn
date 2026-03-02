@@ -28,7 +28,12 @@ function buildChain(callIndex: number) {
       resolve(result.singleData || { data: null, error: null }),
   }))
 
+  const limit = vi.fn(() => ({
+    then: (resolve: (v: unknown) => void) => resolve(result.orderData || { data: [], error: null }),
+  }))
+
   const order = vi.fn(() => ({
+    limit,
     then: (resolve: (v: unknown) => void) => resolve(result.orderData || { data: [], error: null }),
   }))
 
