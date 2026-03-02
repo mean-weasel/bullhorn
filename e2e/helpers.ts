@@ -1170,12 +1170,14 @@ export async function clickLaunchPost(page: Page, index: number = 0) {
  * Delete a launch post from the list
  */
 export async function deleteLaunchPost(page: Page, index: number = 0) {
-  // Set up dialog handler to accept the confirm dialog
-  page.once('dialog', (dialog) => dialog.accept())
-
   await openLaunchPostMenu(page, index)
-  // Click Delete in the dropdown
+  // Click Delete in the dropdown menu to open confirm dialog
   await page.getByRole('button', { name: 'Delete' }).click()
+
+  // Confirm in the ConfirmDialog
+  const dialog = page.getByRole('alertdialog')
+  await dialog.waitFor({ state: 'visible' })
+  await dialog.getByRole('button', { name: 'Delete' }).click()
 
   // Wait for the deletion to complete
   await page.waitForTimeout(500)
