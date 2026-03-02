@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, parseJsonBody } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -7,7 +7,9 @@ export async function POST(request: Request) {
   try {
     const { userId } = await requireAuth()
     const supabase = await createClient()
-    const { token, platform = 'ios' } = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const { token, platform = 'ios' } = jsonResult.data as Record<string, unknown>
 
     if (!token || typeof token !== 'string') {
       return Response.json({ error: 'Token is required' }, { status: 400 })
@@ -38,7 +40,9 @@ export async function DELETE(request: Request) {
   try {
     const { userId } = await requireAuth()
     const supabase = await createClient()
-    const { token } = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const { token } = jsonResult.data as Record<string, unknown>
 
     if (!token || typeof token !== 'string') {
       return Response.json({ error: 'Token is required' }, { status: 400 })

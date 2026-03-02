@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, parseJsonBody } from '@/lib/auth'
 import { z } from 'zod'
 
 const importPostSchema = z.object({
@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = importSchema.safeParse(body)
 
     if (!parsed.success) {

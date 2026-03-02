@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, validateScopes } from '@/lib/auth'
+import { requireAuth, validateScopes, parseJsonBody } from '@/lib/auth'
 import { transformLaunchPostFromDb } from '@/lib/utils'
 import { z } from 'zod'
 
@@ -96,7 +96,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const { id } = await params
     const supabase = await createClient()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = updateLaunchPostSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
