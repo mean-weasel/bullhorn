@@ -291,6 +291,7 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
           placeholder="Post title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          maxLength={300}
           className={cn(
             'w-full text-2xl md:text-3xl font-display font-bold',
             'bg-transparent border-none outline-none',

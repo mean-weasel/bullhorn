@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, FolderKanban, AlertCircle, RefreshCw } from 'lucide-react'
 import { useProjectsStore, useProjectsLoading, useProjectsError } from '@/lib/projects'
@@ -10,6 +10,7 @@ import { ProjectCard } from '@/components/projects/ProjectCard'
 import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
 import { LimitGate } from '@/components/ui/LimitGate'
 import { SkeletonListPage } from '@/components/ui/Skeleton'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function ProjectsPage() {
   const loading = useProjectsLoading()
   const error = useProjectsError()
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!initialized) {
@@ -46,17 +48,18 @@ export default function ProjectsPage() {
     [campaigns]
   )
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (
-      confirm(
-        'Are you sure you want to delete this project? Campaigns will be unassigned but not deleted.'
-      )
-    ) {
-      await deleteProject(id)
-    }
+    setDeleteId(id)
   }
+
+  const confirmDelete = useCallback(async () => {
+    if (deleteId) {
+      await deleteProject(deleteId)
+      setDeleteId(null)
+    }
+  }, [deleteId, deleteProject])
 
   // Sort by most recent first
   const sortedProjects = [...projects].sort(
@@ -162,6 +165,17 @@ export default function ProjectsPage() {
         onSuccess={(projectId) => {
           router.push(`/projects/${projectId}`)
         }}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={!!deleteId}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+        title="Delete Project"
+        description="Are you sure you want to delete this project? Campaigns will be unassigned but not deleted."
+        confirmText="Delete"
+        variant="danger"
       />
     </div>
   )

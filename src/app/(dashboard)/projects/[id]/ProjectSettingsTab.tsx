@@ -57,6 +57,7 @@ export function ProjectSettingsTab({
               type="text"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
+              maxLength={200}
               className={cn(
                 'w-full px-3 py-2.5 rounded-lg',
                 'bg-background border border-border',
@@ -71,6 +72,7 @@ export function ProjectSettingsTab({
               onChange={(e) => setEditDescription(e.target.value)}
               placeholder="Describe this project..."
               rows={3}
+              maxLength={2000}
               className={cn(
                 'w-full px-3 py-2.5 rounded-lg resize-none',
                 'bg-background border border-border',
@@ -207,6 +209,7 @@ function BrandKitSection({
             value={editHashtags}
             onChange={(e) => setEditHashtags(e.target.value)}
             placeholder="product, launch, marketing"
+            maxLength={500}
             className={cn(
               'w-full px-3 py-2.5 rounded-lg',
               'bg-background border border-border',
