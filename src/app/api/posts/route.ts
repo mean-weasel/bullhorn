@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
-import { requireAuth, validateScopes, type ApiKeyScope } from '@/lib/auth'
+import { requireAuth, validateScopes, parseJsonBody, type ApiKeyScope } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
@@ -123,7 +123,9 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = createPostSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
