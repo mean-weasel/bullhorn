@@ -74,24 +74,19 @@ export default function EditorPage() {
   const [pendingPlatform, setPendingPlatform] = useState<Platform | null>(null)
   const [showCampaignDropdown, setShowCampaignDropdown] = useState(false)
 
-  // Fetch posts on mount if not initialized (needed for direct navigation to /edit/:id)
+  // Fetch stores on mount if not initialized (needed for direct navigation to /edit/:id)
   useEffect(() => {
-    if (!postsInitialized) {
-      fetchPosts()
-    }
-  }, [postsInitialized, fetchPosts])
-
-  // Fetch campaigns on mount
-  useEffect(() => {
-    if (!campaignsInitialized) {
-      fetchCampaigns()
-    }
-  }, [campaignsInitialized, fetchCampaigns])
-
-  // Fetch social accounts on mount
-  useEffect(() => {
+    if (!postsInitialized) fetchPosts()
+    if (!campaignsInitialized) fetchCampaigns()
     if (!accountsInitialized) fetchAccounts()
-  }, [accountsInitialized, fetchAccounts])
+  }, [
+    postsInitialized,
+    fetchPosts,
+    campaignsInitialized,
+    fetchCampaigns,
+    accountsInitialized,
+    fetchAccounts,
+  ])
 
   // Form state
   const [post, setPost] = useState<Post>(() => {
