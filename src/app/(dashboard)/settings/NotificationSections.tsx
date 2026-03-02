@@ -191,8 +191,12 @@ export function EmailNotificationsSection({
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         <Mail className="w-4 h-4 inline-block mr-1 -mt-0.5" /> Email Notifications
       </h2>
-      <p className="text-sm text-muted-foreground mb-4">
+      <p className="text-sm text-muted-foreground mb-2">
         Choose which email notifications you&apos;d like to receive.
+      </p>
+      <p className="text-xs text-muted-foreground mb-4 italic">
+        Email notifications coming soon. Your preferences are saved and will take effect when email
+        delivery is enabled.
       </p>
 
       {emailPrefsLoading ? (
@@ -200,7 +204,7 @@ export function EmailNotificationsSection({
           <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
         </div>
       ) : emailPrefs ? (
-        <div className="space-y-1">
+        <div className="space-y-1 opacity-50 pointer-events-none">
           {(
             [
               {
