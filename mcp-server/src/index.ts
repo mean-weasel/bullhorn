@@ -279,6 +279,89 @@ const TOOLS = [
       required: ['query'],
     },
   },
+  // Publish workflow tools
+  {
+    name: 'get_due_posts',
+    description:
+      'Get posts that are due for publishing. Returns posts with status "ready" (already transitioned by cron) or posts with status "scheduled" where scheduledAt <= now (not yet transitioned). Lightweight response with preview text.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        platform: {
+          type: 'string',
+          enum: ['twitter', 'linkedin', 'reddit'],
+          description: 'Filter by platform (optional)',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_post_for_publish',
+    description:
+      'Get full post content pre-formatted for the target platform. Returns everything needed to publish: text, thread chunks (Twitter), visibility (LinkedIn), subreddit + title + body (Reddit), and media URLs.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        postId: {
+          type: 'string',
+          description: 'The post ID to retrieve for publishing',
+        },
+      },
+      required: ['postId'],
+    },
+  },
+  {
+    name: 'mark_post_published',
+    description:
+      'Mark a post as published after it has been posted externally (via browser, Share Sheet, or manual copy). Optionally record the published URL and platform post ID.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        postId: {
+          type: 'string',
+          description: 'The post ID to mark as published',
+        },
+        publishedUrl: {
+          type: 'string',
+          description: 'URL of the published post (optional)',
+        },
+        platformPostId: {
+          type: 'string',
+          description: 'Platform-specific post ID (optional)',
+        },
+      },
+      required: ['postId'],
+    },
+  },
+  {
+    name: 'get_upcoming_schedule',
+    description:
+      'Get posts scheduled for the next N hours (default: 24). Useful for planning publishing sessions. Returns posts with status "scheduled" that are due within the time window.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        hours: {
+          type: 'number',
+          description: 'Number of hours to look ahead (default: 24, max: 168)',
+        },
+      },
+    },
+  },
+  {
+    name: 'download_post_media',
+    description:
+      'Get temporary download URLs for media files attached to a post. URLs expire after 1 hour. Use these to download images/videos for uploading to the target platform.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        postId: {
+          type: 'string',
+          description: 'The post ID to get media for',
+        },
+      },
+      required: ['postId'],
+    },
+  },
   // Campaign management tools
   {
     name: 'create_campaign',
@@ -1023,6 +1106,11 @@ const TOOL_SCOPES: Record<string, string[]> = {
   restore_post: ['posts:write'],
   list_posts: ['posts:read'],
   search_posts: ['posts:read'],
+  get_due_posts: ['posts:read'],
+  get_post_for_publish: ['posts:read'],
+  mark_post_published: ['posts:write'],
+  get_upcoming_schedule: ['posts:read'],
+  download_post_media: ['posts:read', 'media:write'],
   create_reddit_crossposts: ['posts:write'],
   // Campaigns
   create_campaign: ['campaigns:write'],
