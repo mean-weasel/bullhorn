@@ -29,7 +29,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               <Link
                 href="/dashboard"
                 aria-label="Back to dashboard"
-                className="p-2 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors border-2 border-transparent hover:border-border"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors border-2 border-transparent hover:border-border"
               >
                 <svg
                   width="18"
@@ -58,7 +58,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             <Link
               href="/calendar"
               className={cn(
-                'p-2 rounded-md text-muted-foreground transition-all',
+                'p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-muted-foreground transition-all',
                 'hover:text-foreground hover:bg-secondary',
                 'border-2 border-transparent hover:border-border',
                 pathname?.startsWith('/calendar') && 'bg-secondary text-foreground border-border'
@@ -70,7 +70,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             <Link
               href="/projects"
               className={cn(
-                'p-2 rounded-md text-muted-foreground transition-all',
+                'p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-muted-foreground transition-all',
                 'hover:text-foreground hover:bg-secondary',
                 'border-2 border-transparent hover:border-border',
                 pathname?.startsWith('/projects') && 'bg-secondary text-foreground border-border'
@@ -82,7 +82,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             <Link
               href="/campaigns"
               className={cn(
-                'p-2 rounded-md text-muted-foreground transition-all',
+                'p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-muted-foreground transition-all',
                 'hover:text-foreground hover:bg-secondary',
                 'border-2 border-transparent hover:border-border',
                 pathname?.startsWith('/campaigns') && 'bg-secondary text-foreground border-border'
@@ -94,7 +94,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             <Link
               href="/blog"
               className={cn(
-                'p-2 rounded-md text-muted-foreground transition-all',
+                'p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-muted-foreground transition-all',
                 'hover:text-foreground hover:bg-secondary',
                 'border-2 border-transparent hover:border-border',
                 pathname?.startsWith('/blog') && 'bg-secondary text-foreground border-border'
@@ -106,7 +106,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             <Link
               href="/launch-posts"
               className={cn(
-                'p-2 rounded-md text-muted-foreground transition-all',
+                'p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-muted-foreground transition-all',
                 'hover:text-foreground hover:bg-secondary',
                 'border-2 border-transparent hover:border-border',
                 pathname?.startsWith('/launch-posts') &&
@@ -119,7 +119,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             <Link
               href="/settings"
               className={cn(
-                'p-2 rounded-md text-muted-foreground transition-all',
+                'p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md text-muted-foreground transition-all',
                 'hover:text-foreground hover:bg-secondary',
                 'border-2 border-transparent hover:border-border',
                 pathname === '/settings' && 'bg-secondary text-foreground border-border'
@@ -132,7 +132,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               {userEmail ? (
                 <UserMenu email={userEmail} displayName={userDisplayName} />
               ) : (
-                <div className="w-9 h-9 rounded-md bg-sticker-purple flex items-center justify-center text-xs font-bold text-white border-2 border-border">
+                <div className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-md bg-sticker-purple flex items-center justify-center text-xs font-bold text-white border-2 border-border">
                   U
                 </div>
               )}
@@ -143,7 +143,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
             {userEmail ? (
               <UserMenu email={userEmail} displayName={userDisplayName} />
             ) : (
-              <div className="w-9 h-9 rounded-md bg-sticker-purple flex items-center justify-center text-xs font-bold text-white border-2 border-border">
+              <div className="w-11 h-11 min-h-[44px] min-w-[44px] rounded-md bg-sticker-purple flex items-center justify-center text-xs font-bold text-white border-2 border-border">
                 U
               </div>
             )}
