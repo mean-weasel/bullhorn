@@ -27,7 +27,7 @@ export function _resetClient(): void {
 // ==================
 
 export type Platform = 'twitter' | 'linkedin' | 'reddit'
-export type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed' | 'archived'
+export type PostStatus = 'draft' | 'scheduled' | 'ready' | 'published' | 'failed' | 'archived'
 export type CampaignStatus = 'active' | 'paused' | 'completed' | 'archived'
 export type GroupType = 'reddit-crosspost'
 export type BlogDraftStatus = 'draft' | 'scheduled' | 'published' | 'archived'
