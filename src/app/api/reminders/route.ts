@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformReminderFromDb, type DbReminder } from '@/lib/reminders'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, parseJsonBody } from '@/lib/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -61,7 +61,9 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = createReminderSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

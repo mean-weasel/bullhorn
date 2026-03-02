@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Check, Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -106,8 +107,11 @@ export function AccountPicker({
     return (
       <div className="text-center py-6 px-4">
         <p className="text-sm text-muted-foreground">
-          Connect your social media accounts to publish directly to Twitter, LinkedIn, and Reddit
-          from this project. This feature is under development.
+          No social accounts connected yet.{' '}
+          <Link href="/settings" className="text-primary underline hover:no-underline font-medium">
+            Connect accounts in Settings
+          </Link>{' '}
+          to publish directly to Twitter, LinkedIn, and Reddit.
         </p>
       </div>
     )

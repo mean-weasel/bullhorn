@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock requireAuth
 const mockRequireAuth = vi.fn()
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/lib/auth', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/auth')>()),
   requireAuth: () => mockRequireAuth(),
 }))
 

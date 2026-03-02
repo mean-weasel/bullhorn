@@ -15,6 +15,7 @@ import {
   Search,
   X,
   Loader2,
+  RefreshCw,
 } from 'lucide-react'
 import { usePostsStore } from '@/lib/storage'
 import { PostStatus, getPostPreviewText } from '@/lib/posts'
@@ -44,6 +45,7 @@ export default function PostsPage() {
   const fetchPosts = usePostsStore((state) => state.fetchPosts)
   const initialized = usePostsStore((state) => state.initialized)
   const loading = usePostsStore((state) => state.loading)
+  const error = usePostsStore((state) => state.error)
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -128,6 +130,27 @@ export default function PostsPage() {
 
   if (loading && !initialized) {
     return <SkeletonListPage count={5} />
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 max-w-5xl mx-auto animate-fade-in">
+        <div className="text-center py-12 bg-card border border-destructive/30 rounded-xl">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-destructive/10 flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-destructive" />
+          </div>
+          <h3 className="font-semibold mb-2 text-destructive">Failed to load posts</h3>
+          <p className="text-sm text-muted-foreground mb-4">{error}</p>
+          <button
+            onClick={() => fetchPosts()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -5,7 +5,7 @@ import {
   transformAnalyticsConnectionToDb,
   type DbAnalyticsConnection,
 } from '@/lib/utils'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, parseJsonBody } from '@/lib/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -79,7 +79,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const { id } = await context.params
     const supabase = await createClient()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = updateAnalyticsConnectionSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

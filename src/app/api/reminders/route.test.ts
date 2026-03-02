@@ -5,7 +5,8 @@ import { NextRequest } from 'next/server'
 // Mocks
 // ---------------------------------------------------------------------------
 
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/lib/auth', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/auth')>()),
   requireAuth: vi.fn(),
 }))
 

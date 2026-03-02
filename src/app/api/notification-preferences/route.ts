@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, parseJsonBody } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
@@ -117,7 +117,9 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = updateSchema.safeParse(body)
 
     if (!parsed.success) {

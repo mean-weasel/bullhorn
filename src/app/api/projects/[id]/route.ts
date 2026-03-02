@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformProjectFromDb, transformProjectToDb, type DbProject } from '@/lib/utils'
-import { requireAuth, validateScopes } from '@/lib/auth'
+import { requireAuth, validateScopes, parseJsonBody } from '@/lib/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -85,7 +85,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const { id } = await context.params
     const supabase = await createClient()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = updateProjectSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(

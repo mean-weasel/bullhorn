@@ -331,3 +331,21 @@ export async function validateBlogDraftOwnership(
     title: draft.title,
   }
 }
+
+/**
+ * Safely parse JSON body from a Request.
+ * Returns { data: T } on success, { error: Response } on failure.
+ * Use this instead of raw request.json() to handle malformed JSON gracefully.
+ */
+export async function parseJsonBody<T = unknown>(
+  request: Request
+): Promise<{ data: T } | { error: Response }> {
+  try {
+    const data = (await request.json()) as T
+    return { data }
+  } catch {
+    return {
+      error: Response.json({ error: 'Invalid JSON body' }, { status: 400 }),
+    }
+  }
+}

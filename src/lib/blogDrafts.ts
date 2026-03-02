@@ -182,14 +182,16 @@ export const useBlogDraftsStore = create<BlogDraftsState & BlogDraftsActions>()(
   },
 
   searchDrafts: async (query) => {
-    try {
-      const res = await fetch(`${API_BASE}/blog-drafts/search?q=${encodeURIComponent(query)}`)
-      if (!res.ok) throw new Error('Failed to search blog drafts')
-      const data = await res.json()
-      return data.drafts || []
-    } catch (error) {
-      console.error('Search error:', error)
-      return []
-    }
+    return dedup(`searchDrafts:${query}`, async () => {
+      try {
+        const res = await fetch(`${API_BASE}/blog-drafts/search?q=${encodeURIComponent(query)}`)
+        if (!res.ok) throw new Error('Failed to search blog drafts')
+        const data = await res.json()
+        return data.drafts || []
+      } catch (error) {
+        console.error('Search error:', error)
+        return []
+      }
+    })
   },
 }))

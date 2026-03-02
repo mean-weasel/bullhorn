@@ -16,6 +16,7 @@ import {
   isLinkedInContent,
   isRedditContent,
 } from '@/lib/posts'
+import { AlertCircle } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
 import { useAutoSave } from '@/hooks/useAutoSave'
@@ -73,24 +74,19 @@ export default function EditorPage() {
   const [pendingPlatform, setPendingPlatform] = useState<Platform | null>(null)
   const [showCampaignDropdown, setShowCampaignDropdown] = useState(false)
 
-  // Fetch posts on mount if not initialized (needed for direct navigation to /edit/:id)
+  // Fetch stores on mount if not initialized (needed for direct navigation to /edit/:id)
   useEffect(() => {
-    if (!postsInitialized) {
-      fetchPosts()
-    }
-  }, [postsInitialized, fetchPosts])
-
-  // Fetch campaigns on mount
-  useEffect(() => {
-    if (!campaignsInitialized) {
-      fetchCampaigns()
-    }
-  }, [campaignsInitialized, fetchCampaigns])
-
-  // Fetch social accounts on mount
-  useEffect(() => {
+    if (!postsInitialized) fetchPosts()
+    if (!campaignsInitialized) fetchCampaigns()
     if (!accountsInitialized) fetchAccounts()
-  }, [accountsInitialized, fetchAccounts])
+  }, [
+    postsInitialized,
+    fetchPosts,
+    campaignsInitialized,
+    fetchCampaigns,
+    accountsInitialized,
+    fetchAccounts,
+  ])
 
   // Form state
   const [post, setPost] = useState<Post>(() => {
@@ -618,7 +614,7 @@ export default function EditorPage() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] min-h-[calc(100vh-4rem)]">
       {/* Editor */}
-      <div className="p-4 md:p-8 max-w-2xl animate-slide-up">
+      <div className="p-4 md:p-8 max-w-2xl animate-slide-up" role="form" aria-label="Post editor">
         <div className="mb-4 md:mb-6">
           <div className="flex items-center gap-3 mb-1 md:mb-2">
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
@@ -726,6 +722,16 @@ export default function EditorPage() {
             onSelect={handleAccountSelect}
             platform={PLATFORM_INFO[post.platform].name}
           />
+        )}
+
+        {mediaUrls.length > 0 && (
+          <div className="flex items-center gap-2 p-3 rounded-md bg-sticker-orange/10 text-sticker-orange text-sm border-2 border-sticker-orange/30 mb-4 md:mb-6">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="font-medium">
+              Media attachments are not yet supported for publishing. Your text will be published
+              without images/videos.
+            </span>
+          </div>
         )}
 
         <EditorActions

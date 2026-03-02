@@ -4,7 +4,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Mocks
 // ---------------------------------------------------------------------------
 
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/lib/auth', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/auth')>()),
   requireAuth: vi.fn(),
   ALL_SCOPES: [
     'posts:read',

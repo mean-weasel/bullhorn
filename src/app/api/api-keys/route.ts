@@ -1,4 +1,4 @@
-import { requireAuth, ALL_SCOPES } from '@/lib/auth'
+import { requireAuth, ALL_SCOPES, parseJsonBody } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { randomBytes, createHash } from 'crypto'
 import { z } from 'zod'
@@ -69,7 +69,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const { userId } = await requireAuth()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = createApiKeySchema.safeParse(body)
     if (!parsed.success) {
       return Response.json(

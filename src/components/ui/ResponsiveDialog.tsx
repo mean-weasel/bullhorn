@@ -16,6 +16,7 @@ interface ResponsiveDialogProps {
   showCloseButton?: boolean
   className?: string
   role?: 'dialog' | 'alertdialog'
+  preventBackdropClose?: boolean
 }
 
 export function ResponsiveDialog({
@@ -29,6 +30,7 @@ export function ResponsiveDialog({
   showCloseButton = true,
   className,
   role = 'dialog',
+  preventBackdropClose = false,
 }: ResponsiveDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
@@ -38,7 +40,7 @@ export function ResponsiveDialog({
     if (!open) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !preventBackdropClose) {
         onClose()
       }
     }
@@ -50,7 +52,7 @@ export function ResponsiveDialog({
       document.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = ''
     }
-  }, [open, onClose])
+  }, [open, onClose, preventBackdropClose])
 
   if (!open) return null
 
@@ -60,7 +62,7 @@ export function ResponsiveDialog({
         'fixed inset-0 z-50 flex p-4',
         isMobile ? 'items-end justify-center pb-0' : 'items-center justify-center'
       )}
-      onClick={onClose}
+      onClick={preventBackdropClose ? undefined : onClose}
     >
       {/* Backdrop */}
       <div

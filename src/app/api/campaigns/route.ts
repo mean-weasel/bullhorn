@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformCampaignFromDb, type DbCampaign } from '@/lib/utils'
-import { requireAuth, validateScopes } from '@/lib/auth'
+import { requireAuth, validateScopes, parseJsonBody } from '@/lib/auth'
 import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
@@ -104,7 +104,9 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const body = await request.json()
+    const jsonResult = await parseJsonBody(request)
+    if ('error' in jsonResult) return jsonResult.error
+    const body = jsonResult.data
     const parsed = createCampaignSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
