@@ -5,15 +5,9 @@ import { NextRequest } from 'next/server'
 // Mocks
 // ---------------------------------------------------------------------------
 
-const mockPublishPost = vi.fn()
-vi.mock('@/lib/publishers', () => ({
-  publishPost: (...args: unknown[]) => mockPublishPost(...args),
+vi.mock('@/lib/rrule', () => ({
+  getNextOccurrence: vi.fn(),
 }))
-
-vi.mock('@/lib/utils', async () => {
-  const actual = await vi.importActual('@/lib/utils')
-  return { ...actual }
-})
 
 const mockCreateClient = vi.fn()
 vi.mock('@supabase/supabase-js', () => ({
@@ -35,7 +29,7 @@ function makeDbPost(overrides: Record<string, unknown> = {}) {
     id: 'post-1',
     created_at: '2024-01-01T00:00:00Z',
     updated_at: '2024-01-01T00:00:00Z',
-    scheduled_at: new Date(Date.now() - 60_000).toISOString(), // 1 min ago
+    scheduled_at: new Date(Date.now() - 60_000).toISOString(),
     status: 'scheduled',
     platform: 'twitter',
     notes: null,
@@ -46,6 +40,7 @@ function makeDbPost(overrides: Record<string, unknown> = {}) {
     publish_result: null,
     user_id: 'user-1',
     social_account_id: null,
+    recurrence_rule: null,
     ...overrides,
   }
 }
@@ -54,7 +49,6 @@ function makeDbPost(overrides: Record<string, unknown> = {}) {
 // Setup
 // ---------------------------------------------------------------------------
 
-// Import route handler (after mocks are registered)
 let GET: typeof import('./route').GET
 
 beforeEach(async () => {
@@ -65,6 +59,7 @@ beforeEach(async () => {
   vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-key')
 
   // Re-import to pick up fresh mocks
+  vi.resetModules()
   const mod = await import('./route')
   GET = mod.GET
 })
@@ -73,7 +68,7 @@ beforeEach(async () => {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('GET /api/cron/publish', () => {
+describe('GET /api/cron/publish (notify-due-posts)', () => {
   it('returns 401 when CRON_SECRET is set and header does not match', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
     mockCreateClient.mockReturnValue({ from: vi.fn() })
@@ -86,60 +81,36 @@ describe('GET /api/cron/publish', () => {
     expect(body.error).toBe('Unauthorized')
   })
 
-  it('rejects request when no CRON_SECRET is set', async () => {
-    // No CRON_SECRET in env — should fail closed
-    const req = makeRequest() // no auth header
+  it('returns 500 when no CRON_SECRET is configured', async () => {
+    // No CRON_SECRET — fail closed with 500
+    const req = makeRequest()
     const res = await GET(req)
 
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(500)
   })
 
-  it('processes scheduled posts that are due', async () => {
+  it('transitions scheduled posts to ready status', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
 
     const post = makeDbPost()
-    const accountData = [{ id: 'acct-1' }]
 
-    mockPublishPost.mockResolvedValue({
-      success: true,
-      postId: 'ext-123',
-      postUrl: 'https://twitter.com/status/123',
-    })
-
-    // Build a mock supabase that tracks .from() calls
-    const updateEq = vi.fn(() => Promise.resolve({ data: null, error: null }))
-    const accountLimit = vi.fn(() => Promise.resolve({ data: accountData, error: null }))
+    const matchFn = vi.fn(() => Promise.resolve({ data: null, error: null }))
+    const updateFn = vi.fn(() => ({ match: matchFn }))
     const postsLimit = vi.fn(() => Promise.resolve({ data: [post], error: null }))
 
     mockCreateClient.mockReturnValue({
-      from: vi.fn((table: string) => {
-        if (table === 'posts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                lte: vi.fn(() => ({
-                  gte: vi.fn(() => ({
-                    order: vi.fn(() => ({ limit: postsLimit })),
-                  })),
-                })),
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            lte: vi.fn(() => ({
+              gte: vi.fn(() => ({
+                order: vi.fn(() => ({ limit: postsLimit })),
               })),
             })),
-            update: vi.fn(() => ({ eq: updateEq })),
-          }
-        }
-        if (table === 'social_accounts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                  eq: vi.fn(() => ({ limit: accountLimit })),
-                })),
-              })),
-            })),
-          }
-        }
-        return {}
-      }),
+          })),
+        })),
+        update: updateFn,
+      })),
     })
 
     const req = makeRequest({ authorization: 'Bearer my-secret' })
@@ -148,9 +119,10 @@ describe('GET /api/cron/publish', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.processed).toBe(1)
-    expect(body.published).toBe(1)
-    expect(body.failed).toBe(0)
-    expect(mockPublishPost).toHaveBeenCalledTimes(1)
+    expect(body.notified).toBe(1)
+
+    // Verify update was called with ready status
+    expect(updateFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'ready' }))
   })
 
   it('returns zero counts when no posts are due', async () => {
@@ -178,174 +150,7 @@ describe('GET /api/cron/publish', () => {
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.processed).toBe(0)
-    expect(body.published).toBe(0)
-    expect(body.failed).toBe(0)
-  })
-
-  it('sets post to failed when no social account is connected', async () => {
-    vi.stubEnv('CRON_SECRET', 'my-secret')
-
-    const post = makeDbPost()
-
-    const updateEq = vi.fn(() => Promise.resolve({ data: null, error: null }))
-    const accountLimit = vi.fn(() => Promise.resolve({ data: [], error: null }))
-    const postsLimit = vi.fn(() => Promise.resolve({ data: [post], error: null }))
-
-    mockCreateClient.mockReturnValue({
-      from: vi.fn((table: string) => {
-        if (table === 'posts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                lte: vi.fn(() => ({
-                  gte: vi.fn(() => ({
-                    order: vi.fn(() => ({ limit: postsLimit })),
-                  })),
-                })),
-              })),
-            })),
-            update: vi.fn(() => ({ eq: updateEq })),
-          }
-        }
-        if (table === 'social_accounts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                  eq: vi.fn(() => ({ limit: accountLimit })),
-                })),
-              })),
-            })),
-          }
-        }
-        return {}
-      }),
-    })
-
-    const req = makeRequest({ authorization: 'Bearer my-secret' })
-    const res = await GET(req)
-
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.processed).toBe(1)
-    expect(body.published).toBe(0)
-    expect(body.failed).toBe(1)
-    expect(mockPublishPost).not.toHaveBeenCalled()
-  })
-
-  it('returns correct counts with mixed success and failure', async () => {
-    vi.stubEnv('CRON_SECRET', 'my-secret')
-
-    const post1 = makeDbPost({ id: 'post-1' })
-    const post2 = makeDbPost({ id: 'post-2', platform: 'linkedin' })
-    const accountData = [{ id: 'acct-1' }]
-
-    mockPublishPost
-      .mockResolvedValueOnce({ success: true })
-      .mockResolvedValueOnce({ success: false, error: 'Rate limited' })
-
-    const updateEq = vi.fn(() => Promise.resolve({ data: null, error: null }))
-    const accountLimit = vi.fn(() => Promise.resolve({ data: accountData, error: null }))
-    const postsLimit = vi.fn(() => Promise.resolve({ data: [post1, post2], error: null }))
-
-    mockCreateClient.mockReturnValue({
-      from: vi.fn((table: string) => {
-        if (table === 'posts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                lte: vi.fn(() => ({
-                  gte: vi.fn(() => ({
-                    order: vi.fn(() => ({ limit: postsLimit })),
-                  })),
-                })),
-              })),
-            })),
-            update: vi.fn(() => ({ eq: updateEq })),
-          }
-        }
-        if (table === 'social_accounts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                  eq: vi.fn(() => ({ limit: accountLimit })),
-                })),
-              })),
-            })),
-          }
-        }
-        return {}
-      }),
-    })
-
-    const req = makeRequest({ authorization: 'Bearer my-secret' })
-    const res = await GET(req)
-
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.processed).toBe(2)
-    expect(body.published).toBe(1)
-    expect(body.failed).toBe(1)
-  })
-
-  it('individual post failures do not block other posts', async () => {
-    vi.stubEnv('CRON_SECRET', 'my-secret')
-
-    const post1 = makeDbPost({ id: 'post-1' })
-    const post2 = makeDbPost({ id: 'post-2' })
-    const accountData = [{ id: 'acct-1' }]
-
-    // First call throws, second succeeds
-    mockPublishPost
-      .mockRejectedValueOnce(new Error('Network timeout'))
-      .mockResolvedValueOnce({ success: true })
-
-    const updateEq = vi.fn(() => Promise.resolve({ data: null, error: null }))
-    const accountLimit = vi.fn(() => Promise.resolve({ data: accountData, error: null }))
-    const postsLimit = vi.fn(() => Promise.resolve({ data: [post1, post2], error: null }))
-
-    mockCreateClient.mockReturnValue({
-      from: vi.fn((table: string) => {
-        if (table === 'posts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                lte: vi.fn(() => ({
-                  gte: vi.fn(() => ({
-                    order: vi.fn(() => ({ limit: postsLimit })),
-                  })),
-                })),
-              })),
-            })),
-            update: vi.fn(() => ({ eq: updateEq })),
-          }
-        }
-        if (table === 'social_accounts') {
-          return {
-            select: vi.fn(() => ({
-              eq: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                  eq: vi.fn(() => ({ limit: accountLimit })),
-                })),
-              })),
-            })),
-          }
-        }
-        return {}
-      }),
-    })
-
-    const req = makeRequest({ authorization: 'Bearer my-secret' })
-    const res = await GET(req)
-
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.processed).toBe(2)
-    expect(body.published).toBe(1)
-    expect(body.failed).toBe(1)
-    // Both posts were attempted
-    expect(mockPublishPost).toHaveBeenCalledTimes(2)
+    expect(body.notified).toBe(0)
   })
 
   it('returns 500 when database query fails', async () => {
@@ -375,5 +180,48 @@ describe('GET /api/cron/publish', () => {
     expect(res.status).toBe(500)
     const body = await res.json()
     expect(body.error).toBe('Database query failed')
+  })
+
+  it('continues processing when individual post update fails', async () => {
+    vi.stubEnv('CRON_SECRET', 'my-secret')
+
+    const post1 = makeDbPost({ id: 'post-1' })
+    const post2 = makeDbPost({ id: 'post-2' })
+
+    let callCount = 0
+    const matchFn = vi.fn(() => {
+      callCount++
+      // First update fails, second succeeds
+      if (callCount === 1) {
+        return Promise.resolve({ data: null, error: { message: 'Conflict' } })
+      }
+      return Promise.resolve({ data: null, error: null })
+    })
+    const updateFn = vi.fn(() => ({ match: matchFn }))
+    const postsLimit = vi.fn(() => Promise.resolve({ data: [post1, post2], error: null }))
+
+    mockCreateClient.mockReturnValue({
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            lte: vi.fn(() => ({
+              gte: vi.fn(() => ({
+                order: vi.fn(() => ({ limit: postsLimit })),
+              })),
+            })),
+          })),
+        })),
+        update: updateFn,
+      })),
+    })
+
+    const req = makeRequest({ authorization: 'Bearer my-secret' })
+    const res = await GET(req)
+
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    // First post failed to update, second succeeded
+    expect(body.processed).toBe(1)
+    expect(body.notified).toBe(1)
   })
 })

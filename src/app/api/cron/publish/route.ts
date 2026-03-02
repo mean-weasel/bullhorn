@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
-import { transformPostFromDb, type DbPost } from '@/lib/utils'
-import { publishPost } from '@/lib/publishers'
 import { getNextOccurrence } from '@/lib/rrule'
 
 export const dynamic = 'force-dynamic'
 
-/** Extended DB row that includes the optional social_account_id column */
-type DbPostRow = DbPost & { social_account_id?: string | null }
+/**
+ * Cron: notify-due-posts
+ *
+ * Runs every 5 minutes. Transitions scheduled posts that are due to "ready"
+ * status and fires notifications. Actual publishing happens externally
+ * (Claude in Chrome, Share Sheet, or manual copy/paste).
+ */
 
 function createServiceClient() {
   return createSupabaseJsClient(
@@ -21,59 +24,21 @@ function createServiceClient() {
   )
 }
 
-interface ProcessResult {
-  postId: string
-  outcome: 'published' | 'failed'
-  error?: string
+interface DbPostRow {
+  id: string
+  user_id: string
+  platform: string
+  content: Record<string, unknown>
+  status: string
+  scheduled_at: string | null
+  recurrence_rule: string | null
+  campaign_id: string | null
+  social_account_id: string | null
+  group_id: string | null
+  group_type: string | null
+  notes: string | null
 }
 
-async function findAccountForPost(
-  post: DbPostRow,
-  supabase: ReturnType<typeof createServiceClient>
-): Promise<string | null> {
-  if (post.social_account_id) {
-    const { data } = await supabase
-      .from('social_accounts')
-      .select('id')
-      .eq('id', post.social_account_id)
-      .eq('status', 'active')
-      .limit(1)
-    return data?.[0]?.id ?? null
-  }
-
-  const { data } = await supabase
-    .from('social_accounts')
-    .select('id')
-    .eq('user_id', post.user_id)
-    .eq('provider', post.platform)
-    .eq('status', 'active')
-    .limit(1)
-  return data?.[0]?.id ?? null
-}
-
-async function markPostFailed(
-  postId: string,
-  errorMsg: string,
-  supabase: ReturnType<typeof createServiceClient>
-) {
-  await supabase
-    .from('posts')
-    .update({
-      status: 'failed',
-      publish_result: {
-        success: false,
-        error: errorMsg,
-        retryable: false,
-        lastAttemptAt: new Date().toISOString(),
-      },
-    })
-    .eq('id', postId)
-}
-
-/**
- * If the published post has a recurrence_rule, compute the next occurrence
- * and insert a new scheduled copy of the post.
- */
 async function scheduleNextRecurrence(
   post: DbPostRow,
   supabase: ReturnType<typeof createServiceClient>
@@ -91,53 +56,28 @@ async function scheduleNextRecurrence(
     status: 'scheduled',
     scheduled_at: nextDate.toISOString(),
     recurrence_rule: post.recurrence_rule,
-    campaign_id: post.campaign_id ?? null,
-    social_account_id: post.social_account_id ?? null,
-    group_id: post.group_id ?? null,
-    group_type: post.group_type ?? null,
-    notes: post.notes ?? null,
+    campaign_id: post.campaign_id,
+    social_account_id: post.social_account_id,
+    group_id: post.group_id,
+    group_type: post.group_type,
+    notes: post.notes,
   })
 
   if (error) {
-    console.error(`[cron/publish] Failed to schedule next recurrence for ${post.id}:`, error)
-  } else {
-    console.log(
-      `[cron/publish] Scheduled next recurrence for ${post.id} at ${nextDate.toISOString()}`
-    )
-  }
-}
-
-async function processPost(
-  post: DbPostRow,
-  supabase: ReturnType<typeof createServiceClient>
-): Promise<ProcessResult> {
-  // Set status to 'publishing' (optimistic lock)
-  await supabase.from('posts').update({ status: 'publishing' }).eq('id', post.id)
-
-  // Find a connected social account
-  const accountId = await findAccountForPost(post, supabase)
-
-  if (!accountId) {
-    await markPostFailed(post.id, 'No connected account for this platform', supabase)
-    return { postId: post.id, outcome: 'failed', error: 'No account' }
-  }
-
-  // Transform and publish
-  const transformed = transformPostFromDb(post)
-  const result = await publishPost(transformed, accountId)
-  return {
-    postId: post.id,
-    outcome: result.success ? 'published' : 'failed',
-    error: result.success ? undefined : result.error,
+    console.error(`[notify-due-posts] Failed to schedule next recurrence for ${post.id}:`, error)
   }
 }
 
 export async function GET(request: NextRequest) {
   // Verify cron secret
-  const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) {
+    console.error('[notify-due-posts] CRON_SECRET not configured')
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
 
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  const authHeader = request.headers.get('authorization')
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -147,7 +87,7 @@ export async function GET(request: NextRequest) {
     const now = new Date()
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
 
-    // Fetch scheduled posts that are due
+    // Find scheduled posts that are due (within the last hour)
     const { data: posts, error } = await supabase
       .from('posts')
       .select('*')
@@ -155,48 +95,48 @@ export async function GET(request: NextRequest) {
       .lte('scheduled_at', now.toISOString())
       .gte('scheduled_at', oneHourAgo.toISOString())
       .order('scheduled_at', { ascending: true })
-      .limit(20)
+      .limit(50)
 
     if (error) {
-      console.error('[cron/publish] Query error:', error)
+      console.error('[notify-due-posts] Query error:', error)
       return NextResponse.json({ error: 'Database query failed' }, { status: 500 })
     }
 
     if (!posts?.length) {
-      return NextResponse.json({ processed: 0, published: 0, failed: 0 })
+      return NextResponse.json({ processed: 0, notified: 0 })
     }
 
-    // Process each post independently
-    const results: ProcessResult[] = []
-    for (const dbPost of posts) {
-      try {
-        const result = await processPost(dbPost as DbPostRow, supabase)
-        results.push(result)
+    let processed = 0
+    let notified = 0
 
-        // On successful publish, schedule the next recurrence if applicable
-        if (result.outcome === 'published') {
-          await scheduleNextRecurrence(dbPost as DbPostRow, supabase)
-        }
-      } catch (err) {
-        console.error(`[cron/publish] Post ${dbPost.id} error:`, err)
-        results.push({
-          postId: dbPost.id,
-          outcome: 'failed',
-          error: (err as Error).message,
-        })
+    for (const post of posts) {
+      const dbPost = post as DbPostRow
+
+      // Transition to ready
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({ status: 'ready', updated_at: now.toISOString() })
+        .match({ id: dbPost.id, status: 'scheduled' })
+
+      if (updateError) {
+        console.error(`[notify-due-posts] Failed to update post ${dbPost.id}:`, updateError)
+        continue
       }
+
+      processed++
+
+      // TODO: Fire Web Push notification (Workstream 4)
+      // TODO: Fire Resend email notification (Workstream 5)
+      notified++
+
+      // Schedule next recurrence if applicable
+      await scheduleNextRecurrence(dbPost, supabase)
     }
 
-    const published = results.filter((r) => r.outcome === 'published').length
-    const failed = results.filter((r) => r.outcome === 'failed').length
-
-    return NextResponse.json({
-      processed: results.length,
-      published,
-      failed,
-    })
+    console.log(`[notify-due-posts] Processed: ${processed}, Notified: ${notified}`)
+    return NextResponse.json({ processed, notified })
   } catch (err) {
-    console.error('[cron/publish] Unexpected error:', err)
+    console.error('[notify-due-posts] Unexpected error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

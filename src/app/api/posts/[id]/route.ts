@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 const updatePostSchema = z.object({
   platform: z.enum(['twitter', 'linkedin', 'reddit']).optional(),
   content: z.record(z.string(), z.unknown()).optional(),
-  status: z.enum(['draft', 'scheduled', 'published', 'failed', 'archived']).optional(),
+  status: z.enum(['draft', 'scheduled', 'ready', 'published', 'failed', 'archived']).optional(),
   scheduled_at: z.string().optional().nullable(),
   scheduledAt: z.string().optional().nullable(),
   notes: z.string().max(5000).optional().nullable(),
@@ -26,7 +26,8 @@ const updatePostSchema = z.object({
 // Valid status transitions
 const validTransitions: Record<string, string[]> = {
   draft: ['scheduled', 'archived'],
-  scheduled: ['draft', 'published', 'failed', 'archived'],
+  scheduled: ['draft', 'ready', 'published', 'failed', 'archived'],
+  ready: ['draft', 'scheduled', 'published', 'archived'],
   published: ['archived'],
   failed: ['draft', 'scheduled', 'archived'],
   archived: ['draft'],

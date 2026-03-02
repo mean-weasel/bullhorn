@@ -14,6 +14,7 @@ import {
   Loader2,
   ExternalLink,
   RotateCcw,
+  Bell,
 } from 'lucide-react'
 import { Post, PostStatus, getPostPreviewText, PLATFORM_INFO } from '@/lib/posts'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,7 @@ export const STATUS_CONFIG: Record<
 > = {
   draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground', emoji: '📝' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-sticker-blue', emoji: '📅' },
+  ready: { label: 'Ready', icon: Bell, color: 'text-sticker-orange', emoji: '🔔' },
   publishing: { label: 'Publishing', icon: Loader2, color: 'text-sticker-orange', emoji: '🔄' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-sticker-green', emoji: '✅' },
   failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive', emoji: '❌' },
