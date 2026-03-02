@@ -22,6 +22,7 @@ const POST_STATUS_CONFIG: Record<
 > = {
   draft: { label: 'Draft', icon: FileText, color: 'text-muted-foreground' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-blue-400' },
+  ready: { label: 'Ready', icon: Clock, color: 'text-orange-400' },
   publishing: { label: 'Publishing', icon: Loader2, color: 'text-orange-400' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-green-400' },
   failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive' },

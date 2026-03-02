@@ -1,7 +1,14 @@
 // Post type definitions and utilities
 
 export type Platform = 'twitter' | 'linkedin' | 'reddit'
-export type PostStatus = 'draft' | 'scheduled' | 'publishing' | 'published' | 'failed' | 'archived'
+export type PostStatus =
+  | 'draft'
+  | 'scheduled'
+  | 'ready'
+  | 'publishing'
+  | 'published'
+  | 'failed'
+  | 'archived'
 export type CampaignStatus = 'active' | 'paused' | 'completed' | 'archived'
 
 // Campaign interface

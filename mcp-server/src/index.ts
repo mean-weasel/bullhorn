@@ -14,6 +14,10 @@ import {
   restorePost,
   listPosts,
   searchPosts,
+  // Publish workflow functions
+  listDuePosts,
+  listUpcomingPosts,
+  getPostMedia,
   createCampaign,
   getCampaign,
   updateCampaign,
@@ -277,6 +281,89 @@ const TOOLS = [
         },
       },
       required: ['query'],
+    },
+  },
+  // Publish workflow tools
+  {
+    name: 'get_due_posts',
+    description:
+      'Get posts that are due for publishing. Returns posts with status "ready" (already transitioned by cron) or posts with status "scheduled" where scheduledAt <= now (not yet transitioned). Lightweight response with preview text.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        platform: {
+          type: 'string',
+          enum: ['twitter', 'linkedin', 'reddit'],
+          description: 'Filter by platform (optional)',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_post_for_publish',
+    description:
+      'Get full post content pre-formatted for the target platform. Returns everything needed to publish: text, thread chunks (Twitter), visibility (LinkedIn), subreddit + title + body (Reddit), and media URLs.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        postId: {
+          type: 'string',
+          description: 'The post ID to retrieve for publishing',
+        },
+      },
+      required: ['postId'],
+    },
+  },
+  {
+    name: 'mark_post_published',
+    description:
+      'Mark a post as published after it has been posted externally (via browser, Share Sheet, or manual copy). Optionally record the published URL and platform post ID.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        postId: {
+          type: 'string',
+          description: 'The post ID to mark as published',
+        },
+        publishedUrl: {
+          type: 'string',
+          description: 'URL of the published post (optional)',
+        },
+        platformPostId: {
+          type: 'string',
+          description: 'Platform-specific post ID (optional)',
+        },
+      },
+      required: ['postId'],
+    },
+  },
+  {
+    name: 'get_upcoming_schedule',
+    description:
+      'Get posts scheduled for the next N hours (default: 24). Useful for planning publishing sessions. Returns posts with status "scheduled" that are due within the time window.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        hours: {
+          type: 'number',
+          description: 'Number of hours to look ahead (default: 24, max: 168)',
+        },
+      },
+    },
+  },
+  {
+    name: 'download_post_media',
+    description:
+      'Get temporary download URLs for media files attached to a post. URLs expire after 1 hour. Use these to download images/videos for uploading to the target platform.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        postId: {
+          type: 'string',
+          description: 'The post ID to get media for',
+        },
+      },
+      required: ['postId'],
     },
   },
   // Campaign management tools
@@ -1023,6 +1110,11 @@ const TOOL_SCOPES: Record<string, string[]> = {
   restore_post: ['posts:write'],
   list_posts: ['posts:read'],
   search_posts: ['posts:read'],
+  get_due_posts: ['posts:read'],
+  get_post_for_publish: ['posts:read'],
+  mark_post_published: ['posts:write'],
+  get_upcoming_schedule: ['posts:read'],
+  download_post_media: ['posts:read', 'media:write'],
   create_reddit_crossposts: ['posts:write'],
   // Campaigns
   create_campaign: ['campaigns:write'],
@@ -1109,7 +1201,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
-        const contentError = validatePostContent(platform, content as Record<string, unknown>)
+        const contentError = validatePostContent(
+          platform,
+          content as unknown as Record<string, unknown>
+        )
         if (contentError) {
           return {
             content: [{ type: 'text', text: `Error: ${contentError}` }],
@@ -1165,7 +1260,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (updates.platform && updates.content) {
           const contentError = validatePostContent(
             updates.platform,
-            updates.content as Record<string, unknown>
+            updates.content as unknown as Record<string, unknown>
           )
           if (contentError) {
             return {
@@ -1333,6 +1428,184 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               text: JSON.stringify({ success: true, count: posts.length, posts }, null, 2),
             },
           ],
+        }
+      }
+
+      // Publish workflow handlers
+      case 'get_due_posts': {
+        const { platform } = args as { platform?: string }
+        const posts = await listDuePosts(platform ? { platform: platform as Platform } : undefined)
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                posts.length === 0
+                  ? 'No posts are currently due for publishing.'
+                  : JSON.stringify(posts, null, 2),
+            },
+          ],
+        }
+      }
+
+      case 'get_post_for_publish': {
+        const { postId } = args as { postId: string }
+        if (!postId) {
+          return {
+            content: [{ type: 'text', text: 'Error: postId is required' }],
+            isError: true,
+          }
+        }
+        const post = await getPost(postId)
+        if (!post) {
+          return {
+            content: [{ type: 'text', text: `Post ${postId} not found` }],
+            isError: true,
+          }
+        }
+
+        const content = post.content as unknown as Record<string, unknown>
+        let formatted: Record<string, unknown>
+
+        switch (post.platform) {
+          case 'twitter': {
+            const text = (content.text as string) || ''
+            const chunks: string[] = []
+            if (text.length <= 280) {
+              chunks.push(text)
+            } else {
+              let remaining = text
+              while (remaining.length > 0) {
+                if (remaining.length <= 280) {
+                  chunks.push(remaining)
+                  break
+                }
+                let breakPoint = remaining.lastIndexOf(' ', 280)
+                if (breakPoint === -1) breakPoint = 280
+                chunks.push(remaining.slice(0, breakPoint))
+                remaining = remaining.slice(breakPoint).trimStart()
+              }
+            }
+            formatted = {
+              platform: 'twitter',
+              text,
+              threadChunks: chunks,
+              mediaUrls: content.mediaUrls || [],
+            }
+            break
+          }
+          case 'linkedin':
+            formatted = {
+              platform: 'linkedin',
+              text: content.text || '',
+              visibility: content.visibility || 'public',
+              mediaUrls: content.mediaUrl ? [content.mediaUrl] : [],
+            }
+            break
+          case 'reddit':
+            formatted = {
+              platform: 'reddit',
+              subreddit: content.subreddit || '',
+              title: content.title || '',
+              body: content.body || '',
+              flairText: content.flairText || null,
+              mediaUrls: content.mediaUrls || [],
+            }
+            break
+          default:
+            formatted = { platform: post.platform, ...content }
+        }
+
+        return {
+          content: [{ type: 'text', text: JSON.stringify(formatted, null, 2) }],
+        }
+      }
+
+      case 'mark_post_published': {
+        const { postId, publishedUrl, platformPostId } = args as {
+          postId: string
+          publishedUrl?: string
+          platformPostId?: string
+        }
+        if (!postId) {
+          return {
+            content: [{ type: 'text', text: 'Error: postId is required' }],
+            isError: true,
+          }
+        }
+
+        const publishResult: Record<string, unknown> = {
+          success: true,
+          publishedAt: new Date().toISOString(),
+          method: 'external',
+        }
+        if (publishedUrl) publishResult.postUrl = publishedUrl
+        if (platformPostId) publishResult.postId = platformPostId
+
+        const updated = await updatePost(postId, {
+          status: 'published',
+          publishResult: publishResult as unknown as Post['publishResult'],
+        })
+
+        if (!updated) {
+          return {
+            content: [{ type: 'text', text: `Post ${postId} not found` }],
+            isError: true,
+          }
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  success: true,
+                  postId: updated.id,
+                  status: 'published',
+                  publishedAt: publishResult.publishedAt,
+                  publishedUrl: publishedUrl || null,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        }
+      }
+
+      case 'get_upcoming_schedule': {
+        const { hours } = args as { hours?: number }
+        const upcoming = await listUpcomingPosts(hours || 24)
+        return {
+          content: [
+            {
+              type: 'text',
+              text:
+                upcoming.length === 0
+                  ? `No posts scheduled in the next ${hours || 24} hours.`
+                  : JSON.stringify(upcoming, null, 2),
+            },
+          ],
+        }
+      }
+
+      case 'download_post_media': {
+        const { postId } = args as { postId: string }
+        if (!postId) {
+          return {
+            content: [{ type: 'text', text: 'Error: postId is required' }],
+            isError: true,
+          }
+        }
+        const media = await getPostMedia(postId)
+        if (media.length === 0) {
+          return {
+            content: [{ type: 'text', text: 'No media files attached to this post.' }],
+          }
+        }
+        return {
+          content: [{ type: 'text', text: JSON.stringify(media, null, 2) }],
         }
       }
 

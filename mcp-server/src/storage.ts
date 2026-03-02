@@ -27,7 +27,7 @@ export function _resetClient(): void {
 // ==================
 
 export type Platform = 'twitter' | 'linkedin' | 'reddit'
-export type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed' | 'archived'
+export type PostStatus = 'draft' | 'scheduled' | 'ready' | 'published' | 'failed' | 'archived'
 export type CampaignStatus = 'active' | 'paused' | 'completed' | 'archived'
 export type GroupType = 'reddit-crosspost'
 export type BlogDraftStatus = 'draft' | 'scheduled' | 'published' | 'archived'
@@ -252,6 +252,53 @@ export async function searchPosts(query: string, options?: { limit?: number }): 
 
   const res = await getClient().get<{ posts: Post[] }>('/posts', params)
   return res.posts
+}
+
+// ==================
+// Publish Workflow Operations
+// ==================
+
+export interface DuePost {
+  id: string
+  platform: Platform
+  status: PostStatus
+  scheduledAt: string | null
+  preview: string
+  hasMedia: boolean
+}
+
+export async function listDuePosts(options?: { platform?: Platform }): Promise<DuePost[]> {
+  const params: Record<string, string> = {}
+  if (options?.platform) params.platform = options.platform
+  const res = await getClient().get<{ posts: DuePost[] }>('/posts/due', params)
+  return res.posts
+}
+
+export interface UpcomingPost {
+  id: string
+  platform: Platform
+  scheduledAt: string | null
+  preview: string
+  campaignId: string | null
+}
+
+export async function listUpcomingPosts(hours: number = 24): Promise<UpcomingPost[]> {
+  const res = await getClient().get<{ posts: UpcomingPost[] }>('/posts/upcoming', {
+    hours: String(hours),
+  })
+  return res.posts
+}
+
+export interface PostMedia {
+  filename: string
+  originalUrl: string
+  downloadUrl: string | null
+  expiresIn: number
+}
+
+export async function getPostMedia(postId: string): Promise<PostMedia[]> {
+  const res = await getClient().get<{ media: PostMedia[] }>(`/posts/${postId}/media`)
+  return res.media
 }
 
 // ==================

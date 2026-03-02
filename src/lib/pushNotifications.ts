@@ -60,7 +60,11 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
   if (!registration) return null
 
   const existing = await registration.pushManager.getSubscription()
-  if (existing) return existing
+  if (existing) {
+    // Persist to server in case it wasn't saved
+    await persistSubscription(existing)
+    return existing
+  }
 
   if (!VAPID_PUBLIC_KEY) {
     console.warn('[push] NEXT_PUBLIC_VAPID_PUBLIC_KEY is not set — skipping push subscription')
@@ -69,10 +73,13 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
 
   try {
     const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    return await registration.pushManager.subscribe({
+    const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
     })
+    // Persist to server for server-side push delivery
+    await persistSubscription(subscription)
+    return subscription
   } catch (err) {
     console.error('[push] Failed to subscribe:', err)
     return null
@@ -86,6 +93,8 @@ export async function unsubscribeFromPush(): Promise<boolean> {
   if (!subscription) return true
 
   try {
+    // Remove from server
+    await removeSubscription(subscription.endpoint)
     return await subscription.unsubscribe()
   } catch (err) {
     console.error('[push] Failed to unsubscribe:', err)
@@ -122,6 +131,34 @@ export async function sendLocalNotification(
     })
   } catch {
     new Notification(title, { body, icon: '/pwa-192x192.png' })
+  }
+}
+
+async function persistSubscription(subscription: PushSubscription): Promise<void> {
+  try {
+    const json = subscription.toJSON()
+    await fetch('/api/push-subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: json.endpoint,
+        keys: json.keys,
+      }),
+    })
+  } catch (err) {
+    console.error('[push] Failed to persist subscription to server:', err)
+  }
+}
+
+async function removeSubscription(endpoint: string): Promise<void> {
+  try {
+    await fetch('/api/push-subscriptions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint }),
+    })
+  } catch (err) {
+    console.error('[push] Failed to remove subscription from server:', err)
   }
 }
 

@@ -16,6 +16,7 @@ import {
   X,
   Loader2,
   RefreshCw,
+  Bell,
 } from 'lucide-react'
 import { usePostsStore } from '@/lib/storage'
 import { PostStatus, getPostPreviewText } from '@/lib/posts'
@@ -34,6 +35,7 @@ const STATUS_CONFIG: Record<
 > = {
   draft: { label: 'Drafts', icon: FileText, color: 'text-muted-foreground', emoji: '📝' },
   scheduled: { label: 'Scheduled', icon: Calendar, color: 'text-sticker-blue', emoji: '📅' },
+  ready: { label: 'Ready', icon: Bell, color: 'text-sticker-orange', emoji: '🔔' },
   publishing: { label: 'Publishing', icon: Loader2, color: 'text-sticker-orange', emoji: '🔄' },
   published: { label: 'Published', icon: CheckCircle, color: 'text-sticker-green', emoji: '✅' },
   failed: { label: 'Failed', icon: AlertCircle, color: 'text-destructive', emoji: '❌' },
@@ -120,6 +122,7 @@ export default function PostsPage() {
       all: allPosts.filter((p) => p.status !== 'archived').length,
       draft: allPosts.filter((p) => p.status === 'draft').length,
       scheduled: allPosts.filter((p) => p.status === 'scheduled').length,
+      ready: allPosts.filter((p) => p.status === 'ready').length,
       publishing: allPosts.filter((p) => p.status === 'publishing').length,
       published: allPosts.filter((p) => p.status === 'published').length,
       failed: allPosts.filter((p) => p.status === 'failed').length,
@@ -269,6 +272,7 @@ export default function PostsPage() {
                 [
                   'draft',
                   'scheduled',
+                  'ready',
                   'publishing',
                   'published',
                   'failed',
@@ -279,7 +283,10 @@ export default function PostsPage() {
                 const count = counts[status]
                 // Hide publishing, failed, and archived tabs when empty
                 if (
-                  (status === 'publishing' || status === 'failed' || status === 'archived') &&
+                  (status === 'ready' ||
+                    status === 'publishing' ||
+                    status === 'failed' ||
+                    status === 'archived') &&
                   count === 0
                 )
                   return null

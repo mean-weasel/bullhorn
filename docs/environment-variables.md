@@ -72,6 +72,47 @@ SENTRY_AUTH_TOKEN=your-auth-token  # Optional: enables source map uploads
 
 ---
 
+### Web Push Notifications
+
+```bash
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your-vapid-public-key
+VAPID_PRIVATE_KEY=your-vapid-private-key
+```
+
+**Purpose**: Browser push notifications when scheduled posts become ready
+**Where to get**: Generate with `npx tsx scripts/generate-vapid-keys.ts`
+**Impact if missing**: Push notifications disabled — users must check the app manually
+
+**How to set up**:
+1. Run `npx tsx scripts/generate-vapid-keys.ts` to generate a key pair
+2. Add both keys to Vercel environment variables
+3. `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is used client-side for push subscription
+4. `VAPID_PRIVATE_KEY` is server-side only (never expose to client)
+5. Redeploy
+
+---
+
+### Email Notifications (Resend)
+
+```bash
+RESEND_API_KEY=re_your-api-key
+RESEND_FROM_EMAIL=Bullhorn <notifications@bullhorn.to>  # Optional, has default
+```
+
+**Purpose**: Email notifications when scheduled posts become ready
+**Where to get**: https://resend.com/api-keys
+**Impact if missing**: Email notifications disabled — users rely on push or manual checking
+
+**How to set up**:
+1. Create free Resend account at https://resend.com/
+2. Configure sending domain `bullhorn.to` (add SPF + DKIM DNS records)
+3. Create an API key at https://resend.com/api-keys
+4. Add `RESEND_API_KEY` to Vercel environment variables
+5. Optionally set `RESEND_FROM_EMAIL` to customize the sender
+6. Redeploy
+
+---
+
 ## Optional Variables
 
 ### Google OAuth (iOS/Mobile)
