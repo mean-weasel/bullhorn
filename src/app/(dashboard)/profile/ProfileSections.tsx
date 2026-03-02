@@ -54,6 +54,7 @@ export function ProfileInfoSection({
           value={displayName}
           onChange={(e) => onDisplayNameChange(e.target.value)}
           placeholder="Enter your display name"
+          maxLength={100}
           className={cn(
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',

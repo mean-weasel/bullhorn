@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils'
 import { getMediaUrl } from '@/lib/media'
 import { MoveCampaignModal } from '@/components/campaigns/MoveCampaignModal'
 import { LaunchPostCard } from '@/components/launch-posts/LaunchPostCard'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { CampaignPostCard } from './CampaignPostCard'
 import { AddPostModal } from './AddPostModal'
 import { AddLaunchPostModal } from './AddLaunchPostModal'
@@ -65,17 +66,14 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const [showAddPostModal, setShowAddPostModal] = useState(false)
   const [showAddLaunchPostModal, setShowAddLaunchPostModal] = useState(false)
   const [showMoveModal, setShowMoveModal] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<'campaign' | string | null>(null)
 
   useEffect(() => {
-    if (!postsInitialized) {
-      fetchPosts()
-    }
-    if (!projectsInitialized) {
-      fetchProjects()
-    }
-    if (!launchPostsInitialized) {
-      fetchLaunchPosts()
-    }
+    const fetches: Promise<void>[] = []
+    if (!postsInitialized) fetches.push(fetchPosts())
+    if (!projectsInitialized) fetches.push(fetchProjects())
+    if (!launchPostsInitialized) fetches.push(fetchLaunchPosts())
+    if (fetches.length > 0) void Promise.all(fetches)
   }, [
     postsInitialized,
     fetchPosts,
@@ -121,17 +119,17 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     setCampaign({ ...campaign, status })
   }
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!campaign) return
-    if (
-      confirm(
-        'Are you sure you want to delete this campaign? Posts will be unlinked but not deleted.'
-      )
-    ) {
-      await deleteCampaign(campaign.id)
-      router.push('/campaigns')
-    }
+    setDeleteTarget('campaign')
   }
+
+  const confirmDeleteCampaign = useCallback(async () => {
+    if (!campaign) return
+    await deleteCampaign(campaign.id)
+    setDeleteTarget(null)
+    router.push('/campaigns')
+  }, [campaign, deleteCampaign, router])
 
   const handleRemovePost = async (postId: string) => {
     if (!campaign) return
@@ -172,11 +170,16 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     await updateLaunchPost(launchPostId, { campaignId: null })
   }
 
-  const handleDeleteLaunchPost = async (launchPostId: string) => {
-    if (confirm('Are you sure you want to delete this launch post?')) {
-      await deleteLaunchPost(launchPostId)
-    }
+  const handleDeleteLaunchPost = (launchPostId: string) => {
+    setDeleteTarget(launchPostId)
   }
+
+  const confirmDeleteLaunchPost = useCallback(async () => {
+    if (deleteTarget && deleteTarget !== 'campaign') {
+      await deleteLaunchPost(deleteTarget)
+      setDeleteTarget(null)
+    }
+  }, [deleteTarget, deleteLaunchPost])
 
   if (loading) {
     return (
@@ -222,6 +225,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  maxLength={200}
                   className="w-full text-2xl md:text-3xl font-display font-bold bg-transparent border-b-2 border-[hsl(var(--gold))] focus:outline-none"
                   autoFocus
                 />
@@ -230,6 +234,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
                   onChange={(e) => setEditDescription(e.target.value)}
                   placeholder="Add a description..."
                   rows={2}
+                  maxLength={2000}
                   className="w-full text-sm text-muted-foreground bg-transparent border border-border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 resize-none"
                 />
                 <div className="flex gap-2">
@@ -536,6 +541,28 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
           }}
         />
       )}
+
+      {/* Delete Campaign Confirmation */}
+      <ConfirmDialog
+        open={deleteTarget === 'campaign'}
+        onConfirm={confirmDeleteCampaign}
+        onCancel={() => setDeleteTarget(null)}
+        title="Delete Campaign"
+        description="Are you sure you want to delete this campaign? Posts will be unlinked but not deleted."
+        confirmText="Delete"
+        variant="danger"
+      />
+
+      {/* Delete Launch Post Confirmation */}
+      <ConfirmDialog
+        open={!!deleteTarget && deleteTarget !== 'campaign'}
+        onConfirm={confirmDeleteLaunchPost}
+        onCancel={() => setDeleteTarget(null)}
+        title="Delete Launch Post"
+        description="Are you sure you want to delete this launch post?"
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   )
 }

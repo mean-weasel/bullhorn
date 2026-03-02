@@ -34,6 +34,7 @@ export function NewCampaignModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter campaign name..."
+                maxLength={200}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50"
                 autoFocus
               />
@@ -45,6 +46,7 @@ export function NewCampaignModal({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe this campaign..."
                 rows={3}
+                maxLength={2000}
                 className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 resize-none"
               />
             </div>

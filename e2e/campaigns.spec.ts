@@ -111,13 +111,15 @@ test.describe('Campaigns', () => {
       let campaigns = await getAllCampaigns(page)
       expect(campaigns.length).toBe(1)
 
-      // Set up dialog handler before clicking delete
-      page.on('dialog', (dialog) => dialog.accept())
-
       // Click delete button - it's the button with title="Delete campaign"
       const deleteButton = page.getByTitle('Delete campaign')
       await expect(deleteButton).toBeVisible()
       await deleteButton.click()
+
+      // Confirm in the ConfirmDialog
+      const dialog = page.getByRole('alertdialog')
+      await dialog.waitFor({ state: 'visible' })
+      await dialog.getByRole('button', { name: 'Delete' }).click()
 
       // Should navigate back to campaigns list
       await page.waitForURL('/campaigns')

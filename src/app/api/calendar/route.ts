@@ -30,30 +30,33 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Query posts within the date range
-    const { data: postsData, error: postsError } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('user_id', userId)
-      .neq('status', 'archived')
-      .not('scheduled_at', 'is', null)
-      .gte('scheduled_at', `${start}T00:00:00.000Z`)
-      .lte('scheduled_at', `${end}T23:59:59.999Z`)
-      .order('scheduled_at', { ascending: true })
+    // Query posts and reminders in parallel
+    const [postsResult, remindersResult] = await Promise.all([
+      supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', userId)
+        .neq('status', 'archived')
+        .not('scheduled_at', 'is', null)
+        .gte('scheduled_at', `${start}T00:00:00.000Z`)
+        .lte('scheduled_at', `${end}T23:59:59.999Z`)
+        .order('scheduled_at', { ascending: true }),
+      supabase
+        .from('reminders')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('remind_at', `${start}T00:00:00.000Z`)
+        .lte('remind_at', `${end}T23:59:59.999Z`)
+        .order('remind_at', { ascending: true }),
+    ])
+
+    const { data: postsData, error: postsError } = postsResult
+    const { data: remindersData, error: remindersError } = remindersResult
 
     if (postsError) {
       console.error('Database error fetching posts:', postsError)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
-
-    // Query reminders within the date range
-    const { data: remindersData, error: remindersError } = await supabase
-      .from('reminders')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('remind_at', `${start}T00:00:00.000Z`)
-      .lte('remind_at', `${end}T23:59:59.999Z`)
-      .order('remind_at', { ascending: true })
 
     if (remindersError) {
       console.error('Database error fetching reminders:', remindersError)

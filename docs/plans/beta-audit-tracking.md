@@ -130,3 +130,36 @@ Holistic beta-readiness audit across feature completeness, error handling, UX po
 - [ ] Missing title attributes on truncated text (dimension: ux, severity: LOW, reason: polish)
 - [ ] CSP unsafe-inline for scripts in production (dimension: ops, severity: LOW, reason: Next.js requirement, accepted risk)
 - [ ] Error digest exposed to end users (dimension: ops, severity: LOW, reason: useful for support scenarios)
+
+### Iteration 4 (2026-03-02)
+
+**Findings:** 15 total (0 HIGH, 9 MEDIUM, 6 LOW)
+**Code fixes applied:** 9
+**Manual to-dos added:** 0
+**Deferred:** 6
+
+#### Fixed (Code)
+
+- [x] Native confirm() in campaigns list page — replaced with styled ConfirmDialog for delete confirmation (dimension: ux, severity: MEDIUM)
+- [x] Native confirm() in projects list page — replaced with styled ConfirmDialog for delete confirmation (dimension: ux, severity: MEDIUM)
+- [x] Native confirm() in campaign detail page (2 locations) — campaign delete and launch post delete now use ConfirmDialog (dimension: ux, severity: MEDIUM)
+- [x] Campaign detail page sequential store fetches — 3 separate fetches parallelized with Promise.all (dimension: performance, severity: MEDIUM)
+- [x] Calendar API sequential queries — posts and reminders queries parallelized with Promise.all (dimension: performance, severity: MEDIUM)
+- [x] Missing maxLength on blog draft title input — added maxLength=300 (dimension: error-handling, severity: MEDIUM)
+- [x] Missing maxLength on campaign name/description — NewCampaignModal (200/2000) and campaign detail inline edit (200/2000) (dimension: error-handling, severity: MEDIUM)
+- [x] Missing maxLength on project settings inputs — name (200), description (2000), hashtags (500), plus profile display name (100) (dimension: error-handling, severity: MEDIUM)
+- [x] Social accounts endpoint missing .limit() — added .limit(100) to prevent unbounded queries (dimension: performance, severity: MEDIUM)
+
+#### Previously Deferred → Now Fixed
+
+- [x] Blog draft title inline validation and maxLength → maxLength=300 added
+- [x] Campaign detail sequential fetches → parallelized (was deferred as "already parallel" but campaign detail page was still sequential)
+
+#### Deferred
+
+- [ ] Blog publishing flow incomplete — no publish endpoint or workflow for blog drafts (dimension: feature, severity: HIGH, reason: requires full feature implementation)
+- [ ] Launch posts finalization — no mechanism to submit launch posts to platforms (dimension: feature, severity: HIGH, reason: requires platform API integration)
+- [ ] Post search hard-coded 500 record limit (dimension: performance, severity: LOW, reason: acceptable for beta)
+- [ ] Campaigns/projects list missing cursor pagination (dimension: performance, severity: LOW, reason: 100 limit acceptable for beta)
+- [ ] Typography and button styling inconsistencies across pages (dimension: ux, severity: LOW, reason: polish)
+- [ ] Analytics token validation — access tokens forwarded without ownership verification (dimension: ops, severity: MEDIUM, reason: requires analytics OAuth flow redesign)

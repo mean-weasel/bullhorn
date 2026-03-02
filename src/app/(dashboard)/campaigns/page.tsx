@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Plus,
@@ -22,6 +22,7 @@ import { CampaignCard } from './CampaignCard'
 import { NewCampaignModal } from './NewCampaignModal'
 import { LimitGate } from '@/components/ui/LimitGate'
 import { SkeletonListPage } from '@/components/ui/Skeleton'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 type FilterStatus = 'all' | CampaignStatus
 
@@ -47,6 +48,7 @@ export default function CampaignsPage() {
   const [filter, setFilter] = useState<FilterStatus>('all')
   const [showNewModal, setShowNewModal] = useState(false)
   const [movingCampaign, setMovingCampaign] = useState<Campaign | null>(null)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -94,17 +96,18 @@ export default function CampaignsPage() {
     }
   }
 
-  const handleDeleteCampaign = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteCampaign = (id: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (
-      confirm(
-        'Are you sure you want to delete this campaign? Posts will be unlinked but not deleted.'
-      )
-    ) {
-      await deleteCampaign(id)
-    }
+    setDeleteId(id)
   }
+
+  const confirmDelete = useCallback(async () => {
+    if (deleteId) {
+      await deleteCampaign(deleteId)
+      setDeleteId(null)
+    }
+  }, [deleteId, deleteCampaign])
 
   if (loading && !initialized) {
     return <SkeletonListPage count={4} />
@@ -255,6 +258,17 @@ export default function CampaignsPage() {
           onMoved={() => fetchCampaigns()}
         />
       )}
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={!!deleteId}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+        title="Delete Campaign"
+        description="Are you sure you want to delete this campaign? Posts will be unlinked but not deleted."
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   )
 }
