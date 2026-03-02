@@ -1201,7 +1201,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         }
 
-        const contentError = validatePostContent(platform, content as Record<string, unknown>)
+        const contentError = validatePostContent(
+          platform,
+          content as unknown as Record<string, unknown>
+        )
         if (contentError) {
           return {
             content: [{ type: 'text', text: `Error: ${contentError}` }],
@@ -1257,7 +1260,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (updates.platform && updates.content) {
           const contentError = validatePostContent(
             updates.platform,
-            updates.content as Record<string, unknown>
+            updates.content as unknown as Record<string, unknown>
           )
           if (contentError) {
             return {

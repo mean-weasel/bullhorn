@@ -63,7 +63,7 @@ async function handleCreatePost(args: {
     return err('content is required')
   }
 
-  const contentError = validatePostContent(platform, content as Record<string, unknown>)
+  const contentError = validatePostContent(platform, content as unknown as Record<string, unknown>)
   if (contentError) {
     return err(contentError)
   }
@@ -94,7 +94,7 @@ async function handleUpdatePost(args: { id: string; [key: string]: unknown }): P
   if (updates.platform && updates.content) {
     const contentError = validatePostContent(
       updates.platform,
-      updates.content as Record<string, unknown>
+      updates.content as unknown as Record<string, unknown>
     )
     if (contentError) return err(contentError)
   }
