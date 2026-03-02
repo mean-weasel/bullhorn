@@ -34,6 +34,7 @@ import {
   PublishedLinks,
   SchedulePicker,
   EditorActions,
+  PostActions,
   PreviewPanel,
 } from '@/components/editor'
 import RecurrencePicker from '@/components/editor/RecurrencePicker'
@@ -701,6 +702,14 @@ export default function EditorPage() {
           subredditsInput={subredditsInput}
           className="mb-4 md:mb-6"
         />
+
+        {post.status === 'ready' && (
+          <PostActions
+            post={post}
+            onMarkAsPublished={handleMarkAsPosted}
+            className="mb-4 md:mb-6"
+          />
+        )}
 
         <SchedulePicker
           scheduledAt={post.scheduledAt}
