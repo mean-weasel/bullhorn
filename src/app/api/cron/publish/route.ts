@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { getNextOccurrence } from '@/lib/rrule'
+import { sendPushToUser } from '@/lib/webPushSender'
 
 export const dynamic = 'force-dynamic'
 
@@ -125,7 +126,24 @@ export async function GET(request: NextRequest) {
 
       processed++
 
-      // TODO: Fire Web Push notification (Workstream 4)
+      // Fire Web Push notification
+      try {
+        const preview =
+          typeof dbPost.content === 'object' && dbPost.content !== null
+            ? (dbPost.content as Record<string, string>).text ||
+              (dbPost.content as Record<string, string>).title ||
+              ''
+            : ''
+        const truncated = preview.length > 80 ? preview.slice(0, 80) + '...' : preview
+        await sendPushToUser(dbPost.user_id, {
+          title: `Ready to publish on ${dbPost.platform}`,
+          body: truncated || 'Your scheduled post is ready',
+          url: `/edit/${dbPost.id}`,
+        })
+      } catch (pushErr) {
+        console.error(`[notify-due-posts] Push failed for ${dbPost.id}:`, pushErr)
+      }
+
       // TODO: Fire Resend email notification (Workstream 5)
       notified++
 
