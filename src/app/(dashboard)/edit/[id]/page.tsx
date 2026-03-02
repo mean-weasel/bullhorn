@@ -16,6 +16,7 @@ import {
   isLinkedInContent,
   isRedditContent,
 } from '@/lib/posts'
+import { AlertCircle } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
 import { useAutoSave } from '@/hooks/useAutoSave'
@@ -726,6 +727,16 @@ export default function EditorPage() {
             onSelect={handleAccountSelect}
             platform={PLATFORM_INFO[post.platform].name}
           />
+        )}
+
+        {mediaUrls.length > 0 && (
+          <div className="flex items-center gap-2 p-3 rounded-md bg-sticker-orange/10 text-sticker-orange text-sm border-2 border-sticker-orange/30 mb-4 md:mb-6">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="font-medium">
+              Media attachments are not yet supported for publishing. Your text will be published
+              without images/videos.
+            </span>
+          </div>
         )}
 
         <EditorActions
