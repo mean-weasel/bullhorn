@@ -52,6 +52,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       .eq('campaign_id', id)
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
+      .limit(200)
 
     if (error) {
       console.error('Database error:', error)

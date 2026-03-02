@@ -163,3 +163,35 @@ Holistic beta-readiness audit across feature completeness, error handling, UX po
 - [ ] Campaigns/projects list missing cursor pagination (dimension: performance, severity: LOW, reason: 100 limit acceptable for beta)
 - [ ] Typography and button styling inconsistencies across pages (dimension: ux, severity: LOW, reason: polish)
 - [ ] Analytics token validation — access tokens forwarded without ownership verification (dimension: ops, severity: MEDIUM, reason: requires analytics OAuth flow redesign)
+
+### Iteration 5 (2026-03-02)
+
+**Findings:** 14 total (1 HIGH, 9 MEDIUM, 4 LOW)
+**Code fixes applied:** 10
+**Manual to-dos added:** 0
+**Deferred:** 4
+
+#### Fixed (Code)
+
+- [x] Missing .limit() on posts/due API route — added .limit(200) (dimension: performance, severity: HIGH)
+- [x] Missing .limit() on posts/upcoming API route — added .limit(200) (dimension: performance, severity: HIGH)
+- [x] Missing .limit() on calendar API route — added .limit(500) to both posts and reminders queries (dimension: performance, severity: HIGH)
+- [x] Missing .limit() on campaigns/[id]/posts GET — added .limit(200) (dimension: performance, severity: HIGH)
+- [x] ContentEditor textarea missing label association — added htmlFor/id pair (dimension: ux, severity: MEDIUM)
+- [x] Calendar nav buttons missing aria-labels — added dynamic prev/next aria-labels (dimension: ux, severity: MEDIUM)
+- [x] Calendar day cells not keyboard accessible — added role="button", tabIndex, onKeyDown, aria-label (dimension: ux, severity: MEDIUM)
+- [x] CampaignSelector missing aria-haspopup/aria-expanded — added to dropdown trigger button (dimension: ux, severity: MEDIUM)
+- [x] PostCard retry button missing aria-label — added descriptive label (dimension: ux, severity: MEDIUM)
+- [x] New page sequential store fetches — consolidated 3 useEffects into 1 parallel effect (dimension: performance, severity: MEDIUM)
+- [x] Reddit posts save with empty subreddit — added validation to handleSaveDraft, handleSchedule, handlePublishNow (dimension: error-handling, severity: MEDIUM)
+
+#### Previously Deferred → Now Fixed
+
+- [x] Missing .limit() on API routes → now applied to posts/due, posts/upcoming, calendar, campaigns/[id]/posts
+
+#### Deferred
+
+- [ ] user_country cookie set with httpOnly:false — intentionally readable by client-side GDPR logic (dimension: ops, severity: LOW, reason: by design)
+- [ ] Service worker push notification URL not validated against allowlist (dimension: ops, severity: LOW, reason: URLs come from trusted backend)
+- [ ] Blog publishing flow incomplete — no publish endpoint or workflow (dimension: feature, severity: HIGH, reason: requires full feature implementation)
+- [ ] Launch posts finalization — no mechanism to submit to platforms (dimension: feature, severity: HIGH, reason: requires platform API integration)

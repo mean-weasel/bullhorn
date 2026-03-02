@@ -25,6 +25,8 @@ export const CampaignSelector = ({
     <div className={cn('relative', className)}>
       <button
         onClick={onToggleDropdown}
+        aria-haspopup="listbox"
+        aria-expanded={showDropdown}
         className={cn(
           'flex items-center gap-2 px-4 py-2.5 rounded-md transition-all w-full',
           'border-[3px] border-border',

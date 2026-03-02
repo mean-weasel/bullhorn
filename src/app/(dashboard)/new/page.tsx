@@ -74,24 +74,19 @@ export default function EditorPage() {
   const [pendingPlatform, setPendingPlatform] = useState<Platform | null>(null)
   const [showCampaignDropdown, setShowCampaignDropdown] = useState(false)
 
-  // Fetch posts on mount if not initialized (needed for direct navigation to /edit/:id)
+  // Fetch stores on mount if not initialized
   useEffect(() => {
-    if (!postsInitialized) {
-      fetchPosts()
-    }
-  }, [postsInitialized, fetchPosts])
-
-  // Fetch campaigns on mount
-  useEffect(() => {
-    if (!campaignsInitialized) {
-      fetchCampaigns()
-    }
-  }, [campaignsInitialized, fetchCampaigns])
-
-  // Fetch social accounts on mount
-  useEffect(() => {
+    if (!postsInitialized) fetchPosts()
+    if (!campaignsInitialized) fetchCampaigns()
     if (!accountsInitialized) fetchAccounts()
-  }, [accountsInitialized, fetchAccounts])
+  }, [
+    postsInitialized,
+    fetchPosts,
+    campaignsInitialized,
+    fetchCampaigns,
+    accountsInitialized,
+    fetchAccounts,
+  ])
 
   // Form state
   const [post, setPost] = useState<Post>(() => {
@@ -505,6 +500,10 @@ export default function EditorPage() {
 
   // Save as draft
   const handleSaveDraft = () => {
+    if (post.platform === 'reddit' && subredditsInput.length === 0) {
+      toast.error('Please select at least one subreddit')
+      return
+    }
     const toSave = { ...post, status: 'draft' as const }
     handleSave(toSave)
     toast.success('Draft saved')
@@ -512,6 +511,10 @@ export default function EditorPage() {
 
   // Schedule
   const handleSchedule = () => {
+    if (post.platform === 'reddit' && subredditsInput.length === 0) {
+      toast.error('Please select at least one subreddit')
+      return
+    }
     const isRedditMulti = post.platform === 'reddit' && subredditsInput.length > 1
     const allSubredditsHaveSchedule =
       isRedditMulti && subredditsInput.every((sub) => subredditSchedules[sub])
@@ -532,6 +535,11 @@ export default function EditorPage() {
   const handlePublishNow = async () => {
     if (!content.trim()) {
       toast.error('Please add some content')
+      return
+    }
+
+    if (post.platform === 'reddit' && subredditsInput.length === 0) {
+      toast.error('Please select at least one subreddit')
       return
     }
 

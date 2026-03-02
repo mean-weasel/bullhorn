@@ -33,10 +33,14 @@ export const ContentEditor = ({
 
   return (
     <div className={className}>
-      <label className="block text-xs font-extrabold uppercase tracking-wider text-muted-foreground mb-2">
+      <label
+        htmlFor="content-editor"
+        className="block text-xs font-extrabold uppercase tracking-wider text-muted-foreground mb-2"
+      >
         Content
       </label>
       <textarea
+        id="content-editor"
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
         placeholder="What's on your mind? Share your thoughts, announce something exciting, or start a conversation..."

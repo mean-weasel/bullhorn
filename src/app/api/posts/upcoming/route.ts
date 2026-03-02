@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       .gte('scheduled_at', now.toISOString())
       .lte('scheduled_at', until.toISOString())
       .order('scheduled_at', { ascending: true })
+      .limit(200)
 
     if (error) {
       console.error('Database error:', error)

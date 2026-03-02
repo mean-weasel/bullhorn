@@ -154,6 +154,7 @@ export function PostCard({ post, index }: { post: Post; index: number }) {
               <button
                 onClick={handleRetry}
                 disabled={retrying}
+                aria-label="Retry publishing this post"
                 className={cn(
                   'flex items-center gap-1 text-xs font-bold',
                   'text-sticker-orange hover:text-sticker-orange/80',
