@@ -51,3 +51,45 @@ Holistic beta-readiness audit across feature completeness, error handling, UX po
 - [ ] Missing ARIA labels on form sections (dimension: ux, severity: MEDIUM, reason: deferred)
 - [ ] Dead feature UI in AccountPicker — shows "under development" (dimension: ux, severity: MEDIUM, reason: feature roadmap decision)
 - [ ] Various LOW severity items across all dimensions (reason: polish items for later iterations)
+
+### Iteration 2 (2026-03-02)
+
+**Findings:** 18 tasks (8 HIGH, 7 MEDIUM, 3 LOW)
+**Code fixes applied:** 16
+**Manual to-dos added:** 4
+**Deferred:** 0
+
+#### Fixed (Code)
+
+- [x] parseJsonBody helper for safe JSON parsing — covers all 23 API routes (dimension: error-handling, severity: HIGH)
+- [x] Error banners on posts and campaigns pages — store errors now visible to users (dimension: error-handling, severity: HIGH)
+- [x] ResponsiveDialog preventBackdropClose prop — prevents accidental data loss (dimension: ux, severity: HIGH)
+- [x] Header nav touch targets 44x44px — WCAG 2.5.5 compliance (dimension: ux, severity: HIGH)
+- [x] Email notification toggles "coming soon" — greyed out with explanation (dimension: ux, severity: MEDIUM)
+- [x] Media publish warning banner — shown when media attached in editor (dimension: ux, severity: MEDIUM)
+- [x] ARIA form role on post editor sections (dimension: ux, severity: MEDIUM)
+- [x] AccountPicker empty state links to Settings (dimension: ux, severity: MEDIUM)
+- [x] searchDrafts wrapped with dedup — prevents duplicate API requests (dimension: performance, severity: MEDIUM)
+- [x] Edit page useEffect calls consolidated into single effect (dimension: performance, severity: MEDIUM)
+- [x] Database performance indexes migration — posts, campaigns, blog_drafts, launch_posts, reminders (dimension: performance, severity: MEDIUM)
+- [x] Fixed migration column name: due_at → remind_at (dimension: ops, severity: HIGH — CI fix)
+- [x] Removed inert focus trap that blocked dialog interaction (dimension: ux, severity: HIGH — CI fix)
+
+#### Manual To-Dos Added
+
+- Apply migration 20260302002247_add_performance_indexes.sql to production (dimension: ops, severity: MEDIUM)
+- Verify all required Vercel env vars in production (dimension: ops, severity: HIGH)
+- Configure Sentry project alerts for production (dimension: ops, severity: MEDIUM)
+- Set up Upstash Redis for rate limiting (dimension: ops, severity: MEDIUM)
+
+#### Previously Deferred → Now Fixed
+
+- [x] request.json() no try-catch in 20+ API routes → parseJsonBody applied to all 23 routes
+- [x] Store error states not displayed in UI → error banners on posts and campaigns pages
+- [x] Missing focus trap in modals → evaluated and removed (inert approach doesn't work with portal-less dialogs)
+- [x] Header nav touch targets too small → increased to 44x44px minimum
+- [x] Backdrop click closes dialog without confirmation → preventBackdropClose prop added
+- [x] Campaign detail / edit page sequential fetches → already parallel (fire-and-forget), edit page consolidated
+- [x] searchDrafts() not deduplicated → wrapped with dedup
+- [x] Missing ARIA labels on form sections → added role="form" to editor
+- [x] Dead feature UI in AccountPicker → updated with Settings link
