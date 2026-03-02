@@ -255,6 +255,53 @@ export async function searchPosts(query: string, options?: { limit?: number }): 
 }
 
 // ==================
+// Publish Workflow Operations
+// ==================
+
+export interface DuePost {
+  id: string
+  platform: Platform
+  status: PostStatus
+  scheduledAt: string | null
+  preview: string
+  hasMedia: boolean
+}
+
+export async function listDuePosts(options?: { platform?: Platform }): Promise<DuePost[]> {
+  const params: Record<string, string> = {}
+  if (options?.platform) params.platform = options.platform
+  const res = await getClient().get<{ posts: DuePost[] }>('/posts/due', params)
+  return res.posts
+}
+
+export interface UpcomingPost {
+  id: string
+  platform: Platform
+  scheduledAt: string | null
+  preview: string
+  campaignId: string | null
+}
+
+export async function listUpcomingPosts(hours: number = 24): Promise<UpcomingPost[]> {
+  const res = await getClient().get<{ posts: UpcomingPost[] }>('/posts/upcoming', {
+    hours: String(hours),
+  })
+  return res.posts
+}
+
+export interface PostMedia {
+  filename: string
+  originalUrl: string
+  downloadUrl: string | null
+  expiresIn: number
+}
+
+export async function getPostMedia(postId: string): Promise<PostMedia[]> {
+  const res = await getClient().get<{ media: PostMedia[] }>(`/posts/${postId}/media`)
+  return res.media
+}
+
+// ==================
 // Campaign Operations
 // ==================
 
