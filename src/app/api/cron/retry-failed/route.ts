@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { verifyCronSecret } from '@/lib/cronAuth'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,11 +13,8 @@ export const dynamic = 'force-dynamic'
  * Kept as a stub so vercel.json cron config doesn't 404.
  */
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = verifyCronSecret(request)
+  if (authError) return authError
 
   return NextResponse.json({
     status: 'no-op',

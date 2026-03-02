@@ -116,20 +116,25 @@ export default function PostsPage() {
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   )
 
-  // Count by status - 'all' count excludes archived
-  const counts = useMemo(
-    () => ({
-      all: allPosts.filter((p) => p.status !== 'archived').length,
-      draft: allPosts.filter((p) => p.status === 'draft').length,
-      scheduled: allPosts.filter((p) => p.status === 'scheduled').length,
-      ready: allPosts.filter((p) => p.status === 'ready').length,
-      publishing: allPosts.filter((p) => p.status === 'publishing').length,
-      published: allPosts.filter((p) => p.status === 'published').length,
-      failed: allPosts.filter((p) => p.status === 'failed').length,
-      archived: allPosts.filter((p) => p.status === 'archived').length,
-    }),
-    [allPosts]
-  )
+  // Count by status in a single pass - 'all' count excludes archived
+  const counts = useMemo(() => {
+    const result = {
+      all: 0,
+      draft: 0,
+      scheduled: 0,
+      ready: 0,
+      publishing: 0,
+      published: 0,
+      failed: 0,
+      archived: 0,
+    }
+    for (const p of allPosts) {
+      const s = p.status as keyof typeof result
+      if (s in result) result[s]++
+      if (s !== 'archived') result.all++
+    }
+    return result
+  }, [allPosts])
 
   if (loading && !initialized) {
     return <SkeletonListPage count={5} />

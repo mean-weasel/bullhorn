@@ -3,6 +3,7 @@ import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { getNextOccurrence } from '@/lib/rrule'
 import { sendPushToUser } from '@/lib/webPushSender'
 import { sendPostReadyEmail } from '@/lib/emailSender'
+import { verifyCronSecret } from '@/lib/cronAuth'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,17 +72,8 @@ async function scheduleNextRecurrence(
 }
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    console.error('[notify-due-posts] CRON_SECRET not configured')
-    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
-  }
-
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = verifyCronSecret(request)
+  if (authError) return authError
 
   const supabase = createServiceClient()
 

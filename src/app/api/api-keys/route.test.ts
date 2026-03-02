@@ -23,7 +23,8 @@ vi.mock('@/lib/auth', async (importOriginal) => ({
   ],
 }))
 
-const mockOrder = vi.fn()
+const mockLimit = vi.fn()
+const mockOrder = vi.fn(() => ({ limit: mockLimit }))
 const mockSelectEq = vi.fn(() => ({ order: mockOrder }))
 const mockSelect = vi.fn(() => ({ eq: mockSelectEq }))
 const mockInsertSingle = vi.fn()
@@ -83,7 +84,7 @@ describe('GET /api/api-keys', () => {
         updated_at: '2024-01-01T00:00:00Z',
       },
     ]
-    mockOrder.mockResolvedValue({ data: dbKeys, error: null })
+    mockLimit.mockResolvedValue({ data: dbKeys, error: null })
     const res = await GET()
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -95,7 +96,7 @@ describe('GET /api/api-keys', () => {
 
   it('returns empty array when user has no keys', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockOrder.mockResolvedValue({ data: [], error: null })
+    mockLimit.mockResolvedValue({ data: [], error: null })
     const res = await GET()
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -104,7 +105,7 @@ describe('GET /api/api-keys', () => {
 
   it('returns 500 when database query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockOrder.mockResolvedValue({ data: null, error: { message: 'DB error' } })
+    mockLimit.mockResolvedValue({ data: null, error: { message: 'DB error' } })
     const res = await GET()
     expect(res.status).toBe(500)
     const body = await res.json()

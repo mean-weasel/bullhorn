@@ -27,11 +27,11 @@ describe('GET /api/cron/retry-failed (no-op)', () => {
     expect(body.error).toBe('Unauthorized')
   })
 
-  it('returns 401 when no CRON_SECRET is configured', async () => {
+  it('returns 500 when no CRON_SECRET is configured', async () => {
     vi.stubEnv('CRON_SECRET', '')
     const req = createRequest({ authorization: 'Bearer anything' })
     const res = await GET(req)
-    expect(res.status).toBe(401)
+    expect(res.status).toBe(500)
   })
 
   it('returns no-op response with valid auth', async () => {

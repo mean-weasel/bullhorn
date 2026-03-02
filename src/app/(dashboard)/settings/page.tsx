@@ -273,6 +273,7 @@ export default function SettingsPage() {
         emailPrefsLoading={emailPrefsLoading}
         emailPrefsSaving={emailPrefsSaving}
         onToggle={handleEmailPrefToggle}
+        onRetry={fetchEmailPrefs}
       />
 
       {/* Analytics */}
