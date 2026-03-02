@@ -101,9 +101,12 @@ export function ApiKeyManager() {
       {/* Create key UI */}
       {showCreate && !createdRawKey && (
         <div className="mb-4 p-4 rounded-md border-2 border-dashed border-border bg-secondary/30">
-          <label className="text-sm font-bold block mb-2">Key name</label>
+          <label htmlFor="api-key-name" className="text-sm font-bold block mb-2">
+            Key name
+          </label>
           <div className="flex gap-2">
             <input
+              id="api-key-name"
               type="text"
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}

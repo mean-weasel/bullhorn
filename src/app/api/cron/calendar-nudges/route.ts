@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import type { DbEventSubscription } from '@/lib/communityEvents'
 import { getNextOccurrence } from '@/lib/rrule'
+import { verifyCronSecret } from '@/lib/cronAuth'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,12 +97,8 @@ async function reminderExists(
 }
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = verifyCronSecret(request)
+  if (authError) return authError
 
   const supabase = createServiceClient()
   const now = new Date()

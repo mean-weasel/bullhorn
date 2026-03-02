@@ -1,6 +1,7 @@
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { refreshTokenIfNeeded, type SocialAccountWithTokens } from '@/lib/tokenRefresh'
+import { verifyCronSecret } from '@/lib/cronAuth'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,11 +68,8 @@ async function processAccounts(accounts: SocialAccountWithTokens[]) {
 }
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const authError = verifyCronSecret(request)
+  if (authError) return authError
 
   try {
     const accounts = await fetchAccountsToRefresh()

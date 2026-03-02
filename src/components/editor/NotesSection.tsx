@@ -47,6 +47,7 @@ export const NotesSection = ({
           <textarea
             value={notes}
             onChange={(e) => onChange(e.target.value)}
+            maxLength={5000}
             placeholder="Add notes about this post (e.g., context, hashtags to use, posting strategy)..."
             className={cn(
               'w-full min-h-[100px] p-3 md:p-4 rounded-xl',

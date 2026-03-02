@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { LaunchPostCard } from '@/components/launch-posts/LaunchPostCard'
 import { LimitGate } from '@/components/ui/LimitGate'
 import { SkeletonListPage } from '@/components/ui/Skeleton'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 export default function LaunchPostsPage() {
   const router = useRouter()
@@ -24,6 +25,7 @@ export default function LaunchPostsPage() {
   const [platformFilter, setPlatformFilter] = useState<LaunchPlatform | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<LaunchPostStatus | 'all'>('all')
   const [showFilters, setShowFilters] = useState(false)
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!initialized) {
@@ -31,9 +33,14 @@ export default function LaunchPostsPage() {
     }
   }, [initialized, fetchLaunchPosts])
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this launch post?')) {
-      await deleteLaunchPost(id)
+  const handleDelete = (id: string) => {
+    setDeleteId(id)
+  }
+
+  const confirmDelete = async () => {
+    if (deleteId) {
+      await deleteLaunchPost(deleteId)
+      setDeleteId(null)
     }
   }
 
@@ -246,6 +253,16 @@ export default function LaunchPostsPage() {
           ))}
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteId(null)}
+        title="Delete Launch Post"
+        description="Are you sure you want to delete this launch post? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   )
 }

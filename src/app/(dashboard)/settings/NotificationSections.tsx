@@ -49,14 +49,19 @@ export function PushNotificationsSection({
           </div>
         </div>
       ) : pushPermission === 'denied' ? (
-        <div className="flex items-center gap-2 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <div>
+        <div className="p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <p className="font-bold">Notifications blocked</p>
-            <p className="text-sm opacity-80">
-              Please enable notifications in your browser settings.
-            </p>
           </div>
+          <p className="text-sm opacity-80 mt-2">
+            You previously blocked notifications. To re-enable them:
+          </p>
+          <ol className="text-sm opacity-80 mt-1 ml-4 list-decimal space-y-0.5">
+            <li>Click the lock/tune icon in your browser&apos;s address bar</li>
+            <li>Find &quot;Notifications&quot; and change it to &quot;Allow&quot;</li>
+            <li>Reload this page</li>
+          </ol>
         </div>
       ) : !pushSubscribed ? (
         <button
@@ -178,6 +183,7 @@ interface EmailNotificationsSectionProps {
   emailPrefsLoading: boolean
   emailPrefsSaving: boolean
   onToggle: (key: keyof EmailPreferences, value: boolean) => void
+  onRetry?: () => void
 }
 
 export function EmailNotificationsSection({
@@ -185,6 +191,7 @@ export function EmailNotificationsSection({
   emailPrefsLoading,
   emailPrefsSaving,
   onToggle,
+  onRetry,
 }: EmailNotificationsSectionProps) {
   return (
     <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
@@ -248,7 +255,17 @@ export function EmailNotificationsSection({
       ) : (
         <div className="flex items-center gap-2 p-4 rounded-md bg-muted/50 text-muted-foreground border-2 border-border">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <p className="text-sm">Failed to load email preferences. Please refresh the page.</p>
+          <div className="flex-1">
+            <p className="text-sm">Failed to load email preferences.</p>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="text-sm font-medium text-primary hover:underline mt-1"
+              >
+                Try again
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

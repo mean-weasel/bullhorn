@@ -18,3 +18,7 @@ Items that require human action outside the codebase (service provider settings,
 - [ ] Verify all required Vercel env vars are set in production: `CRON_SECRET`, `NEXT_PUBLIC_SENTRY_DSN`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` — see `docs/environment-variables.md` for full list (dimension: ops, severity: HIGH)
 - [ ] Configure Sentry project alerts for production error spikes (dimension: ops, severity: MEDIUM)
 - [ ] Set up Upstash Redis for rate limiting — recommended for production, app works without it but rate limiting will be disabled (dimension: ops, severity: MEDIUM)
+
+### From Iteration 3 (2026-03-02)
+
+- [ ] Create a cookie policy page at `/cookies` or `/cookie-policy` — privacy policy references cookies but no dedicated page exists for regulatory compliance (dimension: feature, severity: HIGH)

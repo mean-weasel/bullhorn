@@ -93,3 +93,40 @@ Holistic beta-readiness audit across feature completeness, error handling, UX po
 - [x] searchDrafts() not deduplicated → wrapped with dedup
 - [x] Missing ARIA labels on form sections → added role="form" to editor
 - [x] Dead feature UI in AccountPicker → updated with Settings link
+
+### Iteration 3 (2026-03-02)
+
+**Findings:** 22 total (4 HIGH, 7 MEDIUM, 11 LOW)
+**Code fixes applied:** 9
+**Manual to-dos added:** 1
+**Deferred:** 11
+
+#### Fixed (Code)
+
+- [x] Timing-safe CRON_SECRET comparison — replaced string `!==` with `crypto.timingSafeEqual` via shared `verifyCronSecret` helper across all 4 cron routes (dimension: ops, severity: HIGH)
+- [x] Dashboard Promise.all not awaited — fire-and-forget `Promise.all(fetches)` missing `void` prefix, silencing floating promise lint (dimension: error-handling, severity: HIGH)
+- [x] Missing maxLength on form inputs — added maxLength to CreateProjectModal (name 200, description 2000) and NotesSection (5000) to match backend limits (dimension: error-handling, severity: HIGH)
+- [x] Push notification denied recovery guidance — expanded "blocked" message with step-by-step browser re-enable instructions (dimension: error-handling, severity: HIGH)
+- [x] Browser confirm() replaced with ConfirmDialog — launch-posts delete now uses styled ConfirmDialog instead of native `confirm()` (dimension: ux, severity: MEDIUM)
+- [x] Unassociated form labels — added htmlFor/id pairs to ApiKeyManager "Key name" and RecurrencePicker "Repeat" labels (dimension: ux, severity: MEDIUM)
+- [x] Missing pagination limits — added .limit(200) to community-events and .limit(100) to api-keys GET endpoints (dimension: performance, severity: MEDIUM)
+- [x] Posts page 8-pass status counts — replaced 8 separate .filter() calls with single-pass reduction loop (dimension: performance, severity: MEDIUM)
+- [x] Email prefs error recovery — added retry button to EmailNotificationsSection when preferences fail to load (dimension: error-handling, severity: MEDIUM)
+
+#### Manual To-Dos Added
+
+- Cookie policy page needed for regulatory compliance — privacy page references cookies but no dedicated cookie policy exists (dimension: feature, severity: HIGH)
+
+#### Deferred
+
+- [ ] Launch post URL format validation (dimension: error-handling, severity: MEDIUM, reason: deferred to next iteration)
+- [ ] Blog draft title inline validation and maxLength (dimension: error-handling, severity: MEDIUM, reason: deferred)
+- [ ] Campaign detail 404 handling on deleted resource (dimension: error-handling, severity: MEDIUM, reason: deferred)
+- [ ] Generic API error messages lack field-level details (dimension: error-handling, severity: MEDIUM, reason: systematic multi-route change)
+- [ ] Console error logging leaks schema details (dimension: ops, severity: MEDIUM, reason: needs structured logging strategy)
+- [ ] Missing aria-busy on loading elements (dimension: ux, severity: LOW, reason: polish)
+- [ ] Emoji in headings need aria-hidden (dimension: ux, severity: LOW, reason: polish)
+- [ ] Form label font weight inconsistency (dimension: ux, severity: LOW, reason: polish)
+- [ ] Missing title attributes on truncated text (dimension: ux, severity: LOW, reason: polish)
+- [ ] CSP unsafe-inline for scripts in production (dimension: ops, severity: LOW, reason: Next.js requirement, accepted risk)
+- [ ] Error digest exposed to end users (dimension: ops, severity: LOW, reason: useful for support scenarios)

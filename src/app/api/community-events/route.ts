@@ -22,6 +22,7 @@ export async function GET() {
       .eq('is_active', true)
       .order('platform', { ascending: true })
       .order('name', { ascending: true })
+      .limit(200)
 
     if (error) {
       console.error('Database error:', error)

@@ -89,6 +89,7 @@ export function CreateProjectModal({ open, onClose, onSuccess }: CreateProjectMo
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter project name..."
+            maxLength={200}
             className={cn(
               'w-full px-3 py-2.5 rounded-lg',
               'bg-background border border-border',
@@ -110,6 +111,7 @@ export function CreateProjectModal({ open, onClose, onSuccess }: CreateProjectMo
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe this project..."
             rows={3}
+            maxLength={2000}
             className={cn(
               'w-full px-3 py-2.5 rounded-lg',
               'bg-background border border-border',

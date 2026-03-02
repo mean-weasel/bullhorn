@@ -94,9 +94,12 @@ export default function RecurrencePicker({
 
   return (
     <div className={cn('space-y-2', className)}>
-      <label className="block text-sm font-bold text-foreground">Repeat</label>
+      <label htmlFor="recurrence-select" className="block text-sm font-bold text-foreground">
+        Repeat
+      </label>
 
       <select
+        id="recurrence-select"
         value={activePreset}
         onChange={(e) => handlePresetChange(e.target.value as PresetKey)}
         className={inputClass}
