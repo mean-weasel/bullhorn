@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { getNextOccurrence } from '@/lib/rrule'
 import { sendPushToUser } from '@/lib/webPushSender'
+import { sendApnsToUser } from '@/lib/apnsSender'
 import { sendPostReadyEmail } from '@/lib/emailSender'
 import { verifyCronSecret } from '@/lib/cronAuth'
 
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest) {
 
       processed++
 
-      // Fire Web Push notification
+      // Fire push notifications (web + native)
       try {
         const preview =
           typeof dbPost.content === 'object' && dbPost.content !== null
@@ -128,11 +129,15 @@ export async function GET(request: NextRequest) {
               ''
             : ''
         const truncated = preview.length > 80 ? preview.slice(0, 80) + '...' : preview
-        await sendPushToUser(dbPost.user_id, {
+        const pushPayload = {
           title: `Ready to publish on ${dbPost.platform}`,
           body: truncated || 'Your scheduled post is ready',
           url: `/edit/${dbPost.id}`,
-        })
+        }
+        await Promise.all([
+          sendPushToUser(dbPost.user_id, pushPayload),
+          sendApnsToUser(dbPost.user_id, pushPayload),
+        ])
       } catch (pushErr) {
         console.error(`[notify-due-posts] Push failed for ${dbPost.id}:`, pushErr)
       }

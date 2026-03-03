@@ -92,6 +92,31 @@ VAPID_PRIVATE_KEY=your-vapid-private-key
 
 ---
 
+### Native iOS Push Notifications (APNs)
+
+```bash
+APNS_KEY_ID=your-10-character-key-id
+APNS_AUTH_KEY=base64-encoded-p8-key-contents
+APNS_ENVIRONMENT=production
+```
+
+**Purpose**: Native push notifications to iOS devices via Apple Push Notification service
+**Where to get**: Apple Developer portal → Certificates, Identifiers & Profiles → Keys
+**Impact if missing**: Native iOS push notifications disabled — iOS users rely on web push or email
+
+**How to set up**:
+1. Sign in to https://developer.apple.com/account/resources/authkeys/list
+2. Create a new key with **Apple Push Notifications service (APNs)** enabled
+3. Download the `.p8` file (one-time download)
+4. Note the **Key ID** (10 characters) shown on the key page
+5. Base64-encode the `.p8` file: `base64 -i AuthKey_XXXXXXXX.p8 | tr -d '\n'`
+6. Add `APNS_KEY_ID`, `APNS_AUTH_KEY`, and `APNS_ENVIRONMENT=production` to Vercel
+7. Redeploy
+
+**Note**: `APNS_TEAM_ID` is hardcoded as `B3A6AN2HA4` in `src/lib/apnsSender.ts`. TestFlight builds use the **production** APNs endpoint, not sandbox.
+
+---
+
 ### Email Notifications (Resend)
 
 ```bash
