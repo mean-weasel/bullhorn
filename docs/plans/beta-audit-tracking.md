@@ -195,3 +195,33 @@ Holistic beta-readiness audit across feature completeness, error handling, UX po
 - [ ] Service worker push notification URL not validated against allowlist (dimension: ops, severity: LOW, reason: URLs come from trusted backend)
 - [ ] Blog publishing flow incomplete — no publish endpoint or workflow (dimension: feature, severity: HIGH, reason: requires full feature implementation)
 - [ ] Launch posts finalization — no mechanism to submit to platforms (dimension: feature, severity: HIGH, reason: requires platform API integration)
+
+### Iteration 6 (2026-03-02)
+
+**Findings:** 14 total (7 HIGH, 3 MEDIUM, 4 LOW)
+**Code fixes applied:** 10
+**Manual to-dos added:** 0
+**Deferred:** 4
+
+#### Fixed (Code)
+
+- [x] Native `confirm()` in BlogEditorForm delete handler — replaced with ConfirmDialog component (dimension: ux, severity: HIGH)
+- [x] Native `confirm()` in BlogEditorForm back/leave handler — replaced with ConfirmDialog component (dimension: ux, severity: HIGH)
+- [x] Native `window.confirm()` in new/page.tsx Escape handler — replaced with ConfirmDialog (dimension: ux, severity: HIGH)
+- [x] Native `window.confirm()` in edit/[id]/page.tsx Escape handler — replaced with ConfirmDialog (dimension: ux, severity: HIGH)
+- [x] Empty `handleCopy` stub in launch-posts/page.tsx — added toast notification (dimension: feature, severity: HIGH)
+- [x] Unhandled Promise.all rejection in dashboard/page.tsx — added `.catch(() => {})` (dimension: error-handling, severity: HIGH)
+- [x] Unhandled Promise.all rejection in campaigns/[id]/page.tsx — added `.catch(() => {})` (dimension: error-handling, severity: HIGH)
+- [x] Projects detail loadProject() missing try/catch — wrapped Promise.all in try/catch (dimension: error-handling, severity: MEDIUM)
+- [x] Blog page missing error state display — added error UI with retry button, destructured `error` from store (dimension: error-handling, severity: MEDIUM)
+- [x] BlogEditorForm status message missing aria-live — added `role="status" aria-live="polite"` (dimension: ux, severity: MEDIUM)
+- [x] Missing .limit(500) on community-events/subscriptions GET (dimension: performance, severity: HIGH — previously deferred)
+- [x] Missing .limit(500) on projects/[id]/campaigns GET (dimension: performance, severity: HIGH — previously deferred)
+- [x] Missing .limit(500) on projects/[id]/accounts GET (dimension: performance, severity: HIGH — previously deferred)
+
+#### Deferred
+
+- [ ] Custom modal migration to ResponsiveDialog — 5+ modals need refactoring (dimension: ux, severity: LOW, reason: too many files for one iteration)
+- [ ] Analytics error message sanitization — error details exposed to client (dimension: ops, severity: LOW, reason: low risk for authenticated endpoints)
+- [ ] Reset endpoint auth hardening — already env-guarded by E2E_TEST_MODE (dimension: ops, severity: LOW, reason: adequate protection)
+- [ ] WelcomeModal missing Escape key dismiss (dimension: ux, severity: LOW, reason: minor polish)

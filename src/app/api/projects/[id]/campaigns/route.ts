@@ -39,6 +39,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       .eq('project_id', projectId)
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
+      .limit(500)
 
     if (error) {
       console.error('Database error:', error)

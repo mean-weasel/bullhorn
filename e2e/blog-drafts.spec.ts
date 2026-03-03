@@ -286,16 +286,18 @@ test.describe('Blog Drafts', () => {
       // Make a change
       await fillBlogDraftTitle(page, 'Changed Title')
 
-      // Set up dialog handler
-      page.once('dialog', (dialog) => {
-        expect(dialog.message()).toContain('unsaved changes')
-        dialog.dismiss()
-      })
-
       // Try to navigate away
       await page.getByRole('button', { name: /back to drafts/i }).click()
 
-      // Should still be on edit page (dialog dismissed)
+      // Verify the ConfirmDialog is shown with unsaved changes warning
+      const dialog = page.getByRole('alertdialog')
+      await expect(dialog).toBeVisible()
+      await expect(dialog).toContainText('unsaved changes')
+
+      // Cancel the dialog (stay on page)
+      await dialog.getByRole('button', { name: /^stay$/i }).click()
+
+      // Should still be on edit page (dialog cancelled)
       await expect(page).toHaveURL(/\/blog\/[a-f0-9-]+/)
     })
 
@@ -671,16 +673,18 @@ test.describe('Blog Drafts', () => {
 
       await page.goto(`/blog/${created.id}`)
 
-      // Set up dialog handler to verify message
-      page.once('dialog', (dialog) => {
-        expect(dialog.message()).toContain('permanently delete')
-        dialog.dismiss()
-      })
-
-      // Click delete
+      // Click delete to open ConfirmDialog
       await page.getByRole('button', { name: /^delete$/i }).click()
 
-      // Should still be on edit page (dialog dismissed)
+      // Verify the ConfirmDialog is shown with the expected message
+      const dialog = page.getByRole('alertdialog')
+      await expect(dialog).toBeVisible()
+      await expect(dialog).toContainText('permanently')
+
+      // Cancel the dialog
+      await dialog.getByRole('button', { name: /^keep$/i }).click()
+
+      // Should still be on edit page (dialog cancelled)
       await expect(page).toHaveURL(/\/blog\/[a-f0-9-]+/)
 
       // Draft should still exist
@@ -696,11 +700,13 @@ test.describe('Blog Drafts', () => {
 
       await page.goto(`/blog/${created.id}`)
 
-      // Set up dialog handler to cancel
-      page.once('dialog', (dialog) => dialog.dismiss())
-
-      // Click delete
+      // Click delete to open ConfirmDialog
       await page.getByRole('button', { name: /^delete$/i }).click()
+
+      // Cancel the ConfirmDialog
+      const dialog = page.getByRole('alertdialog')
+      await expect(dialog).toBeVisible()
+      await dialog.getByRole('button', { name: /^keep$/i }).click()
 
       // Should still be on edit page
       await expect(page).toHaveURL(/\/blog\/[a-f0-9-]+/)

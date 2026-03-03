@@ -30,9 +30,10 @@ const mockProjectEqUserId = vi.fn(() => ({ single: mockProjectSingle }))
 const mockProjectEqId = vi.fn(() => ({ eq: mockProjectEqUserId }))
 const mockProjectSelect = vi.fn(() => ({ eq: mockProjectEqId }))
 
-// campaigns query: .select('*').eq('project_id',x).eq('user_id',y).order(...)
+// campaigns query: .select('*').eq('project_id',x).eq('user_id',y).order(...).limit(...)
 let mockCampaignsData: { data: unknown; error: unknown } = { data: [], error: null }
-const mockCampaignsOrder = vi.fn(() => mockCampaignsData)
+const mockCampaignsLimit = vi.fn(() => mockCampaignsData)
+const mockCampaignsOrder = vi.fn(() => ({ limit: mockCampaignsLimit }))
 const mockCampaignsEqUserId = vi.fn(() => ({ order: mockCampaignsOrder }))
 const mockCampaignsEqProjectId = vi.fn(() => ({ eq: mockCampaignsEqUserId }))
 const mockCampaignsSelect = vi.fn(() => ({ eq: mockCampaignsEqProjectId }))

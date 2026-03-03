@@ -71,29 +71,33 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       if (!projectId) return
       setLoading(true)
 
-      const [projectData, analyticsData] = await Promise.all([
-        fetchProjectWithCampaigns(projectId),
-        fetchProjectAnalytics(projectId),
-        fetchConnections(),
-      ])
+      try {
+        const [projectData, analyticsData] = await Promise.all([
+          fetchProjectWithCampaigns(projectId),
+          fetchProjectAnalytics(projectId),
+          fetchConnections(),
+        ])
 
-      if (projectData) {
-        setProject(projectData.project)
-        setCampaigns(projectData.campaigns)
-        // Set edit fields
-        setEditName(projectData.project.name)
-        setEditDescription(projectData.project.description || '')
-        setEditHashtags(projectData.project.hashtags.join(', '))
-        setEditPrimaryColor(projectData.project.brandColors.primary || '')
-        setEditSecondaryColor(projectData.project.brandColors.secondary || '')
-        setEditAccentColor(projectData.project.brandColors.accent || '')
+        if (projectData) {
+          setProject(projectData.project)
+          setCampaigns(projectData.campaigns)
+          // Set edit fields
+          setEditName(projectData.project.name)
+          setEditDescription(projectData.project.description || '')
+          setEditHashtags(projectData.project.hashtags.join(', '))
+          setEditPrimaryColor(projectData.project.brandColors.primary || '')
+          setEditSecondaryColor(projectData.project.brandColors.secondary || '')
+          setEditAccentColor(projectData.project.brandColors.accent || '')
+        }
+        if (analyticsData) {
+          setAnalytics(analyticsData)
+        }
+        // Get analytics connections for this project
+        const connections = getConnectionsByProject(projectId)
+        setAnalyticsConnections(connections)
+      } catch {
+        // Individual store fetches handle their own errors
       }
-      if (analyticsData) {
-        setAnalytics(analyticsData)
-      }
-      // Get analytics connections for this project
-      const connections = getConnectionsByProject(projectId)
-      setAnalyticsConnections(connections)
 
       setLoading(false)
     }

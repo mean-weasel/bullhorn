@@ -59,7 +59,7 @@ export default function DashboardPage() {
     if (!campaignsInitialized) fetches.push(fetchCampaigns())
     if (!projectsInitialized) fetches.push(fetchProjects())
     if (!remindersInitialized) fetches.push(fetchReminders())
-    if (fetches.length > 0) void Promise.all(fetches)
+    if (fetches.length > 0) void Promise.all(fetches).catch(() => {})
   }, [
     postsInitialized,
     fetchPosts,
