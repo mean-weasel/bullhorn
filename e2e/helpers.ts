@@ -1299,10 +1299,13 @@ export async function restoreBlogDraft(page: Page) {
  * Delete blog draft (from edit page)
  */
 export async function deleteBlogDraft(page: Page) {
-  // Set up dialog handler to accept the confirm dialog
-  page.once('dialog', (dialog) => dialog.accept())
-
+  // Click the delete button to open the confirm dialog
   await page.getByRole('button', { name: /^delete$/i }).click()
+
+  // Confirm in the ConfirmDialog
+  const dialog = page.getByRole('alertdialog')
+  await dialog.waitFor({ state: 'visible' })
+  await dialog.getByRole('button', { name: /^delete$/i }).click()
 
   // Wait for navigation back to list
   await page.waitForURL('/blog')
