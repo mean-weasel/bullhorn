@@ -53,6 +53,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       .select('*')
       .eq('project_id', projectId)
       .order('created_at', { ascending: false })
+      .limit(500)
 
     if (error) {
       console.error('Database error:', error)

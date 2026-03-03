@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { FileText, Plus, Search, X, Tag } from 'lucide-react'
+import { FileText, Plus, Search, X, Tag, AlertCircle, RefreshCw } from 'lucide-react'
 import { useBlogDraftsStore, BlogDraftStatus, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 import { DraftCard, FilterTab } from './DraftCard'
@@ -33,7 +33,7 @@ export default function BlogDraftsPage() {
 }
 
 function BlogDraftsContent() {
-  const { drafts, loading, initialized, fetchDrafts } = useBlogDraftsStore()
+  const { drafts, loading, error, initialized, fetchDrafts } = useBlogDraftsStore()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
@@ -253,8 +253,26 @@ function BlogDraftsContent() {
       {/* Loading state */}
       {loading && !initialized && <SkeletonListPage count={4} />}
 
+      {/* Error state */}
+      {error && (
+        <div className="text-center py-12 bg-card border border-destructive/30 rounded-xl">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-destructive/10 flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-destructive" />
+          </div>
+          <h3 className="font-semibold mb-2 text-destructive">Failed to load blog drafts</h3>
+          <p className="text-sm text-muted-foreground mb-4">{error}</p>
+          <button
+            onClick={() => fetchDrafts()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </button>
+        </div>
+      )}
+
       {/* Empty state */}
-      {!loading && sortedDrafts.length === 0 && (
+      {!loading && !error && sortedDrafts.length === 0 && (
         <div className="text-center py-12">
           <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
           <h3 className="text-lg font-medium mb-2">
@@ -286,7 +304,7 @@ function BlogDraftsContent() {
       )}
 
       {/* Draft list */}
-      {!loading && sortedDrafts.length > 0 && (
+      {!loading && !error && sortedDrafts.length > 0 && (
         <div className="space-y-3">
           {sortedDrafts.map((draft) => (
             <DraftCard key={draft.id} draft={draft} />

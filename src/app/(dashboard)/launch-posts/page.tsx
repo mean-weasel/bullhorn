@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { Plus, Rocket, AlertCircle, RefreshCw, Filter } from 'lucide-react'
 import {
   useLaunchPostsStore,
@@ -44,9 +45,9 @@ export default function LaunchPostsPage() {
     }
   }
 
-  const handleCopy = () => {
-    // Could show a toast notification here
-  }
+  const handleCopy = useCallback(() => {
+    toast.success('Copied to clipboard')
+  }, [])
 
   // Filter posts
   const filteredPosts = launchPosts.filter((post) => {

@@ -30,7 +30,8 @@ const mockProjectSelect = vi.fn(() => ({ eq: mockProjectEqId }))
 
 // --- project_accounts GET chain ---
 let mockAccountsData: { data: unknown; error: unknown } = { data: [], error: null }
-const mockAccountsOrder = vi.fn(() => mockAccountsData)
+const mockAccountsLimit = vi.fn(() => mockAccountsData)
+const mockAccountsOrder = vi.fn(() => ({ limit: mockAccountsLimit }))
 const mockAccountsEqProjectId = vi.fn(() => ({ order: mockAccountsOrder }))
 const mockAccountsSelect = vi.fn(() => ({ eq: mockAccountsEqProjectId }))
 

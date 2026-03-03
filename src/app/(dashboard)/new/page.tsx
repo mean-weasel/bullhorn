@@ -73,6 +73,7 @@ export default function EditorPage() {
   const [showPlatformSwitchConfirm, setShowPlatformSwitchConfirm] = useState(false)
   const [pendingPlatform, setPendingPlatform] = useState<Platform | null>(null)
   const [showCampaignDropdown, setShowCampaignDropdown] = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   // Fetch stores on mount if not initialized
   useEffect(() => {
@@ -621,8 +622,9 @@ export default function EditorPage() {
       {
         key: 'Escape',
         handler: () => {
-          if (!isDirty || window.confirm('You have unsaved changes. Leave anyway?')) {
-            setIsDirty(false)
+          if (isDirty) {
+            setShowLeaveConfirm(true)
+          } else {
             router.push('/')
           }
         },
@@ -815,6 +817,21 @@ export default function EditorPage() {
         description="Switching platforms will reset some content. Your text will be preserved, but platform-specific settings will be cleared."
         confirmText="Switch"
         cancelText="Cancel"
+      />
+
+      {/* Leave without saving confirmation dialog */}
+      <ConfirmDialog
+        open={showLeaveConfirm}
+        onConfirm={() => {
+          setIsDirty(false)
+          router.push('/')
+        }}
+        onCancel={() => setShowLeaveConfirm(false)}
+        title="Leave without saving?"
+        description="You have unsaved changes that will be lost."
+        confirmText="Leave"
+        cancelText="Stay"
+        variant="danger"
       />
     </div>
   )

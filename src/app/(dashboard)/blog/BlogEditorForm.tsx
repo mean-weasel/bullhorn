@@ -16,6 +16,7 @@ import { useBlogDraftsStore, BlogDraft, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts
 import { cn } from '@/lib/utils'
 import { IOSDateTimePicker } from '@/components/ui/IOSDateTimePicker'
 import { MarkdownEditor } from '@/components/ui/MarkdownEditor'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface BlogEditorFormProps {
   /** Draft ID for editing. Undefined for new drafts. */
@@ -50,6 +51,8 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
   const [saving, setSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
 
   // Track original values for change detection
   const originalRef = useRef<{
@@ -200,17 +203,19 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
   }, [isEditing, draftId, restoreDraft])
 
   // Delete handler
-  const handleDelete = useCallback(async () => {
+  const handleDelete = useCallback(() => {
     if (!isEditing) return
-    if (!confirm('Are you sure you want to permanently delete this draft? This cannot be undone.'))
-      return
+    setShowDeleteConfirm(true)
+  }, [isEditing])
+
+  const confirmDelete = useCallback(async () => {
     try {
       await deleteDraft(draftId!)
       router.push('/blog')
     } catch {
       setMessage({ type: 'error', text: 'Failed to delete draft' })
     }
-  }, [isEditing, draftId, deleteDraft, router])
+  }, [draftId, deleteDraft, router])
 
   // Keyboard shortcut for save
   useEffect(() => {
@@ -232,7 +237,8 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
           <button
             onClick={() => {
               if (hasUnsavedChanges) {
-                if (!confirm('You have unsaved changes. Are you sure you want to leave?')) return
+                setShowLeaveConfirm(true)
+                return
               }
               router.push('/blog')
             }}
@@ -268,6 +274,8 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
       {/* Status message */}
       {message && (
         <div
+          role="status"
+          aria-live="polite"
           className={cn(
             'max-w-4xl mx-auto px-4 py-2',
             'flex items-center gap-2 text-sm',
@@ -422,6 +430,28 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
           </div>
         )}
       </main>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        title="Delete this draft?"
+        description="This action cannot be undone. The draft will be permanently removed."
+        confirmText="Delete"
+        cancelText="Keep"
+        variant="danger"
+      />
+
+      <ConfirmDialog
+        open={showLeaveConfirm}
+        onConfirm={() => router.push('/blog')}
+        onCancel={() => setShowLeaveConfirm(false)}
+        title="Leave without saving?"
+        description="You have unsaved changes that will be lost."
+        confirmText="Leave"
+        cancelText="Stay"
+        variant="danger"
+      />
     </div>
   )
 }

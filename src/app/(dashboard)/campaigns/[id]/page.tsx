@@ -73,7 +73,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     if (!postsInitialized) fetches.push(fetchPosts())
     if (!projectsInitialized) fetches.push(fetchProjects())
     if (!launchPostsInitialized) fetches.push(fetchLaunchPosts())
-    if (fetches.length > 0) void Promise.all(fetches)
+    if (fetches.length > 0) void Promise.all(fetches).catch(() => {})
   }, [
     postsInitialized,
     fetchPosts,

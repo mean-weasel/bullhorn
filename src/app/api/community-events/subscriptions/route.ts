@@ -29,6 +29,7 @@ export async function GET() {
       .from('user_event_subscriptions')
       .select('*, community_events(*)')
       .eq('user_id', userId)
+      .limit(500)
 
     if (error) {
       console.error('Database error:', error)
