@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import UserNotifications
+import WebKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -71,10 +72,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        // Called when the app was launched with an activity, including Universal Links.
-        // Feel free to add additional processing here, but if you want the App API to support
-        // tracking app url opens, make sure to keep this call
-        return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        // Forward to Capacitor's proxy (fires appUrlOpen JS event for plugins)
+        let result = ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
+
+        // In remote URL mode, also navigate the WKWebView directly.
+        // This handles the OAuth callback Universal Link — the WebView loads
+        // /auth/callback?code=... which exchanges the PKCE code for a session.
+        if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+           let url = userActivity.webpageURL,
+           url.host == "bullhorn.to" {
+            DispatchQueue.main.async { [weak self] in
+                self?.capacitorWebView?.load(URLRequest(url: url))
+            }
+        }
+
+        return result
+    }
+
+    // MARK: - Universal Link Support
+
+    private var capacitorWebView: WKWebView? {
+        guard let vc = window?.rootViewController as? CAPBridgeViewController else { return nil }
+        return vc.webView
     }
 
 }
