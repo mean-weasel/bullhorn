@@ -18,8 +18,8 @@ export function NativeInit() {
     if (!isNativePlatform() || initialized.current) return
     initialized.current = true
 
-    async function init() {
-      // Restore session from Keychain
+    // Run independent init tasks in parallel so one blocking task can't prevent others
+    async function initSessionBridge() {
       try {
         const { getSessionFromKeychain, saveSessionToKeychain, clearSessionFromKeychain } =
           await import('@/lib/sessionBridge')
@@ -32,7 +32,6 @@ export function NativeInit() {
             refresh_token: session.refreshToken,
           })
         }
-        // Listen for future auth changes to save tokens
         const { createClient } = await import('@/lib/supabase/client')
         const supabase = createClient()
         supabase.auth.onAuthStateChange(async (_event, newSession) => {
@@ -45,8 +44,9 @@ export function NativeInit() {
       } catch (err) {
         console.error('[NativeInit] Session bridge failed:', err)
       }
+    }
 
-      // Check biometric lock
+    async function initBiometric() {
       try {
         const { isBiometricEnabled, authenticateBiometric } = await import('@/lib/biometricAuth')
         const enabled = await isBiometricEnabled()
@@ -59,14 +59,18 @@ export function NativeInit() {
       } catch (err) {
         console.error('[NativeInit] Biometric check failed:', err)
       }
+    }
 
-      // Register push notifications
+    async function initPushNotifications() {
       try {
+        console.log('[NativeInit] Starting push registration...')
         const { registerPushNotifications, addPushListeners, savePushToken } =
           await import('@/lib/pushNotifications')
         const token = await registerPushNotifications()
+        console.log('[NativeInit] Push registration result:', token ? 'got token' : 'no token')
         if (token) {
           await savePushToken(token)
+          console.log('[NativeInit] Push token saved')
         }
         addPushListeners((url) => {
           router.push(url)
@@ -74,24 +78,18 @@ export function NativeInit() {
       } catch (err) {
         console.error('[NativeInit] Push registration failed:', err)
       }
+    }
 
-      // Set up share deep link handler
+    async function initShareHandler() {
       try {
-        const { initShareHandler } = await import('@/lib/shareHandler')
-        initShareHandler(router)
+        const { initShareHandler: initShare } = await import('@/lib/shareHandler')
+        initShare(router)
       } catch (err) {
         console.error('[NativeInit] Share handler init failed:', err)
       }
+    }
 
-      // Monitor network status
-      const cleanupNetwork = onNetworkStatusChange((status) => {
-        console.log('[NativeInit] Network status:', status.connected ? 'online' : 'offline')
-      })
-
-      // Clear badge on app open
-      clearBadge()
-
-      // Listen for app state changes (foreground/background)
+    async function initAppState() {
       try {
         const { App } = await import('@capacitor/app')
         App.addListener('appStateChange', ({ isActive }) => {
@@ -110,11 +108,21 @@ export function NativeInit() {
       } catch (err) {
         console.error('[NativeInit] App state listener failed:', err)
       }
-
-      return cleanupNetwork
     }
 
-    init()
+    // Push registration runs independently — not blocked by session/biometric
+    initPushNotifications()
+
+    // Other tasks run in parallel
+    Promise.all([initSessionBridge(), initBiometric(), initShareHandler(), initAppState()]).catch(
+      (err) => console.error('[NativeInit] Init error:', err)
+    )
+
+    // Non-async tasks
+    onNetworkStatusChange((status) => {
+      console.log('[NativeInit] Network status:', status.connected ? 'online' : 'offline')
+    })
+    clearBadge()
   }, [router])
 
   // Update badge count when reminders or posts change (for next background event)
