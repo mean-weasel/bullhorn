@@ -171,19 +171,33 @@ export async function registerPushNotifications(): Promise<string | null> {
 
   const { PushNotifications } = await import('@capacitor/push-notifications')
 
+  console.log('[Push] Requesting permissions...')
   const permission = await PushNotifications.requestPermissions()
+  console.log('[Push] Permission result:', permission.receive)
   if (permission.receive !== 'granted') return null
 
-  await PushNotifications.register()
+  // Set up listeners BEFORE register() to avoid race condition
+  const tokenPromise = new Promise<string | null>((resolve) => {
+    const timeout = setTimeout(() => {
+      console.warn('[Push] Registration timed out after 10s')
+      resolve(null)
+    }, 10000)
 
-  return new Promise((resolve) => {
     PushNotifications.addListener('registration', (token) => {
+      clearTimeout(timeout)
+      console.log('[Push] Got device token')
       resolve(token.value)
     })
-    PushNotifications.addListener('registrationError', () => {
+    PushNotifications.addListener('registrationError', (err) => {
+      clearTimeout(timeout)
+      console.error('[Push] Registration error:', JSON.stringify(err))
       resolve(null)
     })
   })
+
+  await PushNotifications.register()
+
+  return tokenPromise
 }
 
 export function addPushListeners(onNotificationTap?: (url: string) => void) {
