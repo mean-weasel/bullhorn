@@ -10,8 +10,7 @@ async function gotoDashboard(page: import('@playwright/test').Page) {
 test.describe('Dashboard', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test for clean state
-    await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
+    await page.addInitScript(() => localStorage.clear())
     await enterDemoMode(page)
   })
 

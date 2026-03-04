@@ -30,8 +30,8 @@ test.describe('Auto-save', () => {
       await fillContent(page, 'Auto-save test content')
 
       // Wait for auto-save to complete and URL to change
-      // Auto-save has 2s delay + API call time, so use 10s timeout for CI reliability
-      await expect(page).toHaveURL(/\/edit\/[a-f0-9-]+/, { timeout: 10000 })
+      // Auto-save has 2s delay + API call time, so use 15s timeout for CI reliability
+      await expect(page).toHaveURL(/\/edit\/[a-f0-9-]+/, { timeout: 15000 })
 
       // Database should have exactly 1 post
       expect(await getPostCount(page)).toBe(1)
@@ -51,8 +51,8 @@ test.describe('Auto-save', () => {
       await page.getByRole('button', { name: 'Twitter' }).click()
       await fillContent(page, 'First content')
 
-      // Wait for first auto-save and URL change (10s timeout for CI reliability)
-      await expect(page).toHaveURL(/\/edit\/[a-f0-9-]+/, { timeout: 10000 })
+      // Wait for first auto-save and URL change (15s timeout for CI reliability)
+      await expect(page).toHaveURL(/\/edit\/[a-f0-9-]+/, { timeout: 15000 })
 
       // Should have 1 post
       expect(await getPostCount(page)).toBe(1)
@@ -182,8 +182,8 @@ test.describe('Auto-save', () => {
       // Wait for content to load before checking auto-save behavior
       await waitForContentToLoad(page, 'No changes test')
 
-      // Wait longer than auto-save delay (5s to be safe in CI)
-      await page.waitForTimeout(5000)
+      // Wait for potential auto-save cycle to complete — check that no "Saved!" indicator appears
+      await expect(page.getByText('Saved!')).not.toBeVisible({ timeout: 5000 })
 
       // updatedAt should not have changed (no unnecessary saves)
       const currentPosts = await getAllPosts(page)

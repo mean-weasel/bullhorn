@@ -487,8 +487,8 @@ test.describe('Launch Posts', () => {
       // Use helper to delete via dropdown menu
       await deleteLaunchPost(page, 0)
 
-      // Wait for the post to be removed (the confirm is handled by browser confirm())
-      await page.waitForTimeout(500)
+      // Wait for the post to be removed from the list
+      await expect(page.getByText('Delete Test')).not.toBeVisible({ timeout: 10000 })
 
       // Verify in database
       const posts = await getAllLaunchPosts(page)

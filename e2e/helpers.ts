@@ -81,6 +81,7 @@ export async function selectPlatform(page: Page, platform: 'twitter' | 'linkedin
     reddit: 'Reddit',
   }
   await page.getByRole('button', { name: platformNames[platform] }).click()
+  await expect(page.locator('textarea').first()).toBeVisible({ timeout: 10000 })
 }
 
 /**
@@ -202,14 +203,12 @@ export async function expandSubredditCard(page: Page, subreddit: string) {
       ) as HTMLButtonElement
       if (btn) btn.click()
     }, subreddit)
-    await page.waitForTimeout(300)
 
     // Check if expanded, try fallback click on chevron if not
     const isExpandedNow = await titleInput.isVisible().catch(() => false)
     if (!isExpandedNow) {
       const chevron = card.locator('button').last()
       await chevron.click()
-      await page.waitForTimeout(300)
     }
 
     await titleInput.waitFor({ state: 'visible', timeout: 5000 })
@@ -343,6 +342,9 @@ export async function archivePost(page: Page) {
   // Wait for the confirmation dialog modal to appear and click Archive
   await page.getByRole('alertdialog').waitFor()
   await page.getByRole('alertdialog').getByRole('button', { name: 'Archive' }).click()
+
+  // Wait for navigation to dashboard after archive
+  await page.waitForURL(/\/(dashboard)?$/, { timeout: 15000 })
 }
 
 /**
@@ -350,6 +352,9 @@ export async function archivePost(page: Page) {
  */
 export async function restorePost(page: Page) {
   await page.getByRole('button', { name: /restore/i }).click()
+
+  // Wait for navigation to dashboard after restore
+  await page.waitForURL(/\/(dashboard)?$/, { timeout: 15000 })
 }
 
 /**
@@ -367,6 +372,7 @@ export async function filterByStatus(
     archived: 'Archived',
   }
   await page.getByRole('button', { name: new RegExp(statusNames[status], 'i') }).click()
+  await page.waitForLoadState('networkidle')
 }
 
 /**
@@ -430,11 +436,12 @@ export async function createTestPost(
   await page.goto('/new')
   await expect(page.getByRole('heading', { name: /create post/i })).toBeVisible()
 
-  // Select platform
+  // Select platform and wait for form to be ready
   await page.getByRole('button', { name: platform, exact: false }).click()
+  const textarea = page.locator('textarea').first()
+  await expect(textarea).toBeVisible({ timeout: 10000 })
 
   // Fill content
-  const textarea = page.locator('textarea').first()
   await textarea.fill(content)
 
   // Save
@@ -450,7 +457,7 @@ export async function createTestPost(
   }
 
   // Wait for navigation back to dashboard
-  await expect(page).toHaveURL('/dashboard', { timeout: 30000 })
+  await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 30000 })
 }
 
 // ============================================
@@ -1152,8 +1159,8 @@ export async function openLaunchPostMenu(page: Page, index: number = 0) {
   const card = cards.nth(index)
   // Click the 3-dot menu button
   await card.locator('button').last().click()
-  // Wait for menu to appear
-  await page.waitForTimeout(200)
+  // Wait for dropdown menu to appear
+  await expect(page.getByRole('button', { name: 'Edit' })).toBeVisible({ timeout: 5000 })
 }
 
 /**
@@ -1179,8 +1186,8 @@ export async function deleteLaunchPost(page: Page, index: number = 0) {
   await dialog.waitFor({ state: 'visible' })
   await dialog.getByRole('button', { name: 'Delete' }).click()
 
-  // Wait for the deletion to complete
-  await page.waitForTimeout(500)
+  // Wait for the dialog to close after deletion
+  await expect(dialog).not.toBeVisible({ timeout: 10000 })
 }
 
 /**

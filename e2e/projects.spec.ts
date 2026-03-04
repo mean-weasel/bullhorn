@@ -446,8 +446,8 @@ test.describe('Projects', () => {
         await hashtagInput.fill('launch2024')
         await hashtagInput.press('Enter')
 
-        // Wait for save
-        await page.waitForTimeout(500)
+        // Wait for save to complete
+        await expect(page.getByText('#launch2024')).toBeVisible({ timeout: 5000 })
 
         // Verify hashtags in database
         const project = await getProjectById(page, projectId)
@@ -475,8 +475,8 @@ test.describe('Projects', () => {
       if (await hashtagChip.isVisible()) {
         await hashtagChip.locator('button').click()
 
-        // Wait for save
-        await page.waitForTimeout(500)
+        // Wait for chip to disappear after removal
+        await expect(hashtagChip).not.toBeVisible({ timeout: 5000 })
 
         // Verify hashtag removed in database
         const project = await getProjectById(page, projectId)

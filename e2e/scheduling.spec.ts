@@ -201,9 +201,6 @@ test.describe('Scheduling', () => {
       await schedulePost(page)
       await waitForNavigation(page, '/')
 
-      // Wait for save to propagate
-      await page.waitForTimeout(1000)
-
       // Verify schedule was changed (different from original)
       const updatedPosts = await getAllPosts(page)
       expect(updatedPosts[0].scheduledAt).not.toBe(originalScheduledAt)
@@ -360,7 +357,7 @@ test.describe('Scheduling', () => {
       await page.getByRole('button', { name: /scheduled/i }).click()
 
       // Wait for posts to load
-      await page.waitForTimeout(500)
+      await expect(page.locator('a[href^="/edit/"]').first()).toBeVisible({ timeout: 10000 })
 
       // Verify all 3 posts are visible
       const postCards = page.locator('a[href^="/edit/"]')
