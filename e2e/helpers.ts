@@ -456,8 +456,13 @@ export async function createTestPost(
     await page.getByRole('button', { name: /^schedule$/i }).click()
   }
 
-  // Wait for navigation back to dashboard
-  await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 30000 })
+  // Wait to leave /new page (save/schedule → /dashboard, or auto-save may redirect to /edit/:id)
+  await page.waitForURL((url) => url.pathname !== '/new', { timeout: 30000 })
+  // If auto-save redirected to /edit/:id before Save Draft navigated, go to dashboard manually
+  if (!page.url().match(/\/(dashboard)?$/)) {
+    await page.goto('/')
+  }
+  await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 15000 })
 }
 
 // ============================================
