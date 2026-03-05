@@ -19,8 +19,8 @@ test.describe('Auto-save', () => {
       // Start with empty database
       expect(await getPostCount(page)).toBe(0)
 
-      // Go to new post page
-      await page.goto('/new')
+      // Go to new post page (opt-in to auto-save, disabled by default in E2E mode)
+      await page.goto('/new?autosave=true')
       await expect(page.getByRole('heading', { name: /create post/i })).toBeVisible()
 
       // Select Twitter platform
@@ -30,7 +30,7 @@ test.describe('Auto-save', () => {
       await fillContent(page, 'Auto-save test content')
 
       // Wait for auto-save to complete and URL to change
-      // Auto-save has 5s delay + API call time, so use 15s timeout for CI reliability
+      // Auto-save has 2s delay + API call time, so use 15s timeout for CI reliability
       await expect(page).toHaveURL(/\/edit\/[a-f0-9-]+/, { timeout: 15000 })
 
       // Database should have exactly 1 post
@@ -46,8 +46,8 @@ test.describe('Auto-save', () => {
       // Start with empty database
       expect(await getPostCount(page)).toBe(0)
 
-      // Go to new post page
-      await page.goto('/new')
+      // Go to new post page (opt-in to auto-save, disabled by default in E2E mode)
+      await page.goto('/new?autosave=true')
       await page.getByRole('button', { name: 'Twitter' }).click()
       await fillContent(page, 'First content')
 
@@ -80,7 +80,7 @@ test.describe('Auto-save', () => {
     })
 
     test('should show auto-save indicator after save completes', async ({ page }) => {
-      await page.goto('/new')
+      await page.goto('/new?autosave=true')
       await page.getByRole('button', { name: 'Twitter' }).click()
 
       // Type content
