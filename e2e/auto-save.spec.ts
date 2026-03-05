@@ -30,7 +30,7 @@ test.describe('Auto-save', () => {
       await fillContent(page, 'Auto-save test content')
 
       // Wait for auto-save to complete and URL to change
-      // Auto-save has 2s delay + API call time, so use 15s timeout for CI reliability
+      // Auto-save has 5s delay + API call time, so use 15s timeout for CI reliability
       await expect(page).toHaveURL(/\/edit\/[a-f0-9-]+/, { timeout: 15000 })
 
       // Database should have exactly 1 post

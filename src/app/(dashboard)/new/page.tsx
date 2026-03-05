@@ -227,7 +227,7 @@ export default function EditorPage() {
         console.error('Auto-save failed:', error)
       }
     },
-    delay: 2000,
+    delay: 5000,
     enabled: (post.status === 'draft' || isNew) && !(isNew && hasMultipleSubreddits),
     skipInitialChange: !isNew,
   })
