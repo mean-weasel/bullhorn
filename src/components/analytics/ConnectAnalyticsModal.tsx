@@ -19,13 +19,6 @@ interface GA4Property {
   currencyCode?: string
 }
 
-interface PendingAuthData {
-  accessToken: string
-  refreshToken: string
-  tokenExpiresAt: string
-  scopes: string[]
-}
-
 interface ConnectAnalyticsModalProps {
   open: boolean
   onClose: () => void
@@ -46,7 +39,6 @@ export function ConnectAnalyticsModal({
   const [error, setError] = useState<string | null>(null)
   const [properties, setProperties] = useState<GA4Property[]>([])
   const [selectedProperty, setSelectedProperty] = useState<GA4Property | null>(null)
-  const [authData, setAuthData] = useState<PendingAuthData | null>(null)
 
   const { updateConnection } = useAnalyticsStore()
 
@@ -55,7 +47,7 @@ export function ConnectAnalyticsModal({
     if (open) {
       setError(null)
       if (pendingConnectionId) {
-        // Fetch the pending connection from the API to get tokens
+        // Fetch properties for the pending connection
         setStep('select-property')
         fetchPendingConnection(pendingConnectionId)
       } else {
@@ -69,21 +61,7 @@ export function ConnectAnalyticsModal({
     setError(null)
 
     try {
-      const res = await fetch(`/api/analytics/connections/${connectionId}`)
-      if (!res.ok) {
-        throw new Error('Failed to fetch pending connection')
-      }
-      const data = await res.json()
-      const connection = data.connection
-
-      const pendingAuth: PendingAuthData = {
-        accessToken: connection.accessToken,
-        refreshToken: connection.refreshToken,
-        tokenExpiresAt: connection.tokenExpiresAt,
-        scopes: connection.scopes || [],
-      }
-      setAuthData(pendingAuth)
-      await fetchProperties(pendingAuth.accessToken)
+      await fetchProperties(connectionId)
     } catch (err) {
       setError((err as Error).message || 'Failed to load authentication data')
       setIsLoading(false)
@@ -109,16 +87,12 @@ export function ConnectAnalyticsModal({
     }
   }
 
-  const fetchProperties = async (accessToken: string) => {
+  const fetchProperties = async (connectionId: string) => {
     setIsLoading(true)
     setError(null)
 
     try {
-      const res = await fetch('/api/analytics/properties', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
+      const res = await fetch(`/api/analytics/properties?connectionId=${connectionId}`)
 
       if (!res.ok) {
         throw new Error('Failed to fetch properties')
@@ -138,7 +112,7 @@ export function ConnectAnalyticsModal({
   }
 
   const handleSelectProperty = async () => {
-    if (!selectedProperty || !pendingConnectionId || !authData) return
+    if (!selectedProperty || !pendingConnectionId) return
 
     setIsLoading(true)
     setError(null)
@@ -166,7 +140,6 @@ export function ConnectAnalyticsModal({
     setStep('connect')
     setProperties([])
     setSelectedProperty(null)
-    setAuthData(null)
     setError(null)
     onClose()
   }

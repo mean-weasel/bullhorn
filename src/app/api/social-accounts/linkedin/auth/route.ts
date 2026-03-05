@@ -32,7 +32,7 @@ export async function GET() {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 300,
-      path: '/',
+      path: '/api/social-accounts/linkedin/callback',
     })
 
     // Build authorization URL

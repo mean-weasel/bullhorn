@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,19 +11,33 @@ const GA_ADMIN_API = 'https://analyticsadmin.googleapis.com/v1beta'
 export async function GET(request: NextRequest) {
   try {
     // Require authentication
+    let userId: string
     try {
-      await requireAuth()
+      const auth = await requireAuth()
+      userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get access token from Authorization header
-    const authHeader = request.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Access token required' }, { status: 400 })
+    // Look up access token from DB using connectionId query param
+    const connectionId = request.nextUrl.searchParams.get('connectionId')
+    if (!connectionId) {
+      return NextResponse.json({ error: 'connectionId query param required' }, { status: 400 })
     }
 
-    const accessToken = authHeader.substring(7)
+    const supabase = await createClient()
+    const { data: connection, error: dbError } = await supabase
+      .from('analytics_connections')
+      .select('access_token')
+      .eq('id', connectionId)
+      .eq('user_id', userId)
+      .single()
+
+    if (dbError || !connection) {
+      return NextResponse.json({ error: 'Connection not found' }, { status: 404 })
+    }
+
+    const accessToken = connection.access_token
 
     // Fetch accounts first
     const accountsResponse = await fetch(`${GA_ADMIN_API}/accounts`, {

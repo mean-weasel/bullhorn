@@ -436,6 +436,9 @@ const sampleDbAnalyticsConnection: DbAnalyticsConnection = {
   updated_at: '2024-06-01T00:00:00Z',
 }
 
+// Note: DbAnalyticsConnection still has token fields (full DB row shape)
+// but AnalyticsConnection (frontend type) and transform functions no longer include them
+
 describe('transformAnalyticsConnectionFromDb', () => {
   it('maps all fields correctly', () => {
     const conn = transformAnalyticsConnectionFromDb(sampleDbAnalyticsConnection)
@@ -444,9 +447,6 @@ describe('transformAnalyticsConnectionFromDb', () => {
     expect(conn.provider).toBe('google_analytics')
     expect(conn.propertyId).toBe('GA-12345')
     expect(conn.propertyName).toBe('My Website')
-    expect(conn.accessToken).toBe('access-tok-abc')
-    expect(conn.refreshToken).toBe('refresh-tok-xyz')
-    expect(conn.tokenExpiresAt).toBe('2024-12-31T23:59:59Z')
     expect(conn.scopes).toEqual(['analytics.readonly'])
     expect(conn.projectId).toBe('proj-001')
     expect(conn.lastSyncAt).toBe('2024-06-01T00:00:00Z')
@@ -478,9 +478,6 @@ describe('transformAnalyticsConnectionToDb', () => {
       provider: 'google_analytics',
       propertyId: 'GA-99999',
       propertyName: 'New Site',
-      accessToken: 'new-access',
-      refreshToken: 'new-refresh',
-      tokenExpiresAt: '2025-12-31T00:00:00Z',
       scopes: ['analytics.readonly', 'analytics.edit'],
       projectId: 'proj-002',
       lastSyncAt: '2024-07-01T00:00:00Z',
@@ -491,9 +488,6 @@ describe('transformAnalyticsConnectionToDb', () => {
     expect(dbConn.provider).toBe('google_analytics')
     expect(dbConn.property_id).toBe('GA-99999')
     expect(dbConn.property_name).toBe('New Site')
-    expect(dbConn.access_token).toBe('new-access')
-    expect(dbConn.refresh_token).toBe('new-refresh')
-    expect(dbConn.token_expires_at).toBe('2025-12-31T00:00:00Z')
     expect(dbConn.scopes).toEqual(['analytics.readonly', 'analytics.edit'])
     expect(dbConn.project_id).toBe('proj-002')
     expect(dbConn.last_sync_at).toBe('2024-07-01T00:00:00Z')
@@ -508,7 +502,6 @@ describe('transformAnalyticsConnectionToDb', () => {
     expect(dbConn.sync_error).toBe('failed')
     expect(dbConn).not.toHaveProperty('provider')
     expect(dbConn).not.toHaveProperty('property_id')
-    expect(dbConn).not.toHaveProperty('access_token')
   })
 
   it('allows null for nullable fields', () => {
@@ -531,9 +524,6 @@ describe('AnalyticsConnection roundtrip', () => {
       provider: conn.provider,
       propertyId: conn.propertyId,
       propertyName: conn.propertyName,
-      accessToken: conn.accessToken,
-      refreshToken: conn.refreshToken,
-      tokenExpiresAt: conn.tokenExpiresAt,
       scopes: conn.scopes,
       projectId: conn.projectId,
       lastSyncAt: conn.lastSyncAt,
@@ -543,9 +533,6 @@ describe('AnalyticsConnection roundtrip', () => {
     expect(dbConn.provider).toBe(sampleDbAnalyticsConnection.provider)
     expect(dbConn.property_id).toBe(sampleDbAnalyticsConnection.property_id)
     expect(dbConn.property_name).toBe(sampleDbAnalyticsConnection.property_name)
-    expect(dbConn.access_token).toBe(sampleDbAnalyticsConnection.access_token)
-    expect(dbConn.refresh_token).toBe(sampleDbAnalyticsConnection.refresh_token)
-    expect(dbConn.token_expires_at).toBe(sampleDbAnalyticsConnection.token_expires_at)
     expect(dbConn.scopes).toEqual(sampleDbAnalyticsConnection.scopes)
     expect(dbConn.project_id).toBe(sampleDbAnalyticsConnection.project_id)
     expect(dbConn.last_sync_at).toBe(sampleDbAnalyticsConnection.last_sync_at)

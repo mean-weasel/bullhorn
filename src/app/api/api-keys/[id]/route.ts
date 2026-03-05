@@ -1,4 +1,4 @@
-import { requireAuth } from '@/lib/auth'
+import { requireSessionAuth } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -12,7 +12,7 @@ function getServiceClient() {
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await requireAuth()
+    const { userId } = await requireSessionAuth()
     const { id } = await params
     const supabase = getServiceClient()
 

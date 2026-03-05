@@ -60,7 +60,7 @@ describe('GET /api/social-accounts/twitter/auth', () => {
         httpOnly: true,
         sameSite: 'lax',
         maxAge: 300,
-        path: '/',
+        path: '/api/social-accounts/twitter/callback',
       })
     )
     // Verify the cookie value is valid JSON with both state and codeVerifier

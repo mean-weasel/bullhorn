@@ -5,17 +5,18 @@ import {
   transformAnalyticsConnectionToDb,
   type DbAnalyticsConnection,
 } from '@/lib/utils'
-import { requireAuth, parseJsonBody } from '@/lib/auth'
+import { requireAuth, parseJsonBody, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
+/** Columns safe to return to the browser (excludes OAuth tokens) */
+const SAFE_COLUMNS =
+  'id, user_id, provider, property_id, property_name, scopes, project_id, last_sync_at, sync_status, sync_error, created_at, updated_at'
+
 const updateAnalyticsConnectionSchema = z.object({
   propertyId: z.string().min(1).optional(),
   propertyName: z.string().max(500).optional().nullable(),
-  accessToken: z.string().min(1).optional(),
-  refreshToken: z.string().min(1).optional(),
-  tokenExpiresAt: z.string().min(1).optional(),
   provider: z.string().optional(),
   scopes: z.array(z.string()).optional(),
   projectId: z.string().uuid().optional().nullable(),
@@ -34,7 +35,14 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['analytics:read'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -44,7 +52,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('analytics_connections')
-      .select('*')
+      .select(SAFE_COLUMNS)
       .eq('id', id)
       .eq('user_id', userId)
       .single()
@@ -73,7 +81,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['analytics:read'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -99,7 +114,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       .update(updates)
       .eq('id', id)
       .eq('user_id', userId)
-      .select()
+      .select(SAFE_COLUMNS)
       .single()
 
     if (error) {
@@ -126,7 +141,14 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['analytics:read'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

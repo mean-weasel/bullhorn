@@ -54,6 +54,29 @@ Deno.serve(async (req: Request) => {
     return new Response('Method not allowed', { status: 405 })
   }
 
+  // Authenticate the caller via Supabase JWT
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  const token = authHeader.replace('Bearer ', '')
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser(token)
+
+  if (authError || !user) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   const { userId, title, body, url } = await req.json()
 
   if (!userId || !title || !body) {
@@ -63,7 +86,13 @@ Deno.serve(async (req: Request) => {
     })
   }
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  // Only allow sending push notifications to your own devices
+  if (userId !== user.id) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
 
   const { data: tokens, error } = await supabase
     .from('push_device_tokens')

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockRequireAuth = vi.fn()
-vi.mock('@/lib/auth', () => ({ requireAuth: () => mockRequireAuth() }))
+vi.mock('@/lib/auth', () => ({ requireSessionAuth: () => mockRequireAuth() }))
 
 const mockDeleteUser = vi.fn().mockResolvedValue({ error: null })
 

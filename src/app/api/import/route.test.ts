@@ -5,6 +5,17 @@ const mockRequireAuth = vi.fn()
 vi.mock('@/lib/auth', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/auth')>()),
   requireAuth: () => mockRequireAuth(),
+  validateScopes: vi.fn(),
+}))
+
+vi.mock('@/lib/rateLimit', () => ({
+  rateLimit: vi.fn().mockResolvedValue({ success: true, limit: 10, remaining: 9, reset: 0 }),
+}))
+
+vi.mock('@/lib/planEnforcement', () => ({
+  enforceResourceLimit: vi
+    .fn()
+    .mockResolvedValue({ allowed: true, current: 0, limit: 500, plan: 'free' }),
 }))
 
 // Mock Supabase

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const storedState = cookieStore.get('reddit_oauth_state')?.value
     cookieStore.set('reddit_oauth_state', '', {
       maxAge: 0,
-      path: '/',
+      path: '/api/social-accounts/reddit/callback',
     })
 
     if (!storedState || !state || state !== storedState) {

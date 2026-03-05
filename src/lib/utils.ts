@@ -133,9 +133,6 @@ export interface DbAnalyticsConnectionInsert {
   provider?: AnalyticsProvider | string
   property_id?: string
   property_name?: string | null
-  access_token?: string
-  refresh_token?: string
-  token_expires_at?: string
   scopes?: string[]
   project_id?: string | null
   last_sync_at?: string | null
@@ -148,9 +145,6 @@ export interface AnalyticsConnectionUpdateInput {
   provider?: string
   propertyId?: string
   propertyName?: string | null
-  accessToken?: string
-  refreshToken?: string
-  tokenExpiresAt?: string
   scopes?: string[]
   projectId?: string | null
   lastSyncAt?: string
@@ -304,9 +298,6 @@ export function transformAnalyticsConnectionFromDb(
     provider: dbConnection.provider,
     propertyId: dbConnection.property_id,
     propertyName: dbConnection.property_name ?? undefined,
-    accessToken: dbConnection.access_token,
-    refreshToken: dbConnection.refresh_token,
-    tokenExpiresAt: dbConnection.token_expires_at,
     scopes: dbConnection.scopes || [],
     projectId: dbConnection.project_id ?? undefined,
     lastSyncAt: dbConnection.last_sync_at ?? undefined,
@@ -327,9 +318,6 @@ export function transformAnalyticsConnectionToDb(
   if (connection.provider !== undefined) result.provider = connection.provider
   if (connection.propertyId !== undefined) result.property_id = connection.propertyId
   if (connection.propertyName !== undefined) result.property_name = connection.propertyName
-  if (connection.accessToken !== undefined) result.access_token = connection.accessToken
-  if (connection.refreshToken !== undefined) result.refresh_token = connection.refreshToken
-  if (connection.tokenExpiresAt !== undefined) result.token_expires_at = connection.tokenExpiresAt
   if (connection.scopes !== undefined) result.scopes = connection.scopes
   if (connection.projectId !== undefined) result.project_id = connection.projectId
   if (connection.lastSyncAt !== undefined) result.last_sync_at = connection.lastSyncAt

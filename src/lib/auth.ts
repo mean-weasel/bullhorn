@@ -5,12 +5,16 @@ import { createClient } from './supabase/server'
 
 /**
  * Check if we're running in test mode.
- * IMPORTANT: Test mode is only allowed when NODE_ENV is NOT 'production'.
- * This prevents accidental RLS bypass in production environments.
+ * IMPORTANT: Test mode requires BOTH E2E_TEST_MODE=true AND CI=true.
+ * This prevents accidental RLS bypass in production or preview environments.
  */
 export function isTestMode(): boolean {
   // Safety check: Never allow test mode in production
   if (process.env.NODE_ENV === 'production') {
+    return false
+  }
+  // Only allow test mode in CI environments (not preview/staging deployments)
+  if (process.env.CI !== 'true') {
     return false
   }
   return process.env.E2E_TEST_MODE === 'true'
@@ -149,6 +153,42 @@ export function validateScopes(userScopes: string[], required: string[]): void {
   }
 }
 
+// Valid UUID for test user (used in E2E tests)
+const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+/**
+ * Require session-based authentication only.
+ * Explicitly rejects API key auth to prevent privilege escalation.
+ * Use this for sensitive routes like API key management and account deletion.
+ *
+ * @throws Error with message 'Unauthorized' if not authenticated via session
+ */
+export async function requireSessionAuth(): Promise<{ userId: string }> {
+  if (isTestMode()) {
+    return { userId: TEST_USER_ID }
+  }
+
+  // Explicitly reject API key auth
+  const apiKey = await getApiKeyFromHeaders()
+  if (apiKey) {
+    throw new Error('Unauthorized')
+  }
+
+  // Session auth only
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Unauthorized')
+  }
+
+  Sentry.setUser({ id: user.id })
+  return { userId: user.id }
+}
+
 /**
  * Require authentication for API routes.
  * Returns the authenticated user's ID or throws a 401-style error.
@@ -161,8 +201,6 @@ export function validateScopes(userScopes: string[], required: string[]): void {
  *
  * @throws Error with message 'Unauthorized' if not authenticated
  */
-// Valid UUID for test user (used in E2E tests)
-const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 export async function requireAuth(): Promise<{ userId: string; scopes?: string[] }> {
   // In test mode (non-production only), use a consistent test user ID

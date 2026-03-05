@@ -69,6 +69,7 @@ beforeEach(() => {
   // Reset env vars
   vi.stubEnv('NODE_ENV', 'test')
   vi.stubEnv('E2E_TEST_MODE', '')
+  vi.stubEnv('CI', '')
   vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co')
   vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-key')
 })
@@ -80,18 +81,28 @@ beforeEach(() => {
 describe('isTestMode', () => {
   it('returns false when E2E_TEST_MODE is not set', () => {
     vi.stubEnv('E2E_TEST_MODE', '')
+    vi.stubEnv('CI', 'true')
     expect(isTestMode()).toBe(false)
   })
 
-  it('returns true when E2E_TEST_MODE is "true" and not production', () => {
+  it('returns true when E2E_TEST_MODE and CI are both "true" and not production', () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
+    vi.stubEnv('CI', 'true')
     vi.stubEnv('NODE_ENV', 'test')
     expect(isTestMode()).toBe(true)
   })
 
-  it('returns false in production even if E2E_TEST_MODE is "true"', () => {
+  it('returns false in production even if E2E_TEST_MODE and CI are "true"', () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
+    vi.stubEnv('CI', 'true')
     vi.stubEnv('NODE_ENV', 'production')
+    expect(isTestMode()).toBe(false)
+  })
+
+  it('returns false when CI is not set even if E2E_TEST_MODE is "true"', () => {
+    vi.stubEnv('E2E_TEST_MODE', 'true')
+    vi.stubEnv('CI', '')
+    vi.stubEnv('NODE_ENV', 'test')
     expect(isTestMode()).toBe(false)
   })
 })
@@ -133,6 +144,7 @@ describe('getApiKeyFromHeaders', () => {
 describe('requireAuth', () => {
   it('returns test user ID in test mode', async () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
+    vi.stubEnv('CI', 'true')
     vi.stubEnv('NODE_ENV', 'test')
     const result = await requireAuth()
     expect(result).toEqual({ userId: '00000000-0000-0000-0000-000000000001' })
@@ -174,6 +186,7 @@ describe('requireAuth', () => {
 describe('getOptionalAuth', () => {
   it('returns test user ID in test mode', async () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
+    vi.stubEnv('CI', 'true')
     vi.stubEnv('NODE_ENV', 'test')
     const result = await getOptionalAuth()
     expect(result).toEqual({ userId: '00000000-0000-0000-0000-000000000001' })

@@ -29,7 +29,10 @@ export async function GET(request: NextRequest) {
     const oauthCookie = cookieStore.get('twitter_oauth_state')?.value
 
     // Clear cookie regardless
-    cookieStore.set('twitter_oauth_state', '', { maxAge: 0, path: '/' })
+    cookieStore.set('twitter_oauth_state', '', {
+      maxAge: 0,
+      path: '/api/social-accounts/twitter/callback',
+    })
 
     if (!oauthCookie) {
       return NextResponse.redirect(`${baseUrl}/settings?error=invalid_state`)

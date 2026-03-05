@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireSessionAuth } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +14,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     // Require authentication
     let userId: string
     try {
-      const auth = await requireAuth()
+      const auth = await requireSessionAuth()
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

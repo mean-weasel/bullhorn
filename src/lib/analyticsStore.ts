@@ -20,9 +20,6 @@ interface AnalyticsActions {
     provider: 'google_analytics'
     propertyId: string
     propertyName?: string
-    accessToken: string
-    refreshToken: string
-    tokenExpiresAt: string
     scopes: string[]
     projectId?: string
   }) => Promise<AnalyticsConnection>
