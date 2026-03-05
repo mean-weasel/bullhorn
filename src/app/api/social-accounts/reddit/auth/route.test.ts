@@ -58,7 +58,7 @@ describe('GET /api/social-accounts/reddit/auth', () => {
         httpOnly: true,
         sameSite: 'lax',
         maxAge: 300,
-        path: '/',
+        path: '/api/social-accounts/reddit/callback',
       })
     )
   })

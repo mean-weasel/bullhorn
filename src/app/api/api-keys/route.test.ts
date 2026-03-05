@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('@/lib/auth', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/auth')>()),
-  requireAuth: vi.fn(),
+  requireSessionAuth: vi.fn(),
   ALL_SCOPES: [
     'posts:read',
     'posts:write',
@@ -42,9 +42,9 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 import { GET, POST } from './route'
-import { requireAuth } from '@/lib/auth'
+import { requireSessionAuth } from '@/lib/auth'
 
-const mockRequireAuth = vi.mocked(requireAuth)
+const mockRequireAuth = vi.mocked(requireSessionAuth)
 
 // ---------------------------------------------------------------------------
 // Tests

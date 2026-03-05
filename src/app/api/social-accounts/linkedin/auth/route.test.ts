@@ -58,7 +58,7 @@ describe('GET /api/social-accounts/linkedin/auth', () => {
         httpOnly: true,
         sameSite: 'lax',
         maxAge: 300,
-        path: '/',
+        path: '/api/social-accounts/linkedin/callback',
       })
     )
     const cookieValue = mockCookieSet.mock.calls[0][1]

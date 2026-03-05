@@ -5,9 +5,10 @@ import { getApiKeyFromHeaders } from '../auth'
 
 export async function createClient() {
   // In E2E test mode, use service role key to bypass RLS
-  // SECURITY: Only allow in non-production environments
+  // SECURITY: Requires CI=true + E2E_TEST_MODE=true + non-production
   if (
     process.env.E2E_TEST_MODE === 'true' &&
+    process.env.CI === 'true' &&
     process.env.SUPABASE_SERVICE_ROLE_KEY &&
     process.env.NODE_ENV !== 'production'
   ) {

@@ -13,8 +13,8 @@ export async function POST() {
     return NextResponse.json({ error: 'Reset endpoint is disabled in production' }, { status: 403 })
   }
 
-  // Only allow in E2E test mode
-  if (process.env.E2E_TEST_MODE !== 'true') {
+  // Only allow in E2E test mode (requires CI=true + E2E_TEST_MODE=true)
+  if (process.env.E2E_TEST_MODE !== 'true' || process.env.CI !== 'true') {
     return NextResponse.json(
       { error: 'Reset endpoint only available in test mode' },
       { status: 403 }

@@ -1,4 +1,4 @@
-import { requireAuth, ALL_SCOPES, parseJsonBody } from '@/lib/auth'
+import { requireSessionAuth, ALL_SCOPES, parseJsonBody } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { randomBytes, createHash } from 'crypto'
 import { z } from 'zod'
@@ -44,7 +44,7 @@ function transformKeyFromDb(row: {
 
 export async function GET() {
   try {
-    const { userId } = await requireAuth()
+    const { userId } = await requireSessionAuth()
     const supabase = getServiceClient()
 
     const { data, error } = await supabase
@@ -69,7 +69,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await requireAuth()
+    const { userId } = await requireSessionAuth()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
     const body = jsonResult.data

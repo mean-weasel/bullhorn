@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformReminderFromDb, type DbReminder } from '@/lib/reminders'
-import { requireAuth, parseJsonBody } from '@/lib/auth'
+import { requireSessionAuth, parseJsonBody } from '@/lib/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -20,7 +20,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   try {
     let userId: string
     try {
-      const auth = await requireAuth()
+      const auth = await requireSessionAuth()
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -79,7 +79,7 @@ export async function DELETE(
   try {
     let userId: string
     try {
-      const auth = await requireAuth()
+      const auth = await requireSessionAuth()
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

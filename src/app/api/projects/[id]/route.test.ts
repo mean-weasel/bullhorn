@@ -51,9 +51,10 @@ const mockPatchEqId = vi.fn(() => ({ eq: mockPatchEqUserId }))
 const mockUpdate = vi.fn(() => ({ eq: mockPatchEqId }))
 
 // DELETE chain:
-// 1. count query: .from('campaigns').select('*',{count:'exact',head:true}).eq('project_id',id)
+// 1. count query: .from('campaigns').select('*',{count:'exact',head:true}).eq('project_id',id).eq('user_id',userId)
 let mockCountResult: { count: number | null } = { count: 0 }
-const mockCountEq = vi.fn(() => mockCountResult)
+const mockCountEq2 = vi.fn(() => mockCountResult)
+const mockCountEq = vi.fn(() => ({ eq: mockCountEq2 }))
 const mockCountSelect = vi.fn(() => ({ eq: mockCountEq }))
 
 // 2. delete query: .from('projects').delete().eq('id',id).eq('user_id',userId)

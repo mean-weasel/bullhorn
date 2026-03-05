@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     const storedState = cookieStore.get('oauth_state')?.value
 
     // Clear the state cookie regardless of outcome
-    cookieStore.set('oauth_state', '', { maxAge: 0, path: '/' })
+    cookieStore.set('oauth_state', '', { maxAge: 0, path: '/api/analytics/auth/callback' })
 
     if (!state || !storedState || state !== storedState) {
       console.error('OAuth state mismatch:', { received: !!state, stored: !!storedState })

@@ -7,7 +7,7 @@ import { NextRequest } from 'next/server'
 
 vi.mock('@/lib/auth', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/auth')>()),
-  requireAuth: vi.fn(),
+  requireSessionAuth: vi.fn(),
 }))
 
 // PATCH update chain: .from().update().eq().eq().select().single()
@@ -41,9 +41,9 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 import { PATCH, DELETE } from './route'
-import { requireAuth } from '@/lib/auth'
+import { requireSessionAuth } from '@/lib/auth'
 
-const mockRequireAuth = vi.mocked(requireAuth)
+const mockRequireAuth = vi.mocked(requireSessionAuth)
 
 // ---------------------------------------------------------------------------
 // Helpers

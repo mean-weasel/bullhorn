@@ -22,6 +22,10 @@ const nextConfig = {
   // Security headers
   async headers() {
     const isDev = process.env.NODE_ENV === 'development'
+    // TODO: Replace 'unsafe-inline' with nonce-based CSP for stronger XSS protection.
+    // Currently needed because Next.js injects inline scripts for hydration.
+    // Risk is mitigated by: no dangerouslySetInnerHTML usage, frame-ancestors 'none',
+    // strict CORS on connect-src, and X-Content-Type-Options: nosniff.
     const scriptSrc = isDev
       ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
       : "script-src 'self' 'unsafe-inline'"

@@ -27,9 +27,6 @@ const makeConnection = (overrides: Partial<AnalyticsConnection> = {}): Analytics
   provider: 'google_analytics',
   propertyId: 'GA-123456',
   propertyName: 'My Site',
-  accessToken: 'access-token',
-  refreshToken: 'refresh-token',
-  tokenExpiresAt: '2025-01-01T00:00:00Z',
   scopes: ['analytics.readonly'],
   projectId: 'proj-1',
   syncStatus: 'success',
@@ -164,9 +161,6 @@ describe('useAnalyticsStore', () => {
         provider: 'google_analytics' as const,
         propertyId: 'GA-123456',
         propertyName: 'My Site',
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-        tokenExpiresAt: '2025-01-01T00:00:00Z',
         scopes: ['analytics.readonly'],
         projectId: 'proj-1',
       }
@@ -196,9 +190,6 @@ describe('useAnalyticsStore', () => {
       await useAnalyticsStore.getState().createConnection({
         provider: 'google_analytics',
         propertyId: 'GA-999',
-        accessToken: 'tok',
-        refreshToken: 'rtok',
-        tokenExpiresAt: '2025-01-01T00:00:00Z',
         scopes: [],
       })
 
@@ -218,9 +209,6 @@ describe('useAnalyticsStore', () => {
         useAnalyticsStore.getState().createConnection({
           provider: 'google_analytics',
           propertyId: 'bad',
-          accessToken: 'tok',
-          refreshToken: 'rtok',
-          tokenExpiresAt: '2025-01-01T00:00:00Z',
           scopes: [],
         })
       ).rejects.toThrow('Invalid property ID')
@@ -239,9 +227,6 @@ describe('useAnalyticsStore', () => {
         useAnalyticsStore.getState().createConnection({
           provider: 'google_analytics',
           propertyId: 'bad',
-          accessToken: 'tok',
-          refreshToken: 'rtok',
-          tokenExpiresAt: '2025-01-01T00:00:00Z',
           scopes: [],
         })
       ).rejects.toThrow('Failed to create connection')

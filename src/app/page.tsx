@@ -11,8 +11,12 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  // Skip auth check in E2E test mode
-  if (process.env.E2E_TEST_MODE === 'true') {
+  // Skip auth check in E2E test mode (requires CI=true + E2E_TEST_MODE=true + non-production)
+  const isTestMode =
+    process.env.E2E_TEST_MODE === 'true' &&
+    process.env.CI === 'true' &&
+    process.env.NODE_ENV !== 'production'
+  if (isTestMode) {
     redirect('/dashboard')
   }
 

@@ -1,17 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformAnalyticsConnectionFromDb, type DbAnalyticsConnection } from '@/lib/utils'
-import { requireAuth, parseJsonBody } from '@/lib/auth'
+import { requireAuth, parseJsonBody, validateScopes } from '@/lib/auth'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
+/** Columns safe to return to the browser (excludes OAuth tokens) */
+const SAFE_COLUMNS =
+  'id, user_id, provider, property_id, property_name, scopes, project_id, last_sync_at, sync_status, sync_error, created_at, updated_at'
+
 const createAnalyticsConnectionSchema = z.object({
   propertyId: z.string().min(1),
   propertyName: z.string().max(500).optional().nullable(),
-  accessToken: z.string().min(1),
-  refreshToken: z.string().min(1),
-  tokenExpiresAt: z.string().min(1),
   provider: z.string().optional(),
   scopes: z.array(z.string()).optional(),
   projectId: z.string().uuid().optional().nullable(),
@@ -25,7 +26,14 @@ export async function GET() {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['analytics:read'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -34,7 +42,7 @@ export async function GET() {
     // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('analytics_connections')
-      .select('*')
+      .select(SAFE_COLUMNS)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(100)
@@ -64,7 +72,14 @@ export async function POST(request: NextRequest) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['analytics:read'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -102,14 +117,11 @@ export async function POST(request: NextRequest) {
         provider: parsed.data.provider || 'google_analytics',
         property_id: parsed.data.propertyId,
         property_name: parsed.data.propertyName || null,
-        access_token: parsed.data.accessToken,
-        refresh_token: parsed.data.refreshToken,
-        token_expires_at: parsed.data.tokenExpiresAt,
         scopes: parsed.data.scopes || [],
         project_id: parsed.data.projectId || null,
         sync_status: 'pending',
       })
-      .select()
+      .select(SAFE_COLUMNS)
       .single()
 
     if (error) {

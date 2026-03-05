@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { transformSocialAccountFromDb, type DbSocialAccount } from '@/lib/utils'
-import { requireAuth } from '@/lib/auth'
+import { requireSessionAuth } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +16,7 @@ export async function GET() {
   try {
     let userId: string
     try {
-      const auth = await requireAuth()
+      const auth = await requireSessionAuth()
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

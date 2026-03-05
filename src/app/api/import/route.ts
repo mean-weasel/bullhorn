@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, parseJsonBody } from '@/lib/auth'
+import { requireAuth, parseJsonBody, validateScopes } from '@/lib/auth'
+import { rateLimit } from '@/lib/rateLimit'
+import { enforceResourceLimit } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
 const importPostSchema = z.object({
@@ -33,8 +35,20 @@ export async function POST(request: NextRequest) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['posts:write', 'campaigns:write'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const rateLimitResult = await rateLimit(`import:${userId}`)
+    if (!rateLimitResult.success) {
+      return NextResponse.json({ error: 'Too many import requests' }, { status: 429 })
     }
 
     const supabase = await createClient()
@@ -51,6 +65,49 @@ export async function POST(request: NextRequest) {
     }
 
     const { posts: importPosts, campaigns: importCampaigns } = parsed.data
+
+    // Enforce plan limits for posts
+    if (importPosts.length > 0) {
+      const postsCheck = await enforceResourceLimit(userId, 'posts')
+      if (!postsCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: `Plan limit reached. You have ${postsCheck.current}/${postsCheck.limit} posts on the ${postsCheck.plan} plan.`,
+          },
+          { status: 403 }
+        )
+      }
+      // Check if import would exceed limit
+      if (postsCheck.current + importPosts.length > postsCheck.limit) {
+        return NextResponse.json(
+          {
+            error: `Import would exceed plan limit. You have ${postsCheck.current}/${postsCheck.limit} posts. Trying to import ${importPosts.length}.`,
+          },
+          { status: 403 }
+        )
+      }
+    }
+
+    // Enforce plan limits for campaigns
+    if (importCampaigns.length > 0) {
+      const campaignsCheck = await enforceResourceLimit(userId, 'campaigns')
+      if (!campaignsCheck.allowed) {
+        return NextResponse.json(
+          {
+            error: `Plan limit reached. You have ${campaignsCheck.current}/${campaignsCheck.limit} campaigns on the ${campaignsCheck.plan} plan.`,
+          },
+          { status: 403 }
+        )
+      }
+      if (campaignsCheck.current + importCampaigns.length > campaignsCheck.limit) {
+        return NextResponse.json(
+          {
+            error: `Import would exceed plan limit. You have ${campaignsCheck.current}/${campaignsCheck.limit} campaigns. Trying to import ${importCampaigns.length}.`,
+          },
+          { status: 403 }
+        )
+      }
+    }
 
     let campaignsImported = 0
     let campaignsSkipped = 0

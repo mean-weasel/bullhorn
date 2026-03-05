@@ -64,8 +64,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }
     }
 
-    // Generate unique filename and upload to Supabase Storage
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'png'
+    // Derive extension from validated MIME type (not user-supplied filename)
+    const MIME_TO_EXT: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+    }
+    const ext = MIME_TO_EXT[file.type] || 'png'
     const filename = `${auth.userId}/${projectId}-${crypto.randomUUID().slice(0, 8)}.${ext}`
 
     const bytes = await file.arrayBuffer()

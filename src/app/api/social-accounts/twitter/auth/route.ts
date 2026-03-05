@@ -36,7 +36,7 @@ export async function GET() {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 300,
-      path: '/',
+      path: '/api/social-accounts/twitter/callback',
     })
 
     // Build authorization URL (use x.com, NOT twitter.com)

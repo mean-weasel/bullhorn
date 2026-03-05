@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, validateScopes } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -115,7 +115,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
     try {
       const auth = await requireAuth()
       userId = auth.userId
-    } catch {
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['analytics:read'])
+      }
+    } catch (authError) {
+      const msg = (authError as Error).message
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

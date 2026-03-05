@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // ---------------------------------------------------------------------------
 
 vi.mock('@/lib/auth', () => ({
-  requireAuth: vi.fn(),
+  requireSessionAuth: vi.fn(),
 }))
 
 const mockUpdateSingle = vi.fn()
@@ -22,9 +22,9 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 import { DELETE } from './route'
-import { requireAuth } from '@/lib/auth'
+import { requireSessionAuth } from '@/lib/auth'
 
-const mockRequireAuth = vi.mocked(requireAuth)
+const mockRequireAuth = vi.mocked(requireSessionAuth)
 
 // ---------------------------------------------------------------------------
 // Tests

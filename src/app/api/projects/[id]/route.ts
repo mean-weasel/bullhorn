@@ -159,6 +159,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
       .from('campaigns')
       .select('*', { count: 'exact', head: true })
       .eq('project_id', id)
+      .eq('user_id', userId)
 
     // Delete with ownership check (cascading delete happens via FK)
     const { error } = await supabase.from('projects').delete().eq('id', id).eq('user_id', userId)

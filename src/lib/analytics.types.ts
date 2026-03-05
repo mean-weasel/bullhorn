@@ -13,9 +13,6 @@ export interface AnalyticsConnection {
   provider: AnalyticsProvider
   propertyId: string
   propertyName?: string
-  accessToken: string
-  refreshToken: string
-  tokenExpiresAt: string
   scopes: string[]
   projectId?: string
   lastSyncAt?: string

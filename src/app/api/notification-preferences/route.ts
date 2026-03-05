@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth, parseJsonBody } from '@/lib/auth'
+import { requireSessionAuth, parseJsonBody } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
@@ -58,7 +58,7 @@ export async function GET() {
   try {
     let userId: string
     try {
-      const auth = await requireAuth()
+      const auth = await requireSessionAuth()
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -111,7 +111,7 @@ export async function PATCH(request: NextRequest) {
   try {
     let userId: string
     try {
-      const auth = await requireAuth()
+      const auth = await requireSessionAuth()
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
