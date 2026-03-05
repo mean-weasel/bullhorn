@@ -6,7 +6,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const APNS_KEY_ID = Deno.env.get('APNS_KEY_ID')!
 const APNS_TEAM_ID = Deno.env.get('APNS_TEAM_ID')!
 const APNS_PRIVATE_KEY = Deno.env.get('APNS_PRIVATE_KEY')!
-const APNS_BUNDLE_ID = 'to.bullhorn.app'
+const APNS_BUNDLE_ID = Deno.env.get('APNS_BUNDLE_ID') || 'to.bullhorn.app'
 const APNS_HOST = 'https://api.push.apple.com'
 
 async function createJWT(): Promise<string> {

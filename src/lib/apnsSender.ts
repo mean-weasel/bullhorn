@@ -21,7 +21,7 @@ function base64url(input: string | Buffer): string {
 }
 
 function createApnsJwt(): string | null {
-  if (!APNS_KEY_ID || !APNS_AUTH_KEY) return null
+  if (!APNS_KEY_ID || !APNS_AUTH_KEY || !APNS_TEAM_ID) return null
 
   const header = base64url(JSON.stringify({ alg: 'ES256', kid: APNS_KEY_ID }))
   const now = Math.floor(Date.now() / 1000)

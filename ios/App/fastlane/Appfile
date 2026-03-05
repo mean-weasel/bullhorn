@@ -1,2 +1,2 @@
 app_identifier("to.bullhorn.app")
-team_id(ENV["APPLE_TEAM_ID"] || "REPLACE_WITH_YOUR_TEAM_ID")
+team_id(ENV["APNS_TEAM_ID"] || "REPLACE_WITH_YOUR_TEAM_ID")
