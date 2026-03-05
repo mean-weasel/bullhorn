@@ -15,7 +15,7 @@ platform :ios do
       xcargs: "-allowProvisioningUpdates",
       export_options: {
         method: "app-store",
-        teamID: "B3A6AN2HA4",
+        teamID: ENV["APPLE_TEAM_ID"] || "REPLACE_WITH_YOUR_TEAM_ID",
         signingStyle: "automatic"
       }
     )

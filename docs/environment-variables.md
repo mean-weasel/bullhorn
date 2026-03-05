@@ -113,7 +113,7 @@ APNS_ENVIRONMENT=production
 6. Add `APNS_KEY_ID`, `APNS_AUTH_KEY`, and `APNS_ENVIRONMENT=production` to Vercel
 7. Redeploy
 
-**Note**: `APNS_TEAM_ID` is hardcoded as `B3A6AN2HA4` in `src/lib/apnsSender.ts`. TestFlight builds use the **production** APNs endpoint, not sandbox.
+**Note**: `APNS_TEAM_ID` must be set via the environment variable. TestFlight builds use the **production** APNs endpoint, not sandbox.
 
 ---
 

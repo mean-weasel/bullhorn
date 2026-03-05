@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "B3A6AN2HA4.to.bullhorn.app",
+        "appID": "REPLACE_WITH_YOUR_TEAM_ID.to.bullhorn.app",
         "paths": ["/auth/callback"]
       }
     ]
