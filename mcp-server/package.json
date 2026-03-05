@@ -19,7 +19,7 @@
     "smoke-test": "node smoke-test.mjs"
   },
   "keywords": ["mcp", "bullhorn", "social-media", "scheduler", "claude"],
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
     "url": "https://github.com/neonwatty/bullhorn",
