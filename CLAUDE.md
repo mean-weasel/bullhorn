@@ -341,8 +341,8 @@ Guidelines:
 - **Mode**: Remote URL — WKWebView loads `bullhorn.to`, not a local bundle
 - **Platform detection**: User agent marker `BullhornCapacitor` via `isNativePlatform()` in `src/lib/capacitor.ts`
 - **Bundle ID**: `to.bullhorn.app`
-- **Team ID**: `B3A6AN2HA4` (Mean Weasel LLC)
-- **Apple App ID**: `6759327017`
+- **Team ID**: Set via `APNS_TEAM_ID` env var
+- **Apple App ID**: Set in App Store Connect
 
 ### Local iOS Testing
 

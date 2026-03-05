@@ -51,6 +51,11 @@ export async function rateLimit(identifier: string): Promise<RateLimitResult> {
 
   if (!limiter) {
     console.warn('[rateLimit] Upstash Redis is not configured — rate limiting is disabled')
+    if (process.env.NODE_ENV === 'production') {
+      console.error(
+        '[rateLimit] WARNING: Rate limiting is disabled in production. Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.'
+      )
+    }
     return { success: true, limit: 0, remaining: 0, reset: 0 }
   }
 

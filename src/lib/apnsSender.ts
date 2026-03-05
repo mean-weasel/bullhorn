@@ -2,9 +2,9 @@ import { sign, createPrivateKey } from 'crypto'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 
 const APNS_KEY_ID = process.env.APNS_KEY_ID || ''
-const APNS_TEAM_ID = process.env.APNS_TEAM_ID || 'B3A6AN2HA4'
+const APNS_TEAM_ID = process.env.APNS_TEAM_ID || ''
 const APNS_AUTH_KEY = process.env.APNS_AUTH_KEY || '' // Base64-encoded .p8 file contents
-const APNS_BUNDLE_ID = 'to.bullhorn.app'
+const APNS_BUNDLE_ID = process.env.APNS_BUNDLE_ID || 'to.bullhorn.app'
 const APNS_HOST =
   process.env.APNS_ENVIRONMENT === 'production'
     ? 'https://api.push.apple.com'
@@ -21,7 +21,7 @@ function base64url(input: string | Buffer): string {
 }
 
 function createApnsJwt(): string | null {
-  if (!APNS_KEY_ID || !APNS_AUTH_KEY) return null
+  if (!APNS_KEY_ID || !APNS_AUTH_KEY || !APNS_TEAM_ID) return null
 
   const header = base64url(JSON.stringify({ alg: 'ES256', kid: APNS_KEY_ID }))
   const now = Math.floor(Date.now() / 1000)
