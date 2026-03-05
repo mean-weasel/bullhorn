@@ -31,7 +31,20 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `E2E_TEST_MODE=true NEXT_PUBLIC_E2E_TEST_MODE=true npm run dev -- --port ${PORT}`,
+    command: process.env.CI
+      ? // CI: build with NEXT_PUBLIC_* baked in, then serve with NODE_ENV=test for isTestMode()
+        [
+          `NEXT_PUBLIC_E2E_TEST_MODE=true`,
+          `NEXT_PUBLIC_SUPABASE_URL=${process.env.NEXT_PUBLIC_SUPABASE_URL || ''}`,
+          `NEXT_PUBLIC_SUPABASE_ANON_KEY=${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`,
+          `npm run build &&`,
+          `NODE_ENV=test E2E_TEST_MODE=true`,
+          `SUPABASE_SERVICE_ROLE_KEY=${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
+          `NEXT_PUBLIC_SUPABASE_URL=${process.env.NEXT_PUBLIC_SUPABASE_URL || ''}`,
+          `NEXT_PUBLIC_SUPABASE_ANON_KEY=${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`,
+          `npm start -- --port ${PORT}`,
+        ].join(' ')
+      : `E2E_TEST_MODE=true NEXT_PUBLIC_E2E_TEST_MODE=true npm run dev -- --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 180_000 : 120_000,
