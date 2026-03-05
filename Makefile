@@ -1,7 +1,7 @@
 # Bullhorn - Makefile
 # Run `make help` to see available commands
 
-.PHONY: help install install-hooks dev dev-full build test test-e2e test-e2e-prod lint typecheck knip format check fix clean all
+.PHONY: help install install-hooks dev dev-full build test test-e2e lint typecheck knip format check fix clean all
 
 # Default target
 .DEFAULT_GOAL := help
@@ -223,9 +223,6 @@ test-run: ## Run unit tests once
 
 test-e2e: ## Run end-to-end tests
 	npm run test:e2e
-
-test-e2e-prod: ## Run E2E tests against production build (matches CI)
-	CI=true npm run test:e2e
 
 test-e2e-ui: ## Run E2E tests with UI
 	npm run test:e2e:ui
