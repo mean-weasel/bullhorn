@@ -50,7 +50,7 @@
     "@capawesome/capacitor-badge": "^8.0.1",
     "@capgo/capacitor-social-login": "^8.3.6",
     "@octokit/rest": "^20.0.2",
-    "@sentry/nextjs": "^10.39.0",
+    "@sentry/nextjs": "^10.42.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.97.0",
     "@upstash/ratelimit": "^2.0.8",
