@@ -75,14 +75,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // Forward to Capacitor's proxy (fires appUrlOpen JS event for plugins)
         let result = ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
 
-        // In remote URL mode, also navigate the WKWebView directly.
-        // This handles the OAuth callback Universal Link — the WebView loads
-        // /auth/callback?code=... which exchanges the PKCE code for a session.
+        // In remote URL mode, navigate the WKWebView to the Universal Link URL.
+        // Uses JavaScript navigation (not native URLRequest) so that cookies set
+        // by the Supabase browser client (including the PKCE code_verifier) are
+        // included in the request. Native WKWebView.load(URLRequest) does not
+        // reliably include cookies set via document.cookie.
         if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
            let url = userActivity.webpageURL,
            url.host == "bullhorn.to" {
             DispatchQueue.main.async { [weak self] in
-                self?.capacitorWebView?.load(URLRequest(url: url))
+                let safeUrl = url.absoluteString
+                    .replacingOccurrences(of: "\\", with: "\\\\")
+                    .replacingOccurrences(of: "'", with: "\\'")
+                self?.capacitorWebView?.evaluateJavaScript(
+                    "window.location.href = '\(safeUrl)'"
+                )
             }
         }
 
