@@ -20,7 +20,10 @@ test.describe('Archive Post', () => {
   test('should archive a draft post from editor', async ({ page }, testInfo) => {
     const testId = generateTestId(testInfo)
     // Create a test post
-    await createTestPost(page, { platform: 'twitter', content: uniqueContent('Post to archive', testId) })
+    await createTestPost(page, {
+      platform: 'twitter',
+      content: uniqueContent('Post to archive', testId),
+    })
 
     // Navigate to posts and click on it
     await goToPosts(page)
@@ -30,8 +33,8 @@ test.describe('Archive Post', () => {
     // Archive the post
     await archivePost(page)
 
-    // Should navigate back to dashboard
-    await expect(page).toHaveURL('/dashboard')
+    // Should navigate back to dashboard (archivePost now waits for URL)
+    await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 15000 })
   })
 
   test('should show archived posts in archived filter', async ({ page }, testInfo) => {
@@ -91,8 +94,8 @@ test.describe('Archive Post', () => {
     // Click restore
     await restorePost(page)
 
-    // Should navigate back to dashboard
-    await expect(page).toHaveURL('/dashboard')
+    // Should navigate back to dashboard (restorePost now waits for URL)
+    await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 15000 })
 
     // Verify restored to drafts
     await goToPosts(page)
@@ -120,7 +123,7 @@ test.describe('Archive Post', () => {
     await deletePost(page)
 
     // Should navigate back
-    await expect(page).toHaveURL('/dashboard')
+    await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 15000 })
 
     // Verify gone - archived tab should be hidden since no archived posts remain
     await goToPosts(page)

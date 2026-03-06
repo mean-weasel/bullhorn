@@ -92,6 +92,9 @@ test.describe.serial('Delete Post', () => {
     await page.getByRole('alertdialog').waitFor()
     await page.getByRole('alertdialog').getByRole('button', { name: 'Keep' }).click()
 
+    // Wait for dialog to dismiss before checking page state
+    await expect(page.getByRole('alertdialog')).not.toBeVisible({ timeout: 10000 })
+
     // Should still be on the edit page
     await expect(page.getByRole('heading', { name: /edit post/i })).toBeVisible()
   })

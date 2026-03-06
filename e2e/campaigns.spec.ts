@@ -21,7 +21,9 @@ test.describe('Campaigns', () => {
     test('should create a new campaign', async ({ page }) => {
       // Navigate to campaigns
       await page.goto('/campaigns')
-      await expect(page.getByRole('heading', { name: 'Campaigns', exact: true })).toBeVisible()
+      await expect(page.getByRole('heading', { name: 'Campaigns', exact: true })).toBeVisible({
+        timeout: 15000,
+      })
 
       // Click "New Campaign" button
       await page.getByRole('button', { name: /new campaign|new$/i }).click()
@@ -147,9 +149,9 @@ test.describe('Campaigns', () => {
       await selectPlatform(page, 'twitter')
       await fillContent(page, 'This is a Twitter post for our campaign! #marketing')
 
-      // Wait for campaigns to load, then select campaign from dropdown
-      await page.waitForTimeout(500) // Give time for campaigns to load
+      // Select campaign from dropdown
       const campaignButton = page.locator('button').filter({ hasText: /no campaign/i })
+      await expect(campaignButton).toBeVisible({ timeout: 10000 })
       await campaignButton.click()
 
       // Wait for dropdown and click the campaign
@@ -473,9 +475,6 @@ test.describe('Campaigns', () => {
       await page.waitForURL(/\/campaigns\//)
       const campaignId = page.url().split('/campaigns/')[1]
 
-      // Wait for page to fully load and posts to be fetched
-      await page.waitForTimeout(500)
-
       // Click "Add Existing Post" button
       const addExistingButton = page.getByRole('button', { name: /add existing post/i })
       await expect(addExistingButton).toBeVisible({ timeout: 10000 })
@@ -486,8 +485,8 @@ test.describe('Campaigns', () => {
       await expect(modal).toBeVisible()
       await modal.getByText('Standalone post that will be added').click()
 
-      // Wait for modal to close and refresh
-      await page.waitForTimeout(500)
+      // Wait for modal to close
+      await expect(modal).not.toBeVisible({ timeout: 10000 })
 
       // Verify post is now in the campaign
       const campaignPosts = await getCampaignPosts(page, campaignId)
@@ -559,6 +558,9 @@ test.describe('Campaigns', () => {
 
       // Go back to campaigns list
       await page.goto('/campaigns')
+      await expect(page.getByRole('heading', { name: 'Campaigns', exact: true })).toBeVisible({
+        timeout: 15000,
+      })
 
       // Verify both campaigns appear (both should be active by default)
       await expect(page.getByText('First Campaign')).toBeVisible()

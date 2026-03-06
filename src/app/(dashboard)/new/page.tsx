@@ -228,7 +228,10 @@ export default function EditorPage() {
       }
     },
     delay: 2000,
-    enabled: (post.status === 'draft' || isNew) && !(isNew && hasMultipleSubreddits),
+    enabled:
+      (post.status === 'draft' || isNew) &&
+      !(isNew && hasMultipleSubreddits) &&
+      (process.env.NEXT_PUBLIC_E2E_TEST_MODE !== 'true' || searchParams.get('autosave') === 'true'),
     skipInitialChange: !isNew,
   })
 

@@ -117,11 +117,10 @@ test.describe('User Profile Page', () => {
       // Success message appears
       await expect(page.getByText('Profile updated successfully')).toBeVisible()
 
-      // Wait 3+ seconds for timeout
-      await page.waitForTimeout(4000)
-
-      // Message should disappear
-      await expect(page.getByText('Profile updated successfully')).not.toBeVisible()
+      // Message should disappear after timeout (auto-clears after ~3s)
+      await expect(page.getByText('Profile updated successfully')).not.toBeVisible({
+        timeout: 10000,
+      })
     })
   })
 

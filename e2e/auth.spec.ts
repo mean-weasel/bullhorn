@@ -58,7 +58,7 @@ test.describe('Authentication', () => {
 
     test('should navigate to signup page', async ({ page }) => {
       await page.getByRole('link', { name: 'Sign up' }).click()
-      await expect(page).toHaveURL('/signup')
+      await expect(page).toHaveURL('/signup', { timeout: 15000 })
     })
 
     test('should have forgot password link', async ({ page }) => {
@@ -67,7 +67,7 @@ test.describe('Authentication', () => {
 
     test('should navigate to forgot password page', async ({ page }) => {
       await page.getByRole('link', { name: 'Forgot password?' }).click()
-      await expect(page).toHaveURL('/forgot-password')
+      await expect(page).toHaveURL('/forgot-password', { timeout: 15000 })
     })
 
     test('should show loading state when signing in', async ({ page }) => {
@@ -154,7 +154,7 @@ test.describe('Authentication', () => {
 
     test('should navigate to login page', async ({ page }) => {
       await page.getByRole('link', { name: 'Sign in' }).click()
-      await expect(page).toHaveURL('/login')
+      await expect(page).toHaveURL('/login', { timeout: 15000 })
     })
 
     test('should show loading state when creating account', async ({ page }) => {
@@ -284,7 +284,7 @@ test.describe('Authentication', () => {
 
     test('should navigate back to login page', async ({ page }) => {
       await page.getByRole('link', { name: 'Sign in' }).click()
-      await expect(page).toHaveURL('/login')
+      await expect(page).toHaveURL('/login', { timeout: 15000 })
     })
   })
 
@@ -302,7 +302,7 @@ test.describe('Authentication', () => {
     test('should navigate to forgot password from invalid session', async ({ page }) => {
       await expect(page.getByText(/invalid or expired link/i)).toBeVisible({ timeout: 10000 })
       await page.getByRole('link', { name: 'Request new reset link' }).click()
-      await expect(page).toHaveURL('/forgot-password')
+      await expect(page).toHaveURL('/forgot-password', { timeout: 15000 })
     })
   })
 
@@ -314,12 +314,12 @@ test.describe('Authentication', () => {
 
       // Go to signup
       await page.getByRole('link', { name: 'Sign up' }).click()
-      await expect(page).toHaveURL('/signup')
+      await expect(page).toHaveURL('/signup', { timeout: 15000 })
       await expect(page.getByRole('heading', { name: 'Create an account' })).toBeVisible()
 
       // Go back to login
       await page.getByRole('link', { name: 'Sign in' }).click()
-      await expect(page).toHaveURL('/login')
+      await expect(page).toHaveURL('/login', { timeout: 15000 })
       await expect(page.getByRole('heading', { name: 'Bullhorn' })).toBeVisible()
     })
 
@@ -329,12 +329,12 @@ test.describe('Authentication', () => {
 
       // Go to forgot password
       await page.getByRole('link', { name: 'Forgot password?' }).click()
-      await expect(page).toHaveURL('/forgot-password')
+      await expect(page).toHaveURL('/forgot-password', { timeout: 15000 })
       await expect(page.getByRole('heading', { name: 'Reset password' })).toBeVisible()
 
       // Go back to login
       await page.getByRole('link', { name: 'Sign in' }).click()
-      await expect(page).toHaveURL('/login')
+      await expect(page).toHaveURL('/login', { timeout: 15000 })
     })
   })
 })

@@ -34,14 +34,14 @@ test.describe('Blog Drafts', () => {
       await goToBlogDrafts(page)
 
       await page.getByRole('link', { name: /create draft/i }).click()
-      await expect(page.getByPlaceholder('Post title...')).toBeVisible()
+      await expect(page.getByPlaceholder('Post title...')).toBeVisible({ timeout: 15000 })
     })
 
     test('should navigate to new draft from header button', async ({ page }) => {
       await goToBlogDrafts(page)
 
       await page.getByRole('link', { name: /new draft/i }).click()
-      await expect(page.getByPlaceholder('Post title...')).toBeVisible()
+      await expect(page.getByPlaceholder('Post title...')).toBeVisible({ timeout: 15000 })
     })
 
     test('should display blog drafts after creation', async ({ page }) => {
@@ -321,10 +321,7 @@ test.describe('Blog Drafts', () => {
       await saveBlogDraft(page)
 
       // Wait for save to complete and indicator to disappear
-      await page.waitForTimeout(500)
-
-      // Should NOT show unsaved changes
-      await expect(page.getByText(/unsaved changes/i)).not.toBeVisible()
+      await expect(page.getByText(/unsaved changes/i)).not.toBeVisible({ timeout: 10000 })
     })
   })
 

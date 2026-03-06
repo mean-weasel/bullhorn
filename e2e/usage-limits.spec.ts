@@ -114,7 +114,9 @@ test.describe('Usage Limits', () => {
       await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible()
 
       // Wait for plan data to load (PlanInitializer fetches on mount)
-      await page.waitForTimeout(1000)
+      await expect(page.getByRole('button', { name: /new project/i })).toBeVisible({
+        timeout: 10000,
+      })
 
       // The "New Project" button should be aria-disabled
       const newProjectButton = page.getByRole('button', { name: /new project/i })
@@ -141,7 +143,11 @@ test.describe('Usage Limits', () => {
       // Navigate to projects
       await page.goto('/projects')
       await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible()
-      await page.waitForTimeout(1000)
+
+      // Wait for plan data to load
+      await expect(page.getByRole('button', { name: /new project/i })).toBeVisible({
+        timeout: 10000,
+      })
 
       // The button should NOT be disabled
       const newProjectButton = page.getByRole('button', { name: /new project/i })
@@ -175,8 +181,8 @@ test.describe('Usage Limits', () => {
       await page.goto('/settings')
       await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
 
-      // Wait for plan data to load
-      await page.waitForTimeout(1000)
+      // Wait for plan data to load — usage bars appear after plan fetch
+      await expect(page.getByText('Plan & Usage')).toBeVisible({ timeout: 10000 })
 
       // Should show usage bars for projects and campaigns
       await expect(page.getByText('2 / 3')).toBeVisible() // projects
