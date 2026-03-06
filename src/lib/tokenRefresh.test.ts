@@ -188,7 +188,7 @@ describe('refreshTokenIfNeeded', () => {
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({
-          'User-Agent': 'web:bullhorn-scheduler:v1.0.0 (by /u/neonwatty)',
+          'User-Agent': 'web:bullhorn-scheduler:v1.0.0 (by /u/unknown)',
         }),
       })
     )

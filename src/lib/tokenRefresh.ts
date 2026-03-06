@@ -32,7 +32,8 @@ interface PlatformTokenResponse {
 // ---------------------------------------------------------------------------
 
 const TOKEN_EXPIRY_BUFFER_SECONDS = 300 // 5 minutes
-const REDDIT_USER_AGENT = 'web:bullhorn-scheduler:v1.0.0 (by /u/neonwatty)'
+const REDDIT_USER_AGENT =
+  process.env.REDDIT_USER_AGENT || 'web:bullhorn-scheduler:v1.0.0 (by /u/unknown)'
 
 // ---------------------------------------------------------------------------
 // Helper
