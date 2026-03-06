@@ -5,7 +5,8 @@ import { cookies } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
-const REDDIT_USER_AGENT = 'web:bullhorn-scheduler:v1.0.0 (by /u/neonwatty)'
+const REDDIT_USER_AGENT =
+  process.env.REDDIT_USER_AGENT || 'web:bullhorn-scheduler:v1.0.0 (by /u/unknown)'
 
 export async function GET(request: NextRequest) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

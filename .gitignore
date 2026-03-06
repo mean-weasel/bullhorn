@@ -80,3 +80,6 @@ DEPLOY.md
 
 # MCP config (contains project-specific identifiers)
 .mcp.json
+
+# Internal planning docs (references private repos)
+docs/plans/cross-repo-setup.md
