@@ -240,6 +240,12 @@ Sticker palette: `sticker-yellow`, `sticker-pink`, `sticker-purple`, `sticker-gr
 - Type all props with explicit interfaces
 - Follow sticker design system for consistency
 
+## LSP Usage
+
+When navigating code, always prefer the LSP tool (`goToDefinition`, `findReferences`, `documentSymbol`, `hover`) over Grep/Glob for symbol lookup. Use Grep only for text patterns that are not code symbols (e.g. string literals, comments, config values).
+
+If the LSP tool is unavailable or returns errors, stop and inform the user. Either the `typescript-lsp` plugin needs to be reinstalled (`/plugin` → Discover → `typescript-lsp`) or the language server binary is missing (`npm install -g typescript-language-server typescript`). Do not silently fall back to Grep.
+
 ## Code Quality
 
 ### Prettier Config (`.prettierrc`)
