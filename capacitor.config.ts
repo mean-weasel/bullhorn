@@ -10,6 +10,7 @@ const config: CapacitorConfig = {
   server: {
     url: serverUrl,
     cleartext: serverUrl.startsWith('http://'), // Allow cleartext for localhost dev
+    allowNavigation: ['*.supabase.co'],
   },
   ios: {
     contentInset: 'automatic',

@@ -21,28 +21,44 @@ export async function isBiometricAvailable(): Promise<{
   available: boolean
   biometryType: 'faceID' | 'touchID' | 'none'
 }> {
-  const plugin = await getPlugin()
-  if (!plugin) return { available: false, biometryType: 'none' }
-  const result = await plugin.isAvailable()
-  return result as { available: boolean; biometryType: 'faceID' | 'touchID' | 'none' }
+  try {
+    const plugin = await getPlugin()
+    if (!plugin) return { available: false, biometryType: 'none' }
+    const result = await plugin.isAvailable()
+    return result as { available: boolean; biometryType: 'faceID' | 'touchID' | 'none' }
+  } catch {
+    return { available: false, biometryType: 'none' }
+  }
 }
 
 export async function authenticateBiometric(reason = 'Unlock Bullhorn'): Promise<boolean> {
-  const plugin = await getPlugin()
-  if (!plugin) return true // Allow access on web
-  const result = await plugin.authenticate({ reason })
-  return result.success
+  try {
+    const plugin = await getPlugin()
+    if (!plugin) return true // Allow access on web
+    const result = await plugin.authenticate({ reason })
+    return result.success
+  } catch {
+    return true // Allow access if plugin fails
+  }
 }
 
 export async function setBiometricEnabled(enabled: boolean): Promise<void> {
-  const plugin = await getPlugin()
-  if (!plugin) return
-  await plugin.setEnabled({ enabled })
+  try {
+    const plugin = await getPlugin()
+    if (!plugin) return
+    await plugin.setEnabled({ enabled })
+  } catch {
+    // BiometricAuth plugin not available
+  }
 }
 
 export async function isBiometricEnabled(): Promise<boolean> {
-  const plugin = await getPlugin()
-  if (!plugin) return false
-  const result = await plugin.isEnabled()
-  return result.enabled
+  try {
+    const plugin = await getPlugin()
+    if (!plugin) return false
+    const result = await plugin.isEnabled()
+    return result.enabled
+  } catch {
+    return false
+  }
 }
