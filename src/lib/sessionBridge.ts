@@ -22,21 +22,25 @@ export async function saveSessionToKeychain(
   accessToken: string,
   refreshToken: string
 ): Promise<void> {
-  const plugin = await getKeychainPlugin()
-  if (!plugin) return
-  const payload = JSON.stringify({ accessToken, refreshToken })
-  await plugin.set({ key: SESSION_KEY, value: payload })
+  try {
+    const plugin = await getKeychainPlugin()
+    if (!plugin) return
+    const payload = JSON.stringify({ accessToken, refreshToken })
+    await plugin.set({ key: SESSION_KEY, value: payload })
+  } catch {
+    // Keychain plugin not available on this platform
+  }
 }
 
 export async function getSessionFromKeychain(): Promise<{
   accessToken: string
   refreshToken: string
 } | null> {
-  const plugin = await getKeychainPlugin()
-  if (!plugin) return null
-  const result = await plugin.get({ key: SESSION_KEY })
-  if (!result.value) return null
   try {
+    const plugin = await getKeychainPlugin()
+    if (!plugin) return null
+    const result = await plugin.get({ key: SESSION_KEY })
+    if (!result.value) return null
     return JSON.parse(result.value)
   } catch {
     return null
@@ -44,7 +48,11 @@ export async function getSessionFromKeychain(): Promise<{
 }
 
 export async function clearSessionFromKeychain(): Promise<void> {
-  const plugin = await getKeychainPlugin()
-  if (!plugin) return
-  await plugin.remove({ key: SESSION_KEY })
+  try {
+    const plugin = await getKeychainPlugin()
+    if (!plugin) return
+    await plugin.remove({ key: SESSION_KEY })
+  } catch {
+    // Keychain plugin not available on this platform
+  }
 }

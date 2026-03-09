@@ -29,8 +29,16 @@ export async function nativeGoogleSignIn(
     })
 
     const result = response.result
-    if (result.responseType !== 'online' || !result.idToken) {
-      return { success: false, error: 'Failed to get Google ID token' }
+
+    if (result.responseType !== 'online') {
+      return { success: false, error: 'Google returned offline response' }
+    }
+
+    if (!result.idToken) {
+      return {
+        success: false,
+        error: 'Google did not return an ID token. Check webClientId config.',
+      }
     }
 
     const { error } = await supabase.auth.signInWithIdToken({
