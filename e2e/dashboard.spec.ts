@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test'
-import { enterDemoMode, createTestPost, archivePost, waitForNavigation } from './helpers'
+import {
+  enterDemoMode,
+  createTestPost,
+  createPostViaAPI,
+  archivePost,
+  waitForNavigation,
+} from './helpers'
 
 /** Navigate to dashboard and wait for stats to render */
 async function gotoDashboard(page: import('@playwright/test').Page) {
@@ -43,11 +49,24 @@ test.describe('Dashboard', () => {
     })
 
     test('should show correct counts with multiple posts', async ({ page }) => {
-      await createTestPost(page, { platform: 'twitter', content: 'Draft 1', asDraft: true })
-      await createTestPost(page, { platform: 'linkedin', content: 'Draft 2', asDraft: true })
-      await createTestPost(page, { platform: 'twitter', content: 'Scheduled 1', asDraft: false })
-      await createTestPost(page, { platform: 'linkedin', content: 'Scheduled 2', asDraft: false })
-      await createTestPost(page, { platform: 'reddit', content: 'Scheduled 3', asDraft: false })
+      // Create posts via API to avoid slow UI navigation (5 sequential UI saves is flaky in CI)
+      await createPostViaAPI(page, { platform: 'twitter', content: 'Draft 1', status: 'draft' })
+      await createPostViaAPI(page, { platform: 'linkedin', content: 'Draft 2', status: 'draft' })
+      await createPostViaAPI(page, {
+        platform: 'twitter',
+        content: 'Scheduled 1',
+        status: 'scheduled',
+      })
+      await createPostViaAPI(page, {
+        platform: 'linkedin',
+        content: 'Scheduled 2',
+        status: 'scheduled',
+      })
+      await createPostViaAPI(page, {
+        platform: 'reddit',
+        content: 'Scheduled 3',
+        status: 'scheduled',
+      })
 
       await gotoDashboard(page)
 
