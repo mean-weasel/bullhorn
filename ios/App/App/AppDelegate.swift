@@ -11,6 +11,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Set notification delegate for foreground handling
         UNUserNotificationCenter.current().delegate = self
+
+        // Register for push at native level so the APNS connection is established
+        // immediately, even before the WebView finishes loading
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
+            if granted {
+                DispatchQueue.main.async {
+                    application.registerForRemoteNotifications()
+                }
+            }
+        }
+
         return true
     }
 
