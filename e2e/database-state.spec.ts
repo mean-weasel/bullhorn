@@ -270,7 +270,12 @@ test.describe('Database State Verification', () => {
       await filterByStatus(page, 'archived')
       const archivedCards = await getPostCards(page)
       await archivedCards.first().click()
+      const restoreResponse = page.waitForResponse(
+        (resp) => resp.url().includes('/restore') && resp.request().method() === 'POST',
+        { timeout: 60000 }
+      )
       await page.getByRole('button', { name: /restore/i }).click()
+      await restoreResponse
 
       // Should still have exactly 1 post
       expect(await getPostCount(page)).toBe(1)

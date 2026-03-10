@@ -344,7 +344,7 @@ export async function archivePost(page: Page) {
   await page.getByRole('alertdialog').getByRole('button', { name: 'Archive' }).click()
 
   // Wait for navigation to dashboard after archive
-  await page.waitForURL(/\/(dashboard)?$/, { timeout: 15000 })
+  await page.waitForURL(/\/(dashboard)?$/)
 }
 
 /**
@@ -354,7 +354,7 @@ export async function restorePost(page: Page) {
   await page.getByRole('button', { name: /restore/i }).click()
 
   // Wait for navigation to dashboard after restore
-  await page.waitForURL(/\/(dashboard)?$/, { timeout: 15000 })
+  await page.waitForURL(/\/(dashboard)?$/)
 }
 
 /**
@@ -444,7 +444,12 @@ export async function createTestPost(
   // Fill content
   await textarea.fill(content)
 
-  // Save
+  // Save — wait for the API response before expecting navigation
+  const responsePromise = page.waitForResponse(
+    (resp) => resp.url().includes('/api/posts') && resp.status() < 400,
+    { timeout: 60000 }
+  )
+
   if (asDraft) {
     await page.getByRole('button', { name: /save draft/i }).click()
   } else {
@@ -456,13 +461,14 @@ export async function createTestPost(
     await page.getByRole('button', { name: /^schedule$/i }).click()
   }
 
-  // Wait to leave /new page (save/schedule → /dashboard, or auto-save may redirect to /edit/:id)
-  await page.waitForURL((url) => url.pathname !== '/new', { timeout: 30000 })
+  await responsePromise
+  // Wait to leave /new page — use global navigationTimeout (60s in CI) instead of hardcoded 30s
+  await page.waitForURL((url) => url.pathname !== '/new')
   // If auto-save redirected to /edit/:id before Save Draft navigated, go to dashboard manually
   if (!page.url().match(/\/(dashboard)?$/)) {
     await page.goto('/')
   }
-  await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 15000 })
+  await expect(page).toHaveURL(/\/(dashboard)?$/, { timeout: 30000 })
 }
 
 // ============================================
@@ -566,6 +572,53 @@ export async function getPostCount(page: Page): Promise<number> {
 export async function getPostById(page: Page, id: string): Promise<PostFromAPI | null> {
   const response = await page.request.get(`${API_BASE}/posts/${id}`)
   if (!response.ok()) return null
+  const data = await response.json()
+  return data.post
+}
+
+/**
+ * Create a post directly via API (no UI navigation — fast and reliable for test data setup)
+ */
+export async function createPostViaAPI(
+  page: Page,
+  options: {
+    platform?: 'twitter' | 'linkedin' | 'reddit'
+    content?: string
+    status?: 'draft' | 'scheduled'
+    scheduledAt?: string
+  } = {}
+): Promise<PostFromAPI> {
+  const {
+    platform = 'twitter',
+    content = 'Test post content',
+    status = 'draft',
+    scheduledAt,
+  } = options
+
+  const body: Record<string, unknown> = { platform, status }
+
+  if (platform === 'twitter') {
+    body.content = { text: content }
+  } else if (platform === 'linkedin') {
+    body.content = { text: content }
+  } else if (platform === 'reddit') {
+    body.content = { subreddit: 'test', title: content, body: content }
+  }
+
+  if (status === 'scheduled') {
+    const tomorrow = new Date()
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+    tomorrow.setUTCHours(12, 0, 0, 0)
+    body.scheduledAt = scheduledAt || tomorrow.toISOString()
+  }
+
+  const response = await page.request.post(`${API_BASE}/posts`, { data: body })
+  if (!response.ok()) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      `Failed to create post via API: ${response.status()} - ${JSON.stringify(errorData)}`
+    )
+  }
   const data = await response.json()
   return data.post
 }
@@ -1085,7 +1138,7 @@ export async function fillIndieHackersFields(
 export async function saveLaunchPost(page: Page) {
   await page.getByRole('button', { name: /create launch post|save changes/i }).click()
   // Wait for navigation back to launch posts list
-  await page.waitForURL('/launch-posts', { timeout: 30000 })
+  await page.waitForURL('/launch-posts')
 }
 
 /**
