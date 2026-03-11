@@ -1,6 +1,6 @@
-import { requireSessionAuth, ALL_SCOPES, parseJsonBody } from '@/lib/auth'
+import { requireSessionAuth, ALL_SCOPES, parseJsonBody, hashApiKey } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
-import { randomBytes, createHash } from 'crypto'
+import { randomBytes } from 'crypto'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -85,8 +85,8 @@ export async function POST(request: Request) {
     const rawKey = `bh_${randomBytes(20).toString('hex')}`
     const keyPrefix = rawKey.slice(0, 12)
 
-    // SHA-256 hash for storage
-    const keyHash = createHash('sha256').update(rawKey).digest('hex')
+    // HMAC-SHA256 hash for storage (falls back to SHA-256 if secret not set)
+    const keyHash = hashApiKey(rawKey)
 
     const supabase = getServiceClient()
 

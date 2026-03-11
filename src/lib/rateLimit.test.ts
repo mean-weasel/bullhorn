@@ -51,7 +51,7 @@ describe('rateLimit', () => {
     expect(mockLimit).toHaveBeenCalledWith('user-123')
   })
 
-  it('allows requests when Redis is not configured (fail-open)', async () => {
+  it('uses in-memory fallback when Redis is not configured', async () => {
     vi.stubEnv('UPSTASH_REDIS_REST_URL', '')
     vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
     vi.stubEnv('NODE_ENV', 'production')
@@ -62,11 +62,35 @@ describe('rateLimit', () => {
     const result = await rateLimit('user-456')
 
     expect(result.success).toBe(true)
-    expect(result.limit).toBe(0)
-    expect(result.remaining).toBe(0)
-    expect(result.reset).toBe(0)
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('rate limiting is disabled'))
+    expect(result.limit).toBe(30)
+    expect(result.remaining).toBe(29)
+    expect(result.reset).toBeGreaterThan(Date.now() - 1000)
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('using in-memory fallback'))
 
     consoleSpy.mockRestore()
+  })
+
+  it('in-memory fallback blocks after exceeding limit', async () => {
+    vi.stubEnv('UPSTASH_REDIS_REST_URL', '')
+    vi.stubEnv('UPSTASH_REDIS_REST_TOKEN', '')
+    vi.stubEnv('NODE_ENV', 'test')
+
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const { rateLimit, _memoryStore } = await import('./rateLimit')
+    _memoryStore.clear()
+
+    // Send 30 requests (all should succeed)
+    for (let i = 0; i < 30; i++) {
+      const result = await rateLimit('flood-user')
+      expect(result.success).toBe(true)
+    }
+
+    // 31st request should be blocked
+    const blocked = await rateLimit('flood-user')
+    expect(blocked.success).toBe(false)
+    expect(blocked.remaining).toBe(0)
+
+    vi.restoreAllMocks()
   })
 })
