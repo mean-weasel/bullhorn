@@ -69,6 +69,10 @@ scripts/seed-*.ts
 *.dSYM.zip
 ios/App/build/
 
+# Fastlane artifacts
+ios/App/fastlane/report.xml
+ios/App/fastlane/README.md
+
 # App Store Connect config
 .asc/
 

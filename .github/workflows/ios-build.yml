@@ -1,4 +1,4 @@
-name: iOS Build
+name: iOS TestFlight
 
 on:
   push:
@@ -6,21 +6,35 @@ on:
     paths:
       - 'ios/**'
       - 'capacitor.config.ts'
-      - 'package.json'
+      - '.github/workflows/ios-build.yml'
   workflow_dispatch:
+    inputs:
+      skip_upload:
+        description: 'Build only — skip TestFlight upload'
+        type: boolean
+        default: false
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     name: Build & Upload to TestFlight
-    runs-on: macos-14
+    runs-on: macos-15
+    timeout-minutes: 30
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Select Xcode 16.4
+        run: sudo xcode-select -s /Applications/Xcode_16.4.app
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -29,63 +43,26 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync ios
 
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
-          xcode-version: '16.0'
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: ios/App
 
-      - name: Install CocoaPods
-        run: cd ios/App && pod install
-
-      - name: Import signing certificate
+      - name: Write App Store Connect API key
         env:
-          P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
-          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          ASC_AUTH_KEY_P8: ${{ secrets.ASC_AUTH_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
         run: |
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          echo "$P12_BASE64" | base64 --decode > $RUNNER_TEMP/certificate.p12
-          security import $RUNNER_TEMP/certificate.p12 -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$ASC_AUTH_KEY_P8" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
 
-      - name: Import provisioning profile
+      - name: Build & upload to TestFlight
+        working-directory: ios/App
         env:
-          PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "$PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/bullhorn.mobileprovision
-
-      - name: Build archive
-        run: |
-          cd ios/App
-          xcodebuild archive \
-            -workspace App.xcworkspace \
-            -scheme App \
-            -archivePath $RUNNER_TEMP/Bullhorn.xcarchive \
-            -configuration Release \
-            CODE_SIGN_STYLE=Manual \
-            PROVISIONING_PROFILE_SPECIFIER="Bullhorn Distribution" \
-            CODE_SIGN_IDENTITY="Apple Distribution"
-
-      - name: Export IPA
-        run: |
-          cd ios/App
-          xcodebuild -exportArchive \
-            -archivePath $RUNNER_TEMP/Bullhorn.xcarchive \
-            -exportPath $RUNNER_TEMP/export \
-            -exportOptionsPlist ../../ExportOptions.plist
-
-      - name: Upload to TestFlight
-        env:
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY: ${{ secrets.ASC_API_KEY }}
-        run: |
-          xcrun altool --upload-app \
-            --type ios \
-            --file $RUNNER_TEMP/export/App.ipa \
-            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
-            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
+          SKIP_UPLOAD: ${{ inputs.skip_upload }}
+        run: bundle exec fastlane beta
