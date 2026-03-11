@@ -18,10 +18,12 @@ platform :ios do
       xcodeproj: "App.xcodeproj"
     )
 
+    key_filepath = ENV["ASC_KEY_FILEPATH"] || File.expand_path("~/.appstoreconnect/private_keys/AuthKey_#{ENV['ASC_KEY_ID']}.p8")
+
     build_app(
       project: "App.xcodeproj",
       scheme: "App",
-      xcargs: "-allowProvisioningUpdates",
+      xcargs: "-allowProvisioningUpdates -authenticationKeyPath '#{key_filepath}' -authenticationKeyID '#{ENV['ASC_KEY_ID']}' -authenticationKeyIssuerID '#{ENV['ASC_ISSUER_ID']}'",
       export_options: {
         method: "app-store",
         teamID: ENV["APPLE_TEAM_ID"],
