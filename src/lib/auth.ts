@@ -1,5 +1,6 @@
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/nextjs'
+import { createHmac, createHash } from 'crypto'
 import { headers } from 'next/headers'
 import { createClient } from './supabase/server'
 
@@ -78,21 +79,35 @@ export const ALL_SCOPES: ApiKeyScope[] = [
 ]
 
 /**
+ * Hash an API key using HMAC-SHA256 with a server-side secret.
+ * Falls back to plain SHA-256 if API_KEY_HMAC_SECRET is not set.
+ *
+ * HMAC-SHA256 ensures that if the database is breached, the attacker
+ * cannot reverse key hashes without the HMAC secret — the same approach
+ * used by Stripe, GitHub, and other production API key systems.
+ */
+export function hashApiKey(rawKey: string, hmacSecret?: string): string {
+  const secret = hmacSecret ?? process.env.API_KEY_HMAC_SECRET
+  if (secret) {
+    return createHmac('sha256', secret).update(rawKey).digest('hex')
+  }
+  // Legacy fallback: plain SHA-256 (for backward compatibility)
+  return createHash('sha256').update(rawKey).digest('hex')
+}
+
+/**
  * Resolve a raw API key to a user ID and its granted scopes.
  * Validates the key format, looks up the hash, checks expiry/revocation,
  * and updates last_used_at.
+ *
+ * Supports dual-read: tries HMAC-SHA256 first (if secret is configured),
+ * then falls back to plain SHA-256 for legacy keys. This allows gradual
+ * migration — once all keys are rotated, the SHA-256 fallback can be removed.
  */
 export async function resolveApiKey(rawKey: string): Promise<{ userId: string; scopes: string[] }> {
   if (!rawKey.startsWith('bh_') || rawKey.length < 20) {
     throw new Error('Unauthorized')
   }
-
-  // SHA-256 hash the raw key
-  const encoder = new TextEncoder()
-  const data = encoder.encode(rawKey)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const keyHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 
   // Look up key via service role client (no session exists for API key requests)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -108,13 +123,39 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string; s
     },
   })
 
-  const { data: apiKey, error } = await serviceClient
-    .from('api_keys')
-    .select('id, user_id, expires_at, revoked_at, scopes')
-    .eq('key_hash', keyHash)
-    .single()
+  // Try HMAC-SHA256 first (preferred), then fall back to legacy SHA-256
+  const hmacSecret = process.env.API_KEY_HMAC_SECRET
+  const hashes: string[] = []
+  if (hmacSecret) {
+    hashes.push(hashApiKey(rawKey, hmacSecret))
+  }
+  const legacyHash = hashApiKey(rawKey, undefined)
+  if (!hmacSecret || legacyHash !== hashes[0]) {
+    hashes.push(legacyHash)
+  }
 
-  if (error || !apiKey) {
+  let apiKey: {
+    id: string
+    user_id: string
+    expires_at: string | null
+    revoked_at: string | null
+    scopes: string[]
+  } | null = null
+
+  for (const keyHash of hashes) {
+    const { data, error } = await serviceClient
+      .from('api_keys')
+      .select('id, user_id, expires_at, revoked_at, scopes')
+      .eq('key_hash', keyHash)
+      .single()
+
+    if (!error && data) {
+      apiKey = data
+      break
+    }
+  }
+
+  if (!apiKey) {
     throw new Error('Unauthorized')
   }
 

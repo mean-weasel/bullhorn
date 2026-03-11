@@ -50,10 +50,10 @@ export default function AccessDeniedPage() {
               Sign Out & Try Different Account
             </button>
             <Link
-              href="https://bullhorn.to"
+              href="/"
               className="block w-full px-4 py-3 rounded-md font-bold text-sm transition-all bg-card text-foreground border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]"
             >
-              Go to Production Site
+              Go to Home
             </Link>
           </div>
         </div>

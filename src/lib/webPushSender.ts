@@ -4,7 +4,7 @@ import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 // Configure VAPID (called once at module level)
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || ''
-const VAPID_SUBJECT = 'mailto:hello@bullhorn.to'
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:hello@bullhorn.to'
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webPush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)

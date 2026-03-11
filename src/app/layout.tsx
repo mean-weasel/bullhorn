@@ -6,9 +6,11 @@ import '../index.css'
 import '@/lib/envValidation' // Validate env vars on startup
 import { CookieConsent } from '@/components/ui/CookieConsent'
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bullhorn.to'
+
 // eslint-disable-next-line react-refresh/only-export-components -- metadata export is required by Next.js App Router
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bullhorn.to'),
+  metadataBase: new URL(appUrl),
   title: {
     default: 'Bullhorn — Social Media Post Scheduler',
     template: '%s | Bullhorn',
@@ -21,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Bullhorn — Social Media Post Scheduler',
     description:
       'Schedule and manage social media posts for Twitter, LinkedIn, and Reddit. Organize with campaigns and projects.',
-    url: 'https://bullhorn.to',
+    url: appUrl,
   },
   twitter: {
     card: 'summary_large_image',
