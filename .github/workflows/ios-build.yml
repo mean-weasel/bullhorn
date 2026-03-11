@@ -65,4 +65,5 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           APPLE_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
           SKIP_UPLOAD: ${{ inputs.skip_upload }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 30
         run: bundle exec fastlane beta
