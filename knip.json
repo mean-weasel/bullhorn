@@ -7,9 +7,7 @@
   ],
   "project": ["src/**/*.{ts,tsx}"],
   "ignore": [
-    "src/vite-env.d.ts",
-    "src/app/**/*",
-    "src/lib/googleSignIn.ts"
+    "src/app/**/*"
   ],
   "ignoreDependencies": [
     "@capacitor/ios",
@@ -17,7 +15,6 @@
     "@capacitor/keyboard",
     "@capacitor/splash-screen",
     "@capacitor/status-bar",
-    "@capgo/capacitor-social-login",
     "@octokit/rest",
     "gh-pages",
     "tsx",
@@ -26,7 +23,8 @@
     "@semantic-release/github"
   ],
   "rules": {
-    "exports": "off"
+    "exports": "off",
+    "types": "off"
   },
   "playwright": {
     "entry": ["e2e/**/*.spec.ts", "playwright.config.ts"]
