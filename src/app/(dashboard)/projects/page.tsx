@@ -77,14 +77,14 @@ export default function ProjectsPage() {
           <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
             Organize campaigns and brand assets for different products or initiatives.
           </p>
-          <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
+          <div className="h-1 w-16 bg-linear-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
         </div>
         <LimitGate resource="projects">
           <button
             onClick={() => setShowCreateModal(true)}
             className={cn(
               'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
               'border-2 border-[hsl(var(--gold-dark))]',
               'text-primary-foreground font-medium text-sm',
               'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
@@ -133,7 +133,7 @@ export default function ProjectsPage() {
             onClick={() => setShowCreateModal(true)}
             className={cn(
               'inline-flex items-center gap-2 px-5 py-3 rounded-xl',
-              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
               'border-2 border-[hsl(var(--gold-dark))]',
               'text-primary-foreground font-medium text-sm',
               'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'

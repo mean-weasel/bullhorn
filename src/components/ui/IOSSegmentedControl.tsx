@@ -60,7 +60,7 @@ export function IOSSegmentedControl<T extends string = string>({
       aria-label="Filter options"
       className={cn(
         'inline-flex gap-1 p-1.5 bg-card border-[3px] border-border rounded-lg',
-        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'shadow-sticker-sm',
         fullWidth && 'w-full',
         disabled && 'opacity-50 pointer-events-none',
         className
@@ -79,18 +79,18 @@ export function IOSSegmentedControl<T extends string = string>({
             className={cn(
               'relative flex items-center justify-center gap-1.5',
               'rounded-md font-bold transition-all duration-200',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+              'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/50',
               sizeClasses[size],
               paddingClasses[size],
               fullWidth && 'flex-1',
               isActive
-                ? 'bg-primary text-primary-foreground shadow-[2px_2px_0_hsl(var(--border))]'
+                ? 'bg-primary text-primary-foreground shadow-sticker-hover'
                 : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
             )}
           >
             {/* Icon */}
             {option.icon && (
-              <span className={cn(iconSizeClasses[size], 'flex-shrink-0')}>{option.icon}</span>
+              <span className={cn(iconSizeClasses[size], 'shrink-0')}>{option.icon}</span>
             )}
 
             {/* Label */}

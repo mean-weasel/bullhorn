@@ -125,14 +125,14 @@ export function IOSDateTimePicker({
           className={cn(
             'flex items-center gap-2 px-4 py-3 rounded-md border-[3px] w-full',
             'bg-card text-foreground text-sm text-left font-medium',
-            'border-border shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'border-border shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
             'transition-all duration-200',
             disabled && 'opacity-50 cursor-not-allowed hover:translate-y-0',
             !value && 'text-muted-foreground'
           )}
         >
-          <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
           <span className="flex-1">{getDisplayText()}</span>
         </button>
 
@@ -186,14 +186,14 @@ export function IOSDateTimePicker({
         className={cn(
           'flex items-center gap-2 px-4 py-3 rounded-md border-[3px] w-full',
           'bg-card text-foreground text-sm text-left font-medium',
-          'border-border shadow-[3px_3px_0_hsl(var(--border))]',
+          'border-border shadow-sticker-sm',
           'transition-all duration-200',
           disabled && 'opacity-50 cursor-not-allowed',
           !value && 'text-muted-foreground',
           className
         )}
       >
-        <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <Icon className="w-4 h-4 text-muted-foreground shrink-0" />
         <span className="flex-1">{getDisplayText()}</span>
       </button>
 
@@ -204,7 +204,7 @@ export function IOSDateTimePicker({
           onClick={() => setIsOpen(false)}
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200" />
 
           {/* Sheet */}
           <div
@@ -263,8 +263,8 @@ export function IOSDateTimePicker({
                         'w-full pl-12 pr-4 py-3 rounded-md',
                         'bg-card border-[3px] border-border',
                         'text-base text-foreground font-medium',
-                        'shadow-[3px_3px_0_hsl(var(--border))]',
-                        'focus:outline-none focus:ring-2 focus:ring-primary/50'
+                        'shadow-sticker-sm',
+                        'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
                       )}
                     />
                   </div>
@@ -287,8 +287,8 @@ export function IOSDateTimePicker({
                         'w-full pl-12 pr-4 py-3 rounded-md',
                         'bg-card border-[3px] border-border',
                         'text-base text-foreground font-medium',
-                        'shadow-[3px_3px_0_hsl(var(--border))]',
-                        'focus:outline-none focus:ring-2 focus:ring-primary/50'
+                        'shadow-sticker-sm',
+                        'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
                       )}
                     />
                   </div>

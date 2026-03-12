@@ -70,12 +70,12 @@ export default function CalendarPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-md bg-primary/10 border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+          <div className="p-2.5 rounded-md bg-primary/10 border-[3px] border-border shadow-sticker-sm">
             <Calendar className="w-5 h-5 text-primary" />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight">Calendar</h1>
         </div>
-        <div className="flex items-center border-[3px] border-border rounded-md overflow-hidden shadow-[3px_3px_0_hsl(var(--border))]">
+        <div className="flex items-center border-[3px] border-border rounded-md overflow-hidden shadow-sticker-sm">
           <button
             onClick={() => setViewMode('month')}
             className={cn(
@@ -113,8 +113,8 @@ export default function CalendarPage() {
         </div>
 
         {/* Sidebar agenda */}
-        <div className="lg:w-80 flex-shrink-0">
-          <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] overflow-hidden">
+        <div className="lg:w-80 shrink-0">
+          <div className="bg-card border-[3px] border-border rounded-md shadow-sticker overflow-hidden">
             {/* Sidebar header */}
             <div className="p-4 border-b-[3px] border-border bg-sticker-blue/5">
               <h2 className="text-sm font-extrabold uppercase tracking-widest text-sticker-blue">
@@ -150,7 +150,7 @@ export default function CalendarPage() {
                     >
                       <div
                         className={cn(
-                          'w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0',
+                          'w-2.5 h-2.5 rounded-full mt-1.5 shrink-0',
                           platformClasses[post.platform] || 'bg-muted-foreground'
                         )}
                       />
@@ -178,7 +178,7 @@ export default function CalendarPage() {
                         'hover:bg-sticker-orange/10 transition-colors'
                       )}
                     >
-                      <Bell className="w-4 h-4 text-sticker-orange mt-0.5 flex-shrink-0" />
+                      <Bell className="w-4 h-4 text-sticker-orange mt-0.5 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium truncate">{reminder.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">

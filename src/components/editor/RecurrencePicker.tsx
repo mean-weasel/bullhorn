@@ -88,8 +88,8 @@ export default function RecurrencePicker({
 
   const inputClass = cn(
     'w-full rounded-md bg-background px-3 py-2 text-sm',
-    'border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]',
-    'focus:outline-none focus:ring-2 focus:ring-primary/50'
+    'border-[3px] border-border shadow-sticker-sm',
+    'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
   )
 
   return (

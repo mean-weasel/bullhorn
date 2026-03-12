@@ -46,7 +46,7 @@ export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
               </Link>
             )}
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-xl">
+              <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center border-[3px] border-border shadow-sticker-sm text-xl">
                 📢
               </div>
               <span className="font-extrabold text-xl md:text-2xl tracking-tight">Bullhorn</span>
@@ -177,9 +177,9 @@ export function FloatingActionButton() {
         'flex items-center justify-center',
         'text-primary-foreground',
         'border-[3px] border-border',
-        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'shadow-sticker',
         'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
-        'active:translate-y-[2px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+        'active:translate-y-[2px] active:shadow-sticker-hover',
         'transition-all duration-200',
         'hidden md:flex'
       )}

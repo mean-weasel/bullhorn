@@ -57,7 +57,7 @@ function PublishButton({
           'flex items-center gap-2 px-3 md:px-4 py-2.5',
           'rounded-md min-h-[44px]',
           'text-green-600 dark:text-green-400 font-bold text-sm',
-          'flex-shrink-0'
+          'shrink-0'
         )}
       >
         <CheckCircle className="w-4 h-4" />
@@ -78,7 +78,7 @@ function PublishButton({
           'text-muted-foreground font-medium text-sm',
           'border-2 border-dashed border-border',
           'hover:border-primary/50 hover:text-foreground',
-          'transition-all flex-shrink-0',
+          'transition-all shrink-0',
           isNew && 'sm:ml-auto'
         )}
       >
@@ -97,18 +97,18 @@ function PublishButton({
       className={cn(
         'flex items-center gap-2 px-3 md:px-4 py-2.5',
         'rounded-md min-h-[44px]',
-        'bg-gradient-to-r from-[hsl(var(--gold))]',
+        'bg-linear-to-r from-[hsl(var(--gold))]',
         'to-[hsl(var(--gold-dark))]',
         'text-white font-bold text-sm',
         'border-[3px] border-border',
-        'shadow-[3px_3px_0_hsl(var(--border))]',
-        'hover:translate-y-[-1px]',
-        'hover:shadow-[4px_4px_0_hsl(var(--border))]',
-        'active:translate-y-[1px]',
-        'active:shadow-[2px_2px_0_hsl(var(--border))]',
+        'shadow-sticker-sm',
+        'hover:-translate-y-px',
+        'hover:shadow-sticker',
+        'active:translate-y-px',
+        'active:shadow-sticker-hover',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         'disabled:hover:translate-y-0',
-        'transition-all flex-shrink-0',
+        'transition-all shrink-0',
         isNew && 'sm:ml-auto'
       )}
     >
@@ -151,7 +151,7 @@ export const EditorActions = ({
             'rounded-lg min-h-[44px]',
             'text-muted-foreground hover:bg-accent',
             'font-medium text-sm transition-colors',
-            'disabled:opacity-50 flex-shrink-0'
+            'disabled:opacity-50 shrink-0'
           )}
         >
           <Archive className="w-4 h-4" />
@@ -172,7 +172,7 @@ export const EditorActions = ({
                 'bg-primary/10 text-primary',
                 'font-medium text-sm',
                 'hover:bg-primary/20 transition-colors',
-                'disabled:opacity-50 flex-shrink-0'
+                'disabled:opacity-50 shrink-0'
               )}
             >
               <RotateCcw className="w-4 h-4" />
@@ -188,7 +188,7 @@ export const EditorActions = ({
                 'rounded-lg min-h-[44px]',
                 'text-destructive hover:bg-destructive/10',
                 'font-medium text-sm transition-colors',
-                'disabled:opacity-50 flex-shrink-0'
+                'disabled:opacity-50 shrink-0'
               )}
             >
               <Trash2 className="w-4 h-4" />
@@ -208,13 +208,13 @@ export const EditorActions = ({
           'bg-secondary text-secondary-foreground',
           'font-bold text-sm',
           'border-[3px] border-border',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px]',
-          'hover:shadow-[4px_4px_0_hsl(var(--border))]',
-          'active:translate-y-[1px]',
-          'active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px',
+          'hover:shadow-sticker',
+          'active:translate-y-px',
+          'active:shadow-sticker-hover',
           'disabled:opacity-50 disabled:hover:translate-y-0',
-          'transition-all flex-shrink-0',
+          'transition-all shrink-0',
           !isNew && 'sm:ml-auto'
         )}
       >
@@ -233,14 +233,14 @@ export const EditorActions = ({
           'bg-sticker-blue text-white',
           'font-bold text-sm',
           'border-[3px] border-border',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px]',
-          'hover:shadow-[4px_4px_0_hsl(var(--border))]',
-          'active:translate-y-[1px]',
-          'active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px',
+          'hover:shadow-sticker',
+          'active:translate-y-px',
+          'active:shadow-sticker-hover',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           'disabled:hover:translate-y-0',
-          'transition-all flex-shrink-0'
+          'transition-all shrink-0'
         )}
       >
         <Calendar className="w-4 h-4" />
@@ -267,7 +267,7 @@ export const EditorActions = ({
             'bg-green-500/10 text-green-600 dark:text-green-400',
             'font-medium text-sm',
             'hover:bg-green-500/20 transition-colors',
-            'disabled:opacity-50 flex-shrink-0'
+            'disabled:opacity-50 shrink-0'
           )}
         >
           <CheckCircle className="w-4 h-4" />

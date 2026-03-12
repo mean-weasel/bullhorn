@@ -138,14 +138,14 @@ function BlogDraftsContent() {
           <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
             Manage your markdown blog posts.
           </p>
-          <div className="h-1 w-16 bg-gradient-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
+          <div className="h-1 w-16 bg-linear-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />
         </div>
         <LimitGate resource="blogDrafts">
           <Link
             href="/blog/new"
             className={cn(
               'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-lg min-h-[44px]',
-              'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+              'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
               'border-2 border-[hsl(var(--gold-dark))]',
               'text-primary-foreground font-medium text-sm',
               'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
@@ -171,7 +171,7 @@ function BlogDraftsContent() {
             'w-full pl-10 pr-10 py-3 rounded-lg min-h-[44px]',
             'bg-card border border-border',
             'text-sm placeholder:text-muted-foreground',
-            'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
+            'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
           )}
         />
         {searchQuery && (
@@ -223,7 +223,7 @@ function BlogDraftsContent() {
 
       {/* Tag filter */}
       <div className="flex items-center gap-2 mb-6">
-        <Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
         {BLOG_DRAFT_TAGS.map((tag) => (
           <button
             key={tag}

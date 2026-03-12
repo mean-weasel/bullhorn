@@ -242,7 +242,7 @@ export function ProjectSelector({
                 )}
 
                 {/* Checkmark */}
-                {value === project.id && <Check className="w-4 h-4 flex-shrink-0" />}
+                {value === project.id && <Check className="w-4 h-4 shrink-0" />}
               </button>
             ))
           )}

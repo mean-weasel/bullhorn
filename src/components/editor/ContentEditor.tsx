@@ -47,10 +47,10 @@ export const ContentEditor = ({
         className={cn(
           'w-full min-h-[150px] md:min-h-[200px] p-3 md:p-4 rounded-md',
           'bg-card border-[3px] border-border',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
           'text-base leading-relaxed',
           'placeholder:text-muted-foreground',
-          'focus:outline-none focus:ring-2 focus:ring-primary/50',
+          'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
           'resize-y transition-all'
         )}
       />

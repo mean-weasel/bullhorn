@@ -61,7 +61,7 @@ export function ProjectSettingsTab({
               className={cn(
                 'w-full px-3 py-2.5 rounded-lg',
                 'bg-background border border-border',
-                'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
+                'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
               )}
             />
           </div>
@@ -76,7 +76,7 @@ export function ProjectSettingsTab({
               className={cn(
                 'w-full px-3 py-2.5 rounded-lg resize-none',
                 'bg-background border border-border',
-                'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
+                'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
               )}
             />
           </div>
@@ -150,7 +150,7 @@ export function ProjectSettingsTab({
           onClick={onSave}
           className={cn(
             'px-6 py-2.5 rounded-lg text-sm font-medium',
-            'bg-gradient-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+            'bg-linear-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
             'border-2 border-[hsl(var(--gold-dark))]',
             'text-primary-foreground hover:opacity-90 transition-opacity'
           )}
@@ -213,7 +213,7 @@ function BrandKitSection({
             className={cn(
               'w-full px-3 py-2.5 rounded-lg',
               'bg-background border border-border',
-              'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
+              'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
             )}
           />
           {editHashtags && (
@@ -278,7 +278,7 @@ function ColorInput({
           className={cn(
             'flex-1 px-2 py-1 text-sm rounded-lg',
             'bg-background border border-border',
-            'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
+            'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
           )}
         />
       </div>

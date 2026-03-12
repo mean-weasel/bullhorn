@@ -44,7 +44,7 @@ export function UpgradePromptModal({
   }, [open])
 
   const iconWrapper = (
-    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-3xl border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-3xl border-[3px] border-border shadow-sticker-sm">
       ✨
     </div>
   )
@@ -63,7 +63,7 @@ export function UpgradePromptModal({
       </ResponsiveDialogDescription>
 
       {/* Usage indicator */}
-      <div className="mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+      <div className="mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-sticker-sm">
         <div className="flex items-center justify-between text-sm mb-3">
           <span className="text-muted-foreground font-medium">{resourceName} used</span>
           <span className="font-bold text-foreground">
@@ -72,7 +72,7 @@ export function UpgradePromptModal({
         </div>
         <div className="h-3 bg-muted rounded-full overflow-hidden border-2 border-border">
           <div
-            className="h-full bg-gradient-to-r from-sticker-yellow via-sticker-pink to-sticker-purple rounded-full transition-all"
+            className="h-full bg-linear-to-r from-sticker-yellow via-sticker-pink to-sticker-purple rounded-full transition-all"
             style={{ width: `${Math.min((currentCount / limit) * 100, 100)}%` }}
           />
         </div>
@@ -100,7 +100,7 @@ export function UpgradePromptModal({
         <button
           ref={dismissButtonRef}
           onClick={onDismiss}
-          className="flex-1 px-4 py-3 md:py-3 py-3.5 min-h-[52px] md:min-h-0 rounded-md bg-primary text-primary-foreground font-bold text-sm border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))] transition-all"
+          className="flex-1 px-4 py-3 md:py-3 py-3.5 min-h-[52px] md:min-h-0 rounded-md bg-primary text-primary-foreground font-bold text-sm border-[3px] border-border shadow-sticker-sm hover:-translate-y-px hover:shadow-sticker transition-all"
         >
           Got It
         </button>

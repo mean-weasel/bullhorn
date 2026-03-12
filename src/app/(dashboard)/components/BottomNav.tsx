@@ -62,8 +62,8 @@ export function BottomNav() {
                   'bg-primary',
                   'text-primary-foreground',
                   'border-[3px] border-border',
-                  'shadow-[4px_4px_0_hsl(var(--border))]',
-                  'active:translate-y-[2px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+                  'shadow-sticker',
+                  'active:translate-y-[2px] active:shadow-sticker-hover',
                   'transition-all'
                 )}
                 aria-label={item.label}

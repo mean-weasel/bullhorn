@@ -198,9 +198,9 @@ export default function DashboardPage() {
         )}
 
         {/* Stats bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-sticker">
           <div className="flex-1 flex items-center gap-4 sm:gap-6 overflow-x-auto">
-            <div className="text-center flex-shrink-0">
+            <div className="text-center shrink-0">
               <div
                 data-testid="stat-scheduled"
                 className="text-2xl font-extrabold text-sticker-blue"
@@ -211,8 +211,8 @@ export default function DashboardPage() {
                 📅 Scheduled
               </div>
             </div>
-            <div className="w-px h-8 bg-border flex-shrink-0" />
-            <div className="text-center flex-shrink-0">
+            <div className="w-px h-8 bg-border shrink-0" />
+            <div className="text-center shrink-0">
               <div
                 data-testid="stat-drafts"
                 className="text-2xl font-extrabold text-sticker-orange"
@@ -223,8 +223,8 @@ export default function DashboardPage() {
                 📝 Drafts
               </div>
             </div>
-            <div className="w-px h-8 bg-border flex-shrink-0" />
-            <div className="text-center flex-shrink-0">
+            <div className="w-px h-8 bg-border shrink-0" />
+            <div className="text-center shrink-0">
               <div
                 data-testid="stat-published"
                 className="text-2xl font-extrabold text-sticker-green"
@@ -235,8 +235,8 @@ export default function DashboardPage() {
                 ✅ Published
               </div>
             </div>
-            <div className="w-px h-8 bg-border hidden sm:block flex-shrink-0" />
-            <div className="text-center hidden sm:block flex-shrink-0">
+            <div className="w-px h-8 bg-border hidden sm:block shrink-0" />
+            <div className="text-center hidden sm:block shrink-0">
               <div className="text-2xl font-extrabold text-sticker-purple">{stats.projects}</div>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
                 📁 Projects
@@ -258,7 +258,7 @@ export default function DashboardPage() {
                 'hidden md:flex items-center gap-2 px-4 py-2.5 rounded-md',
                 'bg-primary text-primary-foreground font-bold text-sm',
                 'border-[3px] border-border',
-                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'shadow-sticker-sm',
                 'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
                 'transition-all duration-200'
               )}
@@ -272,7 +272,7 @@ export default function DashboardPage() {
         {/* Empty state when no posts at all */}
         {hasNoPosts ? (
           <div className="text-center py-16 px-4 animate-fade-in">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-4xl">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-sticker text-4xl">
               🎉
             </div>
             <h2 className="text-2xl font-extrabold mb-2">Welcome to Bullhorn</h2>
@@ -286,7 +286,7 @@ export default function DashboardPage() {
                 'inline-flex items-center gap-2 px-6 py-3.5 rounded-md',
                 'bg-primary text-primary-foreground font-bold',
                 'border-[3px] border-border',
-                'shadow-[4px_4px_0_hsl(var(--border))]',
+                'shadow-sticker',
                 'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
                 'transition-all duration-200'
               )}

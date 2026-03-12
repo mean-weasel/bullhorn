@@ -88,7 +88,7 @@ export function DataManagementSection() {
   }
 
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         <Download className="w-4 h-4 inline-block mr-1 -mt-0.5" /> Data Management
       </h2>
@@ -110,7 +110,7 @@ export function DataManagementSection() {
                   'px-3 py-1.5 rounded-md text-xs font-bold uppercase',
                   'border-2 transition-all',
                   exportFormat === fmt
-                    ? 'border-border bg-primary text-primary-foreground shadow-[2px_2px_0_hsl(var(--border))]'
+                    ? 'border-border bg-primary text-primary-foreground shadow-sticker-hover'
                     : 'border-border bg-card text-muted-foreground hover:text-foreground'
                 )}
               >
@@ -129,7 +129,7 @@ export function DataManagementSection() {
                   'px-3 py-1.5 rounded-md text-xs font-bold capitalize',
                   'border-2 transition-all',
                   exportType === t
-                    ? 'border-border bg-secondary text-foreground shadow-[2px_2px_0_hsl(var(--border))]'
+                    ? 'border-border bg-secondary text-foreground shadow-sticker-hover'
                     : 'border-border bg-card text-muted-foreground hover:text-foreground'
                 )}
               >
@@ -146,8 +146,8 @@ export function DataManagementSection() {
             'flex items-center gap-2 px-4 py-2.5 rounded-md',
             'bg-primary text-primary-foreground font-bold text-sm',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
             'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
             'transition-all'
           )}
@@ -185,8 +185,8 @@ export function DataManagementSection() {
             'flex items-center gap-2 px-4 py-2.5 rounded-md cursor-pointer inline-flex',
             'bg-secondary text-foreground font-bold text-sm',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
             'transition-all',
             importing && 'opacity-50 pointer-events-none'
           )}
@@ -222,7 +222,7 @@ export function DataManagementSection() {
       {/* Error */}
       {error && (
         <div className="mt-4 flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30 text-sm font-medium">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
           <button
             onClick={() => setError(null)}

@@ -45,7 +45,7 @@ export function WelcomeModal() {
   ]
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-fade-in">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
       <div
         className={cn(
           'w-full max-w-md',
@@ -74,7 +74,7 @@ export function WelcomeModal() {
             <div key={i} className="flex items-start gap-3">
               <div
                 className={cn(
-                  'w-8 h-8 rounded-md flex-shrink-0',
+                  'w-8 h-8 rounded-md shrink-0',
                   'bg-primary/10 flex items-center justify-center',
                   'border-2 border-primary/30'
                 )}
@@ -96,8 +96,8 @@ export function WelcomeModal() {
             'block w-full text-center px-4 py-3 rounded-md',
             'bg-primary text-primary-foreground font-bold',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
             'transition-all'
           )}
         >

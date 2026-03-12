@@ -75,7 +75,7 @@ export function CookieConsent() {
   return (
     <div
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-[100]',
+        'fixed bottom-0 left-0 right-0 z-100',
         'bg-card border-t-[3px] border-border',
         'shadow-[0_-4px_0_hsl(var(--border))]',
         'p-4 md:px-8 pb-safe animate-slide-up'
@@ -94,8 +94,8 @@ export function CookieConsent() {
             'px-6 py-2 rounded-md font-bold text-sm whitespace-nowrap',
             'bg-primary text-primary-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
             'transition-all'
           )}
         >

@@ -59,7 +59,7 @@ export function CampaignCard({
     >
       <div className="flex items-start gap-3 md:gap-4">
         {/* Icon */}
-        <div className="w-10 h-10 rounded-lg bg-[hsl(var(--gold))]/10 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-[hsl(var(--gold))]/10 flex items-center justify-center shrink-0">
           <FolderOpen className="w-5 h-5 text-[hsl(var(--gold-dark))]" />
         </div>
 

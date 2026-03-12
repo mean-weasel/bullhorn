@@ -159,7 +159,7 @@ export function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorP
             'bg-transparent border-none',
             'p-4 text-base font-mono leading-relaxed',
             'placeholder:text-muted-foreground/50',
-            'focus:outline-none'
+            'focus:outline-hidden'
           )}
         />
       ) : (

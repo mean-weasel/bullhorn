@@ -54,7 +54,7 @@ export default function CommunityEventsPage() {
     <div className="min-h-[calc(100vh-4rem)] p-4 md:p-6 max-w-7xl mx-auto">
       {/* Page header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 rounded-md bg-sticker-purple/10 border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+        <div className="p-2.5 rounded-md bg-sticker-purple/10 border-[3px] border-border shadow-sticker-sm">
           <Megaphone className="w-5 h-5 text-sticker-purple" />
         </div>
         <div>

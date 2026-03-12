@@ -29,7 +29,7 @@ export function VerificationSuccessBanner() {
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-sticker-green/10 text-sticker-green border-b-2 border-sticker-green/30 font-bold">
       <span className="text-lg">🎉</span>
-      <CheckCircle className="w-5 h-5 flex-shrink-0" />
+      <CheckCircle className="w-5 h-5 shrink-0" />
       <p className="flex-1 text-sm">Email verified successfully!</p>
       <button
         onClick={() => setShow(false)}

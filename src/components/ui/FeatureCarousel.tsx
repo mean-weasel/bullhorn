@@ -63,7 +63,7 @@ export function FeatureCarousel({ slides, autoAdvanceMs = 4000 }: FeatureCarouse
       onTouchEnd={handleTouchEnd}
     >
       {/* Image container with phone frame look */}
-      <div className="relative mx-auto aspect-[9/16] w-full max-w-[280px] overflow-hidden rounded-2xl border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_hsl(var(--border))]">
+      <div className="relative mx-auto aspect-9/16 w-full max-w-[280px] overflow-hidden rounded-2xl border-[3px] border-border bg-background shadow-[4px_4px_0px_0px_hsl(var(--border))]">
         {slides.map((slide, i) => (
           <div
             key={slide.src}
@@ -87,14 +87,14 @@ export function FeatureCarousel({ slides, autoAdvanceMs = 4000 }: FeatureCarouse
           <>
             <button
               onClick={prev}
-              className="absolute left-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border-2 border-border bg-card/90 p-1 shadow-sm backdrop-blur-sm transition-colors hover:bg-card"
+              className="absolute left-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border-2 border-border bg-card/90 p-1 shadow-xs backdrop-blur-xs transition-colors hover:bg-card"
               aria-label="Previous slide"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               onClick={next}
-              className="absolute right-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border-2 border-border bg-card/90 p-1 shadow-sm backdrop-blur-sm transition-colors hover:bg-card"
+              className="absolute right-1.5 top-1/2 z-10 -translate-y-1/2 rounded-full border-2 border-border bg-card/90 p-1 shadow-xs backdrop-blur-xs transition-colors hover:bg-card"
               aria-label="Next slide"
             >
               <ChevronRight className="h-4 w-4" />

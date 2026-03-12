@@ -22,7 +22,7 @@ export function NewCampaignModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-xs" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-xl shadow-xl w-full max-w-md animate-scale-in">
         <div className="p-6">
           <h2 className="text-xl font-display font-bold mb-4">New Campaign</h2>
@@ -35,7 +35,7 @@ export function NewCampaignModal({
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter campaign name..."
                 maxLength={200}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50"
                 autoFocus
               />
             </div>
@@ -47,7 +47,7 @@ export function NewCampaignModal({
                 placeholder="Describe this campaign..."
                 rows={3}
                 maxLength={2000}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 resize-none"
+                className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 resize-none"
               />
             </div>
             <div className="flex gap-3 pt-2">
@@ -63,7 +63,7 @@ export function NewCampaignModal({
                 disabled={!name.trim()}
                 className={cn(
                   'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
-                  'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+                  'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
                   'border-2 border-[hsl(var(--gold-dark))]',
                   'text-white',
                   'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30',

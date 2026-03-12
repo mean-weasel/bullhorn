@@ -30,7 +30,7 @@ export function UsageBanner() {
         'text-sm'
       )}
     >
-      <AlertTriangle className="w-4 h-4 text-sticker-orange flex-shrink-0" />
+      <AlertTriangle className="w-4 h-4 text-sticker-orange shrink-0" />
       <p className="flex-1 text-foreground">
         <span className="font-bold">{label}:</span> {nearLimit.current} of {nearLimit.limit} used.{' '}
         <Link href="/settings" className="text-primary font-bold hover:underline">

@@ -74,7 +74,7 @@ export function ConfirmDialog({
     <div
       className={cn(
         'w-14 h-14 rounded-lg flex items-center justify-center text-3xl',
-        'border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]',
+        'border-[3px] border-border shadow-sticker-sm',
         variant === 'danger' && 'bg-destructive/10',
         variant === 'warning' && 'bg-sticker-orange/10',
         variant === 'default' && 'bg-primary/10'
@@ -115,9 +115,9 @@ export function ConfirmDialog({
             'flex-1 px-4 py-3 rounded-md font-bold text-sm transition-all',
             'border-[3px] border-border',
             'md:py-3 py-3.5 min-h-[52px] md:min-h-0',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-            'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
+            'active:translate-y-px active:shadow-sticker-hover',
             variant === 'danger' && 'bg-destructive text-destructive-foreground',
             variant === 'warning' && 'bg-sticker-orange text-white',
             variant === 'default' && 'bg-primary text-primary-foreground'

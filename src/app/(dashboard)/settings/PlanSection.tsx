@@ -50,7 +50,7 @@ function UsageBar({
               ? 'bg-destructive'
               : isNearLimit
                 ? 'bg-amber-500'
-                : 'bg-gradient-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]'
+                : 'bg-linear-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]'
           )}
           style={{ width: `${pct}%` }}
         />
@@ -70,7 +70,7 @@ export function PlanSection() {
 
   if (loading && !initialized) {
     return (
-      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
         <div className="h-6 w-32 bg-muted rounded animate-pulse mb-4" />
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -90,7 +90,7 @@ export function PlanSection() {
   ]
 
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
           <Crown className="w-4 h-4 inline-block mr-1 -mt-0.5" /> Plan & Usage
@@ -99,7 +99,7 @@ export function PlanSection() {
           className={cn(
             'px-3 py-1 rounded-full text-xs font-bold border-2',
             plan === 'pro'
-              ? 'bg-gradient-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] text-primary-foreground border-[hsl(var(--gold-dark))]'
+              ? 'bg-linear-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] text-primary-foreground border-[hsl(var(--gold-dark))]'
               : 'bg-muted text-muted-foreground border-border'
           )}
         >

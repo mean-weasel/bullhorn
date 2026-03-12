@@ -73,7 +73,7 @@ function ReminderBadge({ reminder }: { reminder: CalendarReminder }) {
       )}
       title={reminder.title}
     >
-      <Bell className="w-2.5 h-2.5 flex-shrink-0" />
+      <Bell className="w-2.5 h-2.5 shrink-0" />
       {reminder.title.slice(0, 20)}
     </div>
   )
@@ -166,7 +166,7 @@ function EventDot({ name, platform }: { name: string; platform: string }) {
       )}
       title={name}
     >
-      <Megaphone className="w-2.5 h-2.5 flex-shrink-0" />
+      <Megaphone className="w-2.5 h-2.5 shrink-0" />
       {name.slice(0, 16)}
     </div>
   )
@@ -363,7 +363,7 @@ function WeekDayRow({
         !isPast && 'hover:bg-primary/5'
       )}
     >
-      <div className="w-20 flex-shrink-0 text-center">
+      <div className="w-20 shrink-0 text-center">
         <div className="text-xs font-extrabold uppercase text-muted-foreground">
           {format(day, 'EEE')}
         </div>
@@ -415,7 +415,7 @@ function WeekPostItem({ post, time }: { post: Post; time: Date }) {
       onClick={() => router.push(`/edit/${post.id}`)}
       className={cn(
         'flex items-center gap-2 px-2 py-1.5 rounded border cursor-pointer',
-        'hover:shadow-[2px_2px_0_hsl(var(--border))] transition-all',
+        'hover:shadow-sticker-hover transition-all',
         post.platform === 'twitter' && 'bg-twitter/10 border-twitter/30',
         post.platform === 'linkedin' && 'bg-linkedin/10 border-linkedin/30',
         post.platform === 'reddit' && 'bg-reddit/10 border-reddit/30'
@@ -423,13 +423,13 @@ function WeekPostItem({ post, time }: { post: Post; time: Date }) {
     >
       <span
         className={cn(
-          'w-2 h-2 rounded-full flex-shrink-0',
+          'w-2 h-2 rounded-full shrink-0',
           post.platform === 'twitter' && 'bg-twitter',
           post.platform === 'linkedin' && 'bg-linkedin',
           post.platform === 'reddit' && 'bg-reddit'
         )}
       />
-      <span className="text-[11px] font-bold text-muted-foreground w-12 flex-shrink-0">
+      <span className="text-[11px] font-bold text-muted-foreground w-12 shrink-0">
         {format(time, 'h:mm a')}
       </span>
       <span className="text-xs font-semibold truncate">
@@ -450,8 +450,8 @@ function WeekReminderItem({ reminder, time }: { reminder: CalendarReminder; time
       )}
       title={reminder.title}
     >
-      <Bell className="w-3 h-3 text-accent flex-shrink-0" />
-      <span className="text-[11px] font-bold text-muted-foreground w-12 flex-shrink-0">
+      <Bell className="w-3 h-3 text-accent shrink-0" />
+      <span className="text-[11px] font-bold text-muted-foreground w-12 shrink-0">
         {format(time, 'h:mm a')}
       </span>
       <span
@@ -476,8 +476,8 @@ function WeekEventItem({ name, platform }: { name: string; platform: string }) {
       )}
       title={name}
     >
-      <Megaphone className="w-3 h-3 text-sticker-purple flex-shrink-0" />
-      <span className="text-[11px] font-bold text-muted-foreground w-12 flex-shrink-0">Event</span>
+      <Megaphone className="w-3 h-3 text-sticker-purple shrink-0" />
+      <span className="text-[11px] font-bold text-muted-foreground w-12 shrink-0">Event</span>
       <span className="text-xs font-semibold truncate">{name.slice(0, 50)}</span>
     </div>
   )
@@ -563,7 +563,7 @@ export function CalendarView({
     : format(currentDate, 'MMMM yyyy')
 
   return (
-    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] overflow-hidden">
+    <div className="bg-card border-[3px] border-border rounded-md shadow-sticker overflow-hidden">
       {/* Calendar header */}
       <div className="flex items-center justify-between p-4 border-b-[3px] border-border bg-primary/5">
         <div className="flex items-center gap-4">

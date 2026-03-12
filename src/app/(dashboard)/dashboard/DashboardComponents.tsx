@@ -45,7 +45,7 @@ export function DashboardPostCard({
       className={cn(
         'block p-4 rounded-md bg-card',
         'border-[3px] border-border',
-        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'shadow-sticker',
         'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
         'transition-all duration-200',
         'group'
@@ -107,14 +107,14 @@ export function ProjectMiniCard({
       className={cn(
         'block p-4 rounded-md bg-card',
         'border-[3px] border-border',
-        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'shadow-sticker',
         'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
         'transition-all duration-200',
         'group'
       )}
     >
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-md bg-sticker-purple/10 flex items-center justify-center flex-shrink-0 border-2 border-sticker-purple/30">
+        <div className="w-10 h-10 rounded-md bg-sticker-purple/10 flex items-center justify-center shrink-0 border-2 border-sticker-purple/30">
           <FolderKanban className="w-5 h-5 text-sticker-purple" />
         </div>
         <div className="flex-1 min-w-0">
@@ -144,7 +144,7 @@ export function DashboardCampaignCard({ campaign }: { campaign: Campaign }) {
       className={cn(
         'block p-4 rounded-md bg-card',
         'border-[3px] border-border',
-        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'shadow-sticker',
         'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
         'transition-all duration-200',
         'group'

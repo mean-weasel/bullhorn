@@ -54,7 +54,7 @@ export const NotesSection = ({
               'bg-card border border-[hsl(var(--gold))]/20',
               'text-sm leading-relaxed',
               'placeholder:text-muted-foreground',
-              'focus:outline-none focus:border-[hsl(var(--gold))] focus:ring-4 focus:ring-[hsl(var(--gold))]/10',
+              'focus:outline-hidden focus:border-[hsl(var(--gold))] focus:ring-4 focus:ring-[hsl(var(--gold))]/10',
               'resize-y transition-all'
             )}
           />

@@ -94,7 +94,7 @@ export function CreateProjectModal({ open, onClose, onSuccess }: CreateProjectMo
               'w-full px-3 py-2.5 rounded-lg',
               'bg-background border border-border',
               'text-foreground placeholder:text-muted-foreground',
-              'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+              'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
               'transition-all'
             )}
             required
@@ -116,7 +116,7 @@ export function CreateProjectModal({ open, onClose, onSuccess }: CreateProjectMo
               'w-full px-3 py-2.5 rounded-lg',
               'bg-background border border-border',
               'text-foreground placeholder:text-muted-foreground',
-              'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
+              'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]',
               'resize-none transition-all'
             )}
           />

@@ -174,13 +174,13 @@ export default function PostsPage() {
         </div>
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="flex p-1 bg-card border-[3px] border-border rounded-md shadow-[2px_2px_0_hsl(var(--border))]">
+          <div className="flex p-1 bg-card border-[3px] border-border rounded-md shadow-sticker-hover">
             <button
               onClick={() => setViewMode('list')}
               className={cn(
                 'p-2 rounded transition-all',
                 viewMode === 'list'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-muted-foreground hover:text-foreground'
               )}
               aria-label="List view"
@@ -192,7 +192,7 @@ export default function PostsPage() {
               className={cn(
                 'p-2 rounded transition-all',
                 viewMode === 'calendar'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-muted-foreground hover:text-foreground'
               )}
               aria-label="Calendar view"
@@ -207,7 +207,7 @@ export default function PostsPage() {
                 'flex items-center gap-2 px-3 md:px-4 py-2.5 rounded-md min-h-[44px]',
                 'bg-primary text-primary-foreground font-bold text-sm',
                 'border-[3px] border-border',
-                'shadow-[3px_3px_0_hsl(var(--border))]',
+                'shadow-sticker-sm',
                 'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
                 'transition-all'
               )}
@@ -236,8 +236,8 @@ export default function PostsPage() {
                   'w-full pl-10 pr-10 py-2.5 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',
                   'border-[3px] border-border',
-                  'shadow-[3px_3px_0_hsl(var(--border))]',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                  'shadow-sticker-sm',
+                  'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -261,13 +261,13 @@ export default function PostsPage() {
 
           {/* Filter tabs - horizontally scrollable on mobile */}
           <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0 mb-4 md:mb-6">
-            <div className="flex gap-1 p-1.5 bg-card border-[3px] border-border rounded-md shadow-[3px_3px_0_hsl(var(--border))] min-w-max md:min-w-0">
+            <div className="flex gap-1 p-1.5 bg-card border-[3px] border-border rounded-md shadow-sticker-sm min-w-max md:min-w-0">
               <button
                 onClick={() => setFilter('all')}
                 className={cn(
                   'flex-1 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
                   filter === 'all'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                 )}
               >
@@ -302,7 +302,7 @@ export default function PostsPage() {
                     className={cn(
                       'flex-1 flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 rounded text-sm font-bold transition-all whitespace-nowrap min-h-[40px]',
                       filter === status
-                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        ? 'bg-primary text-primary-foreground shadow-xs'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                     )}
                   >
@@ -317,8 +317,8 @@ export default function PostsPage() {
 
           {/* Posts list */}
           {sortedPosts.length === 0 ? (
-            <div className="text-center py-12 md:py-16 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))]">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-3xl">
+            <div className="text-center py-12 md:py-16 bg-card border-[3px] border-border rounded-md shadow-sticker">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-sticker-sm text-3xl">
                 📝
               </div>
               <h3 className="text-lg font-extrabold mb-2">
@@ -343,7 +343,7 @@ export default function PostsPage() {
                   'inline-flex items-center gap-2 px-5 py-3 rounded-md',
                   'bg-primary text-primary-foreground font-bold text-sm',
                   'border-[3px] border-border',
-                  'shadow-[4px_4px_0_hsl(var(--border))]',
+                  'shadow-sticker',
                   'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
                   'transition-all'
                 )}

@@ -32,7 +32,7 @@ export const CampaignSelector = ({
           'border-[3px] border-border',
           campaignId
             ? 'bg-primary/5 shadow-[3px_3px_0_hsl(var(--primary)/0.3)]'
-            : 'bg-card shadow-[2px_2px_0_hsl(var(--border))] hover:shadow-[3px_3px_0_hsl(var(--border))]'
+            : 'bg-card shadow-sticker-hover hover:shadow-sticker-sm'
         )}
       >
         <FolderOpen className="w-4 h-4 text-primary" />
@@ -51,7 +51,7 @@ export const CampaignSelector = ({
       {showDropdown && (
         <>
           <div className="fixed inset-0 z-10" onClick={onToggleDropdown} />
-          <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] py-1 max-h-[200px] overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-sticker py-1 max-h-[200px] overflow-y-auto">
             <button
               onClick={() => {
                 onSelect(undefined)

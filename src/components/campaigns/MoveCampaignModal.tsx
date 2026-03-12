@@ -111,7 +111,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
               : 'border-border hover:border-[hsl(var(--gold))]/50'
           )}
         >
-          <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
             <FolderKanban className="w-4 h-4 text-muted-foreground" />
           </div>
           <div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
                 : 'border-border hover:border-[hsl(var(--gold))]/50'
             )}
           >
-            <div className="w-8 h-8 rounded-lg bg-[hsl(var(--gold))]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="w-8 h-8 rounded-lg bg-[hsl(var(--gold))]/10 flex items-center justify-center shrink-0 overflow-hidden">
               {project.logoUrl ? (
                 <img
                   src={getMediaUrl(project.logoUrl)}
@@ -184,7 +184,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
           className={cn(
             'flex-1 flex items-center justify-center gap-2 px-4 rounded-lg text-sm font-medium transition-all',
             'md:py-2.5 py-3.5 min-h-[48px] md:min-h-0',
-            'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+            'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
             'border-2 border-[hsl(var(--gold-dark))]',
             'text-white',
             'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30',

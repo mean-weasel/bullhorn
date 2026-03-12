@@ -11,7 +11,7 @@ export default function NotFound() {
       <div className="w-full max-w-md text-center">
         <div className="bg-card rounded-lg border-[3px] border-border shadow-[6px_6px_0_hsl(var(--border))] p-8">
           {/* Megaphone icon */}
-          <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-4xl">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-primary/10 flex items-center justify-center border-[3px] border-border shadow-sticker text-4xl">
             📢
           </div>
 
@@ -25,7 +25,7 @@ export default function NotFound() {
           {/* Back to dashboard button */}
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-md bg-primary text-primary-foreground font-bold border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))] active:translate-y-[2px] active:shadow-[2px_2px_0_hsl(var(--border))] transition-all duration-200"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-md bg-primary text-primary-foreground font-bold border-[3px] border-border shadow-sticker hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))] active:translate-y-[2px] active:shadow-sticker-hover transition-all duration-200"
           >
             Back to Dashboard
           </Link>

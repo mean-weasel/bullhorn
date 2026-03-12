@@ -42,16 +42,16 @@ export function ProjectCard({
         className={cn(
           'block p-4 bg-card rounded-md',
           'border-[3px] border-border',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
           'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
-          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'active:translate-y-px active:shadow-sticker-hover',
           'transition-all',
           'animate-slide-up'
         )}
         style={{ animationDelay: `${index * 30}ms` }}
       >
         {/* Logo or placeholder */}
-        <div className="relative aspect-[2/1] mb-4 rounded-md overflow-hidden bg-accent/30 flex items-center justify-center border-2 border-border">
+        <div className="relative aspect-2/1 mb-4 rounded-md overflow-hidden bg-accent/30 flex items-center justify-center border-2 border-border">
           {hasLogo ? (
             <Image
               src={getMediaUrl(project.logoUrl!)}
@@ -73,21 +73,21 @@ export function ProjectCard({
             <div className="absolute bottom-2 right-2 flex gap-1">
               {project.brandColors.primary && (
                 <div
-                  className="w-4 h-4 rounded-full border-2 border-border shadow-sm"
+                  className="w-4 h-4 rounded-full border-2 border-border shadow-xs"
                   style={{ backgroundColor: project.brandColors.primary }}
                   title="Primary color"
                 />
               )}
               {project.brandColors.secondary && (
                 <div
-                  className="w-4 h-4 rounded-full border-2 border-border shadow-sm"
+                  className="w-4 h-4 rounded-full border-2 border-border shadow-xs"
                   style={{ backgroundColor: project.brandColors.secondary }}
                   title="Secondary color"
                 />
               )}
               {project.brandColors.accent && (
                 <div
-                  className="w-4 h-4 rounded-full border-2 border-border shadow-sm"
+                  className="w-4 h-4 rounded-full border-2 border-border shadow-xs"
                   style={{ backgroundColor: project.brandColors.accent }}
                   title="Accent color"
                 />
@@ -126,7 +126,7 @@ export function ProjectCard({
                   e.stopPropagation()
                   onEdit(e)
                 }}
-                className="p-2 rounded-md bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-foreground hover:bg-accent border-2 border-border transition-colors"
+                className="p-2 rounded-md bg-card/80 backdrop-blur-xs text-muted-foreground hover:text-foreground hover:bg-accent border-2 border-border transition-colors"
               >
                 <Edit2 className="w-4 h-4" />
               </button>
@@ -138,7 +138,7 @@ export function ProjectCard({
                   e.stopPropagation()
                   onDelete(e)
                 }}
-                className="p-2 rounded-md bg-card/80 backdrop-blur-sm text-muted-foreground hover:text-destructive hover:bg-accent border-2 border-border transition-colors"
+                className="p-2 rounded-md bg-card/80 backdrop-blur-xs text-muted-foreground hover:text-destructive hover:bg-accent border-2 border-border transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -156,9 +156,9 @@ export function ProjectCard({
       className={cn(
         'block p-3 md:p-4 bg-card rounded-md group',
         'border-[3px] border-border',
-        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'shadow-sticker-sm',
         'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
-        'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+        'active:translate-y-px active:shadow-sticker-hover',
         'transition-all',
         'animate-slide-up'
       )}
@@ -166,7 +166,7 @@ export function ProjectCard({
     >
       <div className="flex items-start gap-3 md:gap-4">
         {/* Logo/Icon */}
-        <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-md bg-sticker-purple/10 flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-sticker-purple/30">
+        <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-md bg-sticker-purple/10 flex items-center justify-center shrink-0 overflow-hidden border-2 border-sticker-purple/30">
           {hasLogo ? (
             <Image
               src={getMediaUrl(project.logoUrl!)}
@@ -256,7 +256,7 @@ export function ProjectCard({
           {showMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] py-1 min-w-[140px]">
+              <div className="absolute right-0 top-full mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-sticker py-1 min-w-[140px]">
                 <Link
                   href={`/projects/${project.id}`}
                   className="flex items-center gap-2 px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
