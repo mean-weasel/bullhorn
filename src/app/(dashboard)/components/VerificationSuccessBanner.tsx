@@ -11,18 +11,16 @@ import { CheckCircle, X } from 'lucide-react'
  */
 export function VerificationSuccessBanner() {
   const searchParams = useSearchParams()
-  const [show, setShow] = useState(false)
+  const [show, setShow] = useState(() => searchParams.get('verified') === 'true')
 
   useEffect(() => {
-    if (searchParams.get('verified') === 'true') {
-      setShow(true)
-      // Clean up URL
-      window.history.replaceState({}, '', window.location.pathname)
-      // Auto-dismiss after 5 seconds
-      const timer = setTimeout(() => setShow(false), 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [searchParams])
+    if (!show) return
+    // Clean up URL
+    window.history.replaceState({}, '', window.location.pathname)
+    // Auto-dismiss after 5 seconds
+    const timer = setTimeout(() => setShow(false), 5000)
+    return () => clearTimeout(timer)
+  }, [show])
 
   if (!show) return null
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { X, CalendarClock } from 'lucide-react'
 import { useCommunityEventsStore } from '@/lib/communityEvents'
@@ -80,7 +80,7 @@ async function findUrgentNudge(
 export function NudgeBanner({ className }: NudgeBannerProps) {
   const [nudge, setNudge] = useState<Nudge | null>(null)
   const [dismissed, setDismissed] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [checked, setChecked] = useState(false)
 
   const subscriptions = useCommunityEventsStore((s) => s.subscriptions)
   const events = useCommunityEventsStore((s) => s.events)
@@ -94,25 +94,24 @@ export function NudgeBanner({ className }: NudgeBannerProps) {
     }
   }, [initialized, fetchSubscriptions])
 
-  const checkNudges = useCallback(async () => {
-    if (subscriptions.length === 0) {
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    const result = await findUrgentNudge(subscriptions, events)
-    setNudge(result)
-    setLoading(false)
-  }, [subscriptions, events])
-
   // Check for nudges when data is available
   useEffect(() => {
-    if (initialized && subscriptions.length > 0) {
-      checkNudges()
-    } else if (initialized) {
-      setLoading(false)
+    if (!initialized || subscriptions.length === 0) return
+
+    let cancelled = false
+    findUrgentNudge(subscriptions, events).then((result) => {
+      if (!cancelled) {
+        setNudge(result)
+        setChecked(true)
+      }
+    })
+    return () => {
+      cancelled = true
     }
-  }, [initialized, subscriptions, checkNudges])
+  }, [initialized, subscriptions, events])
+
+  // Derive loading: not initialized, or has subscriptions but hasn't checked yet
+  const loading = !initialized || (subscriptions.length > 0 && !checked)
 
   // Don't render anything if loading, dismissed, or no nudge
   if (loading || dismissed || !nudge) return null

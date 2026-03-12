@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { isNativePlatform } from '@/lib/capacitor'
@@ -46,24 +46,14 @@ function getCookie(name: string): string | null {
 }
 
 export function CookieConsent() {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    // Never show in native iOS app
-    if (isNativePlatform()) return
-
-    // Never show in E2E test mode — banner intercepts pointer events
-    if (process.env.NEXT_PUBLIC_E2E_TEST_MODE === 'true') return
-
-    // Only show for EU/EEA countries that require GDPR consent
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === 'undefined') return false
+    if (isNativePlatform()) return false
+    if (process.env.NEXT_PUBLIC_E2E_TEST_MODE === 'true') return false
     const country = getCookie('user_country')
-    if (country && !GDPR_COUNTRIES.has(country)) return
-
-    const consent = localStorage.getItem('cookie_consent')
-    if (!consent) {
-      setVisible(true)
-    }
-  }, [])
+    if (country && !GDPR_COUNTRIES.has(country)) return false
+    return !localStorage.getItem('cookie_consent')
+  })
 
   const handleAccept = () => {
     localStorage.setItem('cookie_consent', 'accepted')
