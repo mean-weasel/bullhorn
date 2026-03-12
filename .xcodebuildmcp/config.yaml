@@ -1,0 +1,9 @@
+schema: 1
+enabledWorkflows:
+  - simulator
+  - device
+  - project-discovery
+  - ui-automation
+sessionDefaults:
+  projectPath: ios/App/App.xcodeproj
+  scheme: App

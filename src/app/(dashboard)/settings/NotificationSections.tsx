@@ -30,7 +30,7 @@ export function PushNotificationsSection({
   onTestNotification,
 }: PushNotificationsSectionProps) {
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         🔔 Notifications
       </h2>
@@ -40,7 +40,7 @@ export function PushNotificationsSection({
 
       {!pushSupported ? (
         <div className="flex items-center gap-2 p-4 rounded-md bg-muted/50 text-muted-foreground border-2 border-border">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <div>
             <p className="font-bold">Not supported</p>
             <p className="text-sm opacity-80">
@@ -51,7 +51,7 @@ export function PushNotificationsSection({
       ) : pushPermission === 'denied' ? (
         <div className="p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <p className="font-bold">Notifications blocked</p>
           </div>
           <p className="text-sm opacity-80 mt-2">
@@ -71,8 +71,8 @@ export function PushNotificationsSection({
             'flex items-center gap-2 px-4 py-3 rounded-md w-full',
             'bg-primary text-primary-foreground font-bold text-sm',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
             'transition-all',
             'disabled:opacity-60 disabled:cursor-not-allowed'
           )}
@@ -118,9 +118,9 @@ function PushNotificationsEnabled({
       </div>
       <div className="flex items-center gap-3 px-4 py-3 rounded-md border-2 border-border bg-card">
         {notificationsEnabled ? (
-          <Bell className="w-5 h-5 text-primary flex-shrink-0" />
+          <Bell className="w-5 h-5 text-primary shrink-0" />
         ) : (
-          <BellOff className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+          <BellOff className="w-5 h-5 text-muted-foreground shrink-0" />
         )}
         <IOSToggleSwitch
           checked={notificationsEnabled}
@@ -136,8 +136,8 @@ function PushNotificationsEnabled({
             'flex items-center gap-2 px-3 py-2 rounded-md',
             'text-sm font-bold',
             'border-[3px] border-border bg-card',
-            'shadow-[2px_2px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]',
+            'shadow-sticker-hover',
+            'hover:-translate-y-px hover:shadow-sticker-sm',
             'transition-all'
           )}
         >
@@ -194,7 +194,7 @@ export function EmailNotificationsSection({
   onRetry,
 }: EmailNotificationsSectionProps) {
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         <Mail className="w-4 h-4 inline-block mr-1 -mt-0.5" /> Email Notifications
       </h2>
@@ -254,7 +254,7 @@ export function EmailNotificationsSection({
         </div>
       ) : (
         <div className="flex items-center gap-2 p-4 rounded-md bg-muted/50 text-muted-foreground border-2 border-border">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <div className="flex-1">
             <p className="text-sm">Failed to load email preferences.</p>
             {onRetry && (

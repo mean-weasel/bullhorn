@@ -43,7 +43,7 @@ export function BiometricSection() {
   }
 
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         <Fingerprint className="w-4 h-4 inline-block mr-1 -mt-0.5" /> Security
       </h2>

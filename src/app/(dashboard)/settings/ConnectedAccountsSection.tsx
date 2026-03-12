@@ -92,7 +92,7 @@ function ConnectedAccount({
         <div
           className={cn(
             'w-10 h-10 rounded-full flex items-center justify-center',
-            'overflow-hidden border-2 flex-shrink-0',
+            'overflow-hidden border-2 shrink-0',
             styles.border,
             'bg-card'
           )}
@@ -128,7 +128,7 @@ function ConnectedAccount({
       <button
         onClick={() => onDisconnect(account.id)}
         className={cn(
-          'p-2 rounded-md flex-shrink-0',
+          'p-2 rounded-md shrink-0',
           'text-muted-foreground hover:text-destructive',
           'hover:bg-destructive/10',
           'border-2 border-transparent hover:border-destructive/30',
@@ -214,12 +214,7 @@ export function ConnectedAccountsSection({
   }
 
   return (
-    <div
-      className={cn(
-        'p-6 rounded-md border-[3px] border-border bg-card',
-        'shadow-[4px_4px_0_hsl(var(--border))] mb-6'
-      )}
-    >
+    <div className={cn('p-6 rounded-md border-[3px] border-border bg-card', 'shadow-sticker mb-6')}>
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         Connected Accounts
       </h2>

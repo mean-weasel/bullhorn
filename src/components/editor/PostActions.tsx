@@ -62,7 +62,7 @@ export function PostActions({ post, onMarkAsPublished, className }: PostActionsP
       className={cn(
         'p-4 rounded-md',
         'bg-sticker-orange/10 border-[3px] border-sticker-orange/30',
-        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'shadow-sticker-sm',
         className
       )}
     >
@@ -83,9 +83,9 @@ export function PostActions({ post, onMarkAsPublished, className }: PostActionsP
             'rounded-md min-h-[44px]',
             'bg-primary text-primary-foreground font-bold text-sm',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-            'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
+            'active:translate-y-px active:shadow-sticker-hover',
             'transition-all'
           )}
         >
@@ -101,9 +101,9 @@ export function PostActions({ post, onMarkAsPublished, className }: PostActionsP
               'rounded-md min-h-[44px]',
               'bg-secondary text-secondary-foreground font-bold text-sm',
               'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-              'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+              'shadow-sticker-sm',
+              'hover:-translate-y-px hover:shadow-sticker',
+              'active:translate-y-px active:shadow-sticker-hover',
               'transition-all'
             )}
           >
@@ -122,9 +122,9 @@ export function PostActions({ post, onMarkAsPublished, className }: PostActionsP
               'rounded-md min-h-[44px]',
               'bg-secondary text-secondary-foreground font-bold text-sm',
               'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-              'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+              'shadow-sticker-sm',
+              'hover:-translate-y-px hover:shadow-sticker',
+              'active:translate-y-px active:shadow-sticker-hover',
               'transition-all'
             )}
           >
@@ -140,9 +140,9 @@ export function PostActions({ post, onMarkAsPublished, className }: PostActionsP
             'rounded-md min-h-[44px]',
             'bg-sticker-green/20 text-sticker-green font-bold text-sm',
             'border-[3px] border-sticker-green/30',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-            'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
+            'active:translate-y-px active:shadow-sticker-hover',
             'transition-all'
           )}
         >

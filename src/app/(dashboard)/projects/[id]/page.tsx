@@ -209,7 +209,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <div className="bg-card border border-border rounded-xl p-4 md:p-6">
           <div className="flex items-start gap-4">
             {/* Logo */}
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-[hsl(var(--gold))]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-[hsl(var(--gold))]/10 flex items-center justify-center shrink-0 overflow-hidden">
               {project.logoUrl ? (
                 <img
                   src={getMediaUrl(project.logoUrl)}
@@ -378,7 +378,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
               onClick={() => setShowNewCampaignModal(true)}
               className={cn(
                 'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium',
-                'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+                'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
                 'border-2 border-[hsl(var(--gold-dark))]',
                 'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
               )}
@@ -402,7 +402,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                 onClick={() => setShowNewCampaignModal(true)}
                 className={cn(
                   'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium',
-                  'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+                  'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
                   'border-2 border-[hsl(var(--gold-dark))]',
                   'text-primary-foreground hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all'
                 )}
@@ -460,7 +460,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       {showNewCampaignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
             onClick={() => setShowNewCampaignModal(false)}
           />
           <div className="relative bg-card border border-border rounded-xl shadow-xl w-full max-w-md animate-in zoom-in-95 fade-in duration-200">
@@ -483,7 +483,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                     className={cn(
                       'w-full px-3 py-2.5 rounded-lg',
                       'bg-background border border-border',
-                      'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
+                      'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
                     )}
                     autoFocus
                   />
@@ -498,7 +498,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                     className={cn(
                       'w-full px-3 py-2.5 rounded-lg resize-none',
                       'bg-background border border-border',
-                      'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
+                      'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50 focus:border-[hsl(var(--gold))]'
                     )}
                   />
                 </div>
@@ -518,7 +518,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
                     disabled={!newCampaignName.trim()}
                     className={cn(
                       'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
-                      'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+                      'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
                       'border-2 border-[hsl(var(--gold-dark))]',
                       'text-white',
                       'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30',
@@ -552,7 +552,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             <ul className="space-y-1 text-muted-foreground">
               {campaigns.slice(0, 5).map((c) => (
                 <li key={c.id} className="flex items-center gap-2">
-                  <FolderOpen className="w-3.5 h-3.5 flex-shrink-0" />
+                  <FolderOpen className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">{c.name}</span>
                 </li>
               ))}

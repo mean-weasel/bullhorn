@@ -312,7 +312,7 @@ export function LandingPage() {
 
                   {/* Carousel side */}
                   {hasSlides && (
-                    <div className="w-full max-w-xs flex-shrink-0 sm:max-w-sm">
+                    <div className="w-full max-w-xs shrink-0 sm:max-w-sm">
                       <FeatureCarousel slides={feature.slides} />
                     </div>
                   )}

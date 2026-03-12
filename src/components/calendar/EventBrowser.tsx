@@ -78,7 +78,7 @@ export function EventBrowser({
       </div>
 
       {/* Platform filter tabs */}
-      <div className="flex items-center gap-1 border-[3px] border-border rounded-md overflow-hidden shadow-[3px_3px_0_hsl(var(--border))]">
+      <div className="flex items-center gap-1 border-[3px] border-border rounded-md overflow-hidden shadow-sticker-sm">
         {FILTER_TABS.map((tab) => (
           <button
             key={tab.value}
@@ -98,7 +98,7 @@ export function EventBrowser({
       {/* Event grid */}
       {filteredEvents.length === 0 ? (
         <div className="text-center py-12 px-4">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-md bg-secondary flex items-center justify-center border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-md bg-secondary flex items-center justify-center border-[3px] border-border shadow-sticker-sm">
             <Calendar className="w-7 h-7 text-muted-foreground" />
           </div>
           <p className="text-sm font-bold text-muted-foreground">

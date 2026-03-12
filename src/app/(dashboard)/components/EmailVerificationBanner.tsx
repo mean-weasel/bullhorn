@@ -69,7 +69,7 @@ export function EmailVerificationBanner({ email }: EmailVerificationBannerProps)
     return (
       <div className="flex items-center gap-3 px-4 py-3 bg-sticker-green/10 text-sticker-green border-b-2 border-sticker-green/30 font-bold">
         <span className="text-lg">✅</span>
-        <CheckCircle className="w-5 h-5 flex-shrink-0" />
+        <CheckCircle className="w-5 h-5 shrink-0" />
         <p className="flex-1 text-sm">Verification email sent! Check your inbox.</p>
         <button
           onClick={() => setResendSuccess(false)}
@@ -90,7 +90,7 @@ export function EmailVerificationBanner({ email }: EmailVerificationBannerProps)
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-primary/10 text-foreground border-b-2 border-primary/30 font-medium">
       <span className="text-lg">📧</span>
-      <Mail className="w-5 h-5 flex-shrink-0 text-primary" />
+      <Mail className="w-5 h-5 shrink-0 text-primary" />
       <p className="flex-1 text-sm">Please verify your email address to ensure account security.</p>
 
       {error && <span className="text-xs text-destructive font-bold">{error}</span>}
@@ -102,9 +102,9 @@ export function EmailVerificationBanner({ email }: EmailVerificationBannerProps)
           'flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold rounded-md',
           'bg-primary text-primary-foreground',
           'border-2 border-border',
-          'shadow-[2px_2px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]',
-          'active:translate-y-[1px] active:shadow-[1px_1px_0_hsl(var(--border))]',
+          'shadow-sticker-hover',
+          'hover:-translate-y-px hover:shadow-sticker-sm',
+          'active:translate-y-px active:shadow-[1px_1px_0_hsl(var(--border))]',
           'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
           'transition-all'
         )}

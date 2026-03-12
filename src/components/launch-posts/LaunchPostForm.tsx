@@ -138,7 +138,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Platform Selection */}
-        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6">
+        <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6">
           <label className="block text-sm font-bold mb-3">
             Platform <span className="text-destructive">*</span>
           </label>
@@ -154,12 +154,12 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                     'border-[3px] border-border font-medium',
                     platform === key
                       ? 'bg-primary/10 text-foreground shadow-[3px_3px_0_hsl(var(--primary)/0.3)]'
-                      : 'bg-card shadow-[2px_2px_0_hsl(var(--border))] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]'
+                      : 'bg-card shadow-sticker-hover hover:-translate-y-px hover:shadow-sticker-sm'
                   )}
                 >
                   <span
                     className={cn(
-                      'w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0',
+                      'w-6 h-6 rounded flex items-center justify-center text-xs font-bold shrink-0',
                       info.bgColor,
                       info.color
                     )}
@@ -185,7 +185,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         </div>
 
         {/* Main Fields */}
-        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+        <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6 space-y-4">
           {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-bold mb-2">
@@ -218,8 +218,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 'w-full px-4 py-3 rounded-md',
                 'bg-card text-foreground placeholder-muted-foreground',
                 'border-[3px] border-border',
-                'shadow-[3px_3px_0_hsl(var(--border))]',
-                'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                'shadow-sticker-sm',
+                'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
                 'transition-all'
               )}
               required
@@ -254,8 +254,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 'w-full px-4 py-3 rounded-md',
                 'bg-card text-foreground placeholder-muted-foreground',
                 'border-[3px] border-border',
-                'shadow-[3px_3px_0_hsl(var(--border))]',
-                'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                'shadow-sticker-sm',
+                'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
                 'transition-all'
               )}
               required={platformRequiresUrl}
@@ -289,8 +289,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 'w-full px-4 py-3 rounded-md',
                 'bg-card text-foreground placeholder-muted-foreground',
                 'border-[3px] border-border',
-                'shadow-[3px_3px_0_hsl(var(--border))]',
-                'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                'shadow-sticker-sm',
+                'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
                 'resize-none transition-all'
               )}
             />
@@ -339,7 +339,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         )}
 
         {/* Status & Scheduling */}
-        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+        <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6 space-y-4">
           <h3 className="font-bold text-sm">📅 Status & Scheduling</h3>
 
           <div className="grid sm:grid-cols-2 gap-4">
@@ -352,7 +352,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 id="status"
                 value={status}
                 onChange={(e) => setStatus(e.target.value as LaunchPostStatus)}
-                className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-sm font-medium"
+                className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-sticker-sm text-sm font-medium"
               >
                 <option value="draft">📝 Draft</option>
                 <option value="scheduled">📅 Scheduled</option>
@@ -372,14 +372,14 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
                 onChange={(e) =>
                   setScheduledAt(e.target.value ? new Date(e.target.value).toISOString() : '')
                 }
-                className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-sm"
+                className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-sticker-sm text-sm"
               />
             </div>
           </div>
         </div>
 
         {/* Notes */}
-        <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6">
+        <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6">
           <label htmlFor="notes" className="block text-sm font-bold mb-2">
             📝 Internal Notes
           </label>
@@ -393,8 +393,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
               'w-full px-4 py-3 rounded-md',
               'bg-card text-foreground placeholder-muted-foreground',
               'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'focus:outline-none focus:ring-2 focus:ring-primary/50',
+              'shadow-sticker-sm',
+              'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
               'resize-none transition-all'
             )}
           />
@@ -403,7 +403,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
         {/* Error */}
         {error && (
           <div className="flex items-center gap-3 p-4 rounded-md bg-destructive/10 text-destructive border-2 border-destructive/30 font-medium">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 shrink-0" />
             <p className="text-sm">{error}</p>
           </div>
         )}
@@ -417,8 +417,8 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
               'px-4 py-2.5 rounded-md',
               'bg-secondary text-secondary-foreground font-bold text-sm',
               'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'shadow-sticker-sm',
+              'hover:-translate-y-px hover:shadow-sticker',
               'transition-all'
             )}
           >
@@ -431,9 +431,9 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
               'flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-md',
               'bg-sticker-green text-white font-bold text-sm',
               'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-              'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+              'shadow-sticker-sm',
+              'hover:-translate-y-px hover:shadow-sticker',
+              'active:translate-y-px active:shadow-sticker-hover',
               'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
               'transition-all'
             )}

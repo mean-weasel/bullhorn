@@ -227,7 +227,7 @@ function ReminderCard({
       className={cn(
         'p-4 rounded-md bg-card',
         'border-[3px] border-border',
-        'shadow-[4px_4px_0_hsl(var(--border))]',
+        'shadow-sticker',
         isOverdue && !reminder.isCompleted && 'border-destructive/50',
         reminder.isCompleted && 'opacity-60'
       )}
@@ -253,7 +253,7 @@ function ReminderCard({
 
           {/* Time info */}
           <div className="flex items-center gap-2 text-xs font-medium mb-2">
-            <Bell className="w-3.5 h-3.5 flex-shrink-0" />
+            <Bell className="w-3.5 h-3.5 shrink-0" />
             {isOverdue && !reminder.isCompleted ? (
               <span className="text-destructive font-bold">
                 Overdue by {formatDistanceToNow(new Date(reminder.remindAt))}
@@ -287,7 +287,7 @@ function ReminderCard({
         </div>
 
         {/* Action buttons */}
-        <div className="flex flex-col gap-1.5 flex-shrink-0">
+        <div className="flex flex-col gap-1.5 shrink-0">
           {!reminder.isCompleted && (
             <button
               onClick={onComplete}

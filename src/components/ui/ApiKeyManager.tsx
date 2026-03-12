@@ -114,8 +114,8 @@ export function ApiKeyManager() {
               className={cn(
                 'flex-1 px-3 py-2 rounded-md text-sm',
                 'border-[3px] border-border bg-card',
-                'shadow-[3px_3px_0_hsl(var(--border))]',
-                'focus:outline-none focus:ring-2 focus:ring-primary/50'
+                'shadow-sticker-sm',
+                'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
               )}
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             />
@@ -125,8 +125,8 @@ export function ApiKeyManager() {
               className={cn(
                 'px-4 py-2 rounded-md text-sm font-bold',
                 'bg-sticker-green text-white',
-                'border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]',
-                'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+                'border-[3px] border-border shadow-sticker-sm',
+                'hover:-translate-y-px hover:shadow-sticker',
                 'disabled:opacity-50 disabled:pointer-events-none',
                 'transition-all'
               )}
@@ -201,7 +201,7 @@ export function ApiKeyManager() {
               className="flex items-center justify-between p-3 rounded-md border-2 border-border bg-card"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center border border-primary/30 flex-shrink-0">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center border border-primary/30 shrink-0">
                   <Key className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
@@ -219,7 +219,7 @@ export function ApiKeyManager() {
               <button
                 onClick={() => setKeyToRevoke(key.id)}
                 className={cn(
-                  'p-2 rounded-md flex-shrink-0',
+                  'p-2 rounded-md shrink-0',
                   'text-muted-foreground hover:text-destructive',
                   'hover:bg-destructive/10 border-2 border-transparent hover:border-destructive/30 transition-all'
                 )}

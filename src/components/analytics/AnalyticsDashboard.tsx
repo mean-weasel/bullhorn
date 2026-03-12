@@ -138,7 +138,7 @@ export function AnalyticsDashboard({
             className={cn(
               'px-3 py-1.5 text-sm rounded-lg',
               'bg-background border border-border',
-              'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
+              'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
             )}
           >
             {DATE_RANGE_OPTIONS.map((option) => (
@@ -168,7 +168,7 @@ export function AnalyticsDashboard({
       {/* Error state */}
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
         </div>
       )}

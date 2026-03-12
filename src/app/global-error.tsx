@@ -46,7 +46,7 @@ export default function GlobalError({
 
             <button
               onClick={reset}
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white font-medium hover:shadow-lg transition-all"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-linear-to-br from-amber-500 to-orange-600 text-white font-medium hover:shadow-lg transition-all"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path

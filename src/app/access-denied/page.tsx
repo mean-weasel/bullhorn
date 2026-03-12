@@ -24,7 +24,7 @@ export default function AccessDeniedPage() {
         {/* Card */}
         <div className="bg-card rounded-lg border-[3px] border-border shadow-[6px_6px_0_hsl(var(--border))] p-8 text-center">
           {/* Icon */}
-          <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-destructive/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-4xl">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-destructive/10 flex items-center justify-center border-[3px] border-border shadow-sticker text-4xl">
             🔒
           </div>
 
@@ -45,13 +45,13 @@ export default function AccessDeniedPage() {
           <div className="space-y-3">
             <button
               onClick={handleSignOut}
-              className="w-full px-4 py-3 rounded-md font-bold text-sm transition-all bg-primary text-primary-foreground border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]"
+              className="w-full px-4 py-3 rounded-md font-bold text-sm transition-all bg-primary text-primary-foreground border-[3px] border-border shadow-sticker-sm hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]"
             >
               Sign Out & Try Different Account
             </button>
             <Link
               href="/"
-              className="block w-full px-4 py-3 rounded-md font-bold text-sm transition-all bg-card text-foreground border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]"
+              className="block w-full px-4 py-3 rounded-md font-bold text-sm transition-all bg-card text-foreground border-[3px] border-border shadow-sticker-sm hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]"
             >
               Go to Home
             </Link>

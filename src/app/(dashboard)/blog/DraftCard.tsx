@@ -41,7 +41,7 @@ export function DraftCard({ draft }: { draft: BlogDraft }) {
         {/* Status icon */}
         <div
           className={cn(
-            'flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center',
+            'shrink-0 w-10 h-10 rounded-lg flex items-center justify-center',
             'bg-muted/50'
           )}
         >
@@ -54,7 +54,7 @@ export function DraftCard({ draft }: { draft: BlogDraft }) {
             <h3 className="font-medium text-foreground truncate group-hover:text-[hsl(var(--gold-dark))] transition-colors">
               {draft.title}
             </h3>
-            <Edit2 className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            <Edit2 className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
           </div>
 
           {contentPreview && (

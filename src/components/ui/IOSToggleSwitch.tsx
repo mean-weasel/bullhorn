@@ -54,7 +54,7 @@ export function IOSToggleSwitch({
       className={cn(
         'relative inline-flex shrink-0 cursor-pointer rounded-full',
         'transition-all duration-200 ease-in-out',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
+        'focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2',
         'border-2 border-border',
         config.track,
         checked ? 'bg-sticker-green' : 'bg-muted',
@@ -68,7 +68,7 @@ export function IOSToggleSwitch({
         className={cn(
           'pointer-events-none inline-block rounded-full bg-white',
           'transform ring-0 transition-transform duration-200 ease-in-out',
-          'absolute top-0.5 border-2 border-border shadow-sm',
+          'absolute top-0.5 border-2 border-border shadow-xs',
           config.thumb,
           config.thumbOffset
         )}
@@ -89,7 +89,7 @@ export function IOSToggleSwitch({
       disabled={disabled}
       className={cn(
         'flex items-center justify-between w-full gap-4 text-left',
-        'focus:outline-none',
+        'focus:outline-hidden',
         disabled && 'opacity-50 cursor-not-allowed',
         className
       )}
@@ -112,7 +112,7 @@ export function IOSToggleSwitch({
           className={cn(
             'pointer-events-none inline-block rounded-full bg-white',
             'transform ring-0 transition-transform duration-200 ease-in-out',
-            'absolute top-0.5 border-2 border-border shadow-sm',
+            'absolute top-0.5 border-2 border-border shadow-xs',
             config.thumb,
             config.thumbOffset
           )}

@@ -83,7 +83,7 @@ export const RedditSettings = ({
               }
             }}
             placeholder="Type subreddit, press Enter"
-            className="flex-1 px-4 py-2.5 rounded-r-lg bg-background border border-border focus:outline-none focus:border-reddit"
+            className="flex-1 px-4 py-2.5 rounded-r-lg bg-background border border-border focus:outline-hidden focus:border-reddit"
           />
           <button
             type="button"
@@ -171,7 +171,7 @@ export const RedditSettings = ({
                         onChange={(e) => onUpdateSubredditTitle(sub, e.target.value)}
                         placeholder={`Title for r/${sub}`}
                         data-testid={`subreddit-title-${sub}`}
-                        className="w-full px-4 py-2.5 rounded-lg bg-background border border-border focus:outline-none focus:border-reddit"
+                        className="w-full px-4 py-2.5 rounded-lg bg-background border border-border focus:outline-hidden focus:border-reddit"
                       />
                       <p className="text-xs text-muted-foreground mt-1.5">
                         {title.length} / 300 characters
@@ -234,7 +234,7 @@ export const RedditSettings = ({
             }))
           }
           placeholder="e.g., Show and Tell"
-          className="w-full px-4 py-2.5 rounded-lg bg-background border border-border focus:outline-none focus:border-reddit"
+          className="w-full px-4 py-2.5 rounded-lg bg-background border border-border focus:outline-hidden focus:border-reddit"
         />
       </div>
       <div>
@@ -246,7 +246,7 @@ export const RedditSettings = ({
           value={redditUrl}
           onChange={(e) => onRedditUrlChange(e.target.value)}
           placeholder="https://youtube.com/watch?v=... or any URL"
-          className="w-full px-4 py-2.5 rounded-lg bg-background border border-border focus:outline-none focus:border-reddit"
+          className="w-full px-4 py-2.5 rounded-lg bg-background border border-border focus:outline-hidden focus:border-reddit"
         />
         <p className="text-xs text-muted-foreground mt-1.5">
           Add a URL for link posts (YouTube, articles, etc.). Leave empty for text posts.

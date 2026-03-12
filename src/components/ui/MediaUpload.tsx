@@ -141,7 +141,7 @@ export function MediaUpload({
       {/* Error message */}
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 text-destructive text-sm border-2 border-destructive/30">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4 shrink-0" />
           <span className="font-medium">{error}</span>
           <button
             onClick={() => setError(null)}
@@ -183,7 +183,7 @@ export function MediaUpload({
           onClick={handleDropZoneClick}
           className={cn(
             'border-[3px] border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
             isDragging
               ? platform === 'twitter'
                 ? 'border-twitter bg-twitter/10'
@@ -231,7 +231,7 @@ function MediaPreviewItem({ filename, index, onRemove }: MediaPreviewItemProps) 
 
   return (
     <div className="relative group">
-      <div className="aspect-video rounded-md overflow-hidden bg-muted border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+      <div className="aspect-video rounded-md overflow-hidden bg-muted border-[3px] border-border shadow-sticker-sm">
         {hasError ? (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             {isVideo ? <Film className="w-8 h-8" /> : <ImageIcon className="w-8 h-8" />}
@@ -261,8 +261,8 @@ function MediaPreviewItem({ filename, index, onRemove }: MediaPreviewItemProps) 
           'absolute -top-2 -right-2 p-1.5 rounded-full',
           'bg-destructive text-white border-2 border-border',
           'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100 transition-opacity',
-          'shadow-[2px_2px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]'
+          'shadow-sticker-hover',
+          'hover:-translate-y-px hover:shadow-sticker-sm'
         )}
       >
         <X className="w-3 h-3" />

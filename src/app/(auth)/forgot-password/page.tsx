@@ -42,7 +42,7 @@ export default function ForgotPasswordPage() {
         </div>
         <div className="w-full max-w-md">
           <div className="bg-card rounded-lg border-[3px] border-border shadow-[6px_6px_0_hsl(var(--border))] p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-green/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-green/10 flex items-center justify-center border-[3px] border-border shadow-sticker text-3xl">
               ✉️
             </div>
             <h2 className="text-xl font-extrabold text-foreground mb-2">Check your email</h2>
@@ -57,8 +57,8 @@ export default function ForgotPasswordPage() {
                 'inline-flex items-center gap-2 px-4 py-2.5 rounded-md',
                 'bg-secondary text-secondary-foreground font-bold text-sm',
                 'border-[3px] border-border',
-                'shadow-[3px_3px_0_hsl(var(--border))]',
-                'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+                'shadow-sticker-sm',
+                'hover:-translate-y-px hover:shadow-sticker',
                 'transition-all'
               )}
             >
@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
         <div className="bg-card rounded-lg border-[3px] border-border shadow-[6px_6px_0_hsl(var(--border))] p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-orange/10 flex items-center justify-center border-[3px] border-border shadow-[4px_4px_0_hsl(var(--border))] text-3xl">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-sticker-orange/10 flex items-center justify-center border-[3px] border-border shadow-sticker text-3xl">
               🔑
             </div>
             <h1 className="text-3xl font-extrabold text-foreground">Reset password</h1>
@@ -113,8 +113,8 @@ export default function ForgotPasswordPage() {
                   'w-full px-4 py-3 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',
                   'border-[3px] border-border',
-                  'shadow-[3px_3px_0_hsl(var(--border))]',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                  'shadow-sticker-sm',
+                  'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
                   'transition-all duration-200'
                 )}
                 placeholder="you@example.com"
@@ -128,9 +128,9 @@ export default function ForgotPasswordPage() {
                 'w-full px-4 py-3.5 rounded-md',
                 'bg-sticker-orange text-white font-bold',
                 'border-[3px] border-border',
-                'shadow-[4px_4px_0_hsl(var(--border))]',
+                'shadow-sticker',
                 'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]',
-                'active:translate-y-[2px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+                'active:translate-y-[2px] active:shadow-sticker-hover',
                 'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
                 'transition-all duration-200'
               )}

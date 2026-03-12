@@ -35,7 +35,7 @@ export const PlatformSelector = ({
                   : platform === 'linkedin'
                     ? 'bg-linkedin/10 text-linkedin shadow-[3px_3px_0_hsl(var(--linkedin))]'
                     : 'bg-reddit/10 text-reddit shadow-[3px_3px_0_hsl(var(--reddit))]'
-                : 'bg-card text-muted-foreground shadow-[2px_2px_0_hsl(var(--border))] hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]'
+                : 'bg-card text-muted-foreground shadow-sticker-hover hover:-translate-y-px hover:shadow-sticker-sm'
             )}
           >
             <PlatformIcon platform={platform} />

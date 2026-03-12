@@ -17,7 +17,7 @@ export function ProductHuntFields({
   const platformInfo = LAUNCH_PLATFORM_INFO[platform]
 
   return (
-    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+    <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6 space-y-4">
       <h3 className="font-bold text-sm flex items-center gap-2">
         <span
           className={cn(
@@ -57,8 +57,8 @@ export function ProductHuntFields({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'transition-all'
           )}
         />
@@ -73,7 +73,7 @@ export function ProductHuntFields({
           id="pricing"
           value={getPlatformFieldString('pricing') || 'free'}
           onChange={(e) => updatePlatformField('pricing', e.target.value)}
-          className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))] text-sm font-medium"
+          className="w-full px-4 py-3 rounded-md bg-card border-[3px] border-border shadow-sticker-sm text-sm font-medium"
         >
           <option value="free">Free</option>
           <option value="freemium">Freemium</option>
@@ -96,8 +96,8 @@ export function ProductHuntFields({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'resize-none transition-all'
           )}
         />
@@ -117,7 +117,7 @@ export function AskHNFields({
   const platformInfo = LAUNCH_PLATFORM_INFO[platform]
 
   return (
-    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+    <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6 space-y-4">
       <h3 className="font-bold text-sm flex items-center gap-2">
         <span
           className={cn(
@@ -146,8 +146,8 @@ export function AskHNFields({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'resize-none transition-all'
           )}
         />
@@ -164,7 +164,7 @@ export function BetaListFieldsSection({
   const platformInfo = LAUNCH_PLATFORM_INFO[platform]
 
   return (
-    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+    <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6 space-y-4">
       <h3 className="font-bold text-sm flex items-center gap-2">
         <span
           className={cn(
@@ -204,8 +204,8 @@ export function BetaListFieldsSection({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'transition-all'
           )}
         />
@@ -225,7 +225,7 @@ export function IndieHackersFieldsSection({
   const platformInfo = LAUNCH_PLATFORM_INFO[platform]
 
   return (
-    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+    <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6 space-y-4">
       <h3 className="font-bold text-sm flex items-center gap-2">
         <span
           className={cn(
@@ -254,8 +254,8 @@ export function IndieHackersFieldsSection({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'transition-all'
           )}
         />
@@ -276,8 +276,8 @@ export function IndieHackersFieldsSection({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'transition-all'
           )}
         />
@@ -294,7 +294,7 @@ export function DevHuntFieldsSection({
   const platformInfo = LAUNCH_PLATFORM_INFO[platform]
 
   return (
-    <div className="bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] p-4 md:p-6 space-y-4">
+    <div className="bg-card border-[3px] border-border rounded-md shadow-sticker p-4 md:p-6 space-y-4">
       <h3 className="font-bold text-sm flex items-center gap-2">
         <span
           className={cn(
@@ -323,8 +323,8 @@ export function DevHuntFieldsSection({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'transition-all'
           )}
         />
@@ -345,8 +345,8 @@ export function DevHuntFieldsSection({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'resize-none transition-all'
           )}
         />

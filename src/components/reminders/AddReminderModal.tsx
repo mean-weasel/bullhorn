@@ -97,7 +97,7 @@ export function AddReminderModal({
     <div
       className={cn(
         'w-14 h-14 rounded-lg flex items-center justify-center',
-        'border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]',
+        'border-[3px] border-border shadow-sticker-sm',
         'bg-sticker-pink/10'
       )}
     >
@@ -141,8 +141,8 @@ export function AddReminderModal({
             className={cn(
               'w-full px-3 py-2.5 rounded-md text-sm',
               'border-[3px] border-border bg-background',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'focus:outline-none focus:ring-2 focus:ring-primary/50',
+              'shadow-sticker-sm',
+              'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
               'placeholder:text-muted-foreground/60'
             )}
           />
@@ -163,8 +163,8 @@ export function AddReminderModal({
             className={cn(
               'w-full px-3 py-2.5 rounded-md text-sm resize-none',
               'border-[3px] border-border bg-background',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'focus:outline-none focus:ring-2 focus:ring-primary/50',
+              'shadow-sticker-sm',
+              'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
               'placeholder:text-muted-foreground/60'
             )}
           />
@@ -184,8 +184,8 @@ export function AddReminderModal({
             className={cn(
               'w-full px-3 py-2.5 rounded-md text-sm',
               'border-[3px] border-border bg-background',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'focus:outline-none focus:ring-2 focus:ring-primary/50'
+              'shadow-sticker-sm',
+              'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
             )}
           />
         </div>
@@ -202,8 +202,8 @@ export function AddReminderModal({
             className={cn(
               'w-full px-3 py-2.5 rounded-md text-sm',
               'border-[3px] border-border bg-background',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'focus:outline-none focus:ring-2 focus:ring-primary/50'
+              'shadow-sticker-sm',
+              'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
             )}
           >
             <option value="">None</option>
@@ -233,8 +233,8 @@ export function AddReminderModal({
             className={cn(
               'w-full px-3 py-2.5 rounded-md text-sm',
               'border-[3px] border-border bg-background',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'focus:outline-none focus:ring-2 focus:ring-primary/50'
+              'shadow-sticker-sm',
+              'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
             )}
           >
             <option value="">None</option>

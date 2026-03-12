@@ -77,7 +77,7 @@ export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: La
       className={cn(
         'p-3 md:p-4 bg-card rounded-md group',
         'border-[3px] border-border',
-        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'shadow-sticker-sm',
         'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
         'transition-all',
         'animate-slide-up'
@@ -88,7 +88,7 @@ export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: La
         {/* Platform Icon */}
         <div
           className={cn(
-            'w-10 h-10 md:w-12 md:h-12 rounded-md flex items-center justify-center flex-shrink-0',
+            'w-10 h-10 md:w-12 md:h-12 rounded-md flex items-center justify-center shrink-0',
             'font-bold text-sm md:text-base',
             'border-2',
             platformInfo.bgColor,
@@ -131,7 +131,7 @@ export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: La
                 onClick={(e) => e.stopPropagation()}
                 className="flex items-center gap-1 hover:text-foreground transition-colors truncate max-w-[200px]"
               >
-                <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                <ExternalLink className="w-3 h-3 shrink-0" />
                 <span className="truncate">{new URL(post.url).hostname}</span>
               </a>
             )}
@@ -168,7 +168,7 @@ export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: La
           {showMenu && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-              <div className="absolute right-0 top-full mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-[4px_4px_0_hsl(var(--border))] py-1 min-w-[160px]">
+              <div className="absolute right-0 top-full mt-1 z-20 bg-card border-[3px] border-border rounded-md shadow-sticker py-1 min-w-[160px]">
                 {onEdit && (
                   <button
                     onClick={(e) => {

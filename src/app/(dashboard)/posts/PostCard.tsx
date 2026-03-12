@@ -65,9 +65,9 @@ export function PostCard({ post, index }: { post: Post; index: number }) {
       href={`/edit/${post.id}`}
       className={cn(
         'block p-3 md:p-4 bg-card border-[3px] border-border rounded-md',
-        'shadow-[3px_3px_0_hsl(var(--border))]',
+        'shadow-sticker-sm',
         'hover:translate-y-[-2px] hover:shadow-[5px_5px_0_hsl(var(--border))]',
-        'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+        'active:translate-y-px active:shadow-sticker-hover',
         'transition-all',
         'animate-slide-up',
         post.status === 'archived' && 'opacity-60'

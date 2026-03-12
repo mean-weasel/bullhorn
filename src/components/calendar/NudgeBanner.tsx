@@ -158,9 +158,9 @@ export function NudgeBanner({ className }: NudgeBannerProps) {
             className={cn(
               'inline-flex items-center gap-1 mt-2 px-3 py-1.5 rounded-md text-xs font-bold',
               'bg-accent text-white',
-              'border-[2px] border-border',
-              'shadow-[2px_2px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[3px_3px_0_hsl(var(--border))]',
+              'border-2 border-border',
+              'shadow-sticker-hover',
+              'hover:-translate-y-px hover:shadow-sticker-sm',
               'transition-all duration-200'
             )}
           >

@@ -62,7 +62,7 @@ export function IOSActionSheet<T = string>({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200" />
 
       {/* Sheet */}
       <div
@@ -77,7 +77,7 @@ export function IOSActionSheet<T = string>({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Options container */}
-        <div className="bg-card border-[3px] border-border rounded-lg overflow-hidden shadow-[4px_4px_0_hsl(var(--border))]">
+        <div className="bg-card border-[3px] border-border rounded-lg overflow-hidden shadow-sticker">
           {/* Title */}
           {title && (
             <div className="px-4 py-3 text-center border-b-2 border-border bg-secondary">
@@ -105,7 +105,7 @@ export function IOSActionSheet<T = string>({
                 {option.icon && (
                   <span
                     className={cn(
-                      'flex-shrink-0',
+                      'shrink-0',
                       option.destructive ? 'text-destructive' : 'text-muted-foreground'
                     )}
                   >
@@ -132,7 +132,7 @@ export function IOSActionSheet<T = string>({
 
                 {/* Checkmark for selected */}
                 {selectedValue === option.value && (
-                  <Check className="w-5 h-5 text-sticker-green flex-shrink-0" />
+                  <Check className="w-5 h-5 text-sticker-green shrink-0" />
                 )}
               </button>
             ))}
@@ -148,7 +148,7 @@ export function IOSActionSheet<T = string>({
             'bg-card border-[3px] border-border rounded-lg',
             'text-base font-bold text-primary',
             'active:bg-primary/20 transition-colors',
-            'shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker',
             'hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(var(--border))]'
           )}
         >

@@ -65,8 +65,8 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
           'w-9 h-9 rounded-md flex items-center justify-center text-xs font-bold text-white',
           'bg-sticker-purple',
           'border-2 border-border',
-          'hover:translate-y-[-1px] transition-all',
-          'focus:outline-none focus:ring-2 focus:ring-primary/50'
+          'hover:-translate-y-px transition-all',
+          'focus:outline-hidden focus:ring-2 focus:ring-primary/50'
         )}
         aria-label="User menu"
         aria-expanded={isOpen}
@@ -81,7 +81,7 @@ export function UserMenu({ email, displayName }: UserMenuProps) {
           className={cn(
             'absolute right-0 mt-2 w-56 py-2',
             'bg-card rounded-md border-[3px] border-border',
-            'shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker',
             'animate-slide-up z-50'
           )}
         >

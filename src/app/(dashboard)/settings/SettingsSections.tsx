@@ -19,7 +19,7 @@ interface ThemeSectionProps {
 
 export function ThemeSection({ theme, setTheme }: ThemeSectionProps) {
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         🎨 Appearance
       </h2>
@@ -36,8 +36,8 @@ export function ThemeSection({ theme, setTheme }: ThemeSectionProps) {
                 'text-sm font-bold transition-all',
                 'border-[3px]',
                 isActive
-                  ? 'border-border bg-primary text-primary-foreground shadow-[3px_3px_0_hsl(var(--border))]'
-                  : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-secondary shadow-[2px_2px_0_hsl(var(--border))]'
+                  ? 'border-border bg-primary text-primary-foreground shadow-sticker-sm'
+                  : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-secondary shadow-sticker-hover'
               )}
             >
               <span>{option.emoji}</span>
@@ -73,7 +73,7 @@ export function AnalyticsSection({
   onDeleteConnection,
 }: AnalyticsSectionProps) {
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         📊 Analytics
       </h2>
@@ -145,8 +145,8 @@ export function AnalyticsSection({
             'flex items-center gap-2 px-4 py-3 rounded-md w-full',
             'bg-sticker-blue text-white font-bold text-sm',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+            'shadow-sticker-sm',
+            'hover:-translate-y-px hover:shadow-sticker',
             'transition-all'
           )}
         >
@@ -162,25 +162,25 @@ export function AnalyticsSection({
 
 export function AboutSection() {
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))]">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         ℹ️ About
       </h2>
       <ul className="space-y-3 text-sm text-muted-foreground">
         <li className="flex items-start gap-3">
-          <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
+          <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 border border-primary/30">
             1
           </span>
           <span>Create and organize your social media post ideas.</span>
         </li>
         <li className="flex items-start gap-3">
-          <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
+          <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 border border-primary/30">
             2
           </span>
           <span>Schedule posts and get reminded when they&apos;re due.</span>
         </li>
         <li className="flex items-start gap-3">
-          <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 border border-primary/30">
+          <span className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 border border-primary/30">
             3
           </span>
           <span>Your data is securely stored and encrypted in the cloud.</span>

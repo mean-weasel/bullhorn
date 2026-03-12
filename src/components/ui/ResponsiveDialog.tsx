@@ -68,7 +68,7 @@ export function ResponsiveDialog({
       <div
         className={cn(
           'absolute inset-0 animate-in fade-in duration-200',
-          'bg-black/40 backdrop-blur-sm'
+          'bg-black/40 backdrop-blur-xs'
         )}
       />
 
@@ -94,7 +94,7 @@ export function ResponsiveDialog({
                 'rounded-lg',
                 'animate-in zoom-in-95 fade-in duration-200',
                 'border-[3px] border-border',
-                'shadow-[4px_4px_0_hsl(var(--border))]',
+                'shadow-sticker',
               ],
           'bg-card',
           className
@@ -103,7 +103,7 @@ export function ResponsiveDialog({
       >
         {/* Drag indicator for mobile */}
         {isMobile && (
-          <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="flex justify-center pt-3 pb-1 shrink-0">
             <div className="w-12 h-1.5 rounded-full bg-border" />
           </div>
         )}
@@ -126,7 +126,7 @@ export function ResponsiveDialog({
         {/* Content wrapper */}
         <div className={cn('overflow-y-auto', isMobile ? 'px-4 pb-4 pt-2' : 'p-6')}>
           {/* Icon */}
-          {icon && <div className={cn('flex-shrink-0', isMobile ? 'mb-3' : 'mb-4')}>{icon}</div>}
+          {icon && <div className={cn('shrink-0', isMobile ? 'mb-3' : 'mb-4')}>{icon}</div>}
 
           {/* Title */}
           {title && (
@@ -145,7 +145,7 @@ export function ResponsiveDialog({
         </div>
 
         {/* Safe area spacer for notched devices */}
-        {isMobile && <div className="h-[env(safe-area-inset-bottom)] bg-card flex-shrink-0" />}
+        {isMobile && <div className="h-[env(safe-area-inset-bottom)] bg-card shrink-0" />}
       </div>
     </div>
   )
@@ -212,27 +212,27 @@ export function ResponsiveDialogButton({
         isMobile ? 'px-4 py-3.5 min-h-[52px]' : 'px-4 py-3',
         variant === 'primary' && [
           'bg-primary text-primary-foreground',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px hover:shadow-sticker',
+          'active:translate-y-px active:shadow-sticker-hover',
         ],
         variant === 'secondary' && [
           'bg-secondary text-secondary-foreground',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px hover:shadow-sticker',
+          'active:translate-y-px active:shadow-sticker-hover',
         ],
         variant === 'danger' && [
           'bg-destructive text-destructive-foreground',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px hover:shadow-sticker',
+          'active:translate-y-px active:shadow-sticker-hover',
         ],
         variant === 'warning' && [
           'bg-sticker-orange text-white',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
-          'active:translate-y-[1px] active:shadow-[2px_2px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px hover:shadow-sticker',
+          'active:translate-y-px active:shadow-sticker-hover',
         ],
         'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
         className

@@ -77,7 +77,7 @@ export const PublishedLinks = ({
                   }))
                 }
                 placeholder="https://twitter.com/user/status/..."
-                className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-twitter"
+                className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-hidden focus:border-twitter"
               />
             </div>
           )}
@@ -102,7 +102,7 @@ export const PublishedLinks = ({
                   }))
                 }
                 placeholder="https://linkedin.com/posts/..."
-                className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-linkedin"
+                className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-hidden focus:border-linkedin"
               />
             </div>
           )}
@@ -136,7 +136,7 @@ export const PublishedLinks = ({
                     }))
                   }
                   placeholder="https://reddit.com/r/..."
-                  className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-reddit"
+                  className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-hidden focus:border-reddit"
                 />
               </div>
             ))}

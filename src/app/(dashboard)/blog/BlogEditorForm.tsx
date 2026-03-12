@@ -257,7 +257,7 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
               disabled={saving || !title.trim()}
               className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-lg min-h-[40px]',
-                'bg-gradient-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
+                'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
                 'border-2 border-[hsl(var(--gold-dark))]',
                 'text-primary-foreground font-medium text-sm',
                 'hover:shadow-lg hover:shadow-[hsl(var(--gold))]/30 transition-all',
@@ -302,7 +302,7 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
           maxLength={300}
           className={cn(
             'w-full text-2xl md:text-3xl font-display font-bold',
-            'bg-transparent border-none outline-none',
+            'bg-transparent border-none outline-hidden',
             'placeholder:text-muted-foreground/50',
             'mb-4'
           )}
@@ -334,7 +334,7 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
 
         {/* Tags */}
         <div className="flex items-center gap-3 mb-6">
-          <Tag className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
           <div className="flex flex-wrap gap-2">
             {BLOG_DRAFT_TAGS.map((tag) => {
               const isSelected = tags.includes(tag)
@@ -381,7 +381,7 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
               'bg-muted/50 border border-border rounded-lg',
               'p-3 text-sm',
               'placeholder:text-muted-foreground/50',
-              'focus:outline-none focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
+              'focus:outline-hidden focus:ring-2 focus:ring-[hsl(var(--gold))]/50'
             )}
           />
         </div>

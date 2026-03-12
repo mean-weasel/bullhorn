@@ -49,7 +49,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <Toaster
         position="top-right"
         toastOptions={{
-          className: 'border-2 border-border shadow-[3px_3px_0_hsl(var(--border))] font-sans',
+          className: 'border-2 border-border shadow-sticker-sm font-sans',
           duration: 4000,
         }}
       />
@@ -58,7 +58,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       {/* Skip to content link for keyboard users */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:font-bold focus:border-[3px] focus:border-border focus:shadow-[3px_3px_0_hsl(var(--border))]"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-100 focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:font-bold focus:border-[3px] focus:border-border focus:shadow-sticker-sm"
       >
         Skip to content
       </a>

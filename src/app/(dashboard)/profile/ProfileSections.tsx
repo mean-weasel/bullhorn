@@ -27,14 +27,14 @@ export function ProfileInfoSection({
   onSave,
 }: ProfileInfoSectionProps) {
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         👋 Profile Information
       </h2>
 
       {/* Avatar */}
       <div className="flex items-center gap-4 mb-6">
-        <div className="w-16 h-16 rounded-lg bg-sticker-purple flex items-center justify-center text-xl font-bold text-white border-[3px] border-border shadow-[3px_3px_0_hsl(var(--border))]">
+        <div className="w-16 h-16 rounded-lg bg-sticker-purple flex items-center justify-center text-xl font-bold text-white border-[3px] border-border shadow-sticker-sm">
           {initials}
         </div>
         <div>
@@ -59,8 +59,8 @@ export function ProfileInfoSection({
             'w-full px-4 py-3 rounded-md',
             'bg-card text-foreground placeholder-muted-foreground',
             'border-[3px] border-border',
-            'shadow-[3px_3px_0_hsl(var(--border))]',
-            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'shadow-sticker-sm',
+            'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
             'transition-all'
           )}
         />
@@ -75,8 +75,8 @@ export function ProfileInfoSection({
           'mt-4 px-4 py-2.5 rounded-md',
           'bg-primary text-primary-foreground font-bold text-sm',
           'border-[3px] border-border',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px hover:shadow-sticker',
           'active:translate-y-[2px] active:shadow-[1px_1px_0_hsl(var(--border))]',
           'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
           'transition-all'
@@ -126,7 +126,7 @@ export function AccountSection({ email, changingPassword, onChangePassword }: Ac
   }
 
   return (
-    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-[4px_4px_0_hsl(var(--border))] mb-6">
+    <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground mb-4">
         🔐 Account
       </h2>
@@ -180,8 +180,8 @@ export function AccountSection({ email, changingPassword, onChangePassword }: Ac
                   'w-full px-4 py-3 pr-10 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',
                   'border-[3px] border-border',
-                  'shadow-[3px_3px_0_hsl(var(--border))]',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                  'shadow-sticker-sm',
+                  'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -212,8 +212,8 @@ export function AccountSection({ email, changingPassword, onChangePassword }: Ac
                   'w-full px-4 py-3 pr-10 rounded-md',
                   'bg-card text-foreground placeholder-muted-foreground',
                   'border-[3px] border-border',
-                  'shadow-[3px_3px_0_hsl(var(--border))]',
-                  'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                  'shadow-sticker-sm',
+                  'focus:outline-hidden focus:ring-2 focus:ring-primary/50',
                   'transition-all'
                 )}
               />
@@ -234,8 +234,8 @@ export function AccountSection({ email, changingPassword, onChangePassword }: Ac
               'px-4 py-2.5 rounded-md',
               'bg-sticker-blue text-white font-bold text-sm',
               'border-[3px] border-border',
-              'shadow-[3px_3px_0_hsl(var(--border))]',
-              'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+              'shadow-sticker-sm',
+              'hover:-translate-y-px hover:shadow-sticker',
               'active:translate-y-[2px] active:shadow-[1px_1px_0_hsl(var(--border))]',
               'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0',
               'transition-all'
@@ -271,8 +271,8 @@ export function DangerZoneSection({ onDeleteClick }: DangerZoneSectionProps) {
           'flex items-center gap-2 px-4 py-2.5 rounded-md',
           'bg-destructive text-destructive-foreground font-bold text-sm',
           'border-[3px] border-border',
-          'shadow-[3px_3px_0_hsl(var(--border))]',
-          'hover:translate-y-[-1px] hover:shadow-[4px_4px_0_hsl(var(--border))]',
+          'shadow-sticker-sm',
+          'hover:-translate-y-px hover:shadow-sticker',
           'transition-all'
         )}
       >

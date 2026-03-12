@@ -62,7 +62,7 @@ const TwitterPreview = ({ content, mediaUrls }: { content: string; mediaUrls: st
       </div>
       <div className="bg-[#15202B] rounded-2xl p-4">
         <div className="flex gap-3 mb-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-500 to-pink-500" />
           <div>
             <div className="font-bold text-[15px] text-[#E7E9EA]">Your Name</div>
             <div className="text-[15px] text-[#71767B]">@yourhandle</div>
@@ -125,14 +125,14 @@ const LinkedInPreview = ({
       </div>
       <div className="bg-card rounded-lg p-4 border border-border">
         <div className="flex gap-3 mb-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+          <div className="w-12 h-12 rounded-full bg-linear-to-br from-purple-500 to-pink-500" />
           <div>
             <div className="font-semibold text-sm text-foreground">Your Name</div>
             <div className="text-xs text-muted-foreground">Software Engineer at Company</div>
             <div className="text-xs text-muted-foreground">Just now</div>
           </div>
         </div>
-        <div className="text-sm leading-[1.5] text-foreground whitespace-pre-wrap">
+        <div className="text-sm leading-normal text-foreground whitespace-pre-wrap">
           {content || 'Your LinkedIn post will appear here...'}
         </div>
         {linkedInMediaUrl && (
