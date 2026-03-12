@@ -36,18 +36,18 @@ export function IOSDateTimePicker({
   const dateInputRef = useRef<HTMLInputElement>(null)
   const timeInputRef = useRef<HTMLInputElement>(null)
 
-  // Initialize temp values when opening
-  useEffect(() => {
-    if (isOpen && value) {
+  const handleOpen = () => {
+    if (disabled) return
+    if (value) {
       setTempDate(format(value, 'yyyy-MM-dd'))
       setTempTime(format(value, 'HH:mm'))
-    } else if (isOpen) {
-      // Default to today/now if no value
+    } else {
       const now = new Date()
       setTempDate(format(now, 'yyyy-MM-dd'))
       setTempTime(format(now, 'HH:mm'))
     }
-  }, [isOpen, value])
+    setIsOpen(true)
+  }
 
   // Handle escape key and prevent body scroll
   useEffect(() => {
@@ -181,7 +181,7 @@ export function IOSDateTimePicker({
       <button
         type="button"
         data-testid={dataTestId}
-        onClick={() => !disabled && setIsOpen(true)}
+        onClick={handleOpen}
         disabled={disabled}
         className={cn(
           'flex items-center gap-2 px-4 py-3 rounded-md border-[3px] w-full',

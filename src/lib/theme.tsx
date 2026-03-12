@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useMemo, ReactNode } from 'react'
 
 export type Theme = 'light' | 'dark' | 'system'
 
@@ -24,30 +24,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return stored || 'system'
   })
 
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
-    if (theme === 'system') return getSystemTheme()
-    return theme
-  })
-
-  // Update resolved theme when theme changes
-  useEffect(() => {
-    const resolved = theme === 'system' ? getSystemTheme() : theme
-    setResolvedTheme(resolved)
-  }, [theme])
+  const [systemTheme, setSystemTheme] = useState<'light' | 'dark'>(getSystemTheme)
 
   // Listen for system theme changes
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-    const handleChange = () => {
-      if (theme === 'system') {
-        setResolvedTheme(getSystemTheme())
-      }
-    }
-
+    const handleChange = () => setSystemTheme(getSystemTheme())
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme])
+  }, [])
+
+  const resolvedTheme = useMemo(
+    () => (theme === 'system' ? systemTheme : theme),
+    [theme, systemTheme]
+  )
 
   // Apply theme to document
   useEffect(() => {

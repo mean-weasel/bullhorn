@@ -1,22 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { X, FileText, FolderOpen, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function WelcomeModal() {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    // Never show in E2E test mode — modal intercepts pointer events
-    if (process.env.NEXT_PUBLIC_E2E_TEST_MODE === 'true') return
-
-    const completed = localStorage.getItem('onboarding_complete')
-    if (!completed) {
-      setVisible(true)
-    }
-  }, [])
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === 'undefined') return false
+    if (process.env.NEXT_PUBLIC_E2E_TEST_MODE === 'true') return false
+    return !localStorage.getItem('onboarding_complete')
+  })
 
   const handleDismiss = () => {
     localStorage.setItem('onboarding_complete', 'true')

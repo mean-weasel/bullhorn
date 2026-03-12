@@ -25,7 +25,9 @@ export function useAutoSave({
   const hasInitialized = useRef(!skipInitialChange) // Pre-initialize if not skipping
   // Use ref for onSave to avoid effect re-runs when callback reference changes
   const onSaveRef = useRef(onSave)
-  onSaveRef.current = onSave
+  useEffect(() => {
+    onSaveRef.current = onSave
+  })
 
   // Serialize data for comparison
   const serializedData = JSON.stringify(data)
