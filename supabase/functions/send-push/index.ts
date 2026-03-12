@@ -100,7 +100,8 @@ Deno.serve(async (req: Request) => {
     .eq('user_id', userId)
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Database error fetching push tokens:', error.message)
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })

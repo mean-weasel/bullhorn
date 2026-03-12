@@ -56,10 +56,7 @@ export async function GET() {
 
     const authUrl = `${GOOGLE_AUTH_URL}?${params.toString()}`
 
-    return NextResponse.json({
-      url: authUrl,
-      state,
-    })
+    return NextResponse.json({ url: authUrl })
   } catch (error) {
     console.error('Error generating OAuth URL:', error)
     return NextResponse.json({ error: 'Failed to generate OAuth URL' }, { status: 500 })

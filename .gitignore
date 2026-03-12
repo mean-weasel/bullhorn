@@ -87,3 +87,10 @@ DEPLOY.md
 
 # Internal planning docs (references private repos)
 docs/plans/cross-repo-setup.md
+docs/plans/plan-refine-tracking.md
+
+# Tool config (user-specific)
+.xcodebuildmcp/
+
+# Internal plans
+plans/

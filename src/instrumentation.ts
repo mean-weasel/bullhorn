@@ -8,6 +8,8 @@ export async function register() {
   }
 }
 
+const SENSITIVE_HEADERS = ['authorization', 'cookie', 'x-api-key']
+
 export async function onRequestError(
   err: { digest: string } & Error,
   request: {
@@ -17,6 +19,14 @@ export async function onRequestError(
   },
   context: { routerKind: string; routePath: string; routeType: string; renderSource: string }
 ) {
+  // Scrub sensitive headers before sending to Sentry
+  const sanitizedHeaders = { ...request.headers }
+  for (const key of Object.keys(sanitizedHeaders)) {
+    if (SENSITIVE_HEADERS.includes(key.toLowerCase())) {
+      sanitizedHeaders[key] = '[Filtered]'
+    }
+  }
+
   const { captureRequestError } = await import('@sentry/nextjs')
-  captureRequestError(err, request, context)
+  captureRequestError(err, { ...request, headers: sanitizedHeaders }, context)
 }

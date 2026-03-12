@@ -1,5 +1,5 @@
 {
-  "name": "@neonwatty/bullhorn-mcp",
+  "name": "@mean-weasel/bullhorn-mcp",
   "version": "0.3.0",
   "description": "MCP server for Bullhorn — manage posts, campaigns, projects, and more",
   "type": "module",
@@ -22,7 +22,7 @@
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/neonwatty/bullhorn",
+    "url": "https://github.com/mean-weasel/bullhorn",
     "directory": "mcp-server"
   },
   "engines": {
