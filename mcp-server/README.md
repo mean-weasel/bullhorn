@@ -1,4 +1,4 @@
-# @neonwatty/bullhorn-mcp
+# @mean-weasel/bullhorn-mcp
 
 MCP server for [Bullhorn](https://bullhorn.to) — manage social media posts, campaigns, projects, blog drafts, and launch posts from Claude Code or any MCP client.
 
@@ -7,7 +7,7 @@ MCP server for [Bullhorn](https://bullhorn.to) — manage social media posts, ca
 ## Quick Start
 
 ```bash
-npx @neonwatty/bullhorn-mcp
+npx @mean-weasel/bullhorn-mcp
 ```
 
 Requires `BULLHORN_API_KEY` in your environment. Create one at **Settings → API Keys** in the Bullhorn app.
@@ -21,7 +21,7 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "bullhorn": {
       "command": "npx",
-      "args": ["-y", "@neonwatty/bullhorn-mcp"],
+      "args": ["-y", "@mean-weasel/bullhorn-mcp"],
       "env": {
         "BULLHORN_API_URL": "https://bullhorn.to"
       }

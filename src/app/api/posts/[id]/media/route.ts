@@ -55,9 +55,10 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const media = await Promise.all(
       mediaFiles.map(async (fileUrl) => {
         const filename = fileUrl.split('/').pop() || fileUrl
+        const storagePath = `${userId}/${filename}`
         const { data: signedUrl } = await supabase.storage
           .from('media')
-          .createSignedUrl(filename, 3600)
+          .createSignedUrl(storagePath, 3600)
 
         return {
           filename,

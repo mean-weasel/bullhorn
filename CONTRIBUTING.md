@@ -75,6 +75,22 @@ See `CLAUDE.md` for a detailed architecture overview including:
 - Zustand store patterns
 - Design system (sticker bomb aesthetic)
 
+## Forking — Values You Must Change
+
+If you're forking Bullhorn to run your own instance, update these project-specific values:
+
+| Value | Location | What to set |
+|-------|----------|-------------|
+| Bundle ID | `capacitor.config.ts` → `appId` | Your own reverse-domain ID (e.g. `com.yourorg.app`) |
+| `APNS_TEAM_ID` | Environment variable | Your Apple Developer Team ID |
+| `APNS_KEY_ID` | Environment variable | Your APNs auth key ID |
+| `APNS_PRIVATE_KEY` | Environment variable | Your APNs `.p8` key contents |
+| `GOOGLE_IOS_CLIENT_ID` | Environment variable | Your Google OAuth iOS client ID |
+| `GOOGLE_WEB_CLIENT_ID` | Environment variable | Your Google OAuth web client ID |
+| `NEXT_PUBLIC_APP_URL` | Environment variable | Your production URL |
+
+See `docs/environment-variables.md` for the full list of environment variables.
+
 ## iOS Development (Optional)
 
 The iOS app is a Capacitor 8 wrapper. To work on it:

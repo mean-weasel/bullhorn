@@ -1,7 +1,20 @@
 import { requireAuth, parseJsonBody } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
+
+const subscriptionSchema = z.object({
+  endpoint: z.string().url().max(2048),
+  keys: z.object({
+    p256dh: z.string().min(1).max(256),
+    auth: z.string().min(1).max(256),
+  }),
+})
+
+const deleteSubscriptionSchema = z.object({
+  endpoint: z.string().url().max(2048),
+})
 
 // POST - Save web push subscription
 export async function POST(request: Request) {
@@ -10,21 +23,21 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const { endpoint, keys } = jsonResult.data as {
-      endpoint?: string
-      keys?: { p256dh?: string; auth?: string }
-    }
 
-    if (!endpoint || !keys?.p256dh || !keys?.auth) {
-      return Response.json({ error: 'Invalid subscription data' }, { status: 400 })
+    const parsed = subscriptionSchema.safeParse(jsonResult.data)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
 
     const { error } = await supabase.from('web_push_subscriptions').upsert(
       {
         user_id: userId,
-        endpoint,
-        keys_p256dh: keys.p256dh,
-        keys_auth: keys.auth,
+        endpoint: parsed.data.endpoint,
+        keys_p256dh: parsed.data.keys.p256dh,
+        keys_auth: parsed.data.keys.auth,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id,endpoint' }
@@ -48,17 +61,20 @@ export async function DELETE(request: Request) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const { endpoint } = jsonResult.data as { endpoint?: string }
 
-    if (!endpoint) {
-      return Response.json({ error: 'Endpoint is required' }, { status: 400 })
+    const parsed = deleteSubscriptionSchema.safeParse(jsonResult.data)
+    if (!parsed.success) {
+      return Response.json(
+        { error: 'Invalid input', details: parsed.error.flatten() },
+        { status: 400 }
+      )
     }
 
     const { error } = await supabase
       .from('web_push_subscriptions')
       .delete()
       .eq('user_id', userId)
-      .eq('endpoint', endpoint)
+      .eq('endpoint', parsed.data.endpoint)
 
     if (error) throw error
 

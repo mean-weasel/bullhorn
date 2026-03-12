@@ -31,7 +31,7 @@
     },
     "bullhorn": {
       "command": "doppler",
-      "args": ["run", "--project", "bullhorn", "--config", "prd", "--", "npx", "-y", "@neonwatty/bullhorn-mcp"],
+      "args": ["run", "--project", "bullhorn", "--config", "prd", "--", "npx", "-y", "@mean-weasel/bullhorn-mcp"],
       "env": {
         "BULLHORN_API_URL": "https://bullhorn.to"
       }

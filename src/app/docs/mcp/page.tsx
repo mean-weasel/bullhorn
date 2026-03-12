@@ -5,7 +5,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'MCP Server Documentation',
   description:
-    'Connect Claude Code or any MCP client to manage your Bullhorn content with AI. Documentation for the @neonwatty/bullhorn-mcp npm package.',
+    'Connect Claude Code or any MCP client to manage your Bullhorn content with AI. Documentation for the @mean-weasel/bullhorn-mcp npm package.',
 }
 import {
   Megaphone,
@@ -181,7 +181,7 @@ const mcpConfig = `{
   "mcpServers": {
     "bullhorn": {
       "command": "npx",
-      "args": ["-y", "@neonwatty/bullhorn-mcp"],
+      "args": ["-y", "@mean-weasel/bullhorn-mcp"],
       "env": {
         "BULLHORN_API_URL": "https://bullhorn.to"
       }
@@ -337,13 +337,13 @@ export default function McpDocsPage() {
 
           <div className="inline-flex">
             <a
-              href="https://www.npmjs.com/package/@neonwatty/bullhorn-mcp"
+              href="https://www.npmjs.com/package/@mean-weasel/bullhorn-mcp"
               target="_blank"
               rel="noopener noreferrer"
               className="sticker-badge border-[hsl(var(--gold-dark))] bg-primary/10 font-mono text-sm text-primary transition-colors hover:bg-primary/20"
             >
               <Package className="mr-1.5 h-3.5 w-3.5" />
-              @neonwatty/bullhorn-mcp
+              @mean-weasel/bullhorn-mcp
               <ExternalLink className="ml-1.5 h-3 w-3" />
             </a>
           </div>
@@ -643,7 +643,7 @@ export default function McpDocsPage() {
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <a
-              href="https://www.npmjs.com/package/@neonwatty/bullhorn-mcp"
+              href="https://www.npmjs.com/package/@mean-weasel/bullhorn-mcp"
               target="_blank"
               rel="noopener noreferrer"
               className="transition-colors hover:text-foreground"
