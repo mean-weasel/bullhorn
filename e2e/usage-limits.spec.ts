@@ -129,7 +129,7 @@ test.describe('Usage Limits', () => {
       // Upgrade modal should appear with limit info
       await expect(page.getByText(/limit reached/i)).toBeVisible()
       await expect(page.getByText('3 / 3')).toBeVisible()
-      await expect(page.getByText(/coming soon/i)).toBeVisible()
+      await expect(page.getByText('Coming Soon', { exact: true })).toBeVisible()
 
       // Dismiss modal
       await page.getByRole('button', { name: /got it/i }).click()
@@ -167,8 +167,8 @@ test.describe('Usage Limits', () => {
 
       // Should show Plan & Usage section with Free badge and beta messaging
       await expect(page.getByText('Plan & Usage')).toBeVisible()
-      await expect(page.getByText('Free')).toBeVisible()
-      await expect(page.getByText(/free during beta/i)).toBeVisible()
+      await expect(page.getByText('Free', { exact: true })).toBeVisible()
+      await expect(page.getByText('Free during beta')).toBeVisible()
     })
 
     test('should show usage bars with correct counts', async ({ page }) => {
