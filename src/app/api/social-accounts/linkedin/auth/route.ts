@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { enforceSocialAccountLimit } from '@/lib/planEnforcement'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
@@ -8,10 +9,26 @@ export const dynamic = 'force-dynamic'
 // GET /api/social-accounts/linkedin/auth - Generate LinkedIn OAuth 2.0 URL
 export async function GET() {
   try {
+    let userId: string
     try {
-      await requireAuth()
+      const auth = await requireAuth()
+      userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Enforce per-provider social account limit
+    const limitCheck = await enforceSocialAccountLimit(userId, 'linkedin')
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'LinkedIn account limit reached',
+          limit: limitCheck.limit,
+          current: limitCheck.current,
+          plan: limitCheck.plan,
+        },
+        { status: 403 }
+      )
     }
 
     const clientId = process.env.LINKEDIN_CLIENT_ID

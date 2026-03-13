@@ -117,7 +117,12 @@ export async function POST(request: NextRequest) {
     const limitCheck = await enforceResourceLimit(userId, 'posts')
     if (!limitCheck.allowed) {
       return NextResponse.json(
-        { error: 'Post limit reached', limit: limitCheck.limit, current: limitCheck.current },
+        {
+          error: 'Post limit reached',
+          limit: limitCheck.limit,
+          current: limitCheck.current,
+          plan: limitCheck.plan,
+        },
         { status: 403 }
       )
     }

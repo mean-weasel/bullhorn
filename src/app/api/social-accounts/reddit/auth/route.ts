@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { enforceSocialAccountLimit } from '@/lib/planEnforcement'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
@@ -7,10 +8,26 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    let userId: string
     try {
-      await requireAuth()
+      const auth = await requireAuth()
+      userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Enforce per-provider social account limit
+    const limitCheck = await enforceSocialAccountLimit(userId, 'reddit')
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Reddit account limit reached',
+          limit: limitCheck.limit,
+          current: limitCheck.current,
+          plan: limitCheck.plan,
+        },
+        { status: 403 }
+      )
     }
 
     const clientId = process.env.REDDIT_CLIENT_ID

@@ -2,11 +2,12 @@
 
 import { useState, type ReactNode, type ReactElement, cloneElement } from 'react'
 import { usePlanStore } from '@/lib/planStore'
-import { RESOURCE_LABELS, type ResourceType } from '@/lib/limits'
+import { RESOURCE_LABELS } from '@/lib/limits'
+import { type GenericResource } from '@/lib/planEnforcement'
 import { UpgradePromptModal } from './UpgradePromptModal'
 
 interface LimitGateProps {
-  resource: Exclude<ResourceType, 'storageBytes'>
+  resource: GenericResource | 'apiKeys'
   children: ReactNode
 }
 
@@ -41,7 +42,7 @@ export function LimitGate({ resource, children }: LimitGateProps) {
         open={showUpgrade}
         onDismiss={() => setShowUpgrade(false)}
         title={`${label} limit reached`}
-        description={`You've used all ${limitInfo.limit} ${label.toLowerCase()} on the free plan. Upgrade to Pro for higher limits.`}
+        description={`You've used all ${limitInfo.limit} ${label.toLowerCase()} available during the beta. Paid plans with higher limits are coming soon.`}
         resourceName={label}
         currentCount={limitInfo.current}
         limit={limitInfo.limit}

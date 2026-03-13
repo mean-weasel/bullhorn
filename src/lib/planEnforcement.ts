@@ -1,10 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS, type PlanType, type ResourceType } from './limits'
 
-const TABLE_MAP: Record<
-  Exclude<ResourceType, 'storageBytes'>,
-  { table: string; countCol: string }
-> = {
+/** Resources that use the generic count-based enforcement via TABLE_MAP */
+export type GenericResource = Exclude<
+  ResourceType,
+  'storageBytes' | 'apiKeys' | 'socialAccountsPerProvider'
+>
+
+const TABLE_MAP: Record<GenericResource, { table: string; countCol: string }> = {
   posts: { table: 'posts', countCol: 'user_id' },
   campaigns: { table: 'campaigns', countCol: 'user_id' },
   projects: { table: 'projects', countCol: 'user_id' },
@@ -24,7 +27,7 @@ export async function getUserPlan(userId: string): Promise<PlanType> {
 
 export async function enforceResourceLimit(
   userId: string,
-  resource: Exclude<ResourceType, 'storageBytes'>,
+  resource: GenericResource,
   preloadedPlan?: PlanType
 ): Promise<{ allowed: boolean; current: number; limit: number; plan: PlanType }> {
   const supabase = await createClient()
@@ -48,6 +51,24 @@ export async function enforceResourceLimit(
     .from(table)
     .select('*', { count: 'exact', head: true })
     .eq(countCol, userId)
+
+  const current = count || 0
+  return { allowed: current < limit, current, limit, plan }
+}
+
+export async function enforceSocialAccountLimit(
+  userId: string,
+  provider: string
+): Promise<{ allowed: boolean; current: number; limit: number; plan: PlanType }> {
+  const supabase = await createClient()
+  const plan = await getUserPlan(userId)
+  const limit = PLAN_LIMITS[plan].socialAccountsPerProvider
+
+  const { count } = await supabase
+    .from('social_accounts')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('provider', provider)
 
   const current = count || 0
   return { allowed: current < limit, current, limit, plan }

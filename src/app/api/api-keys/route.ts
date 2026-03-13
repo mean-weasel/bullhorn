@@ -1,5 +1,7 @@
 import { requireSessionAuth, ALL_SCOPES, parseJsonBody, hashApiKey } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
+import { getUserPlan } from '@/lib/planEnforcement'
+import { PLAN_LIMITS } from '@/lib/limits'
 import { randomBytes } from 'crypto'
 import { z } from 'zod'
 
@@ -81,14 +83,29 @@ export async function POST(request: Request) {
       )
     }
 
+    // Enforce API key limit (count only non-revoked keys)
+    const plan = await getUserPlan(userId)
+    const limit = PLAN_LIMITS[plan].apiKeys
+    const supabase = getServiceClient()
+    const { count } = await supabase
+      .from('api_keys')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .is('revoked_at', null)
+    const current = count || 0
+    if (current >= limit) {
+      return Response.json(
+        { error: 'API key limit reached', limit, current, plan },
+        { status: 403 }
+      )
+    }
+
     // Generate raw key: bh_ + 40 hex chars (20 random bytes = 160 bits)
     const rawKey = `bh_${randomBytes(20).toString('hex')}`
     const keyPrefix = rawKey.slice(0, 12)
 
     // HMAC-SHA256 hash for storage (falls back to SHA-256 if secret not set)
     const keyHash = hashApiKey(rawKey)
-
-    const supabase = getServiceClient()
 
     const { data, error } = await supabase
       .from('api_keys')

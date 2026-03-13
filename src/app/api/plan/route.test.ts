@@ -32,13 +32,14 @@ const mockRequireAuth = vi.mocked(requireAuth)
 /**
  * Set up mock responses for the plan route.
  *
- * The route calls `supabase.from(table)` for 6 tables in order:
+ * The route calls `supabase.from(table)` for 7 tables in order:
  *   1. user_profiles  -> .select().eq().single()
  *   2. posts          -> .select().eq()
  *   3. campaigns      -> .select().eq()
  *   4. projects       -> .select().eq()
  *   5. blog_drafts    -> .select().eq()
  *   6. launch_posts   -> .select().eq()
+ *   7. api_keys       -> .select().eq().is()
  *
  * Because .eq() returns { eq, single }, the resource-count calls
  * resolve from the final .eq() call (not .single()).
@@ -50,6 +51,7 @@ const mockRequireAuth = vi.mocked(requireAuth)
  *   call 4: projects .eq('user_id', userId)
  *   call 5: blog_drafts .eq('user_id', userId)
  *   call 6: launch_posts .eq('user_id', userId)
+ *   call 7: api_keys .eq('user_id', userId)    -> returns { is } for .is() chaining
  */
 function setupMocks(opts: {
   profile?: { plan: string; storage_used_bytes: number } | null
@@ -59,6 +61,7 @@ function setupMocks(opts: {
   projectCount?: number
   blogDraftCount?: number
   launchPostCount?: number
+  apiKeyCount?: number
 }) {
   // Reset mock implementations for each call
   // mockSingle is called once for the user_profiles query
@@ -78,15 +81,19 @@ function setupMocks(opts: {
     { count: opts.launchPostCount ?? 0, data: null, error: null },
   ]
 
+  const apiKeyResult = { count: opts.apiKeyCount ?? 0, data: null, error: null }
+
   // The first .eq() call is for user_profiles (returns { eq, single })
   // Then 5 resource-count .eq() calls each need to resolve with count.
+  // The 7th .eq() call is for api_keys which chains .is('revoked_at', null).
   // The supabase client returns a thenable from .eq() — it's a
   // PostgrestFilterBuilder which is both chainable AND thenable. We need our
   // mock .eq() to behave the same way for the resource queries.
   //
   // Strategy: track call index. For the profile .eq() (1st call), return
   // the chainable object. For resource .eq() calls (2nd-6th), return the
-  // count result directly (which Promise.all will resolve).
+  // count result directly. For api_keys .eq() (7th), return { is } so
+  // .is('revoked_at', null) can resolve with the api key count.
 
   let eqCallIndex = 0
   // @ts-expect-error -- mock returns different shapes for profile vs resource queries
@@ -95,6 +102,10 @@ function setupMocks(opts: {
     if (eqCallIndex === 1) {
       // user_profiles .eq('id', userId) — needs .single() chaining
       return { eq: mockEq, single: mockSingle }
+    }
+    if (eqCallIndex === 7) {
+      // api_keys .eq('user_id', userId) — needs .is() chaining
+      return { is: vi.fn(() => apiKeyResult) }
     }
     // Resource count queries — return result with count field
     const result = resourceResults[eqCallIndex - 2]
@@ -132,6 +143,7 @@ describe('GET /api/plan', () => {
       projectCount: 1,
       blogDraftCount: 3,
       launchPostCount: 0,
+      apiKeyCount: 1,
     })
 
     const res = await GET()
@@ -144,6 +156,7 @@ describe('GET /api/plan', () => {
     expect(body.limits.projects).toEqual({ current: 1, limit: PLAN_LIMITS.free.projects })
     expect(body.limits.blogDrafts).toEqual({ current: 3, limit: PLAN_LIMITS.free.blogDrafts })
     expect(body.limits.launchPosts).toEqual({ current: 0, limit: PLAN_LIMITS.free.launchPosts })
+    expect(body.limits.apiKeys).toEqual({ current: 1, limit: PLAN_LIMITS.free.apiKeys })
     expect(body.storage).toEqual({
       usedBytes: 1024,
       limitBytes: PLAN_LIMITS.free.storageBytes,
@@ -159,6 +172,7 @@ describe('GET /api/plan', () => {
       projectCount: 5,
       blogDraftCount: 20,
       launchPostCount: 15,
+      apiKeyCount: 5,
     })
 
     const res = await GET()
@@ -171,6 +185,7 @@ describe('GET /api/plan', () => {
     expect(body.limits.projects.limit).toBe(PLAN_LIMITS.pro.projects)
     expect(body.limits.blogDrafts.limit).toBe(PLAN_LIMITS.pro.blogDrafts)
     expect(body.limits.launchPosts.limit).toBe(PLAN_LIMITS.pro.launchPosts)
+    expect(body.limits.apiKeys.limit).toBe(PLAN_LIMITS.pro.apiKeys)
     expect(body.storage.limitBytes).toBe(PLAN_LIMITS.pro.storageBytes)
   })
 
@@ -195,9 +210,10 @@ describe('GET /api/plan', () => {
     expect(body.limits).toHaveProperty('projects')
     expect(body.limits).toHaveProperty('blogDrafts')
     expect(body.limits).toHaveProperty('launchPosts')
+    expect(body.limits).toHaveProperty('apiKeys')
 
     // Each limit has current and limit
-    for (const key of ['posts', 'campaigns', 'projects', 'blogDrafts', 'launchPosts']) {
+    for (const key of ['posts', 'campaigns', 'projects', 'blogDrafts', 'launchPosts', 'apiKeys']) {
       expect(body.limits[key]).toHaveProperty('current')
       expect(body.limits[key]).toHaveProperty('limit')
       expect(typeof body.limits[key].current).toBe('number')
@@ -269,5 +285,6 @@ describe('GET /api/plan', () => {
     expect(fromCalls).toContain('projects')
     expect(fromCalls).toContain('blog_drafts')
     expect(fromCalls).toContain('launch_posts')
+    expect(fromCalls).toContain('api_keys')
   })
 })

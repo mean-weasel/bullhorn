@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
+import { enforceSocialAccountLimit } from '@/lib/planEnforcement'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
@@ -8,10 +9,26 @@ export const dynamic = 'force-dynamic'
 // GET /api/social-accounts/twitter/auth - Generate Twitter OAuth 2.0 URL with PKCE
 export async function GET() {
   try {
+    let userId: string
     try {
-      await requireAuth()
+      const auth = await requireAuth()
+      userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Enforce per-provider social account limit
+    const limitCheck = await enforceSocialAccountLimit(userId, 'twitter')
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Twitter account limit reached',
+          limit: limitCheck.limit,
+          current: limitCheck.current,
+          plan: limitCheck.plan,
+        },
+        { status: 403 }
+      )
     }
 
     const clientId = process.env.TWITTER_CLIENT_ID

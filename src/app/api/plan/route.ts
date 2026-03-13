@@ -19,20 +19,29 @@ export async function GET() {
     const supabase = await createClient()
 
     // Fetch profile and all resource counts in parallel
-    const [profileResult, posts, campaigns, projects, blogDrafts, launchPosts] = await Promise.all([
-      supabase.from('user_profiles').select('plan, storage_used_bytes').eq('id', userId).single(),
-      supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase.from('campaigns').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-      supabase
-        .from('blog_drafts')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId),
-      supabase
-        .from('launch_posts')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId),
-    ])
+    const [profileResult, posts, campaigns, projects, blogDrafts, launchPosts, apiKeys] =
+      await Promise.all([
+        supabase.from('user_profiles').select('plan, storage_used_bytes').eq('id', userId).single(),
+        supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase
+          .from('campaigns')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase
+          .from('blog_drafts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        supabase
+          .from('launch_posts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        supabase
+          .from('api_keys')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .is('revoked_at', null),
+      ])
 
     const plan = (profileResult.data?.plan as PlanType) || 'free'
     const storageUsedBytes = profileResult.data?.storage_used_bytes || 0
@@ -46,6 +55,7 @@ export async function GET() {
         projects: { current: projects.count ?? 0, limit: planLimits.projects },
         blogDrafts: { current: blogDrafts.count ?? 0, limit: planLimits.blogDrafts },
         launchPosts: { current: launchPosts.count ?? 0, limit: planLimits.launchPosts },
+        apiKeys: { current: apiKeys.count ?? 0, limit: planLimits.apiKeys },
       },
       storage: {
         usedBytes: storageUsedBytes,

@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
           error: 'Project limit reached',
           limit: limitCheck.limit,
           current: limitCheck.current,
+          plan: limitCheck.plan,
         },
         { status: 403 }
       )

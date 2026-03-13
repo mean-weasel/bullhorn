@@ -1,15 +1,19 @@
 import { create } from 'zustand'
 import { dedup } from './requestDedup'
-import { type PlanType, type ResourceType, PLAN_LIMITS } from './limits'
+import { type PlanType, PLAN_LIMITS } from './limits'
+import { type GenericResource } from './planEnforcement'
 
 interface LimitInfo {
   current: number
   limit: number
 }
 
+/** Resources tracked in the plan store (generic + apiKeys) */
+type TrackedResource = GenericResource | 'apiKeys'
+
 interface PlanState {
   plan: PlanType
-  limits: Record<Exclude<ResourceType, 'storageBytes'>, LimitInfo>
+  limits: Record<TrackedResource, LimitInfo>
   storage: { usedBytes: number; limitBytes: number }
   loading: boolean
   error: string | null
@@ -18,10 +22,10 @@ interface PlanState {
 
 interface PlanActions {
   fetchPlan: () => Promise<void>
-  isAtLimit: (resource: Exclude<ResourceType, 'storageBytes'>) => boolean
+  isAtLimit: (resource: TrackedResource) => boolean
   isNearAnyLimit: () => { resource: string; current: number; limit: number } | null
-  incrementCount: (resource: Exclude<ResourceType, 'storageBytes'>) => void
-  decrementCount: (resource: Exclude<ResourceType, 'storageBytes'>) => void
+  incrementCount: (resource: TrackedResource) => void
+  decrementCount: (resource: TrackedResource) => void
   reset: () => void
 }
 
@@ -31,6 +35,7 @@ const defaultLimits: PlanState['limits'] = {
   projects: { current: 0, limit: PLAN_LIMITS.free.projects },
   blogDrafts: { current: 0, limit: PLAN_LIMITS.free.blogDrafts },
   launchPosts: { current: 0, limit: PLAN_LIMITS.free.launchPosts },
+  apiKeys: { current: 0, limit: PLAN_LIMITS.free.apiKeys },
 }
 
 const initialState: PlanState = {

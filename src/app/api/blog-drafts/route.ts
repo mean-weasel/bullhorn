@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
           error: 'Blog draft limit reached',
           limit: limitCheck.limit,
           current: limitCheck.current,
+          plan: limitCheck.plan,
         },
         { status: 403 }
       )

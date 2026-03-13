@@ -5,6 +5,11 @@ vi.mock('@/lib/auth', () => ({
   requireAuth: () => mockRequireAuth(),
 }))
 
+const mockEnforceSocialAccountLimit = vi.fn()
+vi.mock('@/lib/planEnforcement', () => ({
+  enforceSocialAccountLimit: (...args: unknown[]) => mockEnforceSocialAccountLimit(...args),
+}))
+
 const mockCookieSet = vi.fn()
 vi.mock('next/headers', () => ({
   cookies: vi.fn(() =>
@@ -21,6 +26,12 @@ describe('GET /api/social-accounts/reddit/auth', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockRequireAuth.mockResolvedValue({ userId: 'user-123' })
+    mockEnforceSocialAccountLimit.mockResolvedValue({
+      allowed: true,
+      current: 0,
+      limit: 1,
+      plan: 'free',
+    })
     vi.stubEnv('REDDIT_CLIENT_ID', 'test-client-id')
     vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://localhost:3000')
   })
@@ -31,6 +42,20 @@ describe('GET /api/social-accounts/reddit/auth', () => {
     expect(res.status).toBe(401)
     const body = await res.json()
     expect(body.error).toBe('Unauthorized')
+  })
+
+  it('returns 403 when social account limit reached', async () => {
+    mockEnforceSocialAccountLimit.mockResolvedValue({
+      allowed: false,
+      current: 1,
+      limit: 1,
+      plan: 'free',
+    })
+    const res = await GET()
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error).toBe('Reddit account limit reached')
+    expect(body.plan).toBe('free')
   })
 
   it('returns 500 when REDDIT_CLIENT_ID is not set', async () => {

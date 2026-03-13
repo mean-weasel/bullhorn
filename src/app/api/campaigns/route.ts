@@ -98,7 +98,12 @@ export async function POST(request: NextRequest) {
     const limitCheck = await enforceResourceLimit(userId, 'campaigns')
     if (!limitCheck.allowed) {
       return NextResponse.json(
-        { error: 'Campaign limit reached', limit: limitCheck.limit, current: limitCheck.current },
+        {
+          error: 'Campaign limit reached',
+          limit: limitCheck.limit,
+          current: limitCheck.current,
+          plan: limitCheck.plan,
+        },
         { status: 403 }
       )
     }

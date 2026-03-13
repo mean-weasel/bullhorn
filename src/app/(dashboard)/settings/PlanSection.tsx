@@ -3,7 +3,8 @@
 import { useEffect } from 'react'
 import { Crown } from 'lucide-react'
 import { usePlanStore } from '@/lib/planStore'
-import { RESOURCE_LABELS, type ResourceType } from '@/lib/limits'
+import { RESOURCE_LABELS } from '@/lib/limits'
+import { type GenericResource } from '@/lib/planEnforcement'
 import { cn } from '@/lib/utils'
 
 function formatBytes(bytes: number): string {
@@ -81,12 +82,13 @@ export function PlanSection() {
     )
   }
 
-  const resourceKeys: Exclude<ResourceType, 'storageBytes'>[] = [
+  const resourceKeys: (GenericResource | 'apiKeys')[] = [
     'posts',
     'campaigns',
     'projects',
     'blogDrafts',
     'launchPosts',
+    'apiKeys',
   ]
 
   return (
@@ -125,16 +127,12 @@ export function PlanSection() {
       </div>
 
       {plan === 'free' && (
-        <button
-          disabled
-          className={cn(
-            'w-full px-4 py-3 rounded-md font-bold text-sm',
-            'bg-muted text-muted-foreground border-[3px] border-border',
-            'cursor-not-allowed opacity-60'
-          )}
-        >
-          Upgrade to Pro — Coming Soon
-        </button>
+        <div className="text-center">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
+            Free during beta
+          </p>
+          <p className="text-xs text-muted-foreground">Paid plans with higher limits coming soon</p>
+        </div>
       )}
     </div>
   )

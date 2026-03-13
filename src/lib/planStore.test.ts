@@ -29,6 +29,7 @@ const makeFreePlanResponse = (overrides = {}) => ({
     projects: { current: 1, limit: PLAN_LIMITS.free.projects },
     blogDrafts: { current: 3, limit: PLAN_LIMITS.free.blogDrafts },
     launchPosts: { current: 0, limit: PLAN_LIMITS.free.launchPosts },
+    apiKeys: { current: 1, limit: PLAN_LIMITS.free.apiKeys },
   },
   storage: { usedBytes: 1024 * 1024, limitBytes: PLAN_LIMITS.free.storageBytes },
   ...overrides,
@@ -42,6 +43,7 @@ const makeProPlanResponse = (overrides = {}) => ({
     projects: { current: 5, limit: PLAN_LIMITS.pro.projects },
     blogDrafts: { current: 20, limit: PLAN_LIMITS.pro.blogDrafts },
     launchPosts: { current: 15, limit: PLAN_LIMITS.pro.launchPosts },
+    apiKeys: { current: 5, limit: PLAN_LIMITS.pro.apiKeys },
   },
   storage: { usedBytes: 100 * 1024 * 1024, limitBytes: PLAN_LIMITS.pro.storageBytes },
   ...overrides,
@@ -166,6 +168,7 @@ describe('usePlanStore', () => {
           projects: { current: 0, limit: 3 },
           blogDrafts: { current: 0, limit: 10 },
           launchPosts: { current: 0, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -180,6 +183,7 @@ describe('usePlanStore', () => {
           projects: { current: 0, limit: 3 },
           blogDrafts: { current: 0, limit: 10 },
           launchPosts: { current: 0, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -194,6 +198,7 @@ describe('usePlanStore', () => {
           projects: { current: 0, limit: 3 },
           blogDrafts: { current: 0, limit: 10 },
           launchPosts: { current: 0, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -208,6 +213,7 @@ describe('usePlanStore', () => {
           projects: { current: 3, limit: 3 },
           blogDrafts: { current: 0, limit: 10 },
           launchPosts: { current: 10, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -232,6 +238,7 @@ describe('usePlanStore', () => {
           projects: { current: 1, limit: 3 },
           blogDrafts: { current: 0, limit: 10 },
           launchPosts: { current: 0, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -250,6 +257,7 @@ describe('usePlanStore', () => {
           projects: { current: 0, limit: 3 },
           blogDrafts: { current: 0, limit: 10 },
           launchPosts: { current: 0, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -272,6 +280,7 @@ describe('usePlanStore', () => {
           projects: { current: 1, limit: 3 },
           blogDrafts: { current: 3, limit: 10 },
           launchPosts: { current: 0, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -290,6 +299,7 @@ describe('usePlanStore', () => {
           projects: { current: 0, limit: 3 },
           blogDrafts: { current: 0, limit: 10 },
           launchPosts: { current: 0, limit: 10 },
+          apiKeys: { current: 0, limit: 5 },
         },
       })
 
@@ -313,6 +323,7 @@ describe('usePlanStore', () => {
           projects: { current: 10, limit: 20 },
           blogDrafts: { current: 50, limit: 100 },
           launchPosts: { current: 25, limit: 100 },
+          apiKeys: { current: 10, limit: 25 },
         },
         storage: { usedBytes: 500000000, limitBytes: PLAN_LIMITS.pro.storageBytes },
         loading: true,

@@ -19,17 +19,17 @@ interface UpgradePromptModalProps {
 }
 
 const UPCOMING_FEATURES = [
-  'Higher limits on all resources',
+  'Auto-publishing to Twitter, LinkedIn, and Reddit',
+  'Analytics dashboards',
   'Team collaboration',
-  'Advanced analytics',
-  'Priority support',
+  'Higher limits on all resources',
 ]
 
 export function UpgradePromptModal({
   open,
   onDismiss,
-  title = "You've reached the free tier limit",
-  description = "You can continue using your existing resources. Premium features are coming soon — we'll notify you when they're available!",
+  title = "You've reached the beta limit",
+  description = 'Bullhorn is free during beta. Paid plans with higher limits are coming soon.',
   resourceName = 'Resources',
   currentCount = 3,
   limit = 3,
@@ -81,7 +81,7 @@ export function UpgradePromptModal({
       {/* Upcoming pro features */}
       <div className="mb-6">
         <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
-          Coming Soon with Pro
+          Coming Soon
         </p>
         <ul className="space-y-2">
           {UPCOMING_FEATURES.map((feature) => (

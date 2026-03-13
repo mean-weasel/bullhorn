@@ -7,6 +7,8 @@ export const PLAN_LIMITS = {
     projects: 3,
     blogDrafts: 10,
     launchPosts: 10,
+    apiKeys: 5,
+    socialAccountsPerProvider: 1,
     storageBytes: 50 * 1024 * 1024,
   },
   pro: {
@@ -15,6 +17,8 @@ export const PLAN_LIMITS = {
     projects: 20,
     blogDrafts: 100,
     launchPosts: 100,
+    apiKeys: 25,
+    socialAccountsPerProvider: 5,
     storageBytes: 2 * 1024 * 1024 * 1024,
   },
 } as const
@@ -27,5 +31,7 @@ export const RESOURCE_LABELS: Record<ResourceType, string> = {
   projects: 'Projects',
   blogDrafts: 'Blog Drafts',
   launchPosts: 'Launch Posts',
+  apiKeys: 'API Keys',
+  socialAccountsPerProvider: 'Social Accounts per Platform',
   storageBytes: 'Storage',
 }

@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
           error: 'Launch post limit reached',
           limit: limitCheck.limit,
           current: limitCheck.current,
+          plan: limitCheck.plan,
         },
         { status: 403 }
       )

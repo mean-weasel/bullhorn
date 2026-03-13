@@ -23,9 +23,14 @@ vi.mock('@/lib/auth', async (importOriginal) => ({
   ],
 }))
 
+vi.mock('@/lib/planEnforcement', () => ({
+  getUserPlan: vi.fn(),
+}))
+
 const mockLimit = vi.fn()
 const mockOrder = vi.fn(() => ({ limit: mockLimit }))
-const mockSelectEq = vi.fn(() => ({ order: mockOrder }))
+const mockIs = vi.fn()
+const mockSelectEq = vi.fn(() => ({ order: mockOrder, is: mockIs }))
 const mockSelect = vi.fn(() => ({ eq: mockSelectEq }))
 const mockInsertSingle = vi.fn()
 const mockInsertSelect = vi.fn(() => ({ single: mockInsertSingle }))
@@ -43,8 +48,11 @@ vi.mock('@supabase/supabase-js', () => ({
 
 import { GET, POST } from './route'
 import { requireSessionAuth } from '@/lib/auth'
+import { getUserPlan } from '@/lib/planEnforcement'
+import { PLAN_LIMITS } from '@/lib/limits'
 
 const mockRequireAuth = vi.mocked(requireSessionAuth)
+const mockGetUserPlan = vi.mocked(getUserPlan)
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -54,6 +62,9 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://test.supabase.co')
   vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'test-service-key')
+  // Default: free plan with room under the limit
+  mockGetUserPlan.mockResolvedValue('free')
+  mockIs.mockResolvedValue({ count: 0, data: null, error: null })
 })
 
 // ---------------------------------------------------------------------------
@@ -176,6 +187,24 @@ describe('POST /api/api-keys', () => {
     // rawKey should be present (only returned once)
     expect(body.apiKey.rawKey).toBeDefined()
     expect(body.apiKey.rawKey).toContain('bh_')
+  })
+
+  it('returns 403 when API key limit reached', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    mockGetUserPlan.mockResolvedValue('free')
+    mockIs.mockResolvedValue({ count: PLAN_LIMITS.free.apiKeys, data: null, error: null })
+
+    const req = new Request('http://localhost:3000/api/api-keys', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'One Too Many' }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error).toBe('API key limit reached')
+    expect(body.limit).toBe(PLAN_LIMITS.free.apiKeys)
+    expect(body.current).toBe(PLAN_LIMITS.free.apiKeys)
+    expect(body.plan).toBe('free')
   })
 
   it('returns 500 when insert fails', async () => {
