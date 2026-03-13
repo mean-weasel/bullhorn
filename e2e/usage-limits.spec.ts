@@ -129,7 +129,7 @@ test.describe('Usage Limits', () => {
       // Upgrade modal should appear with limit info
       await expect(page.getByText(/limit reached/i)).toBeVisible()
       await expect(page.getByText('3 / 3')).toBeVisible()
-      await expect(page.getByText(/coming soon with pro/i)).toBeVisible()
+      await expect(page.getByText(/coming soon/i)).toBeVisible()
 
       // Dismiss modal
       await page.getByRole('button', { name: /got it/i }).click()
@@ -161,13 +161,14 @@ test.describe('Usage Limits', () => {
   // ---------------------------------------------------------------------------
 
   test.describe('Settings Page Plan Display', () => {
-    test('should show Free plan badge', async ({ page }) => {
+    test('should show Free plan badge and beta messaging', async ({ page }) => {
       await page.goto('/settings')
       await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
 
-      // Should show Plan & Usage section with Free badge
+      // Should show Plan & Usage section with Free badge and beta messaging
       await expect(page.getByText('Plan & Usage')).toBeVisible()
       await expect(page.getByText('Free')).toBeVisible()
+      await expect(page.getByText(/free during beta/i)).toBeVisible()
     })
 
     test('should show usage bars with correct counts', async ({ page }) => {
@@ -189,14 +190,12 @@ test.describe('Usage Limits', () => {
       await expect(page.getByText('1 / 5')).toBeVisible() // campaigns
     })
 
-    test('should show disabled Upgrade to Pro button', async ({ page }) => {
+    test('should show paid plans coming soon messaging', async ({ page }) => {
       await page.goto('/settings')
       await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
 
-      // Should show disabled upgrade button
-      const upgradeButton = page.getByRole('button', { name: /upgrade to pro/i })
-      await expect(upgradeButton).toBeVisible()
-      await expect(upgradeButton).toBeDisabled()
+      // Should show beta messaging instead of upgrade button
+      await expect(page.getByText(/paid plans with higher limits coming soon/i)).toBeVisible()
     })
   })
 })
