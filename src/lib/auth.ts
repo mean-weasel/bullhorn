@@ -197,6 +197,23 @@ export function validateScopes(userScopes: string[], required: string[]): void {
 // Valid UUID for test user (used in E2E tests)
 const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
 
+/** Cached parsed allowlist (null = no restriction, string[] = only these emails allowed) */
+let cachedAllowedEmails: string[] | null | undefined
+function getAllowedEmails(): string[] | null {
+  if (cachedAllowedEmails !== undefined) return cachedAllowedEmails
+  const env = process.env.ALLOWED_EMAILS
+  cachedAllowedEmails = env ? env.split(',').map((e) => e.trim().toLowerCase()) : null
+  return cachedAllowedEmails
+}
+
+function checkEmailAllowlist(email: string | undefined): void {
+  const allowed = getAllowedEmails()
+  if (!allowed) return
+  if (!email || !allowed.includes(email.toLowerCase())) {
+    throw new Error('Unauthorized')
+  }
+}
+
 /**
  * Require session-based authentication only.
  * Explicitly rejects API key auth to prevent privilege escalation.
@@ -225,6 +242,8 @@ export async function requireSessionAuth(): Promise<{ userId: string }> {
   if (error || !user) {
     throw new Error('Unauthorized')
   }
+
+  checkEmailAllowlist(user.email)
 
   Sentry.setUser({ id: user.id })
   return { userId: user.id }
@@ -267,6 +286,8 @@ export async function requireAuth(): Promise<{ userId: string; scopes?: string[]
   if (error || !user) {
     throw new Error('Unauthorized')
   }
+
+  checkEmailAllowlist(user.email)
 
   Sentry.setUser({ id: user.id })
   return { userId: user.id }

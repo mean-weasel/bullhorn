@@ -97,11 +97,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 })
     }
 
-    // Track storage usage
-    await supabase.rpc('increment_storage_used', {
+    // Track storage usage — roll back upload if tracking fails
+    const { error: rpcError } = await supabase.rpc('increment_storage_used', {
       user_id_param: userId,
       bytes_param: file.size,
     })
+
+    if (rpcError) {
+      console.error('Storage tracking failed, rolling back upload:', rpcError)
+      await supabase.storage.from('media').remove([storagePath])
+      return NextResponse.json(
+        { success: false, error: 'Storage tracking failed' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,

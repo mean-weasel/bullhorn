@@ -192,6 +192,13 @@ export async function POST(request: NextRequest) {
 
       for (const post of importPosts) {
         const contentStr = JSON.stringify(post.content)
+
+        // Skip oversized content (50 KB max per post)
+        if (contentStr.length > 50_000) {
+          postsSkipped++
+          continue
+        }
+
         const fingerprint = `${post.platform}::${contentStr}`
 
         // Preserve original duplicate logic: skip if content matches AND no scheduledAt

@@ -139,6 +139,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Enforce content size limit (50 KB max)
+    const contentStr = JSON.stringify(parsed.data.content)
+    if (contentStr.length > 50_000) {
+      return NextResponse.json({ error: 'Content too large (max 50 KB)' }, { status: 400 })
+    }
+
     const { data, error } = await supabase
       .from('posts')
       .insert({
