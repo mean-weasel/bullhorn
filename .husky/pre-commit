@@ -31,7 +31,7 @@ npm run typecheck --silent || {
 
 # Unit tests
 echo -e "${BLUE}  Unit tests...${RESET}"
-npx vitest run --reporter=dot 2>&1 || {
+npx vitest run --reporter=dot 2>/dev/null || {
   echo -e "${RED}✗ Tests failed. Fix failures before committing.${RESET}"
   exit 1
 }
