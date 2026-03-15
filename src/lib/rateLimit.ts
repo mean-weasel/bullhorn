@@ -1,5 +1,6 @@
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
+import * as Sentry from '@sentry/nextjs'
 
 const WINDOW_MS = 10_000
 const MAX_REQUESTS = 30
@@ -104,10 +105,11 @@ export async function rateLimit(identifier: string): Promise<RateLimitResult> {
 
   if (!limiter) {
     if (process.env.NODE_ENV === 'production') {
-      console.warn(
+      const msg =
         '[rateLimit] Upstash Redis not configured — using in-memory fallback. ' +
-          'Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for distributed rate limiting.'
-      )
+        'Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for distributed rate limiting.'
+      console.warn(msg)
+      Sentry.captureMessage(msg, 'warning')
     }
     return memoryRateLimit(identifier)
   }
