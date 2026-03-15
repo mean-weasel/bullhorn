@@ -26,6 +26,7 @@ function useCampaignStores() {
     if (!projectsInitialized) fetches.push(fetchProjects())
     if (!launchPostStore.initialized) fetches.push(launchPostStore.fetchLaunchPosts())
     if (fetches.length > 0) void Promise.all(fetches).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- using specific Zustand store properties, not whole object
   }, [
     postsInitialized,
     fetchPosts,

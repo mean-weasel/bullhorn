@@ -44,6 +44,7 @@ export default function SignUpPage() {
     setError(null)
     setLoading(true)
 
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- comparing UI form fields, not secrets
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)

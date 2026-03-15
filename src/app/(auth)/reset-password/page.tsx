@@ -44,6 +44,7 @@ export default function ResetPasswordPage() {
     e.preventDefault()
     setError(null)
 
+    // eslint-disable-next-line security/detect-possible-timing-attacks -- comparing UI form fields, not secrets
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       return

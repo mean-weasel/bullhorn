@@ -33,6 +33,7 @@ const DAY_NAMES: Record<string, string> = {
 }
 
 /** Convert an RRULE string to human-readable text. */
+// eslint-disable-next-line react-refresh/only-export-components -- utility shared with other components
 export function formatRecurrenceRule(rule: string): string {
   const parts = rule.replace(/^RRULE:/, '').split(';')
   const params: Record<string, string> = {}

@@ -194,6 +194,7 @@ export async function filterByStatus(
     published: 'Published',
     archived: 'Archived',
   }
+  // eslint-disable-next-line security/detect-non-literal-regexp -- test helper, input is controlled
   await page.getByRole('button', { name: new RegExp(statusNames[status], 'i') }).click()
   await page.waitForLoadState('networkidle')
 }

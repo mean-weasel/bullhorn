@@ -1,5 +1,6 @@
 'use client'
 /* eslint-disable max-lines-per-function -- inner arrow functions in JSX map() callbacks */
+/* eslint-disable react-refresh/only-export-components -- exports shared type and hook alongside component */
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -78,7 +79,6 @@ const PLATFORM_CONFIG = {
   },
 }
 
- 
 export function AccountPicker({
   projectId: _projectId,
   selectedAccountIds,
@@ -233,7 +233,7 @@ export function AccountPicker({
 /**
  * Hook to manage project account associations
  */
- 
+
 export function useProjectAccounts(projectId: string) {
   const [accounts, setAccounts] = useState<ProjectAccount[]>([])
   const [loading, setLoading] = useState(true)

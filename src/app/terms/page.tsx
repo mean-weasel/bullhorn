@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+// eslint-disable-next-line react-refresh/only-export-components -- Next.js metadata export
 export const metadata: Metadata = {
   title: 'Terms of Service',
   description: 'Bullhorn Terms of Service',

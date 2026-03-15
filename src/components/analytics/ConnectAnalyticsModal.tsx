@@ -55,6 +55,7 @@ export function ConnectAnalyticsModal({
         setStep('connect')
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchPendingConnection is defined in component body; deps would cause infinite loop
   }, [open, pendingConnectionId])
 
   const fetchPendingConnection = async (connectionId: string) => {

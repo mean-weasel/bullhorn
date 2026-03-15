@@ -19,6 +19,7 @@ import {
 import { Post, PostStatus, getPostPreviewText, PLATFORM_INFO } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 
+// eslint-disable-next-line react-refresh/only-export-components -- shared config used by sibling components
 export const STATUS_CONFIG: Record<
   PostStatus,
   { label: string; icon: typeof FileText; color: string; emoji: string }

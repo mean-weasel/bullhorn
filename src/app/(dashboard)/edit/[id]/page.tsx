@@ -245,6 +245,7 @@ export default function EditorPage() {
       campaignId: state.post.campaignId,
       scheduledAt: state.post.scheduledAt ?? undefined,
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- saves local draft on content changes only; id and saveDraft are stable
   }, [
     dirtyTracking.isDirty,
     state.content,
@@ -256,7 +257,7 @@ export default function EditorPage() {
     state.subredditsInput,
     state.subredditTitles,
     state.subredditSchedules,
-  ])  
+  ])
 
   useKeyboardShortcuts({
     shortcuts: [

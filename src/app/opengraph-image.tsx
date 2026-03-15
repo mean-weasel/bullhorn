@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Next.js OG image config exports */
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'

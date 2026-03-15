@@ -41,6 +41,7 @@ const GDPR_COUNTRIES = new Set([
 ])
 
 function getCookie(name: string): string | null {
+  // eslint-disable-next-line security/detect-non-literal-regexp -- name is always a controlled constant
   const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'))
   return match ? decodeURIComponent(match[2]) : null
 }

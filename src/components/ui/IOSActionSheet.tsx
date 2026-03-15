@@ -163,7 +163,7 @@ export function IOSActionSheet<T = string>({
   )
 }
 
-// Utility hook to detect iOS
+// eslint-disable-next-line react-refresh/only-export-components -- utility hook co-located with component
 export function useIsIOS() {
   if (typeof window === 'undefined') return false
 
@@ -173,7 +173,7 @@ export function useIsIOS() {
   return isIOS
 }
 
-// Utility hook to detect mobile
+// eslint-disable-next-line react-refresh/only-export-components -- utility hook co-located with component
 export function useIsMobile() {
   if (typeof window === 'undefined') return false
 
