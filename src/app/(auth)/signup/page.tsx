@@ -56,6 +56,19 @@ export default function SignUpPage() {
     }
 
     try {
+      // Pre-signup check: rate limit + deleted account cooldown
+      const checkRes = await fetch('/api/auth/pre-signup-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const check = await checkRes.json()
+      if (!check.allowed) {
+        setError(check.reason || 'Signup is not allowed at this time.')
+        setLoading(false)
+        return
+      }
+
       const { error } = await supabase.auth.signUp({
         email,
         password,

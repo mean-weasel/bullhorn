@@ -26,6 +26,18 @@ export async function POST(_request: Request) {
       },
     })
 
+    // Record email for re-registration cooldown (best-effort)
+    try {
+      const { data: userData } = await adminClient.auth.admin.getUserById(userId)
+      if (userData?.user?.email) {
+        await adminClient
+          .from('deleted_accounts')
+          .upsert({ email: userData.user.email.toLowerCase() }, { onConflict: 'email' })
+      }
+    } catch (cooldownError) {
+      console.error('Cooldown tracking error (non-blocking):', cooldownError)
+    }
+
     // Clean up storage buckets (best-effort — failure should NOT block account deletion)
     try {
       const buckets = ['media', 'logos'] as const
