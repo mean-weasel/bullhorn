@@ -145,7 +145,7 @@ export const EditorActions = ({
       {!isNew && postStatus !== 'archived' && onArchive && (
         <button
           onClick={onArchive}
-          disabled={isSaving}
+          disabled={isSaving || isPublishing}
           className={cn(
             'flex items-center gap-2 px-3 md:px-4 py-2.5',
             'rounded-lg min-h-[44px]',
@@ -165,7 +165,7 @@ export const EditorActions = ({
           {onRestore && (
             <button
               onClick={onRestore}
-              disabled={isSaving}
+              disabled={isSaving || isPublishing}
               className={cn(
                 'flex items-center gap-2 px-3 md:px-4 py-2.5',
                 'rounded-lg min-h-[44px]',
@@ -182,7 +182,7 @@ export const EditorActions = ({
           {onDelete && (
             <button
               onClick={onDelete}
-              disabled={isSaving}
+              disabled={isSaving || isPublishing}
               className={cn(
                 'flex items-center gap-2 px-3 md:px-4 py-2.5',
                 'rounded-lg min-h-[44px]',
@@ -200,7 +200,7 @@ export const EditorActions = ({
 
       <button
         onClick={onSaveDraft}
-        disabled={isSaving}
+        disabled={isSaving || isPublishing}
         title="Save Draft (Ctrl+S)"
         className={cn(
           'flex items-center gap-2 px-3 md:px-4 py-2.5',
@@ -225,7 +225,7 @@ export const EditorActions = ({
 
       <button
         onClick={onSchedule}
-        disabled={isSaving || !canSchedule}
+        disabled={isSaving || isPublishing || !canSchedule}
         title={canSchedule ? 'Schedule Post (Ctrl+Enter)' : 'Select a date and time to schedule'}
         className={cn(
           'flex items-center gap-2 px-3 md:px-4 py-2.5',
@@ -260,7 +260,7 @@ export const EditorActions = ({
       {!isNew && postStatus !== 'published' && onMarkAsPosted && (
         <button
           onClick={onMarkAsPosted}
-          disabled={isSaving}
+          disabled={isSaving || isPublishing}
           className={cn(
             'flex items-center gap-2 px-3 md:px-4 py-2.5',
             'rounded-lg min-h-[44px]',

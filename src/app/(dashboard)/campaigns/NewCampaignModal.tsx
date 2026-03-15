@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function NewCampaignModal({
@@ -8,15 +9,23 @@ export function NewCampaignModal({
   onCreate,
 }: {
   onClose: () => void
-  onCreate: (name: string, description?: string) => void
+  onCreate: (name: string, description?: string) => Promise<void>
 }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (name.trim()) {
-      onCreate(name.trim(), description.trim() || undefined)
+    if (!name.trim() || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await onCreate(name.trim(), description.trim() || undefined)
+    } catch {
+      // Error handled by parent
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -54,15 +63,16 @@ export function NewCampaignModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors"
+                disabled={isSubmitting}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={!name.trim()}
+                disabled={!name.trim() || isSubmitting}
                 className={cn(
-                  'flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
+                  'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
                   'bg-linear-to-br from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))]',
                   'border-2 border-[hsl(var(--gold-dark))]',
                   'text-white',
@@ -70,7 +80,8 @@ export function NewCampaignModal({
                   'disabled:opacity-50 disabled:cursor-not-allowed'
                 )}
               >
-                Create Campaign
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {isSubmitting ? 'Creating...' : 'Create Campaign'}
               </button>
             </div>
           </form>

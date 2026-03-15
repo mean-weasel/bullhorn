@@ -114,6 +114,8 @@ export const CHAR_LIMITS: Record<Platform, number> = {
   reddit: 40000, // For self-post body
 }
 
+export const PLATFORM_CHAR_LIMITS: Record<Platform, number> = CHAR_LIMITS
+
 // Platform display info
 export const PLATFORM_INFO: Record<
   Platform,
@@ -192,6 +194,20 @@ export function getPostPreviewText(post: Post): string {
   }
   if (isRedditContent(content)) {
     return content.body || content.title
+  }
+  return ''
+}
+
+// Extract the main text content from platform-specific content JSON
+export function getTextFromContent(content: PlatformContent, platform: Platform): string {
+  if (platform === 'reddit' && isRedditContent(content)) {
+    return content.body || ''
+  }
+  if (
+    (platform === 'twitter' && isTwitterContent(content)) ||
+    (platform === 'linkedin' && isLinkedInContent(content))
+  ) {
+    return (content as TwitterContent | LinkedInContent).text
   }
   return ''
 }

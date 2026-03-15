@@ -1,14 +1,15 @@
 import { cn } from '@/lib/utils'
 import { CloudOff, Check, Loader2 } from 'lucide-react'
 
-type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
 
 interface AutoSaveIndicatorProps {
   status: AutoSaveStatus
   className?: string
+  retry?: () => void
 }
 
-export function AutoSaveIndicator({ status, className }: AutoSaveIndicatorProps) {
+export function AutoSaveIndicator({ status, className, retry }: AutoSaveIndicatorProps) {
   return (
     <div
       className={cn(
@@ -18,6 +19,7 @@ export function AutoSaveIndicator({ status, className }: AutoSaveIndicatorProps)
         status === 'saving' && 'bg-muted text-muted-foreground opacity-100',
         status === 'saved' &&
           'bg-sticker-green/10 text-sticker-green border-sticker-green/30 opacity-100',
+        status === 'retrying' && 'bg-muted text-muted-foreground opacity-100',
         status === 'error' &&
           'bg-destructive/10 text-destructive border-destructive/30 opacity-100',
         className
@@ -35,10 +37,25 @@ export function AutoSaveIndicator({ status, className }: AutoSaveIndicatorProps)
           <span>Saved!</span>
         </>
       )}
+      {status === 'retrying' && (
+        <>
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          <span>Retrying...</span>
+        </>
+      )}
       {status === 'error' && (
         <>
           <CloudOff className="w-3.5 h-3.5" />
-          <span>Failed to save</span>
+          <span>Save failed</span>
+          {retry && (
+            <button
+              type="button"
+              onClick={retry}
+              className="ml-1 underline underline-offset-2 hover:opacity-80 transition-opacity"
+            >
+              Retry
+            </button>
+          )}
         </>
       )}
     </div>

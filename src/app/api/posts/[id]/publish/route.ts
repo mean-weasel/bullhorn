@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { publishPost } from '@/lib/publishers'
+import { PLATFORM_CHAR_LIMITS, getTextFromContent } from '@/lib/posts'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,6 +45,19 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       )
     }
 
+    // 2b. Validate content does not exceed platform character limit
+    const transformedPost = transformPostFromDb(postRow as DbPost)
+    const textContent = getTextFromContent(transformedPost.content, transformedPost.platform)
+    const charLimit = PLATFORM_CHAR_LIMITS[transformedPost.platform]
+    if (textContent.length > charLimit) {
+      return NextResponse.json(
+        {
+          error: `Content exceeds the ${charLimit}-character limit`,
+        },
+        { status: 400 }
+      )
+    }
+
     // 3. Find an active social account for this platform
     const accountQuery = supabase
       .from('social_accounts')
@@ -74,7 +88,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     }
 
     // 5. Call the publisher
-    const post = transformPostFromDb(postRow as DbPost)
+    const post = transformedPost
     const result = await publishPost(post, account.id)
 
     // 6. Update post with result

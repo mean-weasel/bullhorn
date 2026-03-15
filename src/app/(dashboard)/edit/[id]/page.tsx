@@ -205,7 +205,7 @@ export default function EditorPage() {
     ? subredditsInput.every((sub) => subredditSchedules[sub]) || !!post.scheduledAt
     : !!post.scheduledAt
 
-  const { status: autoSaveStatus } = useAutoSave({
+  const { status: autoSaveStatus, retry: autoSaveRetry } = useAutoSave({
     data: { post, content, mediaUrls, linkedInMediaUrl, redditUrl },
     onSave: async () => {
       if (isSaving) return // Manual save in progress, skip auto-save
@@ -623,7 +623,7 @@ export default function EditorPage() {
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
               {isNew ? 'Create Post' : 'Edit Post'}
             </h1>
-            <AutoSaveIndicator status={autoSaveStatus} />
+            <AutoSaveIndicator status={autoSaveStatus} retry={autoSaveRetry} />
           </div>
           <p className="text-sm md:text-base text-muted-foreground">
             Compose your message and schedule it across multiple platforms.

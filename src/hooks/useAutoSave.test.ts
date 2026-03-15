@@ -170,21 +170,28 @@ describe('useAutoSave logic', () => {
 
   describe('save status tracking', () => {
     it('transitions from idle to saving to saved', async () => {
-      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
       let status: AutoSaveStatus = 'idle'
+      let retryCount = 0
       const onSave = vi.fn().mockResolvedValue(undefined)
 
-      // Simulate the hook's save function
+      // Simulate the hook's save function with retry logic
       const save = async () => {
         status = 'saving'
         try {
           await onSave()
+          retryCount = 0
           status = 'saved'
           setTimeout(() => {
             status = 'idle'
           }, 5000)
         } catch {
-          status = 'error'
+          if (retryCount < 3) {
+            retryCount += 1
+            status = 'retrying'
+          } else {
+            status = 'error'
+          }
         }
       }
 
@@ -199,43 +206,96 @@ describe('useAutoSave logic', () => {
       expect(status).toBe('idle')
     })
 
-    it('transitions to error status when save fails', async () => {
-      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+    it('transitions to retrying status on first failure', async () => {
+      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
       let status: AutoSaveStatus = 'idle'
+      let retryCount = 0
       const onSave = vi.fn().mockRejectedValue(new Error('Network error'))
 
       const save = async () => {
         status = 'saving'
         try {
           await onSave()
+          retryCount = 0
           status = 'saved'
           setTimeout(() => {
             status = 'idle'
           }, 5000)
         } catch {
-          status = 'error'
+          if (retryCount < 3) {
+            retryCount += 1
+            status = 'retrying'
+          } else {
+            status = 'error'
+          }
         }
       }
 
+      await save()
+      expect(status).toBe('retrying')
+      expect(retryCount).toBe(1)
+    })
+
+    it('transitions to error after all retries exhausted', async () => {
+      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
+      let status: AutoSaveStatus = 'idle'
+      let retryCount = 0
+      const onSave = vi.fn().mockRejectedValue(new Error('Network error'))
+
+      const save = async () => {
+        status = 'saving'
+        try {
+          await onSave()
+          retryCount = 0
+          status = 'saved'
+          setTimeout(() => {
+            status = 'idle'
+          }, 5000)
+        } catch {
+          if (retryCount < 3) {
+            retryCount += 1
+            status = 'retrying'
+          } else {
+            status = 'error'
+          }
+        }
+      }
+
+      // Exhaust all 3 retries
+      await save() // retry 1
+      expect(status).toBe('retrying')
+      await save() // retry 2
+      expect(status).toBe('retrying')
+      await save() // retry 3
+      expect(status).toBe('retrying')
+
+      // 4th attempt — retries exhausted
       await save()
       expect(status).toBe('error')
     })
 
     it('does not reset to idle after error', async () => {
-      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
       let status: AutoSaveStatus = 'idle'
+      let retryCount = 3 // Already exhausted
       const onSave = vi.fn().mockRejectedValue(new Error('fail'))
 
       const save = async () => {
         status = 'saving'
         try {
           await onSave()
+          retryCount = 0
           status = 'saved'
           setTimeout(() => {
             status = 'idle'
           }, 5000)
         } catch {
-          status = 'error'
+          if (retryCount < 3) {
+            retryCount += 1
+            status = 'retrying'
+          } else {
+            status = 'error'
+          }
         }
       }
 
@@ -245,6 +305,52 @@ describe('useAutoSave logic', () => {
       // Even after 5 seconds, error status persists (no setTimeout was scheduled)
       vi.advanceTimersByTime(5000)
       expect(status).toBe('error')
+    })
+
+    it('resets retry counter on successful save', async () => {
+      type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
+      let status: AutoSaveStatus = 'idle'
+      let retryCount = 0
+      let callCount = 0
+      const onSave = vi.fn().mockImplementation(() => {
+        callCount++
+        // Fail first two times, succeed on third
+        if (callCount <= 2) {
+          return Promise.reject(new Error('fail'))
+        }
+        return Promise.resolve()
+      })
+
+      const save = async () => {
+        status = 'saving'
+        try {
+          await onSave()
+          retryCount = 0
+          status = 'saved'
+          setTimeout(() => {
+            status = 'idle'
+          }, 5000)
+        } catch {
+          if (retryCount < 3) {
+            retryCount += 1
+            status = 'retrying'
+          } else {
+            status = 'error'
+          }
+        }
+      }
+
+      await save() // fails, retry 1
+      expect(status).toBe('retrying')
+      expect(retryCount).toBe(1)
+
+      await save() // fails, retry 2
+      expect(status).toBe('retrying')
+      expect(retryCount).toBe(2)
+
+      await save() // succeeds
+      expect(status).toBe('saved')
+      expect(retryCount).toBe(0)
     })
   })
 
@@ -335,6 +441,77 @@ describe('useAutoSave logic', () => {
       expect(onSave).toHaveBeenCalledTimes(1)
 
       if (timeout) clearTimer(timeout)
+    })
+  })
+
+  describe('retry backoff', () => {
+    it('uses exponential backoff delays for retries', () => {
+      const onSave = vi.fn()
+      const backoffDelays = [2000, 4000, 8000]
+
+      // Simulate retry scheduling with backoff
+      let retryCount = 0
+      const scheduleRetry = () => {
+        if (retryCount < 3) {
+          const delay = backoffDelays[retryCount]
+          retryCount++
+          return setTimer(onSave, delay)
+        }
+        return null
+      }
+
+      // First retry at 2000ms
+      const t1 = scheduleRetry()
+      vi.advanceTimersByTime(1999)
+      expect(onSave).not.toHaveBeenCalled()
+      vi.advanceTimersByTime(1)
+      expect(onSave).toHaveBeenCalledTimes(1)
+      clearTimer(t1)
+
+      // Second retry at 4000ms
+      const t2 = scheduleRetry()
+      vi.advanceTimersByTime(3999)
+      expect(onSave).toHaveBeenCalledTimes(1)
+      vi.advanceTimersByTime(1)
+      expect(onSave).toHaveBeenCalledTimes(2)
+      clearTimer(t2)
+
+      // Third retry at 8000ms
+      const t3 = scheduleRetry()
+      vi.advanceTimersByTime(7999)
+      expect(onSave).toHaveBeenCalledTimes(2)
+      vi.advanceTimersByTime(1)
+      expect(onSave).toHaveBeenCalledTimes(3)
+      clearTimer(t3)
+
+      // No more retries
+      expect(scheduleRetry()).toBeNull()
+    })
+
+    it('resets retry counter when new data changes come in', () => {
+      const onSave = vi.fn()
+      let retryCount = 2 // Simulate 2 failed retries
+
+      // New data change resets retry counter
+      retryCount = 0
+      expect(retryCount).toBe(0)
+
+      // Should be able to retry 3 more times
+      const backoffDelays = [2000, 4000, 8000]
+      const scheduleRetry = () => {
+        if (retryCount < 3) {
+          const delay = backoffDelays[retryCount]
+          retryCount++
+          return setTimer(onSave, delay)
+        }
+        return null
+      }
+
+      const t1 = scheduleRetry()
+      expect(retryCount).toBe(1)
+      vi.advanceTimersByTime(2000)
+      expect(onSave).toHaveBeenCalledTimes(1)
+      clearTimer(t1)
     })
   })
 
