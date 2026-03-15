@@ -114,8 +114,6 @@ export const CHAR_LIMITS: Record<Platform, number> = {
   reddit: 40000, // For self-post body
 }
 
-export const PLATFORM_CHAR_LIMITS: Record<Platform, number> = CHAR_LIMITS
-
 // Platform display info
 export const PLATFORM_INFO: Record<
   Platform,

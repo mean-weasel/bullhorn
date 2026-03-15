@@ -11,7 +11,7 @@ import {
   Platform,
   PostStatus,
   PLATFORM_INFO,
-  PLATFORM_CHAR_LIMITS,
+  CHAR_LIMITS,
   createPost,
   isTwitterContent,
   isLinkedInContent,
@@ -322,7 +322,7 @@ export default function EditorPage() {
     : !!post.scheduledAt
 
   // Check if content exceeds platform character limit
-  const isOverLimit = content.length > PLATFORM_CHAR_LIMITS[post.platform]
+  const isOverLimit = content.length > CHAR_LIMITS[post.platform]
 
   const { status: autoSaveStatus, retry: autoSaveRetry } = useAutoSave({
     data: { post, content, mediaUrls, linkedInMediaUrl, redditUrl },
@@ -632,7 +632,7 @@ export default function EditorPage() {
   const handleSchedule = () => {
     if (isOverLimit) {
       toast.error(
-        `Content exceeds the ${PLATFORM_CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
+        `Content exceeds the ${CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
       )
       return
     }
@@ -660,7 +660,7 @@ export default function EditorPage() {
   const handlePublishNow = async () => {
     if (isOverLimit) {
       toast.error(
-        `Content exceeds the ${PLATFORM_CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
+        `Content exceeds the ${CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
       )
       return
     }
