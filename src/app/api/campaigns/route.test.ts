@@ -17,6 +17,7 @@ vi.mock('@/lib/planEnforcement', () => ({
     limit: 5,
     plan: 'free',
   })),
+  isPlanLimitError: vi.fn(() => false),
 }))
 
 // mockQueryData holds { data, error } for the final await

@@ -18,6 +18,7 @@ vi.mock('@/lib/planEnforcement', () => ({
     limit: 10,
     plan: 'free',
   })),
+  isPlanLimitError: vi.fn(() => false),
 }))
 
 // GET query chain: .from().select().eq().order() then optional .eq()/.limit()

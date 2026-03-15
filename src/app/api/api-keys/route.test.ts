@@ -25,6 +25,7 @@ vi.mock('@/lib/auth', async (importOriginal) => ({
 
 vi.mock('@/lib/planEnforcement', () => ({
   getUserPlan: vi.fn(),
+  isPlanLimitError: vi.fn(() => false),
 }))
 
 const mockLimit = vi.fn()

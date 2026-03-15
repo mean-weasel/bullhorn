@@ -1,6 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { PLAN_LIMITS, type PlanType, type ResourceType } from './limits'
 
+/**
+ * Check if a Supabase error is a plan limit violation from the DB trigger.
+ * The trigger raises ERRCODE 'check_violation' (SQLSTATE 23514) with a
+ * message like "Plan limit reached: 50 posts (limit 50)".
+ */
+export function isPlanLimitError(error: { code?: string; message?: string }): boolean {
+  return error.code === '23514' && (error.message?.includes('Plan limit reached') ?? false)
+}
+
 /** Resources that use the generic count-based enforcement via TABLE_MAP */
 export type GenericResource = Exclude<
   ResourceType,

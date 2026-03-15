@@ -1,6 +1,6 @@
 import { requireSessionAuth, ALL_SCOPES, parseJsonBody, hashApiKey } from '@/lib/auth'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
-import { getUserPlan } from '@/lib/planEnforcement'
+import { getUserPlan, isPlanLimitError } from '@/lib/planEnforcement'
 import { PLAN_LIMITS } from '@/lib/limits'
 import { randomBytes } from 'crypto'
 import { z } from 'zod'
@@ -122,7 +122,12 @@ export async function POST(request: Request) {
       )
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (isPlanLimitError(error)) {
+        return Response.json({ error: 'API key limit reached' }, { status: 403 })
+      }
+      throw error
+    }
 
     // Return the raw key exactly once — it is never stored or retrievable again
     return Response.json(

@@ -16,6 +16,7 @@ vi.mock('@/lib/planEnforcement', () => ({
   enforceResourceLimit: vi
     .fn()
     .mockResolvedValue({ allowed: true, current: 0, limit: 500, plan: 'free' }),
+  isPlanLimitError: vi.fn(() => false),
 }))
 
 // Mock Supabase

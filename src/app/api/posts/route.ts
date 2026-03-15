@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes, parseJsonBody, type ApiKeyScope } from '@/lib/auth'
-import { enforceResourceLimit } from '@/lib/planEnforcement'
+import { enforceResourceLimit, isPlanLimitError } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -162,6 +162,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      if (isPlanLimitError(error)) {
+        return NextResponse.json({ error: 'Post limit reached' }, { status: 403 })
+      }
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, parseJsonBody, validateScopes } from '@/lib/auth'
 import { rateLimit } from '@/lib/rateLimit'
-import { enforceResourceLimit } from '@/lib/planEnforcement'
+import { enforceResourceLimit, isPlanLimitError } from '@/lib/planEnforcement'
 import { z } from 'zod'
 
 const importPostSchema = z.object({
@@ -154,6 +154,12 @@ export async function POST(request: NextRequest) {
       if (campaignsToInsert.length > 0) {
         const { error } = await supabase.from('campaigns').insert(campaignsToInsert)
         if (error) {
+          if (isPlanLimitError(error)) {
+            return NextResponse.json(
+              { error: 'Campaign limit reached during import' },
+              { status: 403 }
+            )
+          }
           console.error('Error importing campaigns:', error)
           campaignsSkipped += campaignsToInsert.length
         } else {
@@ -226,6 +232,9 @@ export async function POST(request: NextRequest) {
       if (postsToInsert.length > 0) {
         const { error } = await supabase.from('posts').insert(postsToInsert)
         if (error) {
+          if (isPlanLimitError(error)) {
+            return NextResponse.json({ error: 'Post limit reached during import' }, { status: 403 })
+          }
           console.error('Error importing posts:', error)
           postsSkipped += postsToInsert.length
         } else {

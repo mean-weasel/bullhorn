@@ -18,6 +18,7 @@ vi.mock('@/lib/planEnforcement', () => ({
     limit: 3,
     plan: 'free',
   })),
+  isPlanLimitError: vi.fn(() => false),
 }))
 
 vi.mock('@/lib/utils', () => ({

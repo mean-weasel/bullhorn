@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth, validateScopes, parseJsonBody } from '@/lib/auth'
-import { enforceResourceLimit } from '@/lib/planEnforcement'
+import { enforceResourceLimit, isPlanLimitError } from '@/lib/planEnforcement'
 import { escapeSearchPattern, transformDraftFromDb, calculateWordCount } from '@/lib/utils'
 import { z } from 'zod'
 
@@ -158,6 +158,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
+      if (isPlanLimitError(error)) {
+        return NextResponse.json({ error: 'Blog draft limit reached' }, { status: 403 })
+      }
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }

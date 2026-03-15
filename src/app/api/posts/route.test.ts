@@ -17,6 +17,7 @@ vi.mock('@/lib/planEnforcement', () => ({
     limit: 50,
     plan: 'free',
   })),
+  isPlanLimitError: vi.fn(() => false),
 }))
 
 const mockLimit = vi.fn()
