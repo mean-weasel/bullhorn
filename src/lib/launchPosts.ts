@@ -245,7 +245,23 @@ export const useLaunchPostsStore = create<LaunchPostsState & LaunchPostsActions>
   },
 
   addLaunchPost: async (postData) => {
-    set({ loading: true, error: null })
+    const previous = get().launchPosts
+    const tempPost: LaunchPost = {
+      id: 'temp-' + Date.now(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      platform: postData.platform,
+      status: 'draft',
+      scheduledAt: postData.scheduledAt || null,
+      postedAt: null,
+      title: postData.title,
+      url: postData.url || null,
+      description: postData.description || null,
+      platformFields: postData.platformFields || {},
+      campaignId: postData.campaignId || null,
+      notes: postData.notes || null,
+    }
+    set({ launchPosts: [tempPost, ...previous], loading: true, error: null })
     try {
       const res = await fetch(`${API_BASE}/launch-posts`, {
         method: 'POST',
@@ -255,20 +271,22 @@ export const useLaunchPostsStore = create<LaunchPostsState & LaunchPostsActions>
       if (!res.ok) throw new Error('Failed to create launch post')
       const data = await res.json()
       const newPost = transformLaunchPostFromDb(data.launchPost)
-      set((state) => ({
-        launchPosts: [newPost, ...state.launchPosts],
-        loading: false,
-      }))
+      set({ launchPosts: [newPost, ...previous], loading: false })
       usePlanStore.getState().incrementCount('launchPosts')
       return newPost
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ launchPosts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   updateLaunchPost: async (id, updates) => {
-    set({ loading: true, error: null })
+    const previous = get().launchPosts
+    set({
+      launchPosts: previous.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/launch-posts/${id}`, {
         method: 'PATCH',
@@ -278,30 +296,32 @@ export const useLaunchPostsStore = create<LaunchPostsState & LaunchPostsActions>
       if (!res.ok) throw new Error('Failed to update launch post')
       const data = await res.json()
       const updatedPost = transformLaunchPostFromDb(data.launchPost)
-      set((state) => ({
-        launchPosts: state.launchPosts.map((p) => (p.id === id ? updatedPost : p)),
+      set({
+        launchPosts: previous.map((p) => (p.id === id ? updatedPost : p)),
         loading: false,
-      }))
+      })
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ launchPosts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   deleteLaunchPost: async (id) => {
-    set({ loading: true, error: null })
+    const previous = get().launchPosts
+    set({
+      launchPosts: previous.filter((p) => p.id !== id),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/launch-posts/${id}`, {
         method: 'DELETE',
       })
       if (!res.ok) throw new Error('Failed to delete launch post')
-      set((state) => ({
-        launchPosts: state.launchPosts.filter((p) => p.id !== id),
-        loading: false,
-      }))
+      set({ loading: false })
       usePlanStore.getState().decrementCount('launchPosts')
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ launchPosts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },

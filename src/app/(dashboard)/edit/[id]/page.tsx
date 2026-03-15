@@ -11,6 +11,7 @@ import {
   Platform,
   PostStatus,
   PLATFORM_INFO,
+  PLATFORM_CHAR_LIMITS,
   createPost,
   isTwitterContent,
   isLinkedInContent,
@@ -22,6 +23,8 @@ import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
 import { useAutoSave } from '@/hooks/useAutoSave'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useLocalDraft } from '@/hooks/useLocalDraft'
+import { ResourceNotFound } from '@/components/ui/ResourceNotFound'
 import {
   PlatformSelector,
   CampaignSelector,
@@ -40,6 +43,20 @@ import {
 import RecurrencePicker from '@/components/editor/RecurrencePicker'
 import { copyToClipboard } from '@/lib/nativeClipboard'
 import { trackMilestone } from '@/lib/appReview'
+
+interface PostDraftData {
+  content: string
+  platform: string
+  notes: string
+  mediaUrls: string[]
+  linkedInMediaUrl: string
+  redditUrl: string
+  subredditsInput: string[]
+  subredditTitles: Record<string, string>
+  subredditSchedules: Record<string, string>
+  campaignId?: string
+  scheduledAt?: string
+}
 
 export default function EditorPage() {
   const params = useParams()
@@ -66,6 +83,7 @@ export default function EditorPage() {
 
   const isNew = !id
   const existingPost = id ? getPost(id) : undefined
+  const { draft, hasDraft, saveDraft, clearDraft } = useLocalDraft<PostDraftData>(`edit-${id}`)
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -205,6 +223,9 @@ export default function EditorPage() {
     ? subredditsInput.every((sub) => subredditSchedules[sub]) || !!post.scheduledAt
     : !!post.scheduledAt
 
+  // Check if content exceeds platform character limit
+  const isOverLimit = content.length > PLATFORM_CHAR_LIMITS[post.platform]
+
   const { status: autoSaveStatus, retry: autoSaveRetry } = useAutoSave({
     data: { post, content, mediaUrls, linkedInMediaUrl, redditUrl },
     onSave: async () => {
@@ -218,7 +239,12 @@ export default function EditorPage() {
           await updatePost(toSave.id, toSave)
         }
         setIsDirty(false)
+        clearDraft()
       } catch (error) {
+        const msg = (error as Error).message || ''
+        if (msg.includes('401') || msg.includes('Unauthorized')) {
+          toast.error('Session expired. Your changes are saved locally.')
+        }
         console.error('Auto-save failed:', error)
       }
     },
@@ -291,6 +317,86 @@ export default function EditorPage() {
     }
   }, [existingPost])
 
+  // Restore form state from a local draft
+  const restoreFromDraft = (d: PostDraftData) => {
+    setContent(d.content)
+    setPost((prev) => ({
+      ...prev,
+      platform: d.platform as Platform,
+      notes: d.notes,
+      campaignId: d.campaignId,
+      scheduledAt: d.scheduledAt ?? null,
+    }))
+    setMediaUrls(d.mediaUrls)
+    setLinkedInMediaUrl(d.linkedInMediaUrl)
+    setRedditUrl(d.redditUrl)
+    setSubredditsInput(d.subredditsInput)
+    setSubredditTitles(d.subredditTitles)
+    setSubredditSchedules(d.subredditSchedules)
+    if (d.notes) setShowNotes(true)
+  }
+
+  // Draft restoration: show toast when a local draft exists
+  useEffect(() => {
+    if (hasDraft && draft && existingPost) {
+      toast(
+        (t) => (
+          <span className="flex items-center gap-2">
+            You have unsaved local changes.
+            <button
+              className="font-bold underline"
+              onClick={() => {
+                restoreFromDraft(draft)
+                toast.dismiss(t.id)
+              }}
+            >
+              Restore
+            </button>
+            <button
+              className="text-muted-foreground"
+              onClick={() => {
+                clearDraft()
+                toast.dismiss(t.id)
+              }}
+            >
+              Discard
+            </button>
+          </span>
+        ),
+        { duration: 10000 }
+      )
+    }
+  }, [existingPost?.id])
+
+  // Save draft on changes when form is dirty
+  useEffect(() => {
+    if (!isDirty || !id) return
+    saveDraft({
+      content,
+      platform: post.platform,
+      notes: post.notes || '',
+      mediaUrls,
+      linkedInMediaUrl,
+      redditUrl,
+      subredditsInput,
+      subredditTitles,
+      subredditSchedules,
+      campaignId: post.campaignId,
+      scheduledAt: post.scheduledAt ?? undefined,
+    })
+  }, [
+    isDirty,
+    content,
+    post.platform,
+    post.notes,
+    mediaUrls,
+    linkedInMediaUrl,
+    redditUrl,
+    subredditsInput,
+    subredditTitles,
+    subredditSchedules,
+  ])
+
   // Handle save
   const handleSave = async (postToSave: Post) => {
     setIsSaving(true)
@@ -360,6 +466,7 @@ export default function EditorPage() {
         await updatePost(finalPost.id, finalPost)
       }
       trackMilestone()
+      clearDraft()
       router.push('/')
     } catch (error) {
       toast.error('Failed to save post')
@@ -503,6 +610,12 @@ export default function EditorPage() {
 
   // Schedule
   const handleSchedule = () => {
+    if (isOverLimit) {
+      toast.error(
+        `Content exceeds the ${PLATFORM_CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
+      )
+      return
+    }
     const isRedditMulti = post.platform === 'reddit' && subredditsInput.length > 1
     const allSubredditsHaveSchedule =
       isRedditMulti && subredditsInput.every((sub) => subredditSchedules[sub])
@@ -521,6 +634,13 @@ export default function EditorPage() {
   const hasConnectedAccount = !!activeAccount
 
   const handlePublishNow = async () => {
+    if (isOverLimit) {
+      toast.error(
+        `Content exceeds the ${PLATFORM_CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
+      )
+      return
+    }
+
     if (!content.trim()) {
       toast.error('Please add some content')
       return
@@ -537,8 +657,8 @@ export default function EditorPage() {
     let postId = post.id
     if (isNew) {
       try {
-        const draft = { ...post, status: 'draft' as PostStatus }
-        const created = await addPost(draft)
+        const draftPost = { ...post, status: 'draft' as PostStatus }
+        const created = await addPost(draftPost)
         postId = created.id
       } catch {
         toast.error('Failed to save post before publishing')
@@ -613,6 +733,10 @@ export default function EditorPage() {
       },
     ],
   })
+
+  if (postsInitialized && id && !existingPost) {
+    return <ResourceNotFound type="Post" listUrl="/posts" listLabel="Posts" />
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] min-h-[calc(100vh-4rem)]">
@@ -760,6 +884,7 @@ export default function EditorPage() {
           onArchive={handleArchive}
           onRestore={handleRestore}
           onDelete={handleDelete}
+          isOverLimit={isOverLimit}
         />
       </div>
 

@@ -60,7 +60,17 @@ export const useCampaignsStore = create<CampaignsState & CampaignsActions>()((se
   },
 
   addCampaign: async (campaignData) => {
-    set({ loading: true, error: null })
+    const previous = get().campaigns
+    const tempCampaign: Campaign = {
+      id: 'temp-' + Date.now(),
+      name: campaignData.name,
+      description: campaignData.description,
+      status: campaignData.status || 'active',
+      projectId: campaignData.projectId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    set({ campaigns: [tempCampaign, ...previous], loading: true, error: null })
     try {
       const res = await fetch(`${API_BASE}/campaigns`, {
         method: 'POST',
@@ -70,21 +80,23 @@ export const useCampaignsStore = create<CampaignsState & CampaignsActions>()((se
       if (!res.ok) throw new Error('Failed to create campaign')
       const data = await res.json()
       const newCampaign = data.campaign as Campaign
-      set((state) => ({
-        campaigns: [newCampaign, ...state.campaigns],
-        loading: false,
-      }))
+      set({ campaigns: [newCampaign, ...previous], loading: false })
       hapticSuccess()
       usePlanStore.getState().incrementCount('campaigns')
       return newCampaign
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ campaigns: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   updateCampaign: async (id, updates) => {
-    set({ loading: true, error: null })
+    const previous = get().campaigns
+    set({
+      campaigns: previous.map((c) => (c.id === id ? { ...c, ...updates } : c)),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/campaigns/${id}`, {
         method: 'PATCH',
@@ -94,30 +106,32 @@ export const useCampaignsStore = create<CampaignsState & CampaignsActions>()((se
       if (!res.ok) throw new Error('Failed to update campaign')
       const data = await res.json()
       const updatedCampaign = data.campaign as Campaign
-      set((state) => ({
-        campaigns: state.campaigns.map((c) => (c.id === id ? updatedCampaign : c)),
+      set({
+        campaigns: previous.map((c) => (c.id === id ? updatedCampaign : c)),
         loading: false,
-      }))
+      })
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ campaigns: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   deleteCampaign: async (id) => {
-    set({ loading: true, error: null })
+    const previous = get().campaigns
+    set({
+      campaigns: previous.filter((c) => c.id !== id),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/campaigns/${id}`, {
         method: 'DELETE',
       })
       if (!res.ok) throw new Error('Failed to delete campaign')
-      set((state) => ({
-        campaigns: state.campaigns.filter((c) => c.id !== id),
-        loading: false,
-      }))
+      set({ loading: false })
       usePlanStore.getState().decrementCount('campaigns')
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ campaigns: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
@@ -177,7 +191,14 @@ export const useCampaignsStore = create<CampaignsState & CampaignsActions>()((se
   },
 
   moveCampaignToProject: async (campaignId, projectId) => {
-    set({ loading: true, error: null })
+    const previous = get().campaigns
+    set({
+      campaigns: previous.map((c) =>
+        c.id === campaignId ? { ...c, projectId: projectId ?? undefined } : c
+      ),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/campaigns/${campaignId}`, {
         method: 'PATCH',
@@ -187,12 +208,12 @@ export const useCampaignsStore = create<CampaignsState & CampaignsActions>()((se
       if (!res.ok) throw new Error('Failed to move campaign to project')
       const data = await res.json()
       const updatedCampaign = data.campaign as Campaign
-      set((state) => ({
-        campaigns: state.campaigns.map((c) => (c.id === campaignId ? updatedCampaign : c)),
+      set({
+        campaigns: previous.map((c) => (c.id === campaignId ? updatedCampaign : c)),
         loading: false,
-      }))
+      })
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ campaigns: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },

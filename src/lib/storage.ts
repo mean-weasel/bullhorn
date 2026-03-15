@@ -47,7 +47,14 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
   },
 
   addPost: async (postData) => {
-    set({ loading: true, error: null })
+    const previous = get().posts
+    const tempPost = {
+      ...postData,
+      id: 'temp-' + Date.now(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    } as Post
+    set({ posts: [tempPost, ...previous], loading: true, error: null })
     try {
       const res = await fetch(`${API_BASE}/posts`, {
         method: 'POST',
@@ -57,21 +64,23 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
       if (!res.ok) throw new Error('Failed to create post')
       const data = await res.json()
       const newPost = data.post as Post
-      set((state) => ({
-        posts: [newPost, ...state.posts],
-        loading: false,
-      }))
+      set({ posts: [newPost, ...previous], loading: false })
       hapticSuccess()
       usePlanStore.getState().incrementCount('posts')
       return newPost
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ posts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   updatePost: async (id, updates) => {
-    set({ loading: true, error: null })
+    const previous = get().posts
+    set({
+      posts: previous.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/posts/${id}`, {
         method: 'PATCH',
@@ -81,30 +90,32 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
       if (!res.ok) throw new Error('Failed to update post')
       const data = await res.json()
       const updatedPost = data.post as Post
-      set((state) => ({
-        posts: state.posts.map((p) => (p.id === id ? updatedPost : p)),
+      set({
+        posts: previous.map((p) => (p.id === id ? updatedPost : p)),
         loading: false,
-      }))
+      })
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ posts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   deletePost: async (id) => {
-    set({ loading: true, error: null })
+    const previous = get().posts
+    set({
+      posts: previous.filter((p) => p.id !== id),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/posts/${id}`, {
         method: 'DELETE',
       })
       if (!res.ok) throw new Error('Failed to delete post')
-      set((state) => ({
-        posts: state.posts.filter((p) => p.id !== id),
-        loading: false,
-      }))
+      set({ loading: false })
       usePlanStore.getState().decrementCount('posts')
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ posts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },

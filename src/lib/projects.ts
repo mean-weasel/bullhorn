@@ -70,7 +70,18 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
   },
 
   createProject: async (projectData) => {
-    set({ loading: true, error: null })
+    const previous = get().projects
+    const tempProject: Project = {
+      id: 'temp-' + Date.now(),
+      name: projectData.name,
+      description: projectData.description,
+      hashtags: projectData.hashtags || [],
+      brandColors: projectData.brandColors || {},
+      logoUrl: projectData.logoUrl,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    set({ projects: [tempProject, ...previous], loading: true, error: null })
     try {
       const res = await fetch(`${API_BASE}/projects`, {
         method: 'POST',
@@ -84,21 +95,23 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
       const data = await res.json()
       const newProject = data.project as Project
 
-      set((state) => ({
-        projects: [newProject, ...state.projects],
-        loading: false,
-      }))
+      set({ projects: [newProject, ...previous], loading: false })
       usePlanStore.getState().incrementCount('projects')
 
       return newProject
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ projects: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   updateProject: async (id, updates) => {
-    set({ loading: true, error: null })
+    const previous = get().projects
+    set({
+      projects: previous.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/projects/${id}`, {
         method: 'PATCH',
@@ -112,18 +125,23 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
       const data = await res.json()
       const updatedProject = data.project as Project
 
-      set((state) => ({
-        projects: state.projects.map((p) => (p.id === id ? updatedProject : p)),
+      set({
+        projects: previous.map((p) => (p.id === id ? updatedProject : p)),
         loading: false,
-      }))
+      })
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ projects: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   deleteProject: async (id) => {
-    set({ loading: true, error: null })
+    const previous = get().projects
+    set({
+      projects: previous.filter((p) => p.id !== id),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/projects/${id}`, {
         method: 'DELETE',
@@ -134,15 +152,12 @@ export const useProjectsStore = create<ProjectsState & ProjectsActions>()((set, 
       }
       const data = await res.json()
 
-      set((state) => ({
-        projects: state.projects.filter((p) => p.id !== id),
-        loading: false,
-      }))
+      set({ loading: false })
       usePlanStore.getState().decrementCount('projects')
 
       return { campaignsAffected: data.deleted?.campaignsAffected || 0 }
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ projects: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },

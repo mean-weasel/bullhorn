@@ -27,6 +27,7 @@ import { cn } from '@/lib/utils'
 import { getMediaUrl } from '@/lib/media'
 import { MoveCampaignModal } from '@/components/campaigns/MoveCampaignModal'
 import { LaunchPostCard } from '@/components/launch-posts/LaunchPostCard'
+import { ResourceNotFound } from '@/components/ui/ResourceNotFound'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { CampaignPostCard } from './CampaignPostCard'
 import { AddPostModal } from './AddPostModal'
@@ -193,14 +194,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   }
 
   if (!campaign) {
-    return (
-      <div className="p-4 md:p-6 max-w-5xl mx-auto text-center py-16">
-        <h2 className="text-xl font-semibold mb-2">Campaign not found</h2>
-        <Link href="/campaigns" className="text-[hsl(var(--gold))] hover:underline">
-          Back to Campaigns
-        </Link>
-      </div>
-    )
+    return <ResourceNotFound type="Campaign" listUrl="/campaigns" listLabel="Campaigns" />
   }
 
   const statusConfig = CAMPAIGN_STATUS_CONFIG[campaign.status]

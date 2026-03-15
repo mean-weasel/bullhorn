@@ -73,7 +73,23 @@ export const useBlogDraftsStore = create<BlogDraftsState & BlogDraftsActions>()(
   },
 
   addDraft: async (draftData) => {
-    set({ loading: true, error: null })
+    const previous = get().drafts
+    const tempDraft: BlogDraft = {
+      id: 'temp-' + Date.now(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      scheduledAt: draftData.scheduledAt,
+      status: draftData.status,
+      title: draftData.title,
+      date: draftData.date,
+      content: draftData.content,
+      notes: draftData.notes,
+      wordCount: 0,
+      campaignId: draftData.campaignId,
+      images: [],
+      tags: draftData.tags || [],
+    }
+    set({ drafts: [tempDraft, ...previous], loading: true, error: null })
     try {
       const res = await fetch(`${API_BASE}/blog-drafts`, {
         method: 'POST',
@@ -83,21 +99,23 @@ export const useBlogDraftsStore = create<BlogDraftsState & BlogDraftsActions>()(
       if (!res.ok) throw new Error('Failed to create blog draft')
       const data = await res.json()
       const newDraft = data.draft as BlogDraft
-      set((state) => ({
-        drafts: [newDraft, ...state.drafts],
-        loading: false,
-      }))
+      set({ drafts: [newDraft, ...previous], loading: false })
       hapticSuccess()
       usePlanStore.getState().incrementCount('blogDrafts')
       return newDraft
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ drafts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   updateDraft: async (id, updates) => {
-    set({ loading: true, error: null })
+    const previous = get().drafts
+    set({
+      drafts: previous.map((d) => (d.id === id ? { ...d, ...updates } : d)),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/blog-drafts/${id}`, {
         method: 'PATCH',
@@ -107,30 +125,32 @@ export const useBlogDraftsStore = create<BlogDraftsState & BlogDraftsActions>()(
       if (!res.ok) throw new Error('Failed to update blog draft')
       const data = await res.json()
       const updatedDraft = data.draft as BlogDraft
-      set((state) => ({
-        drafts: state.drafts.map((d) => (d.id === id ? updatedDraft : d)),
+      set({
+        drafts: previous.map((d) => (d.id === id ? updatedDraft : d)),
         loading: false,
-      }))
+      })
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ drafts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },
 
   deleteDraft: async (id) => {
-    set({ loading: true, error: null })
+    const previous = get().drafts
+    set({
+      drafts: previous.filter((d) => d.id !== id),
+      loading: true,
+      error: null,
+    })
     try {
       const res = await fetch(`${API_BASE}/blog-drafts/${id}`, {
         method: 'DELETE',
       })
       if (!res.ok) throw new Error('Failed to delete blog draft')
-      set((state) => ({
-        drafts: state.drafts.filter((d) => d.id !== id),
-        loading: false,
-      }))
+      set({ loading: false })
       usePlanStore.getState().decrementCount('blogDrafts')
     } catch (error) {
-      set({ error: (error as Error).message, loading: false })
+      set({ drafts: previous, error: (error as Error).message, loading: false })
       throw error
     }
   },

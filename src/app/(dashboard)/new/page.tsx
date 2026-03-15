@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { usePostsStore } from '@/lib/storage'
@@ -11,6 +11,7 @@ import {
   Platform,
   PostStatus,
   PLATFORM_INFO,
+  PLATFORM_CHAR_LIMITS,
   createPost,
   isTwitterContent,
   isLinkedInContent,
@@ -22,6 +23,7 @@ import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
 import { useAutoSave } from '@/hooks/useAutoSave'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useLocalDraft } from '@/hooks/useLocalDraft'
 import {
   PlatformSelector,
   CampaignSelector,
@@ -65,6 +67,24 @@ export default function EditorPage() {
 
   const isNew = !id
   const existingPost = id ? getPost(id) : undefined
+
+  // Local draft recovery
+  interface PostDraftData {
+    content: string
+    platform: string
+    notes: string
+    mediaUrls: string[]
+    linkedInMediaUrl: string
+    redditUrl: string
+    subredditsInput: string[]
+    subredditTitles: Record<string, string>
+    subredditSchedules: Record<string, string>
+    campaignId?: string
+    scheduledAt?: string
+  }
+
+  const { draft, hasDraft, saveDraft, clearDraft } = useLocalDraft<PostDraftData>('new-post')
+
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -122,6 +142,97 @@ export default function EditorPage() {
   const [subredditSchedules, setSubredditSchedules] = useState<Record<string, string>>({})
   const [subredditTitles, setSubredditTitles] = useState<Record<string, string>>({})
   const [expandedSubreddits, setExpandedSubreddits] = useState<Record<string, boolean>>({})
+
+  // Draft recovery: detect share params and restore/save draft
+  const hasShareParams = !!(searchParams.get('text') || searchParams.get('url'))
+
+  const restoreFromDraft = useCallback((d: PostDraftData) => {
+    setContent(d.content)
+    setPost((prev) => ({
+      ...prev,
+      platform: d.platform as Platform,
+      notes: d.notes,
+      campaignId: d.campaignId,
+      scheduledAt: d.scheduledAt ?? null,
+    }))
+    setMediaUrls(d.mediaUrls)
+    setLinkedInMediaUrl(d.linkedInMediaUrl)
+    setRedditUrl(d.redditUrl)
+    setSubredditsInput(d.subredditsInput)
+    setSubredditTitles(d.subredditTitles)
+    setSubredditSchedules(d.subredditSchedules)
+    if (d.notes) setShowNotes(true)
+  }, [])
+
+  // Show draft restoration toast on mount
+  useEffect(() => {
+    if (!isNew) return
+    if (hasShareParams) {
+      clearDraft()
+      return
+    }
+    if (hasDraft && draft) {
+      toast(
+        (t) => (
+          <span className="flex items-center gap-2">
+            You have an unsaved draft.
+            <button
+              className="font-bold underline"
+              onClick={() => {
+                restoreFromDraft(draft)
+                toast.dismiss(t.id)
+              }}
+            >
+              Restore
+            </button>
+            <button
+              className="text-muted-foreground"
+              onClick={() => {
+                clearDraft()
+                toast.dismiss(t.id)
+              }}
+            >
+              Discard
+            </button>
+          </span>
+        ),
+        { duration: 10000 }
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Save draft on every form change (debounced in hook)
+  useEffect(() => {
+    if (!isNew) return
+    saveDraft({
+      content,
+      platform: post.platform,
+      notes: post.notes || '',
+      mediaUrls,
+      linkedInMediaUrl,
+      redditUrl,
+      subredditsInput,
+      subredditTitles,
+      subredditSchedules,
+      campaignId: post.campaignId,
+      scheduledAt: post.scheduledAt ?? undefined,
+    })
+  }, [
+    content,
+    post.platform,
+    post.notes,
+    mediaUrls,
+    linkedInMediaUrl,
+    redditUrl,
+    subredditsInput,
+    subredditTitles,
+    subredditSchedules,
+    post.campaignId,
+    post.scheduledAt,
+    isNew,
+    saveDraft,
+  ])
 
   // Get active accounts for current platform
   const platformAccounts = getAccountsByProvider(post.platform).filter((a) => a.status === 'active')
@@ -209,6 +320,9 @@ export default function EditorPage() {
   const canSchedule = hasMultipleSubreddits
     ? subredditsInput.every((sub) => subredditSchedules[sub]) || !!post.scheduledAt
     : !!post.scheduledAt
+
+  // Check if content exceeds platform character limit
+  const isOverLimit = content.length > PLATFORM_CHAR_LIMITS[post.platform]
 
   const { status: autoSaveStatus, retry: autoSaveRetry } = useAutoSave({
     data: { post, content, mediaUrls, linkedInMediaUrl, redditUrl },
@@ -369,6 +483,7 @@ export default function EditorPage() {
       }
       trackMilestone()
       router.push('/')
+      clearDraft()
     } catch (error) {
       toast.error('Failed to save post')
       setIsDirty(true)
@@ -515,6 +630,12 @@ export default function EditorPage() {
 
   // Schedule
   const handleSchedule = () => {
+    if (isOverLimit) {
+      toast.error(
+        `Content exceeds the ${PLATFORM_CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
+      )
+      return
+    }
     if (post.platform === 'reddit' && subredditsInput.length === 0) {
       toast.error('Please select at least one subreddit')
       return
@@ -537,6 +658,13 @@ export default function EditorPage() {
   const hasConnectedAccount = !!activeAccount
 
   const handlePublishNow = async () => {
+    if (isOverLimit) {
+      toast.error(
+        `Content exceeds the ${PLATFORM_CHAR_LIMITS[post.platform]}-character limit for ${PLATFORM_INFO[post.platform].name}`
+      )
+      return
+    }
+
     if (!content.trim()) {
       toast.error('Please add some content')
       return
@@ -582,6 +710,7 @@ export default function EditorPage() {
           publishResult: data.publishResult,
         }))
         fetchPosts()
+        clearDraft()
       } else {
         toast.error(data.error || 'Failed to publish')
       }
@@ -773,6 +902,7 @@ export default function EditorPage() {
           onArchive={handleArchive}
           onRestore={handleRestore}
           onDelete={handleDelete}
+          isOverLimit={isOverLimit}
         />
       </div>
 

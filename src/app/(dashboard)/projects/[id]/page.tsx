@@ -22,6 +22,7 @@ import { useCampaignsStore } from '@/lib/campaigns'
 import { Project, Campaign, ProjectAnalytics } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 import { getMediaUrl } from '@/lib/media'
+import { ResourceNotFound } from '@/components/ui/ResourceNotFound'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ProjectCampaignCard } from './ProjectCampaignCard'
 import { ProjectSettingsTab } from './ProjectSettingsTab'
@@ -183,14 +184,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   }
 
   if (!project) {
-    return (
-      <div className="p-4 md:p-6 max-w-5xl mx-auto text-center py-16">
-        <h2 className="text-xl font-semibold mb-2">Project not found</h2>
-        <Link href="/projects" className="text-[hsl(var(--gold))] hover:underline">
-          Back to Projects
-        </Link>
-      </div>
-    )
+    return <ResourceNotFound type="Project" listUrl="/projects" listLabel="Projects" />
   }
 
   return (

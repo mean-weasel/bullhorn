@@ -29,6 +29,7 @@ interface EditorActionsProps {
   isPublishing?: boolean
   hasConnectedAccount?: boolean
   platformName?: string
+  isOverLimit?: boolean
 }
 
 function PublishButton({
@@ -39,6 +40,7 @@ function PublishButton({
   platformName,
   onPublishNow,
   isNew,
+  isOverLimit,
 }: Pick<
   EditorActionsProps,
   | 'postStatus'
@@ -48,6 +50,7 @@ function PublishButton({
   | 'platformName'
   | 'onPublishNow'
   | 'isNew'
+  | 'isOverLimit'
 >) {
   // Published state: show green indicator
   if (postStatus === 'published') {
@@ -93,7 +96,7 @@ function PublishButton({
   return (
     <button
       onClick={onPublishNow}
-      disabled={isSaving || isPublishing}
+      disabled={isSaving || isPublishing || isOverLimit}
       className={cn(
         'flex items-center gap-2 px-3 md:px-4 py-2.5',
         'rounded-md min-h-[44px]',
@@ -133,6 +136,7 @@ export const EditorActions = ({
   isPublishing = false,
   hasConnectedAccount,
   platformName,
+  isOverLimit,
 }: EditorActionsProps) => {
   return (
     <div
@@ -225,7 +229,7 @@ export const EditorActions = ({
 
       <button
         onClick={onSchedule}
-        disabled={isSaving || isPublishing || !canSchedule}
+        disabled={isSaving || isPublishing || !canSchedule || isOverLimit}
         title={canSchedule ? 'Schedule Post (Ctrl+Enter)' : 'Select a date and time to schedule'}
         className={cn(
           'flex items-center gap-2 px-3 md:px-4 py-2.5',
@@ -255,6 +259,7 @@ export const EditorActions = ({
         platformName={platformName}
         onPublishNow={onPublishNow}
         isNew={isNew}
+        isOverLimit={isOverLimit}
       />
 
       {!isNew && postStatus !== 'published' && onMarkAsPosted && (
