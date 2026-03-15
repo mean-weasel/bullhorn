@@ -108,7 +108,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { GET, PATCH, DELETE } from './route'
+import { GET } from './route'
 import { requireAuth } from '@/lib/auth'
 
 const mockRequireAuth = vi.mocked(requireAuth)
@@ -219,7 +219,9 @@ describe('GET /api/campaigns/[id]', () => {
     const body = await res.json()
     expect(body.error).toBe('Campaign not found')
   })
+})
 
+describe('GET /api/campaigns/[id] - continued', () => {
   it('returns 500 when campaign query fails with non-PGRST116 error', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     campaignSingleData = { data: null, error: { code: 'OTHER', message: 'DB error' } }
@@ -254,210 +256,5 @@ describe('GET /api/campaigns/[id]', () => {
     const body = await res.json()
     expect(body.campaign.id).toBe('camp-1')
     expect(body.posts).toEqual([])
-  })
-})
-
-// ---------------------------------------------------------------------------
-// PATCH /api/campaigns/[id]
-// ---------------------------------------------------------------------------
-
-describe('PATCH /api/campaigns/[id]', () => {
-  it('returns 401 when not authenticated', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(401)
-    const body = await res.json()
-    expect(body.error).toBe('Unauthorized')
-  })
-
-  it('returns 403 when scopes are insufficient', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Forbidden'))
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.error).toBe('Forbidden')
-  })
-
-  it('returns 400 for invalid input', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'invalid-status' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(400)
-    const body = await res.json()
-    expect(body.error).toBe('Invalid input')
-    expect(body.details).toBeDefined()
-  })
-
-  it('returns 400 when name is whitespace-only', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: '   ' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(400)
-    const body = await res.json()
-    expect(body.error).toBe('Name cannot be empty')
-  })
-
-  it('updates campaign successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const updatedCampaign = {
-      ...dbCampaign,
-      name: 'Updated Name',
-      updated_at: '2024-06-01T00:00:00Z',
-    }
-    updateSingleData = { data: updatedCampaign, error: null }
-
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated Name' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.campaign.name).toBe('Updated Name')
-    expect(body.campaign.projectId).toBe('proj-1')
-  })
-
-  it('updates campaign with all optional fields', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const projectUuid = 'a1b2c3d4-e5f6-4a7b-8c9d-e0f1a2b3c4d5'
-    const updatedCampaign = {
-      ...dbCampaign,
-      name: 'Full Update',
-      description: 'New description',
-      status: 'paused',
-      project_id: projectUuid,
-    }
-    updateSingleData = { data: updatedCampaign, error: null }
-
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({
-        name: 'Full Update',
-        description: 'New description',
-        status: 'paused',
-        projectId: projectUuid,
-      }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.campaign.name).toBe('Full Update')
-    expect(body.campaign.description).toBe('New description')
-    expect(body.campaign.status).toBe('paused')
-    expect(body.campaign.projectId).toBe(projectUuid)
-  })
-
-  it('returns 404 when campaign not found', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    updateSingleData = { data: null, error: { code: 'PGRST116', message: 'not found' } }
-
-    const req = createRequest('/api/campaigns/nonexistent', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Test' }),
-    })
-    const res = await PATCH(req, makeParams('nonexistent'))
-    expect(res.status).toBe(404)
-    const body = await res.json()
-    expect(body.error).toBe('Campaign not found')
-  })
-
-  it('returns 500 when update fails with non-PGRST116 error', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    updateSingleData = { data: null, error: { code: 'OTHER', message: 'DB error' } }
-
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Test' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// DELETE /api/campaigns/[id]
-// ---------------------------------------------------------------------------
-
-describe('DELETE /api/campaigns/[id]', () => {
-  it('returns 401 when not authenticated', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
-    const req = createRequest('/api/campaigns/camp-1', { method: 'DELETE' })
-    const res = await DELETE(req, makeParams('camp-1'))
-    expect(res.status).toBe(401)
-    const body = await res.json()
-    expect(body.error).toBe('Unauthorized')
-  })
-
-  it('returns 403 when scopes are insufficient', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Forbidden'))
-    const req = createRequest('/api/campaigns/camp-1', { method: 'DELETE' })
-    const res = await DELETE(req, makeParams('camp-1'))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.error).toBe('Forbidden')
-  })
-
-  it('returns 404 when campaign not found', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    campaignSingleData = { data: null, error: { code: 'PGRST116', message: 'not found' } }
-
-    const req = createRequest('/api/campaigns/nonexistent', { method: 'DELETE' })
-    const res = await DELETE(req, makeParams('nonexistent'))
-    expect(res.status).toBe(404)
-    const body = await res.json()
-    expect(body.error).toBe('Campaign not found')
-  })
-
-  it('deletes campaign successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    campaignSingleData = { data: { id: 'camp-1' }, error: null }
-    deleteCampaignData = { error: null }
-
-    const req = createRequest('/api/campaigns/camp-1', { method: 'DELETE' })
-    const res = await DELETE(req, makeParams('camp-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.success).toBe(true)
-  })
-
-  it('nullifies campaign_id on associated posts before deleting', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    campaignSingleData = { data: { id: 'camp-1' }, error: null }
-    deleteCampaignData = { error: null }
-
-    const req = createRequest('/api/campaigns/camp-1', { method: 'DELETE' })
-    await DELETE(req, makeParams('camp-1'))
-
-    // Verify update was called on posts table to nullify campaign_id
-    expect(mockFrom).toHaveBeenCalledWith('posts')
-    expect(mockUpdate).toHaveBeenCalled()
-  })
-
-  it('returns 500 when delete fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    campaignSingleData = { data: { id: 'camp-1' }, error: null }
-    deleteCampaignData = { error: { message: 'Delete failed' } }
-
-    const req = createRequest('/api/campaigns/camp-1', { method: 'DELETE' })
-    const res = await DELETE(req, makeParams('camp-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
   })
 })

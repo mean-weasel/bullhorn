@@ -6,6 +6,35 @@ import { requireAuth } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
+async function fetchCalendarData(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  start: string,
+  end: string
+) {
+  const [postsResult, remindersResult] = await Promise.all([
+    supabase
+      .from('posts')
+      .select('*')
+      .eq('user_id', userId)
+      .neq('status', 'archived')
+      .not('scheduled_at', 'is', null)
+      .gte('scheduled_at', `${start}T00:00:00.000Z`)
+      .lte('scheduled_at', `${end}T23:59:59.999Z`)
+      .order('scheduled_at', { ascending: true })
+      .limit(500),
+    supabase
+      .from('reminders')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('remind_at', `${start}T00:00:00.000Z`)
+      .lte('remind_at', `${end}T23:59:59.999Z`)
+      .order('remind_at', { ascending: true })
+      .limit(500),
+  ])
+  return { postsResult, remindersResult }
+}
+
 // GET /api/calendar?start=YYYY-MM-DD&end=YYYY-MM-DD
 export async function GET(request: NextRequest) {
   try {
@@ -29,47 +58,21 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const { postsResult, remindersResult } = await fetchCalendarData(supabase, userId, start, end)
 
-    // Query posts and reminders in parallel
-    const [postsResult, remindersResult] = await Promise.all([
-      supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', userId)
-        .neq('status', 'archived')
-        .not('scheduled_at', 'is', null)
-        .gte('scheduled_at', `${start}T00:00:00.000Z`)
-        .lte('scheduled_at', `${end}T23:59:59.999Z`)
-        .order('scheduled_at', { ascending: true })
-        .limit(500),
-      supabase
-        .from('reminders')
-        .select('*')
-        .eq('user_id', userId)
-        .gte('remind_at', `${start}T00:00:00.000Z`)
-        .lte('remind_at', `${end}T23:59:59.999Z`)
-        .order('remind_at', { ascending: true })
-        .limit(500),
-    ])
-
-    const { data: postsData, error: postsError } = postsResult
-    const { data: remindersData, error: remindersError } = remindersResult
-
-    if (postsError) {
-      console.error('Database error fetching posts:', postsError)
+    if (postsResult.error) {
+      console.error('Database error fetching posts:', postsResult.error)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+    if (remindersResult.error) {
+      console.error('Database error fetching reminders:', remindersResult.error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    if (remindersError) {
-      console.error('Database error fetching reminders:', remindersError)
-      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-    }
-
-    const posts = (postsData || []).map((post) => transformPostFromDb(post as DbPost))
-    const reminders = (remindersData || []).map((reminder) =>
-      transformReminderFromDb(reminder as DbReminder)
+    const posts = (postsResult.data || []).map((post) => transformPostFromDb(post as DbPost))
+    const reminders = (remindersResult.data || []).map((r) =>
+      transformReminderFromDb(r as DbReminder)
     )
-
     return NextResponse.json({ posts, reminders })
   } catch (error) {
     console.error('Error fetching calendar data:', error)

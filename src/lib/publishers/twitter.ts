@@ -33,46 +33,50 @@ export function splitIntoThread(text: string, maxLength = 280): string[] {
   return chunks
 }
 
+async function postTweet(
+  text: string,
+  accessToken: string,
+  replyToId: string | null
+): Promise<{ id: string } | PublishOutput> {
+  const body: Record<string, unknown> = { text }
+  if (replyToId) body.reply = { in_reply_to_tweet_id: replyToId }
+
+  const res = await fetch(TWITTER_API_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}))
+    return {
+      success: false,
+      error: errorData.detail || errorData.title || 'Failed to create tweet',
+      retryable: res.status === 429 || res.status >= 500,
+    }
+  }
+
+  const result = await res.json()
+  return { id: result.data.id }
+}
+
 export async function publishToTwitter(input: PublishInput): Promise<PublishOutput> {
   const content = input.post.content as TwitterContent
   const { accessToken } = input
 
   try {
-    // TODO: Add media upload support in follow-up task.
-    // Media upload via Twitter API v2 requires chunked upload flow.
-
     const tweets = splitIntoThread(content.text)
     const tweetIds: string[] = []
     let lastTweetId: string | null = null
 
     for (const tweetText of tweets) {
-      const body: Record<string, unknown> = { text: tweetText }
-      if (lastTweetId) {
-        body.reply = { in_reply_to_tweet_id: lastTweetId }
-      }
-
-      const res = await fetch(TWITTER_API_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      })
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        const isRateLimit = res.status === 429
-        return {
-          success: false,
-          error: errorData.detail || errorData.title || 'Failed to create tweet',
-          retryable: isRateLimit || res.status >= 500,
-        }
-      }
-
-      const result = await res.json()
-      tweetIds.push(result.data.id)
-      lastTweetId = result.data.id
+      const result = await postTweet(tweetText, accessToken, lastTweetId)
+      if ('success' in result) return result
+      tweetIds.push(result.id)
+      lastTweetId = result.id
     }
 
     return {
@@ -87,10 +91,6 @@ export async function publishToTwitter(input: PublishInput): Promise<PublishOutp
       },
     }
   } catch (error) {
-    return {
-      success: false,
-      error: (error as Error).message,
-      retryable: true,
-    }
+    return { success: false, error: (error as Error).message, retryable: true }
   }
 }

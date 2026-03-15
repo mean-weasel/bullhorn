@@ -109,7 +109,9 @@ describe('GET /api/projects/[id]/campaigns', () => {
     const body = await res.json()
     expect(body.error).toBe('Project not found')
   })
+})
 
+describe('GET /api/projects/[id]/campaigns - continued', () => {
   it('returns campaigns for a project', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = { data: { id: 'proj-1' }, error: null }

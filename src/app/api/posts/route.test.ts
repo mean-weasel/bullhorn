@@ -101,7 +101,9 @@ describe('GET /api/posts', () => {
     expect(body.posts[0].id).toBe('post-1')
     expect(body.posts[0].platform).toBe('twitter')
   })
+})
 
+describe('GET /api/posts - continued', () => {
   it('filters by status query param', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockLimit.mockResolvedValue({ data: [], error: null })
@@ -161,7 +163,9 @@ describe('POST /api/posts', () => {
     const body = await res.json()
     expect(body.error).toBe('Invalid input')
   })
+})
 
+describe('POST /api/posts - continued', () => {
   it('creates post successfully and returns 201', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const createdPost = {

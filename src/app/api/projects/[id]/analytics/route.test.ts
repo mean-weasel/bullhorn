@@ -160,7 +160,9 @@ describe('GET /api/projects/[id]/analytics', () => {
       failedPosts: 0,
     })
   })
+})
 
+describe('GET /api/projects/[id]/analytics - continued', () => {
   it('returns rolled-up analytics with post status counts', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = { data: { id: 'proj-1' }, error: null }

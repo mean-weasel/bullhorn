@@ -140,7 +140,9 @@ describe('GET /api/blog-drafts', () => {
     const body = await res.json()
     expect(body.drafts).toEqual([])
   })
+})
 
+describe('GET /api/blog-drafts - continued', () => {
   it('returns 500 when database query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockQueryData = { data: null, error: { message: 'DB error' } }
@@ -236,7 +238,9 @@ describe('POST /api/blog-drafts', () => {
     expect(body.draft.id).toBe('draft-new')
     expect(body.draft.title).toBe('New Draft')
   })
+})
 
+describe('POST /api/blog-drafts - continued', () => {
   it('returns 400 for invalid input (bad status)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({

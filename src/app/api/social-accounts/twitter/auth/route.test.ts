@@ -75,6 +75,21 @@ describe('GET /api/social-accounts/twitter/auth', () => {
     expect(body.url).toContain('code_challenge=')
     expect(body.url).toContain('code_challenge_method=S256')
   })
+})
+
+describe('GET /api/social-accounts/twitter/auth - continued', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockRequireAuth.mockResolvedValue({ userId: 'user-123' })
+    mockEnforceSocialAccountLimit.mockResolvedValue({
+      allowed: true,
+      current: 0,
+      limit: 1,
+      plan: 'free',
+    })
+    vi.stubEnv('TWITTER_CLIENT_ID', 'test-client-id')
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://localhost:3000')
+  })
 
   it('sets twitter_oauth_state cookie with state and codeVerifier', async () => {
     await GET()

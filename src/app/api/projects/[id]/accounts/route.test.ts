@@ -131,7 +131,9 @@ describe('GET /api/projects/[id]/accounts', () => {
     const body = await res.json()
     expect(body.error).toBe('Project not found')
   })
+})
 
+describe('GET /api/projects/[id]/accounts - continued', () => {
   it('returns accounts for authenticated user', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = { data: { id: 'proj-1' }, error: null }
@@ -219,7 +221,9 @@ describe('POST /api/projects/[id]/accounts', () => {
     const body = await res.json()
     expect(body.error).toBe('Project not found')
   })
+})
 
+describe('POST /api/projects/[id]/accounts - continued', () => {
   it('creates account association successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = { data: { id: 'proj-1' }, error: null }

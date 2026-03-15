@@ -136,7 +136,9 @@ describe('GET /api/notification-preferences', () => {
     // Verify insert was called with user_id
     expect(mockInsert).toHaveBeenCalledWith({ user_id: 'user-1' })
   })
+})
 
+describe('GET /api/notification-preferences - continued', () => {
   it('returns 500 when insert for defaults fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // First query returns PGRST116
@@ -241,7 +243,9 @@ describe('PATCH /api/notification-preferences', () => {
     const body = await res.json()
     expect(body.error).toBe('No fields to update')
   })
+})
 
+describe('PATCH /api/notification-preferences - continued', () => {
   it('returns 400 for unknown fields (stripped by schema, treated as empty)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const req = createRequest('/api/notification-preferences', {

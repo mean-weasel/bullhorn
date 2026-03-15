@@ -129,7 +129,9 @@ describe('GET /api/launch-posts', () => {
     const body = await res.json()
     expect(body.launchPosts).toEqual([])
   })
+})
 
+describe('GET /api/launch-posts - continued', () => {
   it('returns 500 when database query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockQueryData = { data: null, error: { message: 'DB error' } }
@@ -213,7 +215,9 @@ describe('POST /api/launch-posts', () => {
     const body = await res.json()
     expect(body.error).toBe('Invalid input')
   })
+})
 
+describe('POST /api/launch-posts - continued', () => {
   it('returns 400 for invalid platform', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({

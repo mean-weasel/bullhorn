@@ -40,424 +40,184 @@ const makeCampaign = (overrides: Partial<Campaign> = {}): Campaign => ({
 // fetchCampaigns
 // ---------------------------------------------------------------------------
 
-describe('useCampaignsStore', () => {
-  describe('fetchCampaigns', () => {
-    it('should set loading true while fetching', async () => {
-      let capturedLoading = false
-      mockFetch.mockImplementation(() => {
-        capturedLoading = useCampaignsStore.getState().loading
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ campaigns: [] }),
-        })
-      })
-
-      await useCampaignsStore.getState().fetchCampaigns()
-      expect(capturedLoading).toBe(true)
-    })
-
-    it('should populate campaigns on success', async () => {
-      const campaigns = [makeCampaign(), makeCampaign({ id: 'camp-2', name: 'Second' })]
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ campaigns }),
-      })
-
-      await useCampaignsStore.getState().fetchCampaigns()
-
-      const state = useCampaignsStore.getState()
-      expect(state.campaigns).toEqual(campaigns)
-      expect(state.loading).toBe(false)
-      expect(state.error).toBeNull()
-    })
-
-    it('should set initialized after first fetch', async () => {
-      mockFetch.mockResolvedValueOnce({
+describe('useCampaignsStore - fetchCampaigns', () => {
+  it('should set loading true while fetching', async () => {
+    let capturedLoading = false
+    mockFetch.mockImplementation(() => {
+      capturedLoading = useCampaignsStore.getState().loading
+      return Promise.resolve({
         ok: true,
         json: async () => ({ campaigns: [] }),
       })
-
-      expect(useCampaignsStore.getState().initialized).toBe(false)
-      await useCampaignsStore.getState().fetchCampaigns()
-      expect(useCampaignsStore.getState().initialized).toBe(true)
     })
 
-    it('should set error on failure', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false })
-
-      await useCampaignsStore.getState().fetchCampaigns()
-
-      const state = useCampaignsStore.getState()
-      expect(state.error).toBe('Failed to fetch campaigns')
-      expect(state.loading).toBe(false)
-    })
-
-    it('should handle network error', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'))
-
-      await useCampaignsStore.getState().fetchCampaigns()
-
-      expect(useCampaignsStore.getState().error).toBe('Network error')
-    })
-
-    it('should default to empty array when response has no campaigns key', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({}),
-      })
-
-      await useCampaignsStore.getState().fetchCampaigns()
-      expect(useCampaignsStore.getState().campaigns).toEqual([])
-    })
-
-    it('should pass projectId as query param', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ campaigns: [] }),
-      })
-
-      await useCampaignsStore.getState().fetchCampaigns({ projectId: 'proj-42' })
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns?projectId=proj-42')
-    })
-
-    it('should deduplicate concurrent calls', async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: async () => ({ campaigns: [] }),
-      })
-
-      await Promise.all([
-        useCampaignsStore.getState().fetchCampaigns(),
-        useCampaignsStore.getState().fetchCampaigns(),
-      ])
-
-      expect(mockFetch).toHaveBeenCalledTimes(1)
-    })
+    await useCampaignsStore.getState().fetchCampaigns()
+    expect(capturedLoading).toBe(true)
   })
 
-  // ---------------------------------------------------------------------------
-  // addCampaign
-  // ---------------------------------------------------------------------------
-
-  describe('addCampaign', () => {
-    it('should POST to /api/campaigns and add to items', async () => {
-      const newCampaign = makeCampaign()
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ campaign: newCampaign }),
-      })
-
-      const result = await useCampaignsStore
-        .getState()
-        .addCampaign({ name: 'Test Campaign', description: 'A test campaign' })
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Test Campaign', description: 'A test campaign' }),
-      })
-      expect(result).toEqual(newCampaign)
-      expect(useCampaignsStore.getState().campaigns).toHaveLength(1)
-      expect(useCampaignsStore.getState().campaigns[0]).toEqual(newCampaign)
+  it('should populate campaigns on success', async () => {
+    const campaigns = [makeCampaign(), makeCampaign({ id: 'camp-2', name: 'Second' })]
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ campaigns }),
     })
 
-    it('should prepend new campaign to existing list', async () => {
-      const existing = makeCampaign({ id: 'existing-1' })
-      useCampaignsStore.setState({ campaigns: [existing] })
+    await useCampaignsStore.getState().fetchCampaigns()
 
-      const newCampaign = makeCampaign({ id: 'new-1' })
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ campaign: newCampaign }),
-      })
-
-      await useCampaignsStore.getState().addCampaign({ name: 'New' })
-
-      const campaigns = useCampaignsStore.getState().campaigns
-      expect(campaigns).toHaveLength(2)
-      expect(campaigns[0].id).toBe('new-1')
-      expect(campaigns[1].id).toBe('existing-1')
-    })
-
-    it('should set error and throw on failure', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false })
-
-      await expect(useCampaignsStore.getState().addCampaign({ name: 'Fail' })).rejects.toThrow(
-        'Failed to create campaign'
-      )
-
-      expect(useCampaignsStore.getState().error).toBe('Failed to create campaign')
-      expect(useCampaignsStore.getState().loading).toBe(false)
-    })
+    const state = useCampaignsStore.getState()
+    expect(state.campaigns).toEqual(campaigns)
+    expect(state.loading).toBe(false)
+    expect(state.error).toBeNull()
   })
 
-  // ---------------------------------------------------------------------------
-  // updateCampaign
-  // ---------------------------------------------------------------------------
-
-  describe('updateCampaign', () => {
-    it('should PATCH and update the campaign in state', async () => {
-      const original = makeCampaign()
-      useCampaignsStore.setState({ campaigns: [original] })
-
-      const updated = { ...original, name: 'Updated Name' }
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ campaign: updated }),
-      })
-
-      await useCampaignsStore.getState().updateCampaign('camp-1', { name: 'Updated Name' })
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Updated Name' }),
-      })
-      expect(useCampaignsStore.getState().campaigns[0].name).toBe('Updated Name')
+  it('should set initialized after first fetch', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ campaigns: [] }),
     })
 
-    it('should set error and throw on failure', async () => {
-      useCampaignsStore.setState({ campaigns: [makeCampaign()] })
-      mockFetch.mockResolvedValueOnce({ ok: false })
-
-      await expect(
-        useCampaignsStore.getState().updateCampaign('camp-1', { name: 'Fail' })
-      ).rejects.toThrow('Failed to update campaign')
-
-      expect(useCampaignsStore.getState().error).toBe('Failed to update campaign')
-    })
+    expect(useCampaignsStore.getState().initialized).toBe(false)
+    await useCampaignsStore.getState().fetchCampaigns()
+    expect(useCampaignsStore.getState().initialized).toBe(true)
   })
 
-  // ---------------------------------------------------------------------------
-  // deleteCampaign
-  // ---------------------------------------------------------------------------
+  it('should set error on failure', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false })
 
-  describe('deleteCampaign', () => {
-    it('should DELETE and remove the campaign from state', async () => {
-      useCampaignsStore.setState({
-        campaigns: [makeCampaign({ id: 'camp-1' }), makeCampaign({ id: 'camp-2' })],
-      })
+    await useCampaignsStore.getState().fetchCampaigns()
 
-      mockFetch.mockResolvedValueOnce({ ok: true })
+    const state = useCampaignsStore.getState()
+    expect(state.error).toBe('Failed to fetch campaigns')
+    expect(state.loading).toBe(false)
+  })
+})
 
-      await useCampaignsStore.getState().deleteCampaign('camp-1')
+describe('useCampaignsStore - fetchCampaigns - continued', () => {
+  it('should handle network error', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1', { method: 'DELETE' })
-      const campaigns = useCampaignsStore.getState().campaigns
-      expect(campaigns).toHaveLength(1)
-      expect(campaigns[0].id).toBe('camp-2')
-    })
+    await useCampaignsStore.getState().fetchCampaigns()
 
-    it('should set error and throw on failure', async () => {
-      useCampaignsStore.setState({ campaigns: [makeCampaign()] })
-      mockFetch.mockResolvedValueOnce({ ok: false })
-
-      await expect(useCampaignsStore.getState().deleteCampaign('camp-1')).rejects.toThrow(
-        'Failed to delete campaign'
-      )
-
-      expect(useCampaignsStore.getState().error).toBe('Failed to delete campaign')
-    })
+    expect(useCampaignsStore.getState().error).toBe('Network error')
   })
 
-  // ---------------------------------------------------------------------------
-  // getCampaign
-  // ---------------------------------------------------------------------------
-
-  describe('getCampaign', () => {
-    it('should return a campaign by id', () => {
-      const campaign = makeCampaign()
-      useCampaignsStore.setState({ campaigns: [campaign] })
-      expect(useCampaignsStore.getState().getCampaign('camp-1')).toEqual(campaign)
+  it('should default to empty array when response has no campaigns key', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({}),
     })
 
-    it('should return undefined for unknown id', () => {
-      useCampaignsStore.setState({ campaigns: [makeCampaign()] })
-      expect(useCampaignsStore.getState().getCampaign('nonexistent')).toBeUndefined()
-    })
+    await useCampaignsStore.getState().fetchCampaigns()
+    expect(useCampaignsStore.getState().campaigns).toEqual([])
   })
 
-  // ---------------------------------------------------------------------------
-  // getCampaignsByStatus
-  // ---------------------------------------------------------------------------
-
-  describe('getCampaignsByStatus', () => {
-    it('should filter campaigns by status', () => {
-      useCampaignsStore.setState({
-        campaigns: [
-          makeCampaign({ id: '1', status: 'active' }),
-          makeCampaign({ id: '2', status: 'paused' }),
-          makeCampaign({ id: '3', status: 'active' }),
-        ],
-      })
-
-      const active = useCampaignsStore.getState().getCampaignsByStatus('active')
-      expect(active).toHaveLength(2)
-      expect(active.map((c) => c.id)).toEqual(['1', '3'])
+  it('should pass projectId as query param', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ campaigns: [] }),
     })
 
-    it('should return all campaigns when no status provided', () => {
-      useCampaignsStore.setState({
-        campaigns: [makeCampaign({ id: '1' }), makeCampaign({ id: '2' })],
-      })
+    await useCampaignsStore.getState().fetchCampaigns({ projectId: 'proj-42' })
 
-      expect(useCampaignsStore.getState().getCampaignsByStatus()).toHaveLength(2)
-    })
+    expect(mockFetch).toHaveBeenCalledWith('/api/campaigns?projectId=proj-42')
   })
 
-  // ---------------------------------------------------------------------------
-  // getCampaignsByProject
-  // ---------------------------------------------------------------------------
-
-  describe('getCampaignsByProject', () => {
-    it('should filter campaigns by projectId', () => {
-      useCampaignsStore.setState({
-        campaigns: [
-          makeCampaign({ id: '1', projectId: 'proj-1' }),
-          makeCampaign({ id: '2', projectId: 'proj-2' }),
-          makeCampaign({ id: '3', projectId: 'proj-1' }),
-        ],
-      })
-
-      const result = useCampaignsStore.getState().getCampaignsByProject('proj-1')
-      expect(result).toHaveLength(2)
-      expect(result.map((c) => c.id)).toEqual(['1', '3'])
+  it('should deduplicate concurrent calls', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ campaigns: [] }),
     })
 
-    it('should return unassigned campaigns when projectId is null', () => {
-      useCampaignsStore.setState({
-        campaigns: [
-          makeCampaign({ id: '1', projectId: 'proj-1' }),
-          makeCampaign({ id: '2', projectId: undefined }),
-        ],
-      })
+    await Promise.all([
+      useCampaignsStore.getState().fetchCampaigns(),
+      useCampaignsStore.getState().fetchCampaigns(),
+    ])
 
-      const result = useCampaignsStore.getState().getCampaignsByProject(null)
-      expect(result).toHaveLength(1)
-      expect(result[0].id).toBe('2')
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('useCampaignsStore - addCampaign', () => {
+  it('should POST to /api/campaigns and add to items', async () => {
+    const newCampaign = makeCampaign()
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ campaign: newCampaign }),
     })
+
+    const result = await useCampaignsStore
+      .getState()
+      .addCampaign({ name: 'Test Campaign', description: 'A test campaign' })
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/campaigns', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Test Campaign', description: 'A test campaign' }),
+    })
+    expect(result).toEqual(newCampaign)
+    expect(useCampaignsStore.getState().campaigns).toHaveLength(1)
+    expect(useCampaignsStore.getState().campaigns[0]).toEqual(newCampaign)
   })
 
-  // ---------------------------------------------------------------------------
-  // getCampaignWithPosts
-  // ---------------------------------------------------------------------------
+  it('should prepend new campaign to existing list', async () => {
+    const existing = makeCampaign({ id: 'existing-1' })
+    useCampaignsStore.setState({ campaigns: [existing] })
 
-  describe('getCampaignWithPosts', () => {
-    it('should fetch campaign detail with posts', async () => {
-      const campaign = makeCampaign()
-      const posts = [{ id: 'post-1', content: { text: 'hello' } }]
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ campaign, posts }),
-      })
-
-      const result = await useCampaignsStore.getState().getCampaignWithPosts('camp-1')
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1')
-      expect(result).toEqual({ campaign, posts })
+    const newCampaign = makeCampaign({ id: 'new-1' })
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ campaign: newCampaign }),
     })
 
-    it('should return undefined on failure', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false })
+    await useCampaignsStore.getState().addCampaign({ name: 'New' })
 
-      const result = await useCampaignsStore.getState().getCampaignWithPosts('camp-1')
-      expect(result).toBeUndefined()
-    })
-
-    it('should return undefined on network error', async () => {
-      mockFetch.mockRejectedValueOnce(new Error('Network error'))
-
-      const result = await useCampaignsStore.getState().getCampaignWithPosts('camp-1')
-      expect(result).toBeUndefined()
-    })
+    const campaigns = useCampaignsStore.getState().campaigns
+    expect(campaigns).toHaveLength(2)
+    expect(campaigns[0].id).toBe('new-1')
+    expect(campaigns[1].id).toBe('existing-1')
   })
 
-  // ---------------------------------------------------------------------------
-  // addPostToCampaign
-  // ---------------------------------------------------------------------------
+  it('should set error and throw on failure', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false })
 
-  describe('addPostToCampaign', () => {
-    it('should POST to the campaign posts endpoint', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: true })
+    await expect(useCampaignsStore.getState().addCampaign({ name: 'Fail' })).rejects.toThrow(
+      'Failed to create campaign'
+    )
 
-      await useCampaignsStore.getState().addPostToCampaign('camp-1', 'post-1')
+    expect(useCampaignsStore.getState().error).toBe('Failed to create campaign')
+    expect(useCampaignsStore.getState().loading).toBe(false)
+  })
+})
 
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId: 'post-1' }),
-      })
+describe('useCampaignsStore - updateCampaign', () => {
+  it('should PATCH and update the campaign in state', async () => {
+    const original = makeCampaign()
+    useCampaignsStore.setState({ campaigns: [original] })
+
+    const updated = { ...original, name: 'Updated Name' }
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ campaign: updated }),
     })
 
-    it('should set error and throw on failure', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false })
+    await useCampaignsStore.getState().updateCampaign('camp-1', { name: 'Updated Name' })
 
-      await expect(
-        useCampaignsStore.getState().addPostToCampaign('camp-1', 'post-1')
-      ).rejects.toThrow('Failed to add post to campaign')
-
-      expect(useCampaignsStore.getState().error).toBe('Failed to add post to campaign')
+    expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Updated Name' }),
     })
+    expect(useCampaignsStore.getState().campaigns[0].name).toBe('Updated Name')
   })
 
-  // ---------------------------------------------------------------------------
-  // removePostFromCampaign
-  // ---------------------------------------------------------------------------
+  it('should set error and throw on failure', async () => {
+    useCampaignsStore.setState({ campaigns: [makeCampaign()] })
+    mockFetch.mockResolvedValueOnce({ ok: false })
 
-  describe('removePostFromCampaign', () => {
-    it('should DELETE the post from the campaign', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: true })
+    await expect(
+      useCampaignsStore.getState().updateCampaign('camp-1', { name: 'Fail' })
+    ).rejects.toThrow('Failed to update campaign')
 
-      await useCampaignsStore.getState().removePostFromCampaign('camp-1', 'post-1')
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1/posts/post-1', {
-        method: 'DELETE',
-      })
-    })
-
-    it('should set error and throw on failure', async () => {
-      mockFetch.mockResolvedValueOnce({ ok: false })
-
-      await expect(
-        useCampaignsStore.getState().removePostFromCampaign('camp-1', 'post-1')
-      ).rejects.toThrow('Failed to remove post from campaign')
-    })
-  })
-
-  // ---------------------------------------------------------------------------
-  // moveCampaignToProject
-  // ---------------------------------------------------------------------------
-
-  describe('moveCampaignToProject', () => {
-    it('should PATCH campaign with new projectId', async () => {
-      useCampaignsStore.setState({ campaigns: [makeCampaign()] })
-
-      const updated = makeCampaign({ projectId: 'proj-2' })
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ campaign: updated }),
-      })
-
-      await useCampaignsStore.getState().moveCampaignToProject('camp-1', 'proj-2')
-
-      expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: 'proj-2' }),
-      })
-      expect(useCampaignsStore.getState().campaigns[0].projectId).toBe('proj-2')
-    })
-
-    it('should set error and throw on failure', async () => {
-      useCampaignsStore.setState({ campaigns: [makeCampaign()] })
-      mockFetch.mockResolvedValueOnce({ ok: false })
-
-      await expect(
-        useCampaignsStore.getState().moveCampaignToProject('camp-1', 'proj-2')
-      ).rejects.toThrow('Failed to move campaign to project')
-
-      expect(useCampaignsStore.getState().error).toBe('Failed to move campaign to project')
-    })
+    expect(useCampaignsStore.getState().error).toBe('Failed to update campaign')
   })
 })

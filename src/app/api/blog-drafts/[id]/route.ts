@@ -31,7 +31,6 @@ const validTransitions: Record<string, string[]> = {
 // GET /api/blog-drafts/[id] - Get single blog draft
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
@@ -50,7 +49,6 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const { id } = await params
     const supabase = await createClient()
 
-    // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('blog_drafts')
       .select('*')
@@ -66,7 +64,6 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform to camelCase for frontend
     return NextResponse.json({ draft: transformDraftFromDb(data) })
   } catch (error) {
     console.error('Error fetching blog draft:', error)
@@ -74,22 +71,51 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
 }
 
+function buildDraftUpdates(data: z.infer<typeof updateBlogDraftSchema>) {
+  const updates: Record<string, unknown> = {}
+  if (data.title !== undefined) {
+    const trimmedTitle = data.title?.trim() ?? null
+    if (trimmedTitle !== null && !trimmedTitle) return null
+    updates.title = trimmedTitle
+  }
+  if (data.content !== undefined) {
+    updates.content = data.content
+    updates.word_count = calculateWordCount(data.content || '')
+  }
+  if (data.date !== undefined) updates.date = data.date
+  if (data.status !== undefined) updates.status = data.status
+  if (data.scheduled_at !== undefined || data.scheduledAt !== undefined) {
+    updates.scheduled_at = data.scheduled_at || data.scheduledAt
+  }
+  if (data.notes !== undefined) updates.notes = data.notes
+  if (data.campaign_id !== undefined || data.campaignId !== undefined) {
+    updates.campaign_id = data.campaign_id || data.campaignId
+  }
+  if (data.images !== undefined) updates.images = data.images
+  if (data.tags !== undefined) updates.tags = data.tags
+  return updates
+}
+
+function validateDraftStatusTransition(currentStatus: string, newStatus: string | undefined) {
+  if (!newStatus || newStatus === currentStatus) return null
+  const allowed = validTransitions[currentStatus] || []
+  if (!allowed.includes(newStatus)) {
+    return `Cannot transition from ${currentStatus} to ${newStatus}`
+  }
+  return null
+}
+
 // PATCH /api/blog-drafts/[id] - Update blog draft
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['blog:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['blog:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -97,8 +123,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = updateBlogDraftSchema.safeParse(body)
+    const parsed = updateBlogDraftSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -106,7 +131,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       )
     }
 
-    // Get current draft to validate status transition (with ownership check)
     const { data: currentDraft, error: fetchError } = await supabase
       .from('blog_drafts')
       .select('status')
@@ -115,48 +139,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       .single()
 
     if (fetchError) {
-      if (fetchError.code === 'PGRST116') {
+      if (fetchError.code === 'PGRST116')
         return NextResponse.json({ error: 'Blog draft not found' }, { status: 404 })
-      }
-      console.error('Database error:', fetchError)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Validate status transition
-    if (parsed.data.status && parsed.data.status !== currentDraft.status) {
-      const allowed = validTransitions[currentDraft.status] || []
-      if (!allowed.includes(parsed.data.status)) {
-        return NextResponse.json(
-          { error: `Cannot transition from ${currentDraft.status} to ${parsed.data.status}` },
-          { status: 400 }
-        )
-      }
-    }
+    const transitionErr = validateDraftStatusTransition(currentDraft.status, parsed.data.status)
+    if (transitionErr) return NextResponse.json({ error: transitionErr }, { status: 400 })
 
-    // Build update object
-    const updates: Record<string, unknown> = {}
-    if (parsed.data.title !== undefined) {
-      const trimmedTitle = parsed.data.title?.trim() ?? null
-      if (trimmedTitle !== null && !trimmedTitle) {
-        return NextResponse.json({ error: 'Title cannot be empty' }, { status: 400 })
-      }
-      updates.title = trimmedTitle
-    }
-    if (parsed.data.content !== undefined) {
-      updates.content = parsed.data.content
-      updates.word_count = calculateWordCount(parsed.data.content || '')
-    }
-    if (parsed.data.date !== undefined) updates.date = parsed.data.date
-    if (parsed.data.status !== undefined) updates.status = parsed.data.status
-    if (parsed.data.scheduled_at !== undefined || parsed.data.scheduledAt !== undefined) {
-      updates.scheduled_at = parsed.data.scheduled_at || parsed.data.scheduledAt
-    }
-    if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes
-    if (parsed.data.campaign_id !== undefined || parsed.data.campaignId !== undefined) {
-      updates.campaign_id = parsed.data.campaign_id || parsed.data.campaignId
-    }
-    if (parsed.data.images !== undefined) updates.images = parsed.data.images
-    if (parsed.data.tags !== undefined) updates.tags = parsed.data.tags
+    const updates = buildDraftUpdates(parsed.data)
+    if (updates === null)
+      return NextResponse.json({ error: 'Title cannot be empty' }, { status: 400 })
 
     const { data, error } = await supabase
       .from('blog_drafts')
@@ -167,14 +160,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       .single()
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error.code === 'PGRST116')
         return NextResponse.json({ error: 'Blog draft not found' }, { status: 404 })
-      }
-      console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform to camelCase for frontend
     return NextResponse.json({ draft: transformDraftFromDb(data) })
   } catch (error) {
     console.error('Error updating blog draft:', error)
@@ -188,7 +178,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()

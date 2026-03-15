@@ -134,7 +134,7 @@ async function handleSearchBlogDrafts(args: {
   return ok({ count: drafts.length, drafts })
 }
 
-describe('Blog Draft Tool Handlers', () => {
+describe('Blog Draft Tool Handlers - create_blog_draft', () => {
   beforeEach(() => {
     mockGet.mockReset()
     mockPost.mockReset()
@@ -143,261 +143,325 @@ describe('Blog Draft Tool Handlers', () => {
     _resetClient()
   })
 
-  describe('create_blog_draft', () => {
-    it('should create a blog draft with valid title', async () => {
-      const mockDraft = { id: 'draft-1', title: 'My Post', status: 'draft', content: '' }
-      mockPost.mockResolvedValueOnce({ draft: mockDraft })
+  it('should create a blog draft with valid title', async () => {
+    const mockDraft = { id: 'draft-1', title: 'My Post', status: 'draft', content: '' }
+    mockPost.mockResolvedValueOnce({ draft: mockDraft })
 
-      const result = await handleCreateBlogDraft({ title: 'My Post' })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.draft).toEqual(mockDraft)
+    const result = await handleCreateBlogDraft({ title: 'My Post' })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.draft).toEqual(mockDraft)
+  })
+
+  it('should create a blog draft with all fields', async () => {
+    const mockDraft = { id: 'draft-2', title: 'Full Post', status: 'draft' }
+    mockPost.mockResolvedValueOnce({ draft: mockDraft })
+
+    await handleCreateBlogDraft({
+      title: 'Full Post',
+      content: '# Hello',
+      date: '2026-03-01',
+      scheduledAt: '2026-03-01T10:00:00Z',
+      status: 'draft',
+      notes: 'Some notes',
+      campaignId: 'c1',
     })
 
-    it('should create a blog draft with all fields', async () => {
-      const mockDraft = { id: 'draft-2', title: 'Full Post', status: 'draft' }
-      mockPost.mockResolvedValueOnce({ draft: mockDraft })
+    expect(mockPost).toHaveBeenCalledWith('/blog-drafts', {
+      title: 'Full Post',
+      content: '# Hello',
+      date: '2026-03-01',
+      scheduledAt: '2026-03-01T10:00:00Z',
+      status: 'draft',
+      notes: 'Some notes',
+      campaignId: 'c1',
+    })
+  })
 
-      await handleCreateBlogDraft({
-        title: 'Full Post',
-        content: '# Hello',
-        date: '2026-03-01',
-        scheduledAt: '2026-03-01T10:00:00Z',
+  it('should return error when title is missing', async () => {
+    const result = await handleCreateBlogDraft({})
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('title is required')
+  })
+})
+
+describe('Blog Draft Tool Handlers - create_blog_draft - continued', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should return error when title is empty', async () => {
+    const result = await handleCreateBlogDraft({ title: '' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('title is required')
+  })
+
+  it('should return error when title is whitespace', async () => {
+    const result = await handleCreateBlogDraft({ title: '   ' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('title is required')
+  })
+
+  it('should trim the title', async () => {
+    const mockDraft = { id: 'draft-3', title: 'Trimmed', status: 'draft' }
+    mockPost.mockResolvedValueOnce({ draft: mockDraft })
+
+    await handleCreateBlogDraft({ title: '  Trimmed  ' })
+    expect(mockPost).toHaveBeenCalledWith(
+      '/blog-drafts',
+      expect.objectContaining({ title: 'Trimmed' })
+    )
+  })
+})
+
+describe('Blog Draft Tool Handlers - get_blog_draft', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should return draft when found', async () => {
+    const mockDraft = { id: 'draft-1', title: 'My Post', content: '# Hello' }
+    mockGet.mockResolvedValueOnce({ draft: mockDraft })
+
+    const result = await handleGetBlogDraft({ id: 'draft-1' })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.draft).toEqual(mockDraft)
+  })
+
+  it('should return error when draft not found', async () => {
+    mockGet.mockRejectedValueOnce(new Error('Not found'))
+
+    const result = await handleGetBlogDraft({ id: 'nonexistent' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
+  })
+})
+
+describe('Blog Draft Tool Handlers - update_blog_draft', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should update draft with valid data', async () => {
+    const mockDraft = { id: 'draft-1', title: 'Updated Title' }
+    mockPatch.mockResolvedValueOnce({ draft: mockDraft })
+
+    const result = await handleUpdateBlogDraft({ id: 'draft-1', title: 'Updated Title' })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.draft).toEqual(mockDraft)
+  })
+
+  it('should return error when draft not found', async () => {
+    mockPatch.mockRejectedValueOnce(new Error('Not found'))
+
+    const result = await handleUpdateBlogDraft({ id: 'nonexistent', title: 'New' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
+  })
+})
+
+describe('Blog Draft Tool Handlers - delete_blog_draft', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should delete draft when confirmed', async () => {
+    mockDelete.mockResolvedValueOnce({})
+
+    const result = await handleDeleteBlogDraft({ id: 'draft-1', confirmed: true })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.message).toContain('Blog draft draft-1 permanently deleted')
+  })
+
+  it('should return error when not confirmed', async () => {
+    const result = await handleDeleteBlogDraft({ id: 'draft-1', confirmed: false })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Deletion not confirmed')
+  })
+
+  it('should return error when draft not found', async () => {
+    mockDelete.mockRejectedValueOnce(new Error('Not found'))
+
+    const result = await handleDeleteBlogDraft({ id: 'nonexistent', confirmed: true })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
+  })
+})
+
+describe('Blog Draft Tool Handlers - archive_blog_draft', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should archive draft when confirmed', async () => {
+    const mockDraft = { id: 'draft-1', status: 'archived' }
+    mockPatch.mockResolvedValueOnce({ draft: mockDraft })
+
+    const result = await handleArchiveBlogDraft({ id: 'draft-1', confirmed: true })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.draft.status).toBe('archived')
+  })
+
+  it('should return error when not confirmed', async () => {
+    const result = await handleArchiveBlogDraft({ id: 'draft-1', confirmed: false })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Archive not confirmed')
+  })
+
+  it('should return error when draft not found', async () => {
+    mockPatch.mockRejectedValueOnce(new Error('Not found'))
+
+    const result = await handleArchiveBlogDraft({ id: 'nonexistent', confirmed: true })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
+  })
+})
+
+describe('Blog Draft Tool Handlers - restore_blog_draft', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should restore archived draft', async () => {
+    const mockDraft = { id: 'draft-1', status: 'draft' }
+    mockPatch.mockResolvedValueOnce({ draft: mockDraft })
+
+    const result = await handleRestoreBlogDraft({ id: 'draft-1' })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.draft.status).toBe('draft')
+  })
+
+  it('should return error when draft not found', async () => {
+    mockPatch.mockRejectedValueOnce(new Error('Not found'))
+
+    const result = await handleRestoreBlogDraft({ id: 'nonexistent' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
+  })
+})
+
+describe('Blog Draft Tool Handlers - list_blog_drafts', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should list drafts with no filter', async () => {
+    const mockDrafts = [
+      {
+        id: 'd1',
+        title: 'Draft 1',
         status: 'draft',
-        notes: 'Some notes',
-        campaignId: 'c1',
-      })
+        date: null,
+        wordCount: 100,
+        updatedAt: '2026-02-01',
+      },
+      {
+        id: 'd2',
+        title: 'Draft 2',
+        status: 'published',
+        date: '2026-01-15',
+        wordCount: 200,
+        updatedAt: '2026-02-02',
+      },
+    ]
+    mockGet.mockResolvedValueOnce({ drafts: mockDrafts })
 
-      expect(mockPost).toHaveBeenCalledWith('/blog-drafts', {
-        title: 'Full Post',
-        content: '# Hello',
-        date: '2026-03-01',
-        scheduledAt: '2026-03-01T10:00:00Z',
-        status: 'draft',
-        notes: 'Some notes',
-        campaignId: 'c1',
-      })
-    })
-
-    it('should return error when title is missing', async () => {
-      const result = await handleCreateBlogDraft({})
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('title is required')
-    })
-
-    it('should return error when title is empty', async () => {
-      const result = await handleCreateBlogDraft({ title: '' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('title is required')
-    })
-
-    it('should return error when title is whitespace', async () => {
-      const result = await handleCreateBlogDraft({ title: '   ' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('title is required')
-    })
-
-    it('should trim the title', async () => {
-      const mockDraft = { id: 'draft-3', title: 'Trimmed', status: 'draft' }
-      mockPost.mockResolvedValueOnce({ draft: mockDraft })
-
-      await handleCreateBlogDraft({ title: '  Trimmed  ' })
-      expect(mockPost).toHaveBeenCalledWith(
-        '/blog-drafts',
-        expect.objectContaining({ title: 'Trimmed' })
-      )
-    })
+    const result = await handleListBlogDrafts({})
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.count).toBe(2)
   })
 
-  describe('get_blog_draft', () => {
-    it('should return draft when found', async () => {
-      const mockDraft = { id: 'draft-1', title: 'My Post', content: '# Hello' }
-      mockGet.mockResolvedValueOnce({ draft: mockDraft })
+  it('should pass status filter', async () => {
+    mockGet.mockResolvedValueOnce({ drafts: [] })
 
-      const result = await handleGetBlogDraft({ id: 'draft-1' })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.draft).toEqual(mockDraft)
-    })
-
-    it('should return error when draft not found', async () => {
-      mockGet.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleGetBlogDraft({ id: 'nonexistent' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
-    })
+    await handleListBlogDrafts({ status: 'draft' })
+    expect(mockGet).toHaveBeenCalledWith(
+      '/blog-drafts',
+      expect.objectContaining({ status: 'draft' })
+    )
   })
 
-  describe('update_blog_draft', () => {
-    it('should update draft with valid data', async () => {
-      const mockDraft = { id: 'draft-1', title: 'Updated Title' }
-      mockPatch.mockResolvedValueOnce({ draft: mockDraft })
+  it('should use default limit of 50', async () => {
+    mockGet.mockResolvedValueOnce({ drafts: [] })
 
-      const result = await handleUpdateBlogDraft({ id: 'draft-1', title: 'Updated Title' })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.draft).toEqual(mockDraft)
-    })
+    await handleListBlogDrafts({})
+    expect(mockGet).toHaveBeenCalledWith('/blog-drafts', expect.objectContaining({ limit: '50' }))
+  })
+})
 
-    it('should return error when draft not found', async () => {
-      mockPatch.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleUpdateBlogDraft({ id: 'nonexistent', title: 'New' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
-    })
+describe('Blog Draft Tool Handlers - search_blog_drafts', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
   })
 
-  describe('delete_blog_draft', () => {
-    it('should delete draft when confirmed', async () => {
-      mockDelete.mockResolvedValueOnce({})
+  it('should return matching drafts', async () => {
+    const mockDrafts = [{ id: 'd1', title: 'React Guide' }]
+    mockGet.mockResolvedValueOnce({ drafts: mockDrafts })
 
-      const result = await handleDeleteBlogDraft({ id: 'draft-1', confirmed: true })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.message).toContain('Blog draft draft-1 permanently deleted')
-    })
-
-    it('should return error when not confirmed', async () => {
-      const result = await handleDeleteBlogDraft({ id: 'draft-1', confirmed: false })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Deletion not confirmed')
-    })
-
-    it('should return error when draft not found', async () => {
-      mockDelete.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleDeleteBlogDraft({ id: 'nonexistent', confirmed: true })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
-    })
+    const result = await handleSearchBlogDrafts({ query: 'react' })
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.count).toBe(1)
+    expect(response.drafts).toEqual(mockDrafts)
   })
 
-  describe('archive_blog_draft', () => {
-    it('should archive draft when confirmed', async () => {
-      const mockDraft = { id: 'draft-1', status: 'archived' }
-      mockPatch.mockResolvedValueOnce({ draft: mockDraft })
+  it('should return empty results', async () => {
+    mockGet.mockResolvedValueOnce({ drafts: [] })
 
-      const result = await handleArchiveBlogDraft({ id: 'draft-1', confirmed: true })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.draft.status).toBe('archived')
-    })
-
-    it('should return error when not confirmed', async () => {
-      const result = await handleArchiveBlogDraft({ id: 'draft-1', confirmed: false })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Archive not confirmed')
-    })
-
-    it('should return error when draft not found', async () => {
-      mockPatch.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleArchiveBlogDraft({ id: 'nonexistent', confirmed: true })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
-    })
+    const result = await handleSearchBlogDrafts({ query: 'nonexistent' })
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.count).toBe(0)
+    expect(response.drafts).toEqual([])
   })
 
-  describe('restore_blog_draft', () => {
-    it('should restore archived draft', async () => {
-      const mockDraft = { id: 'draft-1', status: 'draft' }
-      mockPatch.mockResolvedValueOnce({ draft: mockDraft })
-
-      const result = await handleRestoreBlogDraft({ id: 'draft-1' })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.draft.status).toBe('draft')
-    })
-
-    it('should return error when draft not found', async () => {
-      mockPatch.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleRestoreBlogDraft({ id: 'nonexistent' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Blog draft with ID nonexistent not found')
-    })
-  })
-
-  describe('list_blog_drafts', () => {
-    it('should list drafts with no filter', async () => {
-      const mockDrafts = [
-        {
-          id: 'd1',
-          title: 'Draft 1',
-          status: 'draft',
-          date: null,
-          wordCount: 100,
-          updatedAt: '2026-02-01',
-        },
-        {
-          id: 'd2',
-          title: 'Draft 2',
-          status: 'published',
-          date: '2026-01-15',
-          wordCount: 200,
-          updatedAt: '2026-02-02',
-        },
-      ]
-      mockGet.mockResolvedValueOnce({ drafts: mockDrafts })
-
-      const result = await handleListBlogDrafts({})
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.count).toBe(2)
-    })
-
-    it('should pass status filter', async () => {
-      mockGet.mockResolvedValueOnce({ drafts: [] })
-
-      await handleListBlogDrafts({ status: 'draft' })
-      expect(mockGet).toHaveBeenCalledWith(
-        '/blog-drafts',
-        expect.objectContaining({ status: 'draft' })
-      )
-    })
-
-    it('should use default limit of 50', async () => {
-      mockGet.mockResolvedValueOnce({ drafts: [] })
-
-      await handleListBlogDrafts({})
-      expect(mockGet).toHaveBeenCalledWith('/blog-drafts', expect.objectContaining({ limit: '50' }))
-    })
-  })
-
-  describe('search_blog_drafts', () => {
-    it('should return matching drafts', async () => {
-      const mockDrafts = [{ id: 'd1', title: 'React Guide' }]
-      mockGet.mockResolvedValueOnce({ drafts: mockDrafts })
-
-      const result = await handleSearchBlogDrafts({ query: 'react' })
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.count).toBe(1)
-      expect(response.drafts).toEqual(mockDrafts)
-    })
-
-    it('should return empty results', async () => {
-      mockGet.mockResolvedValueOnce({ drafts: [] })
-
-      const result = await handleSearchBlogDrafts({ query: 'nonexistent' })
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.count).toBe(0)
-      expect(response.drafts).toEqual([])
-    })
-
-    it('should return error when query is empty', async () => {
-      const result = await handleSearchBlogDrafts({ query: '' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('search query is required')
-    })
+  it('should return error when query is empty', async () => {
+    const result = await handleSearchBlogDrafts({ query: '' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('search query is required')
   })
 })

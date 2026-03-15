@@ -136,7 +136,9 @@ describe('DELETE /api/campaigns/[id]/posts/[postId]', () => {
     const body = await res.json()
     expect(body.error).toBe('Post not found')
   })
+})
 
+describe('DELETE /api/campaigns/[id]/posts/[postId] - continued', () => {
   it('returns 400 when post does not belong to this campaign', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // Campaign check passes, post found but belongs to different campaign

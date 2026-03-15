@@ -124,7 +124,9 @@ describe('GET /api/cron/publish (notify-due-posts)', () => {
     // Verify update was called with ready status
     expect(updateFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'ready' }))
   })
+})
 
+describe('GET /api/cron/publish (notify-due-posts) - continued', () => {
   it('returns zero counts when no posts are due', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
 

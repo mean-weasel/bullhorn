@@ -110,7 +110,9 @@ describe('GET /api/launch-posts/[id]', () => {
     expect(body.launchPost.platform).toBe('product_hunt')
     expect(body.launchPost.platformFields).toEqual({ tagline: 'Best app ever' })
   })
+})
 
+describe('GET /api/launch-posts/[id] - continued', () => {
   it('returns 404 when launch post not found (PGRST116)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -194,7 +196,9 @@ describe('PATCH /api/launch-posts/[id]', () => {
     expect(body.launchPost.title).toBe('Updated Launch')
     expect(body.launchPost.status).toBe('scheduled')
   })
+})
 
+describe('PATCH /api/launch-posts/[id] - continued', () => {
   it('returns 404 when launch post not found on update', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockUpdateSingle.mockResolvedValue({

@@ -16,7 +16,6 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     const { id } = await params
     const supabase = await createClient()
 
-    // Defense-in-depth: filter by user_id alongside RLS
     const { data: currentDraft, error: fetchError } = await supabase
       .from('blog_drafts')
       .select('status')
@@ -49,7 +48,6 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform to camelCase for frontend
     return NextResponse.json({ draft: transformDraftFromDb(data) })
   } catch (error) {
     if (error instanceof Error && error.message === 'Forbidden') {

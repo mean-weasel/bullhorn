@@ -21,26 +21,20 @@ const updateCampaignSchema = z.object({
 // GET /api/campaigns/[id] - Get single campaign with posts
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['campaigns:read'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['campaigns:read'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
     const supabase = await createClient()
 
-    // Fetch campaign and posts in parallel (independent queries)
     const [campaignResult, postsResult] = await Promise.all([
       supabase.from('campaigns').select('*').eq('id', id).eq('user_id', userId).single(),
       supabase
@@ -77,22 +71,30 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
 }
 
+function buildCampaignUpdates(data: z.infer<typeof updateCampaignSchema>) {
+  const updates: Record<string, unknown> = {}
+  if (data.name !== undefined) {
+    const trimmedName = data.name.trim()
+    if (!trimmedName) return null
+    updates.name = trimmedName
+  }
+  if (data.description !== undefined) updates.description = data.description
+  if (data.status !== undefined) updates.status = data.status
+  if (data.projectId !== undefined) updates.project_id = data.projectId || null
+  return updates
+}
+
 // PATCH /api/campaigns/[id] - Update campaign
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['campaigns:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['campaigns:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -100,8 +102,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = updateCampaignSchema.safeParse(body)
+    const parsed = updateCampaignSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -109,17 +110,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       )
     }
 
-    const updates: Record<string, unknown> = {}
-    if (parsed.data.name !== undefined) {
-      const trimmedName = parsed.data.name.trim()
-      if (!trimmedName) {
-        return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 })
-      }
-      updates.name = trimmedName
+    const updates = buildCampaignUpdates(parsed.data)
+    if (updates === null) {
+      return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 })
     }
-    if (parsed.data.description !== undefined) updates.description = parsed.data.description
-    if (parsed.data.status !== undefined) updates.status = parsed.data.status
-    if (parsed.data.projectId !== undefined) updates.project_id = parsed.data.projectId || null
 
     const { data, error } = await supabase
       .from('campaigns')
@@ -137,7 +131,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform campaign from snake_case to camelCase
     const campaign = transformCampaignFromDb(data as DbCampaign)
     return NextResponse.json({ campaign })
   } catch (error) {
@@ -152,26 +145,20 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['campaigns:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['campaigns:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
     const supabase = await createClient()
 
-    // Verify user owns this campaign first
     const { data: campaign, error: checkError } = await supabase
       .from('campaigns')
       .select('id')
@@ -183,14 +170,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
     }
 
-    // Remove campaign_id from associated posts (only user's posts)
     await supabase
       .from('posts')
       .update({ campaign_id: null })
       .eq('campaign_id', id)
       .eq('user_id', userId)
 
-    // Delete the campaign
     const { error } = await supabase.from('campaigns').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {

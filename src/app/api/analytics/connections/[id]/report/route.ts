@@ -107,29 +107,80 @@ function getDateRangeFromPreset(preset: string): { startDate: string; endDate: s
   }
 }
 
+const GA4_METRIC_NAMES = [
+  'activeUsers',
+  'sessions',
+  'screenPageViews',
+  'engagementRate',
+  'averageSessionDuration',
+  'bounceRate',
+  'newUsers',
+  'totalUsers',
+  'eventCount',
+]
+
+function parseGA4Metrics(reportData: Record<string, unknown>) {
+  const row = (reportData.rows as Array<Record<string, unknown>>)?.[0]
+  const metricValues = (row?.metricValues as Array<{ value?: string }>) || []
+  return {
+    activeUsers: parseInt(metricValues[0]?.value || '0', 10),
+    sessions: parseInt(metricValues[1]?.value || '0', 10),
+    pageViews: parseInt(metricValues[2]?.value || '0', 10),
+    screenPageViews: parseInt(metricValues[2]?.value || '0', 10),
+    engagementRate: parseFloat(metricValues[3]?.value || '0'),
+    averageSessionDuration: parseFloat(metricValues[4]?.value || '0'),
+    bounceRate: parseFloat(metricValues[5]?.value || '0'),
+    newUsers: parseInt(metricValues[6]?.value || '0', 10),
+    totalUsers: parseInt(metricValues[7]?.value || '0', 10),
+    eventCount: parseInt(metricValues[8]?.value || '0', 10),
+  }
+}
+
+async function fetchGA4Report(
+  propertyId: string,
+  accessToken: string,
+  dateRange: { startDate: string; endDate: string }
+) {
+  const reportUrl = `${GA_DATA_API}/properties/${propertyId}:runReport`
+  return fetch(reportUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      dateRanges: [dateRange],
+      metrics: GA4_METRIC_NAMES.map((name) => ({ name })),
+    }),
+  })
+}
+
+function parseDateRange(searchParams: URLSearchParams) {
+  const customStartDate = searchParams.get('startDate')
+  const customEndDate = searchParams.get('endDate')
+  if (customStartDate && customEndDate) {
+    return { startDate: customStartDate, endDate: customEndDate }
+  }
+  return getDateRangeFromPreset(searchParams.get('preset') || '28d')
+}
+
 // GET /api/analytics/connections/[id]/report - Fetch metrics from GA4
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['analytics:read'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['analytics:read'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await context.params
     const supabase = await createClient()
 
-    // Get the connection
     const { data: connection, error: connError } = await supabase
       .from('analytics_connections')
       .select('*')
@@ -141,56 +192,16 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Connection not found' }, { status: 404 })
     }
 
-    // Parse date range from query params
-    const searchParams = request.nextUrl.searchParams
-    const preset = searchParams.get('preset') || '28d'
-    const customStartDate = searchParams.get('startDate')
-    const customEndDate = searchParams.get('endDate')
-
-    let dateRange: { startDate: string; endDate: string }
-    if (customStartDate && customEndDate) {
-      dateRange = { startDate: customStartDate, endDate: customEndDate }
-    } else {
-      dateRange = getDateRangeFromPreset(preset)
-    }
-
-    // Refresh token if needed
+    const dateRange = parseDateRange(request.nextUrl.searchParams)
     const { accessToken } = await refreshTokenIfNeeded(connection, supabase)
 
-    // Update sync status to syncing
     await supabase.from('analytics_connections').update({ sync_status: 'syncing' }).eq('id', id)
 
-    // Fetch metrics from GA4 Data API
-    const propertyId = connection.property_id
-    const reportUrl = `${GA_DATA_API}/properties/${propertyId}:runReport`
-
-    const reportResponse = await fetch(reportUrl, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        dateRanges: [dateRange],
-        metrics: [
-          { name: 'activeUsers' },
-          { name: 'sessions' },
-          { name: 'screenPageViews' },
-          { name: 'engagementRate' },
-          { name: 'averageSessionDuration' },
-          { name: 'bounceRate' },
-          { name: 'newUsers' },
-          { name: 'totalUsers' },
-          { name: 'eventCount' },
-        ],
-      }),
-    })
+    const reportResponse = await fetchGA4Report(connection.property_id, accessToken, dateRange)
 
     if (!reportResponse.ok) {
       const errorData = await reportResponse.json()
       console.error('GA4 API error:', errorData)
-
-      // Update sync status to error
       await supabase
         .from('analytics_connections')
         .update({
@@ -198,49 +209,26 @@ export async function GET(request: NextRequest, context: RouteContext) {
           sync_error: errorData.error?.message || 'Failed to fetch metrics',
         })
         .eq('id', id)
-
       return NextResponse.json({ error: 'Failed to fetch analytics data' }, { status: 502 })
     }
 
-    const reportData = await reportResponse.json()
+    const metrics = parseGA4Metrics(await reportResponse.json())
 
-    // Parse metrics from response
-    const row = reportData.rows?.[0]
-    const metricValues = row?.metricValues || []
-
-    const metrics = {
-      activeUsers: parseInt(metricValues[0]?.value || '0', 10),
-      sessions: parseInt(metricValues[1]?.value || '0', 10),
-      pageViews: parseInt(metricValues[2]?.value || '0', 10),
-      screenPageViews: parseInt(metricValues[2]?.value || '0', 10),
-      engagementRate: parseFloat(metricValues[3]?.value || '0'),
-      averageSessionDuration: parseFloat(metricValues[4]?.value || '0'),
-      bounceRate: parseFloat(metricValues[5]?.value || '0'),
-      newUsers: parseInt(metricValues[6]?.value || '0', 10),
-      totalUsers: parseInt(metricValues[7]?.value || '0', 10),
-      eventCount: parseInt(metricValues[8]?.value || '0', 10),
-    }
-
-    // Update sync status to success
     await supabase
       .from('analytics_connections')
-      .update({
-        sync_status: 'success',
-        sync_error: null,
-        last_sync_at: new Date().toISOString(),
-      })
+      .update({ sync_status: 'success', sync_error: null, last_sync_at: new Date().toISOString() })
       .eq('id', id)
 
-    const report = {
-      connectionId: id,
-      propertyId: connection.property_id,
-      propertyName: connection.property_name,
-      dateRange,
-      metrics,
-      fetchedAt: new Date().toISOString(),
-    }
-
-    return NextResponse.json({ report })
+    return NextResponse.json({
+      report: {
+        connectionId: id,
+        propertyId: connection.property_id,
+        propertyName: connection.property_name,
+        dateRange,
+        metrics,
+        fetchedAt: new Date().toISOString(),
+      },
+    })
   } catch (error) {
     console.error('Error fetching analytics report:', error)
     return NextResponse.json({ error: 'Failed to fetch analytics report' }, { status: 500 })

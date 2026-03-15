@@ -5,6 +5,23 @@ import { requireAuth, validateScopes } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
+function filterPostsBySearch(
+  data: Array<{ content?: unknown; notes?: string; platform?: string }>,
+  query: string
+) {
+  const searchLower = query.toLowerCase()
+  return data.filter((post) => {
+    const contentStr = JSON.stringify(post.content || {}).toLowerCase()
+    const notesStr = (post.notes || '').toLowerCase()
+    const platformStr = (post.platform || '').toLowerCase()
+    return (
+      contentStr.includes(searchLower) ||
+      notesStr.includes(searchLower) ||
+      platformStr.includes(searchLower)
+    )
+  })
+}
+
 // GET /api/posts/search - Search posts
 export async function GET(request: NextRequest) {
   try {
@@ -18,14 +35,8 @@ export async function GET(request: NextRequest) {
 
     const query = searchParams.get('q') || searchParams.get('query') || ''
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50') || 50, 1), 200)
+    if (!query) return NextResponse.json({ error: 'Search query is required' }, { status: 400 })
 
-    if (!query) {
-      return NextResponse.json({ error: 'Search query is required' }, { status: 400 })
-    }
-
-    // Fetch all non-archived posts, then filter in Node.js.
-    // PostgREST can't search within JSONB text (content field), so we
-    // fetch a larger buffer and filter across all text fields client-side.
     const { data, error } = await supabase
       .from('posts')
       .select('*')
@@ -39,22 +50,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Filter by search query across all text fields (content JSON, notes, platform)
-    const searchLower = query.toLowerCase()
-    const filtered = (data || []).filter(
-      (post: { content?: unknown; notes?: string; platform?: string }) => {
-        const contentStr = JSON.stringify(post.content || {}).toLowerCase()
-        const notesStr = (post.notes || '').toLowerCase()
-        const platformStr = (post.platform || '').toLowerCase()
-        return (
-          contentStr.includes(searchLower) ||
-          notesStr.includes(searchLower) ||
-          platformStr.includes(searchLower)
-        )
-      }
-    )
-
-    // Transform and apply the requested limit
+    const filtered = filterPostsBySearch(data || [], query)
     const posts = filtered.slice(0, limit).map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ posts })
   } catch (error) {

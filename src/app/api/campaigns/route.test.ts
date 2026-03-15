@@ -125,7 +125,9 @@ describe('GET /api/campaigns', () => {
     const body = await res.json()
     expect(body.campaigns).toEqual([])
   })
+})
 
+describe('GET /api/campaigns - continued', () => {
   it('returns 500 when database query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockQueryData = { data: null, error: { message: 'DB error' } }
@@ -183,7 +185,9 @@ describe('POST /api/campaigns', () => {
     const res = await POST(req)
     expect(res.status).toBe(400)
   })
+})
 
+describe('POST /api/campaigns - continued', () => {
   it('creates campaign successfully and returns 201', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const createdCampaign = {

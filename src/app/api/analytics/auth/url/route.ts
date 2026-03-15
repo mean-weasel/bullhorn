@@ -11,7 +11,6 @@ const SCOPES = ['https://www.googleapis.com/auth/analytics.readonly']
 // GET /api/analytics/auth/url - Generate OAuth URL for Google Analytics
 export async function GET() {
   try {
-    // Require authentication
     try {
       await requireAuth()
     } catch {

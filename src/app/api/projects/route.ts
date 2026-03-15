@@ -18,25 +18,19 @@ const createProjectSchema = z.object({
 // GET /api/projects - List projects
 export async function GET() {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['projects:read'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['projects:read'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const supabase = await createClient()
 
-    // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('projects')
       .select('*')
@@ -49,7 +43,6 @@ export async function GET() {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform projects from snake_case to camelCase
     const projects = (data || []).map((project) => transformProjectFromDb(project as DbProject))
 
     return NextResponse.json({ projects })
@@ -62,23 +55,17 @@ export async function GET() {
 // POST /api/projects - Create project
 export async function POST(request: NextRequest) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['projects:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['projects:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Enforce plan limit
     const limitCheck = await enforceResourceLimit(userId, 'projects')
     if (!limitCheck.allowed) {
       return NextResponse.json(
@@ -95,8 +82,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = createProjectSchema.safeParse(body)
+    const parsed = createProjectSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -105,9 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     const name = parsed.data.name.trim()
-    if (!name) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
-    }
+    if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
 
     const { data, error } = await supabase
       .from('projects')
@@ -130,7 +114,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform project from snake_case to camelCase
     const project = transformProjectFromDb(data as DbProject)
     return NextResponse.json({ project }, { status: 201 })
   } catch (error) {

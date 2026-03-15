@@ -123,7 +123,9 @@ describe('POST /api/posts/[id]/restore', () => {
     const body = await res.json()
     expect(body.error).toBe('Post is not archived')
   })
+})
 
+describe('POST /api/posts/[id]/restore - continued', () => {
   it('restores an archived post successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

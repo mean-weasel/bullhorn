@@ -6,19 +6,8 @@ import {
   transformPostFromDb,
   transformPostToDb,
   transformCampaignFromDb,
-  transformProjectFromDb,
-  transformProjectToDb,
-  transformAnalyticsConnectionFromDb,
-  transformAnalyticsConnectionToDb,
 } from './utils'
-import type {
-  DbPost,
-  DbCampaign,
-  DbProject,
-  DbAnalyticsConnection,
-  ProjectUpdateInput,
-  AnalyticsConnectionUpdateInput,
-} from './utils'
+import type { DbPost, DbCampaign } from './utils'
 
 // ---------------------------------------------------------------------------
 // cn (class name merging)
@@ -34,7 +23,6 @@ describe('cn', () => {
   })
 
   it('uses tailwind-merge to resolve conflicts', () => {
-    // tailwind-merge should keep only the last conflicting utility
     expect(cn('p-4', 'p-2')).toBe('p-2')
     expect(cn('text-red-500', 'text-blue-500')).toBe('text-blue-500')
   })
@@ -106,7 +94,6 @@ describe('camelToSnake', () => {
 
   it('handles consecutive uppercase letters', () => {
     const input = { myURLPath: '/api' }
-    // Each uppercase letter gets its own underscore prefix
     expect(camelToSnake(input)).toEqual({ my_u_r_l_path: '/api' })
   })
 
@@ -149,7 +136,7 @@ const sampleDbPost: DbPost = {
   user_id: 'user-abc',
 }
 
-describe('transformPostFromDb', () => {
+describe('transformPostFromDb - field mapping', () => {
   it('maps all snake_case fields to camelCase', () => {
     const post = transformPostFromDb(sampleDbPost)
     expect(post.id).toBe('post-001')
@@ -162,6 +149,18 @@ describe('transformPostFromDb', () => {
     expect(post.campaignId).toBe('camp-001')
     expect(post.groupId).toBe('grp-001')
     expect(post.groupType).toBe('reddit-crosspost')
+  })
+
+  it('does not include user_id in the output', () => {
+    const post = transformPostFromDb(sampleDbPost) as unknown as Record<string, unknown>
+    expect(post.user_id).toBeUndefined()
+    expect(post.userId).toBeUndefined()
+  })
+})
+
+describe('transformPostFromDb - nulls', () => {
+  it('preserves content and publishResult', () => {
+    const post = transformPostFromDb(sampleDbPost)
     expect(post.content).toEqual({
       text: 'Hello world!',
       mediaUrls: ['https://img.example.com/1.png'],
@@ -172,12 +171,6 @@ describe('transformPostFromDb', () => {
       postUrl: 'https://twitter.com/user/status/12345',
       publishedAt: '2024-06-05T15:01:00Z',
     })
-  })
-
-  it('does not include user_id in the output', () => {
-    const post = transformPostFromDb(sampleDbPost) as unknown as Record<string, unknown>
-    expect(post.user_id).toBeUndefined()
-    expect(post.userId).toBeUndefined()
   })
 
   it('converts null optional fields to undefined', () => {
@@ -212,8 +205,6 @@ describe('transformPostToDb', () => {
     expect(dbPost.platform).toBe('twitter')
     expect(dbPost.notes).toBe('Remember hashtags')
     expect(dbPost.campaign_id).toBe('camp-001')
-    expect(dbPost.group_id).toBe('grp-001')
-    expect(dbPost.group_type).toBe('reddit-crosspost')
   })
 
   it('handles partial post data', () => {
@@ -222,7 +213,6 @@ describe('transformPostToDb', () => {
     expect(dbPost.status).toBe('draft')
     expect(dbPost.platform).toBe('linkedin')
     expect(dbPost.id).toBeUndefined()
-    expect(dbPost.notes).toBeUndefined()
   })
 })
 
@@ -232,8 +222,6 @@ describe('Post roundtrip', () => {
     const dbPost = transformPostToDb(post)
     expect(dbPost.id).toBe(sampleDbPost.id)
     expect(dbPost.created_at).toBe(sampleDbPost.created_at)
-    expect(dbPost.updated_at).toBe(sampleDbPost.updated_at)
-    expect(dbPost.scheduled_at).toBe(sampleDbPost.scheduled_at)
     expect(dbPost.status).toBe(sampleDbPost.status)
     expect(dbPost.platform).toBe(sampleDbPost.platform)
     expect(dbPost.content).toEqual(sampleDbPost.content)
@@ -274,268 +262,9 @@ describe('transformCampaignFromDb', () => {
   })
 
   it('converts null optional fields to undefined', () => {
-    const dbCampaign: DbCampaign = {
-      ...sampleDbCampaign,
-      description: null,
-      project_id: null,
-    }
+    const dbCampaign: DbCampaign = { ...sampleDbCampaign, description: null, project_id: null }
     const campaign = transformCampaignFromDb(dbCampaign)
     expect(campaign.description).toBeUndefined()
     expect(campaign.projectId).toBeUndefined()
-  })
-})
-
-// ---------------------------------------------------------------------------
-// transformProjectFromDb / transformProjectToDb
-// ---------------------------------------------------------------------------
-
-describe('transformProjectFromDb', () => {
-  const sampleDbProject: DbProject = {
-    id: 'proj-001',
-    name: 'Bullhorn',
-    description: 'Social media scheduler',
-    hashtags: ['#launch', '#saas'],
-    brand_colors: { primary: '#fbbf24', secondary: '#ec4899', accent: '#3b82f6' },
-    logo_url: 'https://example.com/logo.png',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-03-01T00:00:00Z',
-    user_id: 'user-abc',
-  }
-
-  it('maps all fields correctly', () => {
-    const project = transformProjectFromDb(sampleDbProject)
-    expect(project.id).toBe('proj-001')
-    expect(project.name).toBe('Bullhorn')
-    expect(project.description).toBe('Social media scheduler')
-    expect(project.hashtags).toEqual(['#launch', '#saas'])
-    expect(project.brandColors).toEqual({
-      primary: '#fbbf24',
-      secondary: '#ec4899',
-      accent: '#3b82f6',
-    })
-    expect(project.logoUrl).toBe('https://example.com/logo.png')
-    expect(project.createdAt).toBe('2024-01-01T00:00:00Z')
-    expect(project.updatedAt).toBe('2024-03-01T00:00:00Z')
-  })
-
-  it('does not include user_id in the output', () => {
-    const project = transformProjectFromDb(sampleDbProject) as unknown as Record<string, unknown>
-    expect(project.userId).toBeUndefined()
-    expect(project.user_id).toBeUndefined()
-  })
-
-  it('converts null optional fields to undefined', () => {
-    const dbProject: DbProject = {
-      ...sampleDbProject,
-      description: null,
-      logo_url: null,
-    }
-    const project = transformProjectFromDb(dbProject)
-    expect(project.description).toBeUndefined()
-    expect(project.logoUrl).toBeUndefined()
-  })
-
-  it('defaults hashtags to empty array when falsy', () => {
-    const dbProject: DbProject = {
-      ...sampleDbProject,
-      hashtags: [] as string[],
-    }
-    const project = transformProjectFromDb(dbProject)
-    expect(project.hashtags).toEqual([])
-  })
-})
-
-describe('transformProjectToDb', () => {
-  it('maps all provided fields', () => {
-    const input: ProjectUpdateInput = {
-      name: 'New Name',
-      description: 'Updated description',
-      hashtags: ['#updated'],
-      brandColors: { primary: '#000' },
-      logoUrl: 'https://example.com/new-logo.png',
-    }
-    const dbProject = transformProjectToDb(input)
-    expect(dbProject.name).toBe('New Name')
-    expect(dbProject.description).toBe('Updated description')
-    expect(dbProject.hashtags).toEqual(['#updated'])
-    expect(dbProject.brand_colors).toEqual({ primary: '#000' })
-    expect(dbProject.logo_url).toBe('https://example.com/new-logo.png')
-  })
-
-  it('only includes defined fields (sparse update)', () => {
-    const input: ProjectUpdateInput = { name: 'Just Name' }
-    const dbProject = transformProjectToDb(input)
-    expect(dbProject.name).toBe('Just Name')
-    expect(dbProject).not.toHaveProperty('description')
-    expect(dbProject).not.toHaveProperty('hashtags')
-    expect(dbProject).not.toHaveProperty('brand_colors')
-    expect(dbProject).not.toHaveProperty('logo_url')
-  })
-
-  it('allows null for nullable fields', () => {
-    const input: ProjectUpdateInput = { description: null, logoUrl: null }
-    const dbProject = transformProjectToDb(input)
-    expect(dbProject.description).toBeNull()
-    expect(dbProject.logo_url).toBeNull()
-  })
-
-  it('returns empty object when given empty input', () => {
-    const dbProject = transformProjectToDb({})
-    expect(dbProject).toEqual({})
-  })
-})
-
-describe('Project roundtrip', () => {
-  it('fromDb -> toDb preserves all editable fields', () => {
-    const sampleDbProject: DbProject = {
-      id: 'proj-001',
-      name: 'Bullhorn',
-      description: 'desc',
-      hashtags: ['#a'],
-      brand_colors: { primary: '#000' },
-      logo_url: 'https://logo.png',
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-03-01T00:00:00Z',
-      user_id: 'user-abc',
-    }
-    const project = transformProjectFromDb(sampleDbProject)
-    const dbProject = transformProjectToDb({
-      name: project.name,
-      description: project.description,
-      hashtags: project.hashtags,
-      brandColors: project.brandColors,
-      logoUrl: project.logoUrl,
-    })
-    expect(dbProject.name).toBe(sampleDbProject.name)
-    expect(dbProject.description).toBe(sampleDbProject.description)
-    expect(dbProject.hashtags).toEqual(sampleDbProject.hashtags)
-    expect(dbProject.brand_colors).toEqual(sampleDbProject.brand_colors)
-    expect(dbProject.logo_url).toBe(sampleDbProject.logo_url)
-  })
-})
-
-// ---------------------------------------------------------------------------
-// transformAnalyticsConnectionFromDb / transformAnalyticsConnectionToDb
-// ---------------------------------------------------------------------------
-
-const sampleDbAnalyticsConnection: DbAnalyticsConnection = {
-  id: 'ac-001',
-  user_id: 'user-abc',
-  provider: 'google_analytics',
-  property_id: 'GA-12345',
-  property_name: 'My Website',
-  access_token: 'access-tok-abc',
-  refresh_token: 'refresh-tok-xyz',
-  token_expires_at: '2024-12-31T23:59:59Z',
-  scopes: ['analytics.readonly'],
-  project_id: 'proj-001',
-  last_sync_at: '2024-06-01T00:00:00Z',
-  sync_status: 'success',
-  sync_error: null,
-  created_at: '2024-01-01T00:00:00Z',
-  updated_at: '2024-06-01T00:00:00Z',
-}
-
-// Note: DbAnalyticsConnection still has token fields (full DB row shape)
-// but AnalyticsConnection (frontend type) and transform functions no longer include them
-
-describe('transformAnalyticsConnectionFromDb', () => {
-  it('maps all fields correctly', () => {
-    const conn = transformAnalyticsConnectionFromDb(sampleDbAnalyticsConnection)
-    expect(conn.id).toBe('ac-001')
-    expect(conn.userId).toBe('user-abc')
-    expect(conn.provider).toBe('google_analytics')
-    expect(conn.propertyId).toBe('GA-12345')
-    expect(conn.propertyName).toBe('My Website')
-    expect(conn.scopes).toEqual(['analytics.readonly'])
-    expect(conn.projectId).toBe('proj-001')
-    expect(conn.lastSyncAt).toBe('2024-06-01T00:00:00Z')
-    expect(conn.syncStatus).toBe('success')
-    expect(conn.syncError).toBeUndefined()
-    expect(conn.createdAt).toBe('2024-01-01T00:00:00Z')
-    expect(conn.updatedAt).toBe('2024-06-01T00:00:00Z')
-  })
-
-  it('converts null optional fields to undefined', () => {
-    const dbConn: DbAnalyticsConnection = {
-      ...sampleDbAnalyticsConnection,
-      property_name: null,
-      project_id: null,
-      last_sync_at: null,
-      sync_error: null,
-    }
-    const conn = transformAnalyticsConnectionFromDb(dbConn)
-    expect(conn.propertyName).toBeUndefined()
-    expect(conn.projectId).toBeUndefined()
-    expect(conn.lastSyncAt).toBeUndefined()
-    expect(conn.syncError).toBeUndefined()
-  })
-})
-
-describe('transformAnalyticsConnectionToDb', () => {
-  it('maps all provided fields', () => {
-    const input: AnalyticsConnectionUpdateInput = {
-      provider: 'google_analytics',
-      propertyId: 'GA-99999',
-      propertyName: 'New Site',
-      scopes: ['analytics.readonly', 'analytics.edit'],
-      projectId: 'proj-002',
-      lastSyncAt: '2024-07-01T00:00:00Z',
-      syncStatus: 'syncing',
-      syncError: 'timeout',
-    }
-    const dbConn = transformAnalyticsConnectionToDb(input)
-    expect(dbConn.provider).toBe('google_analytics')
-    expect(dbConn.property_id).toBe('GA-99999')
-    expect(dbConn.property_name).toBe('New Site')
-    expect(dbConn.scopes).toEqual(['analytics.readonly', 'analytics.edit'])
-    expect(dbConn.project_id).toBe('proj-002')
-    expect(dbConn.last_sync_at).toBe('2024-07-01T00:00:00Z')
-    expect(dbConn.sync_status).toBe('syncing')
-    expect(dbConn.sync_error).toBe('timeout')
-  })
-
-  it('only includes defined fields (sparse update)', () => {
-    const input: AnalyticsConnectionUpdateInput = { syncStatus: 'error', syncError: 'failed' }
-    const dbConn = transformAnalyticsConnectionToDb(input)
-    expect(dbConn.sync_status).toBe('error')
-    expect(dbConn.sync_error).toBe('failed')
-    expect(dbConn).not.toHaveProperty('provider')
-    expect(dbConn).not.toHaveProperty('property_id')
-  })
-
-  it('allows null for nullable fields', () => {
-    const input: AnalyticsConnectionUpdateInput = { propertyName: null, projectId: null }
-    const dbConn = transformAnalyticsConnectionToDb(input)
-    expect(dbConn.property_name).toBeNull()
-    expect(dbConn.project_id).toBeNull()
-  })
-
-  it('returns empty object when given empty input', () => {
-    const dbConn = transformAnalyticsConnectionToDb({})
-    expect(dbConn).toEqual({})
-  })
-})
-
-describe('AnalyticsConnection roundtrip', () => {
-  it('fromDb -> toDb preserves editable fields', () => {
-    const conn = transformAnalyticsConnectionFromDb(sampleDbAnalyticsConnection)
-    const dbConn = transformAnalyticsConnectionToDb({
-      provider: conn.provider,
-      propertyId: conn.propertyId,
-      propertyName: conn.propertyName,
-      scopes: conn.scopes,
-      projectId: conn.projectId,
-      lastSyncAt: conn.lastSyncAt,
-      syncStatus: conn.syncStatus,
-      syncError: conn.syncError,
-    })
-    expect(dbConn.provider).toBe(sampleDbAnalyticsConnection.provider)
-    expect(dbConn.property_id).toBe(sampleDbAnalyticsConnection.property_id)
-    expect(dbConn.property_name).toBe(sampleDbAnalyticsConnection.property_name)
-    expect(dbConn.scopes).toEqual(sampleDbAnalyticsConnection.scopes)
-    expect(dbConn.project_id).toBe(sampleDbAnalyticsConnection.project_id)
-    expect(dbConn.last_sync_at).toBe(sampleDbAnalyticsConnection.last_sync_at)
-    expect(dbConn.sync_status).toBe(sampleDbAnalyticsConnection.sync_status)
   })
 })

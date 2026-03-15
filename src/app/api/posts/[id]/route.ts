@@ -36,26 +36,20 @@ const validTransitions: Record<string, string[]> = {
 // GET /api/posts/[id] - Get single post
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['posts:read'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['posts:read'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
     const supabase = await createClient()
 
-    // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('posts')
       .select('*')
@@ -71,7 +65,6 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform post from snake_case to camelCase
     const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post })
   } catch (error) {
@@ -80,22 +73,41 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
 }
 
+function buildPostUpdates(data: z.infer<typeof updatePostSchema>) {
+  const updates: Record<string, unknown> = {}
+  if (data.platform !== undefined) updates.platform = data.platform
+  if (data.content !== undefined) updates.content = data.content
+  if (data.status !== undefined) updates.status = data.status
+  if (data.scheduled_at !== undefined || data.scheduledAt !== undefined) {
+    updates.scheduled_at = data.scheduled_at || data.scheduledAt
+  }
+  if (data.notes !== undefined) updates.notes = data.notes
+  if (data.campaign_id !== undefined || data.campaignId !== undefined) {
+    updates.campaign_id = data.campaign_id || data.campaignId
+  }
+  if (data.publish_result !== undefined || data.publishResult !== undefined) {
+    updates.publish_result = data.publish_result || data.publishResult
+  }
+  if (data.group_id !== undefined || data.groupId !== undefined) {
+    updates.group_id = data.group_id || data.groupId
+  }
+  if (data.group_type !== undefined || data.groupType !== undefined) {
+    updates.group_type = data.group_type || data.groupType
+  }
+  return updates
+}
+
 // PATCH /api/posts/[id] - Update post
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['posts:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['posts:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -103,8 +115,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = updatePostSchema.safeParse(body)
+    const parsed = updatePostSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -112,7 +123,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       )
     }
 
-    // Get current post to validate status transition (with ownership check)
     const { data: currentPost, error: fetchError } = await supabase
       .from('posts')
       .select('status')
@@ -128,7 +138,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Validate status transition if status is being changed
     if (parsed.data.status && parsed.data.status !== currentPost.status) {
       const allowed = validTransitions[currentPost.status] || []
       if (!allowed.includes(parsed.data.status)) {
@@ -139,28 +148,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       }
     }
 
-    // Build update object
-    const updates: Record<string, unknown> = {}
-    if (parsed.data.platform !== undefined) updates.platform = parsed.data.platform
-    if (parsed.data.content !== undefined) updates.content = parsed.data.content
-    if (parsed.data.status !== undefined) updates.status = parsed.data.status
-    if (parsed.data.scheduled_at !== undefined || parsed.data.scheduledAt !== undefined) {
-      updates.scheduled_at = parsed.data.scheduled_at || parsed.data.scheduledAt
-    }
-    if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes
-    if (parsed.data.campaign_id !== undefined || parsed.data.campaignId !== undefined) {
-      updates.campaign_id = parsed.data.campaign_id || parsed.data.campaignId
-    }
-    if (parsed.data.publish_result !== undefined || parsed.data.publishResult !== undefined) {
-      updates.publish_result = parsed.data.publish_result || parsed.data.publishResult
-    }
-    if (parsed.data.group_id !== undefined || parsed.data.groupId !== undefined) {
-      updates.group_id = parsed.data.group_id || parsed.data.groupId
-    }
-    if (parsed.data.group_type !== undefined || parsed.data.groupType !== undefined) {
-      updates.group_type = parsed.data.group_type || parsed.data.groupType
-    }
-
+    const updates = buildPostUpdates(parsed.data)
     const { data, error } = await supabase
       .from('posts')
       .update(updates)
@@ -177,7 +165,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform post from snake_case to camelCase
     const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post })
   } catch (error) {
@@ -192,73 +179,25 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['posts:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['posts:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
     const supabase = await createClient()
 
-    // Fetch the post before deleting to extract media URLs for cleanup
-    const { data: post } = await supabase
-      .from('posts')
-      .select('content')
-      .eq('id', id)
-      .eq('user_id', userId)
-      .single()
-
     const { error } = await supabase.from('posts').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-    }
-
-    // Clean up media files referenced by the deleted post (best-effort)
-    if (post?.content) {
-      try {
-        const content = post.content as Record<string, unknown>
-        const mediaUrls: string[] = []
-        if (Array.isArray(content.mediaUrls)) mediaUrls.push(...content.mediaUrls)
-        if (typeof content.mediaUrl === 'string' && content.mediaUrl)
-          mediaUrls.push(content.mediaUrl)
-
-        for (const url of mediaUrls) {
-          // Extract filename from /api/media/{filename}
-          const match = url.match(/\/api\/media\/([^/?#]+)/)
-          if (!match) continue
-          const filename = match[1]
-          const storagePath = `${userId}/${filename}`
-
-          const { data: files } = await supabase.storage.from('media').list(userId, {
-            search: filename,
-          })
-          const fileSize = files?.find((f) => f.name === filename)?.metadata?.size ?? 0
-
-          await supabase.storage.from('media').remove([storagePath])
-
-          if (fileSize > 0) {
-            await supabase.rpc('decrement_storage_used', {
-              user_id_param: userId,
-              bytes_param: fileSize,
-            })
-          }
-        }
-      } catch (cleanupErr) {
-        console.error('Media cleanup error (non-blocking):', cleanupErr)
-      }
     }
 
     return NextResponse.json({ success: true })

@@ -226,7 +226,9 @@ describe('GET /api/plan', () => {
     expect(typeof body.storage.usedBytes).toBe('number')
     expect(typeof body.storage.limitBytes).toBe('number')
   })
+})
 
+describe('GET /api/plan - continued', () => {
   it('defaults to free plan when profile has no plan field', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     setupMocks({

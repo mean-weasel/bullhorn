@@ -13,6 +13,32 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+
+function validateLogoFile(file: File | null) {
+  if (!file) return { error: 'No file provided' }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return { error: 'Unsupported file type. Allowed: JPG, PNG, WebP' }
+  }
+  if (file.size > MAX_SIZE) return { error: 'File too large. Maximum size: 5MB' }
+  return null
+}
+
+async function removeOldLogo(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  logoUrl: string | null
+) {
+  if (!logoUrl) return
+  const oldPath = logoUrl.replace(/^\/storage\/logos\//, '')
+  if (oldPath && !oldPath.includes('..')) {
+    await supabase.storage.from('logos').remove([oldPath])
+  }
+}
+
 // POST /api/projects/[id]/logo - Upload project logo
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
@@ -23,7 +49,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
-    // Verify project exists and user owns it
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id, logo_url, user_id')
@@ -33,49 +58,22 @@ export async function POST(request: NextRequest, context: RouteContext) {
     if (projectError || !project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
-
     if (project.user_id !== auth.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
+    const validationError = validateLogoFile(file)
+    if (validationError) return NextResponse.json(validationError, { status: 400 })
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 })
-    }
+    await removeOldLogo(supabase, project.logo_url)
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Unsupported file type. Allowed: JPG, PNG, WebP' },
-        { status: 400 }
-      )
-    }
-
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: 'File too large. Maximum size: 5MB' }, { status: 400 })
-    }
-
-    // Delete old logo from storage if exists
-    if (project.logo_url) {
-      const oldPath = project.logo_url.replace(/^\/storage\/logos\//, '')
-      if (oldPath && !oldPath.includes('..')) {
-        await supabase.storage.from('logos').remove([oldPath])
-      }
-    }
-
-    // Derive extension from validated MIME type (not user-supplied filename)
-    const MIME_TO_EXT: Record<string, string> = {
-      'image/jpeg': 'jpg',
-      'image/png': 'png',
-      'image/webp': 'webp',
-    }
-    const ext = MIME_TO_EXT[file.type] || 'png'
+    const ext = MIME_TO_EXT[file!.type] || 'png'
     const filename = `${auth.userId}/${projectId}-${crypto.randomUUID().slice(0, 8)}.${ext}`
-
-    const bytes = await file.arrayBuffer()
+    const bytes = await file!.arrayBuffer()
     const { error: uploadError } = await supabase.storage.from('logos').upload(filename, bytes, {
-      contentType: file.type,
+      contentType: file!.type,
       upsert: false,
     })
 
@@ -85,26 +83,18 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const logoUrl = `/storage/logos/${filename}`
-
-    // Update project with new logo URL
     const { error: updateError } = await supabase
       .from('projects')
       .update({ logo_url: logoUrl, updated_at: new Date().toISOString() })
       .eq('id', projectId)
 
     if (updateError) {
-      // Clean up uploaded file
       await supabase.storage.from('logos').remove([filename])
       return NextResponse.json({ error: 'Failed to update project' }, { status: 500 })
     }
 
-    // Get public URL for the logo
     const { data: urlData } = supabase.storage.from('logos').getPublicUrl(filename)
-
-    return NextResponse.json({
-      success: true,
-      logoUrl: urlData.publicUrl || logoUrl,
-    })
+    return NextResponse.json({ success: true, logoUrl: urlData.publicUrl || logoUrl })
   } catch (error) {
     if (error instanceof Error && error.message === 'Forbidden') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })

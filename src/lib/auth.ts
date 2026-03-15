@@ -104,26 +104,21 @@ export function hashApiKey(rawKey: string, hmacSecret?: string): string {
  * then falls back to plain SHA-256 for legacy keys. This allows gradual
  * migration — once all keys are rotated, the SHA-256 fallback can be removed.
  */
-export async function resolveApiKey(rawKey: string): Promise<{ userId: string; scopes: string[] }> {
-  if (!rawKey.startsWith('bh_') || rawKey.length < 20) {
-    throw new Error('Unauthorized')
-  }
-
-  // Look up key via service role client (no session exists for API key requests)
+function createServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!supabaseUrl || !serviceKey) {
     throw new Error('Unauthorized')
   }
-
-  const serviceClient = createSupabaseJsClient(supabaseUrl, serviceKey, {
+  return createSupabaseJsClient(supabaseUrl, serviceKey, {
     global: {
       fetch: (url: string | URL | Request, options?: RequestInit) =>
         fetch(url, { ...options, cache: 'no-store' }),
     },
   })
+}
 
-  // Try HMAC-SHA256 first (preferred), then fall back to legacy SHA-256
+function buildKeyHashes(rawKey: string): string[] {
   const hmacSecret = process.env.API_KEY_HMAC_SECRET
   const hashes: string[] = []
   if (hmacSecret) {
@@ -133,15 +128,33 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string; s
   if (!hmacSecret || legacyHash !== hashes[0]) {
     hashes.push(legacyHash)
   }
+  return hashes
+}
 
-  let apiKey: {
-    id: string
-    user_id: string
-    expires_at: string | null
-    revoked_at: string | null
-    scopes: string[]
-  } | null = null
+interface ApiKeyRow {
+  id: string
+  user_id: string
+  expires_at: string | null
+  revoked_at: string | null
+  scopes: string[]
+}
 
+function validateApiKeyRow(apiKey: ApiKeyRow): void {
+  if (apiKey.revoked_at) throw new Error('Unauthorized')
+  if (apiKey.expires_at && new Date(apiKey.expires_at) < new Date()) {
+    throw new Error('Unauthorized')
+  }
+}
+
+export async function resolveApiKey(rawKey: string): Promise<{ userId: string; scopes: string[] }> {
+  if (!rawKey.startsWith('bh_') || rawKey.length < 20) {
+    throw new Error('Unauthorized')
+  }
+
+  const serviceClient = createServiceClient()
+  const hashes = buildKeyHashes(rawKey)
+
+  let apiKey: ApiKeyRow | null = null
   for (const keyHash of hashes) {
     const { data, error } = await serviceClient
       .from('api_keys')
@@ -155,19 +168,8 @@ export async function resolveApiKey(rawKey: string): Promise<{ userId: string; s
     }
   }
 
-  if (!apiKey) {
-    throw new Error('Unauthorized')
-  }
-
-  // Check revocation
-  if (apiKey.revoked_at) {
-    throw new Error('Unauthorized')
-  }
-
-  // Check expiration
-  if (apiKey.expires_at && new Date(apiKey.expires_at) < new Date()) {
-    throw new Error('Unauthorized')
-  }
+  if (!apiKey) throw new Error('Unauthorized')
+  validateApiKeyRow(apiKey)
 
   // Update last_used_at for audit trail
   await serviceClient

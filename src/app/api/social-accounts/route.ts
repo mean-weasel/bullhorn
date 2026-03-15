@@ -24,7 +24,6 @@ export async function GET() {
 
     const supabase = await createClient()
 
-    // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('social_accounts')
       .select(SAFE_COLUMNS)

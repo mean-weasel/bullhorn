@@ -20,7 +20,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
-    // Verify project exists and user owns it (defense-in-depth alongside RLS)
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')

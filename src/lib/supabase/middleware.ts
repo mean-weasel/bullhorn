@@ -25,44 +25,32 @@ function getClientIp(request: NextRequest): string {
   return 'unknown'
 }
 
-export async function updateSession(request: NextRequest) {
-  // Skip auth in E2E test mode
-  if (process.env.E2E_TEST_MODE === 'true') {
-    return NextResponse.next({ request })
-  }
-
+async function handleApiRateLimit(request: NextRequest): Promise<NextResponse | null> {
   const pathname = request.nextUrl.pathname
+  if (!pathname.startsWith('/api/') || pathname === '/api/health') return null
 
-  // --- Rate limiting for API routes ---
-  if (pathname.startsWith('/api/') && pathname !== '/api/health') {
-    const identifier = getClientIp(request)
-    const result = await rateLimit(identifier)
+  const identifier = getClientIp(request)
+  const result = await rateLimit(identifier)
 
-    if (!result.success) {
-      const retryAfter = Math.ceil((result.reset - Date.now()) / 1000)
-      return NextResponse.json(
-        { error: 'Too many requests', retryAfter },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': String(retryAfter),
-            'X-RateLimit-Limit': String(result.limit),
-            'X-RateLimit-Remaining': '0',
-          },
-        }
-      )
-    }
+  if (!result.success) {
+    const retryAfter = Math.ceil((result.reset - Date.now()) / 1000)
+    return NextResponse.json(
+      { error: 'Too many requests', retryAfter },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(retryAfter),
+          'X-RateLimit-Limit': String(result.limit),
+          'X-RateLimit-Remaining': '0',
+        },
+      }
+    )
   }
+  return null
+}
 
-  // For API routes, skip getUser() — each route handler calls requireAuth()
-  // independently. IP-based rate limiting above is sufficient for middleware.
-  if (pathname.startsWith('/api/')) {
-    return NextResponse.next({ request })
-  }
-
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+function createSupabaseMiddlewareClient(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -74,9 +62,7 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -85,19 +71,46 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
+  return { supabase, getResponse: () => supabaseResponse }
+}
 
+const PUBLIC_PATHS = [
+  '/login',
+  '/signup',
+  '/forgot-password',
+  '/reset-password',
+  '/auth',
+  '/api',
+  '/access-denied',
+  '/docs',
+]
+
+export async function updateSession(request: NextRequest) {
+  if (process.env.E2E_TEST_MODE === 'true') {
+    return NextResponse.next({ request })
+  }
+
+  const pathname = request.nextUrl.pathname
+
+  // Rate limit API routes
+  const rateLimitResponse = await handleApiRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
+  // API routes handle their own auth via requireAuth()
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next({ request })
+  }
+
+  const { supabase, getResponse } = createSupabaseMiddlewareClient(request)
+
+  // Do not run code between createServerClient and supabase.auth.getUser().
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Check if access is restricted to specific emails
+  // Check email allowlist
   const allowedEmails = getAllowedEmails()
-  const isAccessDeniedPage = pathname === '/access-denied'
-
-  if (allowedEmails && user && !isAccessDeniedPage) {
+  if (allowedEmails && user && pathname !== '/access-denied') {
     const userEmail = user.email?.toLowerCase()
     if (!userEmail || !allowedEmails.includes(userEmail)) {
       const url = request.nextUrl.clone()
@@ -106,25 +119,13 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Redirect to login if not authenticated and trying to access protected routes
-  // API routes handle their own auth via Supabase RLS
-  const publicPaths = [
-    '/login',
-    '/signup',
-    '/forgot-password',
-    '/reset-password',
-    '/auth',
-    '/api',
-    '/access-denied',
-    '/docs',
-  ]
-  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path)) || pathname === '/'
-
+  // Redirect unauthenticated users to login for protected routes
+  const isPublicPath = PUBLIC_PATHS.some((p) => pathname.startsWith(p)) || pathname === '/'
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  return supabaseResponse
+  return getResponse()
 }

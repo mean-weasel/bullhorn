@@ -103,7 +103,9 @@ describe('GET /api/posts/[id]', () => {
     const body = await res.json()
     expect(body.post.id).toBe('post-1')
   })
+})
 
+describe('GET /api/posts/[id] - continued', () => {
   it('returns 404 when post not found (PGRST116)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -172,7 +174,9 @@ describe('PATCH /api/posts/[id]', () => {
     const res = await PATCH(req, makeParams('post-1'))
     expect(res.status).toBe(404)
   })
+})
 
+describe('PATCH /api/posts/[id] - continued', () => {
   it('returns 400 for invalid status transition', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // Current post status is 'draft'

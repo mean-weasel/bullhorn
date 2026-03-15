@@ -55,7 +55,9 @@ describe('dedup', () => {
     expect(result1).toBe('result-1')
     expect(result2).toBe('result-2')
   })
+})
 
+describe('dedup - continued', () => {
   it('allows re-execution after the first call resolves', async () => {
     let callCount = 0
     const fn = vi.fn(async () => {

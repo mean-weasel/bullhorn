@@ -162,7 +162,9 @@ describe('POST /api/projects/[id]/logo', () => {
     const body = await res.json()
     expect(body.error).toBe('Unauthorized')
   })
+})
 
+describe('POST /api/projects/[id]/logo - continued', () => {
   it('returns 400 when no file provided', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
@@ -280,7 +282,9 @@ describe('DELETE /api/projects/[id]/logo', () => {
     const body = await res.json()
     expect(body.error).toBe('Unauthorized')
   })
+})
 
+describe('DELETE /api/projects/[id]/logo - continued', () => {
   it('deletes logo successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {

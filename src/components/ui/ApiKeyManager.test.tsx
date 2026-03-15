@@ -134,6 +134,12 @@ describe('ApiKeyManager', () => {
     expect(screen.getByPlaceholderText('e.g. MCP Server')).toBeInTheDocument()
     expect(screen.getByText('Create')).toBeInTheDocument()
   })
+})
+
+describe('ApiKeyManager - continued', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   it('creates a new key and shows raw key', async () => {
     const fetchSpy = vi.spyOn(global, 'fetch')

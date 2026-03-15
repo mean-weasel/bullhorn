@@ -146,7 +146,9 @@ describe('GET /api/posts/search', () => {
     expect(body.posts).toHaveLength(1)
     expect(body.posts[0].id).toBe('post-2')
   })
+})
 
+describe('GET /api/posts/search - continued', () => {
   it('filters results client-side by content JSON', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const dbPosts = [

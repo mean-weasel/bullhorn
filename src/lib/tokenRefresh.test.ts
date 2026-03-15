@@ -114,10 +114,6 @@ describe('refreshTokenIfNeeded', () => {
     expect(mockFetch).not.toHaveBeenCalled()
   })
 
-  // -------------------------------------------------------------------------
-  // Twitter refresh
-  // -------------------------------------------------------------------------
-
   it('refreshes Twitter token when expired', async () => {
     const account = expiredAccount('twitter')
     mockSuccessfulRefresh({
@@ -145,10 +141,6 @@ describe('refreshTokenIfNeeded', () => {
     )
   })
 
-  // -------------------------------------------------------------------------
-  // LinkedIn refresh
-  // -------------------------------------------------------------------------
-
   it('refreshes LinkedIn token when expired', async () => {
     const account = expiredAccount('linkedin')
     mockSuccessfulRefresh({
@@ -166,10 +158,6 @@ describe('refreshTokenIfNeeded', () => {
       expect.objectContaining({ method: 'POST' })
     )
   })
-
-  // -------------------------------------------------------------------------
-  // Reddit refresh
-  // -------------------------------------------------------------------------
 
   it('refreshes Reddit token when expired', async () => {
     const account = expiredAccount('reddit')
@@ -193,11 +181,9 @@ describe('refreshTokenIfNeeded', () => {
       })
     )
   })
+})
 
-  // -------------------------------------------------------------------------
-  // Error handling — 401 / invalid_grant
-  // -------------------------------------------------------------------------
-
+describe('refreshTokenIfNeeded - continued', () => {
   it('marks account as expired on 401 response', async () => {
     const account = expiredAccount('twitter')
     mockFetch.mockResolvedValueOnce({

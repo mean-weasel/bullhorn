@@ -32,26 +32,20 @@ const updateLaunchPostSchema = z.object({
 // GET /api/launch-posts/[id] - Get single launch post
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['launches:read'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['launches:read'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
     const supabase = await createClient()
 
-    // Defense-in-depth: filter by user_id
     const { data, error } = await supabase
       .from('launch_posts')
       .select('*')
@@ -75,22 +69,36 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
 }
 
+function buildLaunchPostUpdates(data: z.infer<typeof updateLaunchPostSchema>) {
+  const updates: Record<string, unknown> = {}
+  if (data.platform !== undefined) updates.platform = data.platform
+  if (data.status !== undefined) updates.status = data.status
+  if (data.title !== undefined) {
+    const trimmedTitle = data.title.trim()
+    if (!trimmedTitle) return null
+    updates.title = trimmedTitle
+  }
+  if (data.url !== undefined) updates.url = data.url
+  if (data.description !== undefined) updates.description = data.description
+  if (data.platformFields !== undefined) updates.platform_fields = data.platformFields
+  if (data.campaignId !== undefined) updates.campaign_id = data.campaignId
+  if (data.scheduledAt !== undefined) updates.scheduled_at = data.scheduledAt
+  if (data.postedAt !== undefined) updates.posted_at = data.postedAt
+  if (data.notes !== undefined) updates.notes = data.notes
+  return updates
+}
+
 // PATCH /api/launch-posts/[id] - Update launch post
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['launches:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['launches:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -98,8 +106,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = updateLaunchPostSchema.safeParse(body)
+    const parsed = updateLaunchPostSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -107,25 +114,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       )
     }
 
-    // Build update object - only include fields that were provided
-    const updates: Record<string, unknown> = {}
-    if (parsed.data.platform !== undefined) updates.platform = parsed.data.platform
-    if (parsed.data.status !== undefined) updates.status = parsed.data.status
-    if (parsed.data.title !== undefined) {
-      const trimmedTitle = parsed.data.title.trim()
-      if (!trimmedTitle) {
-        return NextResponse.json({ error: 'Title cannot be empty' }, { status: 400 })
-      }
-      updates.title = trimmedTitle
+    const updates = buildLaunchPostUpdates(parsed.data)
+    if (updates === null) {
+      return NextResponse.json({ error: 'Title cannot be empty' }, { status: 400 })
     }
-    if (parsed.data.url !== undefined) updates.url = parsed.data.url
-    if (parsed.data.description !== undefined) updates.description = parsed.data.description
-    if (parsed.data.platformFields !== undefined)
-      updates.platform_fields = parsed.data.platformFields
-    if (parsed.data.campaignId !== undefined) updates.campaign_id = parsed.data.campaignId
-    if (parsed.data.scheduledAt !== undefined) updates.scheduled_at = parsed.data.scheduledAt
-    if (parsed.data.postedAt !== undefined) updates.posted_at = parsed.data.postedAt
-    if (parsed.data.notes !== undefined) updates.notes = parsed.data.notes
 
     const { data, error } = await supabase
       .from('launch_posts')
@@ -157,19 +149,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['launches:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['launches:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

@@ -163,7 +163,9 @@ describe('POST /api/reminders', () => {
     expect(body.error).toBe('Invalid input')
     expect(body.details).toBeDefined()
   })
+})
 
+describe('POST /api/reminders - continued', () => {
   it('validates required fields — missing remindAt', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const req = createRequest('/api/reminders', {

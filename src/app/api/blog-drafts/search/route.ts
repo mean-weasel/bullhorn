@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
 
     const searchPattern = `%${escapeSearchPattern(query)}%`
 
-    // Defense-in-depth: filter by user_id alongside RLS
     const { data, error } = await supabase
       .from('blog_drafts')
       .select('*')
@@ -42,7 +41,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform to camelCase for frontend
     const drafts = (data || []).map(transformDraftFromDb)
     return NextResponse.json({ drafts })
   } catch (error) {

@@ -72,6 +72,12 @@ describe('GET /api/export', () => {
     const body = await response.json()
     expect(body.error).toContain('Invalid type')
   })
+})
+
+describe('GET /api/export - continued', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   it('returns JSON export with posts and campaigns', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })

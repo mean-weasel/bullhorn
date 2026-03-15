@@ -232,7 +232,9 @@ describe('PATCH /api/projects/[id]', () => {
     const body = await res.json()
     expect(body.error).toBe('Name cannot be empty')
   })
+})
 
+describe('PATCH /api/projects/[id] - continued', () => {
   it('updates project successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const updatedProject = { ...sampleDbProject, name: 'Updated Name' }

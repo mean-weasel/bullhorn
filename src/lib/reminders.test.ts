@@ -91,7 +91,9 @@ describe('reminder recurrence expansion', () => {
 
     expect(results).toHaveLength(0)
   })
+})
 
+describe('reminder recurrence expansion - continued', () => {
   it('merges recurring and one-time reminders sorted by date', () => {
     const oneTime = makeReminder({
       id: 'once-1',

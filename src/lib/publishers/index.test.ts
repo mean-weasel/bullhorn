@@ -202,6 +202,16 @@ describe('publishPost', () => {
       })
     )
   })
+})
+
+describe('publishPost - continued', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockUpdate.mockReturnValue({ eq: mockEq })
+    mockSingle.mockResolvedValue({
+      data: { provider_account_id: 'account-123' },
+    })
+  })
 
   it('updates post status to failed on failure', async () => {
     const { publishPost } = await import('./index')

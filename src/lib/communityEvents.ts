@@ -117,6 +117,57 @@ interface CommunityEventsActions {
   unsubscribe: (subscriptionId: string) => Promise<void>
 }
 
+type EventsSetFn = (
+  partial:
+    | Partial<CommunityEventsState>
+    | ((s: CommunityEventsState) => Partial<CommunityEventsState>)
+) => void
+
+async function subscribeAction(
+  eventId: string,
+  options: SubscribeOptions | undefined,
+  set: EventsSetFn
+): Promise<EventSubscription> {
+  set({ loading: true, error: null })
+  try {
+    const res = await fetch(`${API_BASE}/community-events/subscriptions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventId,
+        notifyHoursBefore: options?.notifyHoursBefore,
+        autoCreateDraft: options?.autoCreateDraft,
+      }),
+    })
+    if (res.status === 409) throw new Error('Already subscribed to this event')
+    if (!res.ok) throw new Error('Failed to subscribe')
+    const data = await res.json()
+    const newSub = data.subscription as EventSubscription
+    set((state) => ({ subscriptions: [newSub, ...state.subscriptions], loading: false }))
+    return newSub
+  } catch (error) {
+    set({ error: (error as Error).message, loading: false })
+    throw error
+  }
+}
+
+async function unsubscribeAction(subscriptionId: string, set: EventsSetFn) {
+  set({ loading: true, error: null })
+  try {
+    const res = await fetch(`${API_BASE}/community-events/subscriptions/${subscriptionId}`, {
+      method: 'DELETE',
+    })
+    if (!res.ok) throw new Error('Failed to unsubscribe')
+    set((state) => ({
+      subscriptions: state.subscriptions.filter((s) => s.id !== subscriptionId),
+      loading: false,
+    }))
+  } catch (error) {
+    set({ error: (error as Error).message, loading: false })
+    throw error
+  }
+}
+
 export const useCommunityEventsStore = create<CommunityEventsState & CommunityEventsActions>()(
   (set) => ({
     events: [],
@@ -126,9 +177,7 @@ export const useCommunityEventsStore = create<CommunityEventsState & CommunityEv
     initialized: false,
 
     fetchEvents: async () => {
-      const key = createDedupKey('communityEvents')
-
-      return dedup(key, async () => {
+      return dedup(createDedupKey('communityEvents'), async () => {
         set({ loading: true, error: null })
         try {
           const res = await fetch(`${API_BASE}/community-events`)
@@ -142,9 +191,7 @@ export const useCommunityEventsStore = create<CommunityEventsState & CommunityEv
     },
 
     fetchSubscriptions: async () => {
-      const key = createDedupKey('eventSubscriptions')
-
-      return dedup(key, async () => {
+      return dedup(createDedupKey('eventSubscriptions'), async () => {
         set({ loading: true, error: null })
         try {
           const res = await fetch(`${API_BASE}/community-events/subscriptions`)
@@ -157,50 +204,7 @@ export const useCommunityEventsStore = create<CommunityEventsState & CommunityEv
       })
     },
 
-    subscribe: async (eventId, options) => {
-      set({ loading: true, error: null })
-      try {
-        const res = await fetch(`${API_BASE}/community-events/subscriptions`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            eventId,
-            notifyHoursBefore: options?.notifyHoursBefore,
-            autoCreateDraft: options?.autoCreateDraft,
-          }),
-        })
-        if (res.status === 409) {
-          throw new Error('Already subscribed to this event')
-        }
-        if (!res.ok) throw new Error('Failed to subscribe')
-        const data = await res.json()
-        const newSub = data.subscription as EventSubscription
-        set((state) => ({
-          subscriptions: [newSub, ...state.subscriptions],
-          loading: false,
-        }))
-        return newSub
-      } catch (error) {
-        set({ error: (error as Error).message, loading: false })
-        throw error
-      }
-    },
-
-    unsubscribe: async (subscriptionId) => {
-      set({ loading: true, error: null })
-      try {
-        const res = await fetch(`${API_BASE}/community-events/subscriptions/${subscriptionId}`, {
-          method: 'DELETE',
-        })
-        if (!res.ok) throw new Error('Failed to unsubscribe')
-        set((state) => ({
-          subscriptions: state.subscriptions.filter((s) => s.id !== subscriptionId),
-          loading: false,
-        }))
-      } catch (error) {
-        set({ error: (error as Error).message, loading: false })
-        throw error
-      }
-    },
+    subscribe: (eventId, options) => subscribeAction(eventId, options, set),
+    unsubscribe: (subscriptionId) => unsubscribeAction(subscriptionId, set),
   })
 )

@@ -24,25 +24,19 @@ const createBlogDraftSchema = z.object({
 // GET /api/blog-drafts - List blog drafts
 export async function GET(request: NextRequest) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['blog:read'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['blog:read'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
-
     const status = searchParams.get('status')
     const campaignId = searchParams.get('campaignId')
     const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50') || 50, 1), 200)
@@ -54,30 +48,22 @@ export async function GET(request: NextRequest) {
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
 
-    if (status && status !== 'all') {
-      query = query.eq('status', status)
-    }
-    if (campaignId) {
-      query = query.eq('campaign_id', campaignId)
-    }
+    if (status && status !== 'all') query = query.eq('status', status)
+    if (campaignId) query = query.eq('campaign_id', campaignId)
     if (search) {
       const escaped = escapeSearchPattern(search)
       query = query.or(
         `title.ilike.%${escaped}%,content.ilike.%${escaped}%,notes.ilike.%${escaped}%`
       )
     }
-    if (limit > 0) {
-      query = query.limit(limit)
-    }
+    if (limit > 0) query = query.limit(limit)
 
     const { data, error } = await query
-
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform to camelCase for frontend
     const drafts = (data || []).map(transformDraftFromDb)
     return NextResponse.json({ drafts })
   } catch (error) {
@@ -86,26 +72,41 @@ export async function GET(request: NextRequest) {
   }
 }
 
+function buildDraftInsertData(
+  userId: string,
+  data: z.infer<typeof createBlogDraftSchema>,
+  title: string | null
+) {
+  const content = data.content || ''
+  return {
+    user_id: userId,
+    title,
+    content,
+    date: data.date,
+    status: data.status || 'draft',
+    scheduled_at: data.scheduled_at || data.scheduledAt,
+    notes: data.notes,
+    word_count: calculateWordCount(content),
+    campaign_id: data.campaign_id || data.campaignId,
+    images: data.images || [],
+    tags: data.tags || [],
+  }
+}
+
 // POST /api/blog-drafts - Create blog draft
 export async function POST(request: NextRequest) {
   try {
-    // Require authentication - throws if not authenticated
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['blog:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['blog:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Enforce plan limit
     const limitCheck = await enforceResourceLimit(userId, 'blogDrafts')
     if (!limitCheck.allowed) {
       return NextResponse.json(
@@ -122,8 +123,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = createBlogDraftSchema.safeParse(body)
+    const parsed = createBlogDraftSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -136,24 +136,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
-    const content = parsed.data.content || ''
-    const wordCount = calculateWordCount(content)
-
     const { data, error } = await supabase
       .from('blog_drafts')
-      .insert({
-        user_id: userId,
-        title,
-        content: content,
-        date: parsed.data.date,
-        status: parsed.data.status || 'draft',
-        scheduled_at: parsed.data.scheduled_at || parsed.data.scheduledAt,
-        notes: parsed.data.notes,
-        word_count: wordCount,
-        campaign_id: parsed.data.campaign_id || parsed.data.campaignId,
-        images: parsed.data.images || [],
-        tags: parsed.data.tags || [],
-      })
+      .insert(buildDraftInsertData(userId, parsed.data, title))
       .select()
       .single()
 
@@ -165,7 +150,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform to camelCase for frontend
     return NextResponse.json({ draft: transformDraftFromDb(data) }, { status: 201 })
   } catch (error) {
     console.error('Error creating blog draft:', error)

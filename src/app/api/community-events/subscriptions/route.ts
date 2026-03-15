@@ -60,8 +60,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = createSubscriptionSchema.safeParse(body)
+    const parsed = createSubscriptionSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },

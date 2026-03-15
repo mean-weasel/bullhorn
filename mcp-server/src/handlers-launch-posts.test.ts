@@ -120,7 +120,7 @@ async function handleListLaunchPosts(args: {
   return ok({ count: launchPosts.length, launchPosts })
 }
 
-describe('Launch Post Tool Handlers', () => {
+describe('Launch Post Tool Handlers - create_launch_post', () => {
   beforeEach(() => {
     mockGet.mockReset()
     mockPost.mockReset()
@@ -129,300 +129,354 @@ describe('Launch Post Tool Handlers', () => {
     _resetClient()
   })
 
-  describe('create_launch_post', () => {
-    it('should create a launch post with valid platform and title', async () => {
-      const mockLaunchPost = {
-        id: 'lp-1',
-        platform: 'product_hunt',
-        title: 'Launch Bullhorn',
-        status: 'draft',
-      }
-      mockPost.mockResolvedValueOnce({ launchPost: mockLaunchPost })
+  it('should create a launch post with valid platform and title', async () => {
+    const mockLaunchPost = {
+      id: 'lp-1',
+      platform: 'product_hunt',
+      title: 'Launch Bullhorn',
+      status: 'draft',
+    }
+    mockPost.mockResolvedValueOnce({ launchPost: mockLaunchPost })
 
-      const result = await handleCreateLaunchPost({
-        platform: 'product_hunt',
-        title: 'Launch Bullhorn',
-      })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.launchPost).toEqual(mockLaunchPost)
+    const result = await handleCreateLaunchPost({
+      platform: 'product_hunt',
+      title: 'Launch Bullhorn',
+    })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.launchPost).toEqual(mockLaunchPost)
+  })
+
+  it('should create a launch post with all fields', async () => {
+    const mockLaunchPost = {
+      id: 'lp-2',
+      platform: 'hacker_news_show',
+      title: 'Show HN: Bullhorn',
+      status: 'scheduled',
+    }
+    mockPost.mockResolvedValueOnce({ launchPost: mockLaunchPost })
+
+    await handleCreateLaunchPost({
+      platform: 'hacker_news_show',
+      title: 'Show HN: Bullhorn',
+      url: 'https://bullhorn.to',
+      description: 'A social media scheduler',
+      platformFields: { tags: ['social', 'productivity'] },
+      campaignId: 'camp-1',
+      scheduledAt: '2026-03-01T10:00:00Z',
+      notes: 'Launch day!',
+      status: 'scheduled',
     })
 
-    it('should create a launch post with all fields', async () => {
-      const mockLaunchPost = {
-        id: 'lp-2',
-        platform: 'hacker_news_show',
-        title: 'Show HN: Bullhorn',
-        status: 'scheduled',
-      }
-      mockPost.mockResolvedValueOnce({ launchPost: mockLaunchPost })
-
-      await handleCreateLaunchPost({
-        platform: 'hacker_news_show',
-        title: 'Show HN: Bullhorn',
-        url: 'https://bullhorn.to',
-        description: 'A social media scheduler',
-        platformFields: { tags: ['social', 'productivity'] },
-        campaignId: 'camp-1',
-        scheduledAt: '2026-03-01T10:00:00Z',
-        notes: 'Launch day!',
-        status: 'scheduled',
-      })
-
-      expect(mockPost).toHaveBeenCalledWith('/launch-posts', {
-        platform: 'hacker_news_show',
-        title: 'Show HN: Bullhorn',
-        url: 'https://bullhorn.to',
-        description: 'A social media scheduler',
-        platformFields: { tags: ['social', 'productivity'] },
-        campaignId: 'camp-1',
-        scheduledAt: '2026-03-01T10:00:00Z',
-        notes: 'Launch day!',
-        status: 'scheduled',
-      })
-    })
-
-    it('should return error when platform is missing', async () => {
-      const result = await handleCreateLaunchPost({ title: 'My Launch' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('platform and title are required')
-    })
-
-    it('should return error when title is missing', async () => {
-      const result = await handleCreateLaunchPost({ platform: 'product_hunt' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('platform and title are required')
-    })
-
-    it('should return error when both platform and title are missing', async () => {
-      const result = await handleCreateLaunchPost({})
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('platform and title are required')
-    })
-
-    it('should create launch posts for different platforms', async () => {
-      const platforms = [
-        'hacker_news_show',
-        'hacker_news_ask',
-        'hacker_news_link',
-        'product_hunt',
-        'dev_hunt',
-        'beta_list',
-        'indie_hackers',
-      ]
-
-      for (const platform of platforms) {
-        mockPost.mockResolvedValueOnce({
-          launchPost: { id: `lp-${platform}`, platform, title: 'Test', status: 'draft' },
-        })
-
-        const result = await handleCreateLaunchPost({ platform, title: 'Test' })
-        expect(result.isError).toBeUndefined()
-        const response = JSON.parse(result.content[0].text)
-        expect(response.success).toBe(true)
-        expect(response.launchPost.platform).toBe(platform)
-      }
+    expect(mockPost).toHaveBeenCalledWith('/launch-posts', {
+      platform: 'hacker_news_show',
+      title: 'Show HN: Bullhorn',
+      url: 'https://bullhorn.to',
+      description: 'A social media scheduler',
+      platformFields: { tags: ['social', 'productivity'] },
+      campaignId: 'camp-1',
+      scheduledAt: '2026-03-01T10:00:00Z',
+      notes: 'Launch day!',
+      status: 'scheduled',
     })
   })
 
-  describe('get_launch_post', () => {
-    it('should return launch post when found', async () => {
-      const mockLaunchPost = {
-        id: 'lp-1',
-        platform: 'product_hunt',
-        title: 'My Launch',
-        status: 'draft',
-      }
-      mockGet.mockResolvedValueOnce({ launchPost: mockLaunchPost })
+  it('should return error when platform is missing', async () => {
+    const result = await handleCreateLaunchPost({ title: 'My Launch' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('platform and title are required')
+  })
+})
 
-      const result = await handleGetLaunchPost({ id: 'lp-1' })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.launchPost).toEqual(mockLaunchPost)
-    })
-
-    it('should return error when launch post not found', async () => {
-      mockGet.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleGetLaunchPost({ id: 'nonexistent' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Launch post with ID nonexistent not found')
-    })
+describe('Launch Post Tool Handlers - create_launch_post - continued', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
   })
 
-  describe('update_launch_post', () => {
-    it('should update launch post with valid data', async () => {
-      const mockLaunchPost = {
-        id: 'lp-1',
-        platform: 'product_hunt',
-        title: 'Updated Title',
-        status: 'scheduled',
-      }
-      mockPatch.mockResolvedValueOnce({ launchPost: mockLaunchPost })
-
-      const result = await handleUpdateLaunchPost({
-        id: 'lp-1',
-        title: 'Updated Title',
-        status: 'scheduled',
-      })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.launchPost).toEqual(mockLaunchPost)
-    })
-
-    it('should return error when launch post not found', async () => {
-      mockPatch.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleUpdateLaunchPost({ id: 'nonexistent', title: 'New Title' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Launch post with ID nonexistent not found')
-    })
-
-    it('should update platform fields', async () => {
-      const mockLaunchPost = {
-        id: 'lp-1',
-        platform: 'product_hunt',
-        platformFields: { tagline: 'New tagline' },
-      }
-      mockPatch.mockResolvedValueOnce({ launchPost: mockLaunchPost })
-
-      const result = await handleUpdateLaunchPost({
-        id: 'lp-1',
-        platformFields: { tagline: 'New tagline' },
-      })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.launchPost.platformFields).toEqual({ tagline: 'New tagline' })
-    })
-
-    it('should update url and description', async () => {
-      const mockLaunchPost = {
-        id: 'lp-1',
-        url: 'https://newurl.com',
-        description: 'New description',
-      }
-      mockPatch.mockResolvedValueOnce({ launchPost: mockLaunchPost })
-
-      const result = await handleUpdateLaunchPost({
-        id: 'lp-1',
-        url: 'https://newurl.com',
-        description: 'New description',
-      })
-      expect(result.isError).toBeUndefined()
-      const response = JSON.parse(result.content[0].text)
-      expect(response.launchPost.url).toBe('https://newurl.com')
-      expect(response.launchPost.description).toBe('New description')
-    })
+  it('should return error when title is missing', async () => {
+    const result = await handleCreateLaunchPost({ platform: 'product_hunt' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('platform and title are required')
   })
 
-  describe('delete_launch_post', () => {
-    it('should delete launch post when confirmed', async () => {
-      mockDelete.mockResolvedValueOnce({})
+  it('should return error when both platform and title are missing', async () => {
+    const result = await handleCreateLaunchPost({})
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('platform and title are required')
+  })
 
-      const result = await handleDeleteLaunchPost({ id: 'lp-1', confirmed: true })
+  it('should create launch posts for different platforms', async () => {
+    const platforms = [
+      'hacker_news_show',
+      'hacker_news_ask',
+      'hacker_news_link',
+      'product_hunt',
+      'dev_hunt',
+      'beta_list',
+      'indie_hackers',
+    ]
+
+    for (const platform of platforms) {
+      mockPost.mockResolvedValueOnce({
+        launchPost: { id: `lp-${platform}`, platform, title: 'Test', status: 'draft' },
+      })
+
+      const result = await handleCreateLaunchPost({ platform, title: 'Test' })
       expect(result.isError).toBeUndefined()
       const response = JSON.parse(result.content[0].text)
       expect(response.success).toBe(true)
-      expect(response.message).toContain('Launch post lp-1 deleted')
-    })
+      expect(response.launchPost.platform).toBe(platform)
+    }
+  })
+})
 
-    it('should return error when not confirmed', async () => {
-      const result = await handleDeleteLaunchPost({ id: 'lp-1', confirmed: false })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Deletion not confirmed')
-    })
-
-    it('should return error when confirmed is missing', async () => {
-      const result = await handleDeleteLaunchPost({ id: 'lp-1' })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Deletion not confirmed')
-    })
-
-    it('should return error when launch post not found', async () => {
-      mockDelete.mockRejectedValueOnce(new Error('Not found'))
-
-      const result = await handleDeleteLaunchPost({ id: 'nonexistent', confirmed: true })
-      expect(result.isError).toBe(true)
-      expect(result.content[0].text).toContain('Launch post with ID nonexistent not found')
-    })
+describe('Launch Post Tool Handlers - get_launch_post', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
   })
 
-  describe('list_launch_posts', () => {
-    it('should list launch posts with no filters', async () => {
-      const mockLaunchPosts = [
-        { id: 'lp1', platform: 'product_hunt', title: 'Launch 1' },
-        { id: 'lp2', platform: 'hacker_news_show', title: 'Launch 2' },
-      ]
-      mockGet.mockResolvedValueOnce({ launchPosts: mockLaunchPosts })
+  it('should return launch post when found', async () => {
+    const mockLaunchPost = {
+      id: 'lp-1',
+      platform: 'product_hunt',
+      title: 'My Launch',
+      status: 'draft',
+    }
+    mockGet.mockResolvedValueOnce({ launchPost: mockLaunchPost })
 
-      const result = await handleListLaunchPosts({})
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.count).toBe(2)
-      expect(response.launchPosts).toEqual(mockLaunchPosts)
+    const result = await handleGetLaunchPost({ id: 'lp-1' })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.launchPost).toEqual(mockLaunchPost)
+  })
+
+  it('should return error when launch post not found', async () => {
+    mockGet.mockRejectedValueOnce(new Error('Not found'))
+
+    const result = await handleGetLaunchPost({ id: 'nonexistent' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Launch post with ID nonexistent not found')
+  })
+})
+
+describe('Launch Post Tool Handlers - update_launch_post', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should update launch post with valid data', async () => {
+    const mockLaunchPost = {
+      id: 'lp-1',
+      platform: 'product_hunt',
+      title: 'Updated Title',
+      status: 'scheduled',
+    }
+    mockPatch.mockResolvedValueOnce({ launchPost: mockLaunchPost })
+
+    const result = await handleUpdateLaunchPost({
+      id: 'lp-1',
+      title: 'Updated Title',
+      status: 'scheduled',
     })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.launchPost).toEqual(mockLaunchPost)
+  })
 
-    it('should pass platform filter', async () => {
-      mockGet.mockResolvedValueOnce({ launchPosts: [] })
+  it('should return error when launch post not found', async () => {
+    mockPatch.mockRejectedValueOnce(new Error('Not found'))
 
-      await handleListLaunchPosts({ platform: 'product_hunt' })
-      expect(mockGet).toHaveBeenCalledWith(
-        '/launch-posts',
-        expect.objectContaining({ platform: 'product_hunt' })
-      )
+    const result = await handleUpdateLaunchPost({ id: 'nonexistent', title: 'New Title' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Launch post with ID nonexistent not found')
+  })
+})
+
+describe('Launch Post Tool Handlers - update_launch_post - continued', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should update platform fields', async () => {
+    const mockLaunchPost = {
+      id: 'lp-1',
+      platform: 'product_hunt',
+      platformFields: { tagline: 'New tagline' },
+    }
+    mockPatch.mockResolvedValueOnce({ launchPost: mockLaunchPost })
+
+    const result = await handleUpdateLaunchPost({
+      id: 'lp-1',
+      platformFields: { tagline: 'New tagline' },
     })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.launchPost.platformFields).toEqual({ tagline: 'New tagline' })
+  })
 
-    it('should pass status filter', async () => {
-      mockGet.mockResolvedValueOnce({ launchPosts: [] })
+  it('should update url and description', async () => {
+    const mockLaunchPost = {
+      id: 'lp-1',
+      url: 'https://newurl.com',
+      description: 'New description',
+    }
+    mockPatch.mockResolvedValueOnce({ launchPost: mockLaunchPost })
 
-      await handleListLaunchPosts({ status: 'draft' })
-      expect(mockGet).toHaveBeenCalledWith(
-        '/launch-posts',
-        expect.objectContaining({ status: 'draft' })
-      )
+    const result = await handleUpdateLaunchPost({
+      id: 'lp-1',
+      url: 'https://newurl.com',
+      description: 'New description',
     })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.launchPost.url).toBe('https://newurl.com')
+    expect(response.launchPost.description).toBe('New description')
+  })
+})
 
-    it('should pass campaignId filter', async () => {
-      mockGet.mockResolvedValueOnce({ launchPosts: [] })
+describe('Launch Post Tool Handlers - delete_launch_post', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
 
-      await handleListLaunchPosts({ campaignId: 'camp-1' })
-      expect(mockGet).toHaveBeenCalledWith(
-        '/launch-posts',
-        expect.objectContaining({ campaignId: 'camp-1' })
-      )
-    })
+  it('should delete launch post when confirmed', async () => {
+    mockDelete.mockResolvedValueOnce({})
 
-    it('should use default limit of 50', async () => {
-      mockGet.mockResolvedValueOnce({ launchPosts: [] })
+    const result = await handleDeleteLaunchPost({ id: 'lp-1', confirmed: true })
+    expect(result.isError).toBeUndefined()
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.message).toContain('Launch post lp-1 deleted')
+  })
 
-      await handleListLaunchPosts({})
-      expect(mockGet).toHaveBeenCalledWith(
-        '/launch-posts',
-        expect.objectContaining({ limit: '50' })
-      )
-    })
+  it('should return error when not confirmed', async () => {
+    const result = await handleDeleteLaunchPost({ id: 'lp-1', confirmed: false })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Deletion not confirmed')
+  })
 
-    it('should pass custom limit', async () => {
-      mockGet.mockResolvedValueOnce({ launchPosts: [] })
+  it('should return error when confirmed is missing', async () => {
+    const result = await handleDeleteLaunchPost({ id: 'lp-1' })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Deletion not confirmed')
+  })
 
-      await handleListLaunchPosts({ limit: 10 })
-      expect(mockGet).toHaveBeenCalledWith(
-        '/launch-posts',
-        expect.objectContaining({ limit: '10' })
-      )
-    })
+  it('should return error when launch post not found', async () => {
+    mockDelete.mockRejectedValueOnce(new Error('Not found'))
 
-    it('should return empty results', async () => {
-      mockGet.mockResolvedValueOnce({ launchPosts: [] })
+    const result = await handleDeleteLaunchPost({ id: 'nonexistent', confirmed: true })
+    expect(result.isError).toBe(true)
+    expect(result.content[0].text).toContain('Launch post with ID nonexistent not found')
+  })
+})
 
-      const result = await handleListLaunchPosts({})
-      const response = JSON.parse(result.content[0].text)
-      expect(response.success).toBe(true)
-      expect(response.count).toBe(0)
-      expect(response.launchPosts).toEqual([])
-    })
+describe('Launch Post Tool Handlers - list_launch_posts', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should list launch posts with no filters', async () => {
+    const mockLaunchPosts = [
+      { id: 'lp1', platform: 'product_hunt', title: 'Launch 1' },
+      { id: 'lp2', platform: 'hacker_news_show', title: 'Launch 2' },
+    ]
+    mockGet.mockResolvedValueOnce({ launchPosts: mockLaunchPosts })
+
+    const result = await handleListLaunchPosts({})
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.count).toBe(2)
+    expect(response.launchPosts).toEqual(mockLaunchPosts)
+  })
+
+  it('should pass platform filter', async () => {
+    mockGet.mockResolvedValueOnce({ launchPosts: [] })
+
+    await handleListLaunchPosts({ platform: 'product_hunt' })
+    expect(mockGet).toHaveBeenCalledWith(
+      '/launch-posts',
+      expect.objectContaining({ platform: 'product_hunt' })
+    )
+  })
+
+  it('should pass status filter', async () => {
+    mockGet.mockResolvedValueOnce({ launchPosts: [] })
+
+    await handleListLaunchPosts({ status: 'draft' })
+    expect(mockGet).toHaveBeenCalledWith(
+      '/launch-posts',
+      expect.objectContaining({ status: 'draft' })
+    )
+  })
+
+  it('should pass campaignId filter', async () => {
+    mockGet.mockResolvedValueOnce({ launchPosts: [] })
+
+    await handleListLaunchPosts({ campaignId: 'camp-1' })
+    expect(mockGet).toHaveBeenCalledWith(
+      '/launch-posts',
+      expect.objectContaining({ campaignId: 'camp-1' })
+    )
+  })
+})
+
+describe('Launch Post Tool Handlers - list_launch_posts - continued', () => {
+  beforeEach(() => {
+    mockGet.mockReset()
+    mockPost.mockReset()
+    mockPatch.mockReset()
+    mockDelete.mockReset()
+    _resetClient()
+  })
+
+  it('should use default limit of 50', async () => {
+    mockGet.mockResolvedValueOnce({ launchPosts: [] })
+
+    await handleListLaunchPosts({})
+    expect(mockGet).toHaveBeenCalledWith('/launch-posts', expect.objectContaining({ limit: '50' }))
+  })
+
+  it('should pass custom limit', async () => {
+    mockGet.mockResolvedValueOnce({ launchPosts: [] })
+
+    await handleListLaunchPosts({ limit: 10 })
+    expect(mockGet).toHaveBeenCalledWith('/launch-posts', expect.objectContaining({ limit: '10' }))
+  })
+
+  it('should return empty results', async () => {
+    mockGet.mockResolvedValueOnce({ launchPosts: [] })
+
+    const result = await handleListLaunchPosts({})
+    const response = JSON.parse(result.content[0].text)
+    expect(response.success).toBe(true)
+    expect(response.count).toBe(0)
+    expect(response.launchPosts).toEqual([])
   })
 })

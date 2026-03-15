@@ -30,7 +30,6 @@ interface RouteContext {
 // GET /api/analytics/connections/[id] - Get single connection
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
@@ -49,7 +48,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     const { id } = await context.params
     const supabase = await createClient()
 
-    // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('analytics_connections')
       .select(SAFE_COLUMNS)
@@ -76,7 +74,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 // PATCH /api/analytics/connections/[id] - Update connection
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
@@ -96,8 +93,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = updateAnalyticsConnectionSchema.safeParse(body)
+    const parsed = updateAnalyticsConnectionSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -105,10 +101,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       )
     }
 
-    // Transform updates to snake_case
     const updates = transformAnalyticsConnectionToDb(parsed.data)
 
-    // Update with ownership check (RLS handles this, but add defense-in-depth)
     const { data, error } = await supabase
       .from('analytics_connections')
       .update(updates)
@@ -136,7 +130,6 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 // DELETE /api/analytics/connections/[id] - Delete connection
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
@@ -155,7 +148,6 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     const { id } = await context.params
     const supabase = await createClient()
 
-    // Delete with ownership check
     const { error } = await supabase
       .from('analytics_connections')
       .delete()

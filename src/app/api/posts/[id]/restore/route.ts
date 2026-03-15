@@ -49,7 +49,6 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    // Transform post from snake_case to camelCase
     const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post })
   } catch (error) {

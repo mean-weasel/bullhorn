@@ -128,7 +128,9 @@ describe('PATCH /api/reminders/[id]', () => {
     const body = await res.json()
     expect(body.error).toBe('Invalid input')
   })
+})
 
+describe('PATCH /api/reminders/[id] - continued', () => {
   it('returns 404 when reminder not found (PGRST116)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockUpdateSingle.mockResolvedValue({

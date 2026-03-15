@@ -47,6 +47,22 @@ const initialState: PlanState = {
   initialized: false,
 }
 
+function adjustCount(
+  state: PlanState,
+  resource: TrackedResource,
+  delta: number
+): Partial<PlanState> {
+  return {
+    limits: {
+      ...state.limits,
+      [resource]: {
+        ...state.limits[resource],
+        current: Math.max(0, state.limits[resource].current + delta),
+      },
+    },
+  }
+}
+
 export const usePlanStore = create<PlanState & PlanActions>()((set, get) => ({
   ...initialState,
 
@@ -76,8 +92,7 @@ export const usePlanStore = create<PlanState & PlanActions>()((set, get) => ({
   },
 
   isNearAnyLimit: () => {
-    const state = get()
-    const resources = Object.entries(state.limits) as [string, LimitInfo][]
+    const resources = Object.entries(get().limits) as [string, LimitInfo][]
     for (const [resource, info] of resources) {
       if (info.limit > 0 && info.current / info.limit >= 0.8) {
         return { resource, current: info.current, limit: info.limit }
@@ -86,29 +101,9 @@ export const usePlanStore = create<PlanState & PlanActions>()((set, get) => ({
     return null
   },
 
-  incrementCount: (resource) => {
-    set((state) => ({
-      limits: {
-        ...state.limits,
-        [resource]: {
-          ...state.limits[resource],
-          current: state.limits[resource].current + 1,
-        },
-      },
-    }))
-  },
+  incrementCount: (resource) => set((state) => adjustCount(state, resource, 1)),
 
-  decrementCount: (resource) => {
-    set((state) => ({
-      limits: {
-        ...state.limits,
-        [resource]: {
-          ...state.limits[resource],
-          current: Math.max(0, state.limits[resource].current - 1),
-        },
-      },
-    }))
-  },
+  decrementCount: (resource) => set((state) => adjustCount(state, resource, -1)),
 
   reset: () => set(initialState),
 }))

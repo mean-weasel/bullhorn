@@ -69,6 +69,14 @@ describe('rateLimit', () => {
 
     consoleSpy.mockRestore()
   })
+})
+
+describe('rateLimit - continued', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.unstubAllEnvs()
+    mockLimit.mockReset()
+  })
 
   it('in-memory fallback blocks after exceeding limit', async () => {
     vi.stubEnv('UPSTASH_REDIS_REST_URL', '')

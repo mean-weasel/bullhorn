@@ -161,7 +161,9 @@ describe('POST /api/api-keys', () => {
     const res = await POST(req)
     expect(res.status).toBe(400)
   })
+})
 
+describe('POST /api/api-keys - continued', () => {
   it('creates API key successfully and returns 201 with raw key', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const insertedRow = {

@@ -109,7 +109,9 @@ describe('GET /api/blog-drafts/[id]', () => {
     expect(body.draft.id).toBe('draft-1')
     expect(body.draft.title).toBe('My Post')
   })
+})
 
+describe('GET /api/blog-drafts/[id] - continued', () => {
   it('returns 404 when draft not found (PGRST116)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -177,7 +179,9 @@ describe('PATCH /api/blog-drafts/[id]', () => {
     const res = await PATCH(req, makeParams('draft-1'))
     expect(res.status).toBe(404)
   })
+})
 
+describe('PATCH /api/blog-drafts/[id] - continued', () => {
   it('returns 400 for invalid status transition', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // Current status is 'draft', trying to go to 'published' (not allowed)

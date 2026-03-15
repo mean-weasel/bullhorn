@@ -158,7 +158,9 @@ describe('GET /api/blog-drafts/search', () => {
     const body = await res.json()
     expect(body.drafts).toEqual([])
   })
+})
 
+describe('GET /api/blog-drafts/search - continued', () => {
   it('handles null data from database', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockLimit.mockResolvedValue({ data: null, error: null })

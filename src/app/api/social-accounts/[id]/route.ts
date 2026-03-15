@@ -11,7 +11,6 @@ interface RouteContext {
 // DELETE /api/social-accounts/[id] — Disconnect a social account
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireSessionAuth()
@@ -23,7 +22,6 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     const { id } = await context.params
     const supabase = await createClient()
 
-    // Delete with ownership check (RLS handles this, but add defense-in-depth)
     const { error } = await supabase
       .from('social_accounts')
       .delete()

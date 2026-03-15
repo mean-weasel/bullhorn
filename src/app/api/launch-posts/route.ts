@@ -30,25 +30,19 @@ const createLaunchPostSchema = z.object({
 // GET /api/launch-posts - List launch posts with optional filters
 export async function GET(request: NextRequest) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['launches:read'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['launches:read'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
-
     const platform = searchParams.get('platform')
     const status = searchParams.get('status')
     const campaignId = searchParams.get('campaignId')
@@ -60,21 +54,12 @@ export async function GET(request: NextRequest) {
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
 
-    if (platform) {
-      query = query.eq('platform', platform)
-    }
-    if (status && status !== 'all') {
-      query = query.eq('status', status)
-    }
-    if (campaignId) {
-      query = query.eq('campaign_id', campaignId)
-    }
-    if (limit > 0) {
-      query = query.limit(limit)
-    }
+    if (platform) query = query.eq('platform', platform)
+    if (status && status !== 'all') query = query.eq('status', status)
+    if (campaignId) query = query.eq('campaign_id', campaignId)
+    if (limit > 0) query = query.limit(limit)
 
     const { data, error } = await query
-
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -88,26 +73,39 @@ export async function GET(request: NextRequest) {
   }
 }
 
+function buildLaunchPostInsert(
+  userId: string,
+  data: z.infer<typeof createLaunchPostSchema>,
+  title: string
+) {
+  return {
+    user_id: userId,
+    platform: data.platform,
+    status: data.status || 'draft',
+    title,
+    url: data.url || null,
+    description: data.description || null,
+    platform_fields: data.platformFields || {},
+    campaign_id: data.campaignId || null,
+    scheduled_at: data.scheduledAt || null,
+    notes: data.notes || null,
+  }
+}
+
 // POST /api/launch-posts - Create new launch post
 export async function POST(request: NextRequest) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) {
-        validateScopes(auth.scopes, ['launches:write'])
-      }
+      if (auth.scopes) validateScopes(auth.scopes, ['launches:write'])
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-      }
+      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Enforce plan limit
     const limitCheck = await enforceResourceLimit(userId, 'launchPosts')
     if (!limitCheck.allowed) {
       return NextResponse.json(
@@ -124,8 +122,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const body = jsonResult.data
-    const parsed = createLaunchPostSchema.safeParse(body)
+    const parsed = createLaunchPostSchema.safeParse(jsonResult.data)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -134,24 +131,11 @@ export async function POST(request: NextRequest) {
     }
 
     const title = parsed.data.title.trim()
-    if (!title) {
-      return NextResponse.json({ error: 'Title is required' }, { status: 400 })
-    }
+    if (!title) return NextResponse.json({ error: 'Title is required' }, { status: 400 })
 
     const { data, error } = await supabase
       .from('launch_posts')
-      .insert({
-        user_id: userId,
-        platform: parsed.data.platform,
-        status: parsed.data.status || 'draft',
-        title,
-        url: parsed.data.url || null,
-        description: parsed.data.description || null,
-        platform_fields: parsed.data.platformFields || {},
-        campaign_id: parsed.data.campaignId || null,
-        scheduled_at: parsed.data.scheduledAt || null,
-        notes: parsed.data.notes || null,
-      })
+      .insert(buildLaunchPostInsert(userId, parsed.data, title))
       .select()
       .single()
 

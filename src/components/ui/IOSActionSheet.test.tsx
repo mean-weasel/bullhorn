@@ -79,6 +79,13 @@ describe('IOSActionSheet', () => {
 
     expect(onClose).toHaveBeenCalled()
   })
+})
+
+describe('IOSActionSheet - continued', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    document.body.style.overflow = ''
+  })
 
   it('does not call onClose when clicking inside the sheet content', () => {
     const onClose = vi.fn()

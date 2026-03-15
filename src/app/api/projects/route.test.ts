@@ -190,7 +190,9 @@ describe('POST /api/projects', () => {
     expect(body.error).toBe('Invalid input')
     expect(body.details).toBeDefined()
   })
+})
 
+describe('POST /api/projects - continued', () => {
   it('returns 400 for empty name', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({

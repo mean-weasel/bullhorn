@@ -237,7 +237,9 @@ describe('POST /api/posts/[id]/publish', () => {
       'account-1'
     )
   })
+})
 
+describe('POST /api/posts/[id]/publish - continued', () => {
   it('successfully publishes a failed post (retry)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const failedRow = { ...DRAFT_POST_ROW, status: 'failed' }

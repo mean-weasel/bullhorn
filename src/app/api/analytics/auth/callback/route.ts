@@ -9,15 +9,43 @@ export const dynamic = 'force-dynamic'
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 
 // GET /api/analytics/auth/callback - Handle OAuth callback from Google
+async function exchangeGoogleToken(code: string, redirectUri: string) {
+  const clientId = process.env.GOOGLE_ANALYTICS_CLIENT_ID
+  const clientSecret = process.env.GOOGLE_ANALYTICS_CLIENT_SECRET
+  if (!clientId || !clientSecret) return { error: 'not_configured' as const }
+
+  const tokenResponse = await fetch(GOOGLE_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
+    }),
+  })
+
+  if (!tokenResponse.ok) {
+    const errorData = await tokenResponse.json()
+    console.error('Token exchange failed:', errorData)
+    return { error: 'token_exchange_failed' as const }
+  }
+
+  const tokens = await tokenResponse.json()
+  if (!tokens.access_token || !tokens.refresh_token) {
+    return { error: 'missing_tokens' as const }
+  }
+  return { tokens }
+}
+
 export async function GET(request: NextRequest) {
   try {
-    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
     } catch {
-      // Redirect to login with error
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
       return NextResponse.redirect(`${baseUrl}/settings?error=unauthorized`)
     }
@@ -26,74 +54,29 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code')
     const error = searchParams.get('error')
     const state = searchParams.get('state')
-
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
-    // Validate OAuth state parameter (CSRF protection)
     const cookieStore = await cookies()
     const storedState = cookieStore.get('oauth_state')?.value
-
-    // Clear the state cookie regardless of outcome
     cookieStore.set('oauth_state', '', { maxAge: 0, path: '/api/analytics/auth/callback' })
 
     if (!state || !storedState || state !== storedState) {
-      console.error('OAuth state mismatch:', { received: !!state, stored: !!storedState })
       return NextResponse.redirect(`${baseUrl}/settings?error=invalid_state`)
     }
-
-    // Check for error from Google
     if (error) {
-      console.error('OAuth error from Google:', error)
       return NextResponse.redirect(
         `${baseUrl}/settings?error=oauth_denied&message=${encodeURIComponent(error)}`
       )
     }
+    if (!code) return NextResponse.redirect(`${baseUrl}/settings?error=missing_code`)
 
-    // Validate code
-    if (!code) {
-      return NextResponse.redirect(`${baseUrl}/settings?error=missing_code`)
-    }
-
-    // Exchange code for tokens
-    const clientId = process.env.GOOGLE_ANALYTICS_CLIENT_ID
-    const clientSecret = process.env.GOOGLE_ANALYTICS_CLIENT_SECRET
     const redirectUri = `${baseUrl}/api/analytics/auth/callback`
-
-    if (!clientId || !clientSecret) {
-      return NextResponse.redirect(`${baseUrl}/settings?error=not_configured`)
+    const result = await exchangeGoogleToken(code, redirectUri)
+    if ('error' in result) {
+      return NextResponse.redirect(`${baseUrl}/settings?error=${result.error}`)
     }
 
-    const tokenResponse = await fetch(GOOGLE_TOKEN_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-      }),
-    })
-
-    if (!tokenResponse.ok) {
-      const errorData = await tokenResponse.json()
-      console.error('Token exchange failed:', errorData)
-      return NextResponse.redirect(`${baseUrl}/settings?error=token_exchange_failed`)
-    }
-
-    const tokens = await tokenResponse.json()
-    const { access_token, refresh_token, expires_in, scope } = tokens
-
-    if (!access_token || !refresh_token) {
-      return NextResponse.redirect(`${baseUrl}/settings?error=missing_tokens`)
-    }
-
-    // Calculate token expiration
-    const tokenExpiresAt = new Date(Date.now() + expires_in * 1000).toISOString()
-
-    // Store tokens directly in the database instead of passing via URL
+    const { access_token, refresh_token, expires_in, scope } = result.tokens
     const supabase = await createClient()
     const { data: pendingConnection, error: dbError } = await supabase
       .from('analytics_connections')
@@ -103,7 +86,7 @@ export async function GET(request: NextRequest) {
         property_id: 'pending',
         access_token,
         refresh_token,
-        token_expires_at: tokenExpiresAt,
+        token_expires_at: new Date(Date.now() + expires_in * 1000).toISOString(),
         scopes: scope ? scope.split(' ') : [],
         sync_status: 'pending_property_selection',
       })
@@ -115,7 +98,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/settings?error=callback_failed`)
     }
 
-    // Redirect with only a success flag and connection ID (no sensitive data in URL)
     return NextResponse.redirect(
       `${baseUrl}/settings?analytics_auth=success&connection_id=${pendingConnection.id}`
     )

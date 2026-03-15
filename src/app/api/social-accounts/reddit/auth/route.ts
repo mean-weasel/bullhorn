@@ -16,7 +16,6 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Enforce per-provider social account limit
     const limitCheck = await enforceSocialAccountLimit(userId, 'reddit')
     if (!limitCheck.allowed) {
       return NextResponse.json(
@@ -37,7 +36,6 @@ export async function GET() {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const redirectUri = `${baseUrl}/api/social-accounts/reddit/callback`
-
     const state = crypto.randomUUID()
 
     const cookieStore = await cookies()
@@ -58,8 +56,9 @@ export async function GET() {
       duration: 'permanent',
     })
 
-    const authUrl = `https://www.reddit.com/api/v1/authorize?${params.toString()}`
-    return NextResponse.json({ url: authUrl })
+    return NextResponse.json({
+      url: `https://www.reddit.com/api/v1/authorize?${params.toString()}`,
+    })
   } catch (error) {
     console.error('Error generating Reddit OAuth URL:', error)
     return NextResponse.json({ error: 'Failed to generate OAuth URL' }, { status: 500 })

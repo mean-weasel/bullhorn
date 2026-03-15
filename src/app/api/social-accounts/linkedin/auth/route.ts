@@ -17,7 +17,6 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Enforce per-provider social account limit
     const limitCheck = await enforceSocialAccountLimit(userId, 'linkedin')
     if (!limitCheck.allowed) {
       return NextResponse.json(

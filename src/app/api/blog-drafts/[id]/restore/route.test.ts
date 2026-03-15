@@ -123,7 +123,9 @@ describe('POST /api/blog-drafts/[id]/restore', () => {
     const body = await res.json()
     expect(body.error).toBe('Blog draft is not archived')
   })
+})
 
+describe('POST /api/blog-drafts/[id]/restore - continued', () => {
   it('restores an archived blog draft successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

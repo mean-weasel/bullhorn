@@ -128,7 +128,9 @@ describe('GET /api/cron/refresh-tokens', () => {
     expect(body.refreshed).toBe(0)
     expect(mockRefreshTokenIfNeeded).not.toHaveBeenCalled()
   })
+})
 
+describe('GET /api/cron/refresh-tokens - continued', () => {
   it('handles refresh failure gracefully without blocking others', async () => {
     const failing = makeAccount({
       id: 'fail-1',
