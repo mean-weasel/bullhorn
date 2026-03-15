@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { transformPostFromDb, type DbPost } from '@/lib/utils'
 import { requireAuth, validateScopes } from '@/lib/auth'
 import { publishPost } from '@/lib/publishers'
-import { PLATFORM_CHAR_LIMITS, getTextFromContent } from '@/lib/posts'
+import { CHAR_LIMITS, getTextFromContent } from '@/lib/posts'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,7 +48,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     // 2b. Validate content does not exceed platform character limit
     const transformedPost = transformPostFromDb(postRow as DbPost)
     const textContent = getTextFromContent(transformedPost.content, transformedPost.platform)
-    const charLimit = PLATFORM_CHAR_LIMITS[transformedPost.platform]
+    const charLimit = CHAR_LIMITS[transformedPost.platform]
     if (textContent.length > charLimit) {
       return NextResponse.json(
         {
