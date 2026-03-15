@@ -211,11 +211,54 @@ export async function DELETE(
     const { id } = await params
     const supabase = await createClient()
 
+    // Fetch the post before deleting to extract media URLs for cleanup
+    const { data: post } = await supabase
+      .from('posts')
+      .select('content')
+      .eq('id', id)
+      .eq('user_id', userId)
+      .single()
+
     const { error } = await supabase.from('posts').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+
+    // Clean up media files referenced by the deleted post (best-effort)
+    if (post?.content) {
+      try {
+        const content = post.content as Record<string, unknown>
+        const mediaUrls: string[] = []
+        if (Array.isArray(content.mediaUrls)) mediaUrls.push(...content.mediaUrls)
+        if (typeof content.mediaUrl === 'string' && content.mediaUrl)
+          mediaUrls.push(content.mediaUrl)
+
+        for (const url of mediaUrls) {
+          // Extract filename from /api/media/{filename}
+          const match = url.match(/\/api\/media\/([^/?#]+)/)
+          if (!match) continue
+          const filename = match[1]
+          const storagePath = `${userId}/${filename}`
+
+          const { data: files } = await supabase.storage.from('media').list(userId, {
+            search: filename,
+          })
+          const fileSize = files?.find((f) => f.name === filename)?.metadata?.size ?? 0
+
+          await supabase.storage.from('media').remove([storagePath])
+
+          if (fileSize > 0) {
+            await supabase.rpc('decrement_storage_used', {
+              user_id_param: userId,
+              bytes_param: fileSize,
+            })
+          }
+        }
+      } catch (cleanupErr) {
+        console.error('Media cleanup error (non-blocking):', cleanupErr)
+      }
     }
 
     return NextResponse.json({ success: true })
