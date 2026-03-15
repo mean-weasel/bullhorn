@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { X, FileText, FolderOpen, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function WelcomeModal() {
   const [visible, setVisible] = useState(() => {
     if (typeof window === 'undefined') return false

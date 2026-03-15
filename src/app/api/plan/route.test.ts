@@ -125,7 +125,7 @@ beforeEach(() => {
 // GET /api/plan
 // ---------------------------------------------------------------------------
 
-describe('GET /api/plan', () => {
+describe('GET /api/plan (1/5)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const res = await GET()
@@ -162,7 +162,9 @@ describe('GET /api/plan', () => {
       limitBytes: PLAN_LIMITS.free.storageBytes,
     })
   })
+})
 
+describe('GET /api/plan (2/5)', () => {
   it('returns correct limits for pro plan', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     setupMocks({
@@ -188,7 +190,9 @@ describe('GET /api/plan', () => {
     expect(body.limits.apiKeys.limit).toBe(PLAN_LIMITS.pro.apiKeys)
     expect(body.storage.limitBytes).toBe(PLAN_LIMITS.pro.storageBytes)
   })
+})
 
+describe('GET /api/plan (3/5)', () => {
   it('returns correct response structure with all expected fields', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     setupMocks({
@@ -228,7 +232,7 @@ describe('GET /api/plan', () => {
   })
 })
 
-describe('GET /api/plan - continued', () => {
+describe('GET /api/plan (4/5)', () => {
   it('defaults to free plan when profile has no plan field', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     setupMocks({
@@ -270,7 +274,9 @@ describe('GET /api/plan - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Internal server error')
   })
+})
 
+describe('GET /api/plan (5/5)', () => {
   it('queries the correct tables with user_id filter', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-42' })
     setupMocks({

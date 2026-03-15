@@ -68,53 +68,12 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
  * @param onProgress Optional callback for upload progress
  * @returns Upload result with filename and URL on success
  */
-function uploadWithProgress(
-  formData: FormData,
-  onProgress: (progress: UploadProgress) => void
-): Promise<UploadResult> {
-  return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest()
-
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        onProgress({
-          loaded: event.loaded,
-          total: event.total,
-          percentage: Math.round((event.loaded / event.total) * 100),
-        })
-      }
-    })
-
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          resolve(JSON.parse(xhr.responseText))
-        } catch {
-          resolve({ success: false, error: 'Invalid server response' })
-        }
-      } else {
-        try {
-          const error = JSON.parse(xhr.responseText)
-          resolve({ success: false, error: error.error || 'Upload failed' })
-        } catch {
-          resolve({ success: false, error: `Upload failed (${xhr.status})` })
-        }
-      }
-    })
-
-    xhr.addEventListener('error', () => {
-      resolve({ success: false, error: 'Network error during upload' })
-    })
-
-    xhr.open('POST', `${API_BASE}/media/upload`)
-    xhr.send(formData)
-  })
-}
-
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export async function uploadMedia(
   file: File,
   onProgress?: (progress: UploadProgress) => void
 ): Promise<UploadResult> {
+  // Validate file first
   const validation = validateFile(file)
   if (!validation.valid) {
     return { success: false, error: validation.error }
@@ -124,10 +83,49 @@ export async function uploadMedia(
   formData.append('file', file)
 
   try {
+    // Use XMLHttpRequest for progress tracking
     if (onProgress) {
-      return uploadWithProgress(formData, onProgress)
+      return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest()
+
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            onProgress({
+              loaded: event.loaded,
+              total: event.total,
+              percentage: Math.round((event.loaded / event.total) * 100),
+            })
+          }
+        })
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const result = JSON.parse(xhr.responseText)
+              resolve(result)
+            } catch {
+              resolve({ success: false, error: 'Invalid server response' })
+            }
+          } else {
+            try {
+              const error = JSON.parse(xhr.responseText)
+              resolve({ success: false, error: error.error || 'Upload failed' })
+            } catch {
+              resolve({ success: false, error: `Upload failed (${xhr.status})` })
+            }
+          }
+        })
+
+        xhr.addEventListener('error', () => {
+          resolve({ success: false, error: 'Network error during upload' })
+        })
+
+        xhr.open('POST', `${API_BASE}/media/upload`)
+        xhr.send(formData)
+      })
     }
 
+    // Simple fetch for non-progress uploads
     const response = await fetch(`${API_BASE}/media/upload`, {
       method: 'POST',
       body: formData,

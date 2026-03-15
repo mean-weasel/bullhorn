@@ -6,25 +6,7 @@ import { PLAN_LIMITS, type PlanType } from '@/lib/limits'
 // Ensure this route is always dynamic (never cached by Next.js)
 export const dynamic = 'force-dynamic'
 
-async function fetchResourceCounts(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string
-) {
-  return Promise.all([
-    supabase.from('user_profiles').select('plan, storage_used_bytes').eq('id', userId).single(),
-    supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-    supabase.from('campaigns').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-    supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-    supabase.from('blog_drafts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-    supabase.from('launch_posts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-    supabase
-      .from('api_keys')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .is('revoked_at', null),
-  ])
-}
-
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export async function GET() {
   try {
     let userId: string
@@ -36,10 +18,34 @@ export async function GET() {
     }
 
     const supabase = await createClient()
+
+    // Fetch profile and all resource counts in parallel
     const [profileResult, posts, campaigns, projects, blogDrafts, launchPosts, apiKeys] =
-      await fetchResourceCounts(supabase, userId)
+      await Promise.all([
+        supabase.from('user_profiles').select('plan, storage_used_bytes').eq('id', userId).single(),
+        supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase
+          .from('campaigns')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+        supabase
+          .from('blog_drafts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        supabase
+          .from('launch_posts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId),
+        supabase
+          .from('api_keys')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .is('revoked_at', null),
+      ])
 
     const plan = (profileResult.data?.plan as PlanType) || 'free'
+    const storageUsedBytes = profileResult.data?.storage_used_bytes || 0
     const planLimits = PLAN_LIMITS[plan]
 
     return NextResponse.json({
@@ -53,7 +59,7 @@ export async function GET() {
         apiKeys: { current: apiKeys.count ?? 0, limit: planLimits.apiKeys },
       },
       storage: {
-        usedBytes: profileResult.data?.storage_used_bytes || 0,
+        usedBytes: storageUsedBytes,
         limitBytes: planLimits.storageBytes,
       },
     })

@@ -96,50 +96,7 @@ async function reminderExists(
   return (data?.length ?? 0) > 0
 }
 
-async function processSubscription(
-  supabase: ReturnType<typeof createServiceClient>,
-  row: DbEventSubscription,
-  now: Date
-) {
-  let nudged = 0
-  let draftsCreated = 0
-  const event = row.community_events
-  if (!event || !event.is_active) return { nudged, draftsCreated }
-
-  const next = getNextOccurrence(event.recurrence_rule, now)
-  if (!next) return { nudged, draftsCreated }
-
-  const hoursUntil = (next.getTime() - now.getTime()) / (1000 * 60 * 60)
-  if (hoursUntil > row.notify_hours_before || hoursUntil < 0) return { nudged, draftsCreated }
-
-  const alreadyNudged = await reminderExists(supabase, row.user_id, event.id, next)
-  if (alreadyNudged) return { nudged, draftsCreated }
-
-  const reminderOk = await createReminder(
-    supabase,
-    row.user_id,
-    event.name,
-    event.target,
-    event.id,
-    next
-  )
-  if (reminderOk) nudged++
-
-  if (row.auto_create_draft) {
-    const draftOk = await createDraftPost(
-      supabase,
-      row.user_id,
-      event.platform,
-      event.name,
-      event.target,
-      next
-    )
-    if (draftOk) draftsCreated++
-  }
-
-  return { nudged, draftsCreated }
-}
-
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request)
   if (authError) return authError
@@ -167,9 +124,42 @@ export async function GET(request: NextRequest) {
 
     for (const row of subs as DbEventSubscription[]) {
       processed++
-      const result = await processSubscription(supabase, row, now)
-      nudged += result.nudged
-      draftsCreated += result.draftsCreated
+      const event = row.community_events
+      if (!event || !event.is_active) continue
+
+      const next = getNextOccurrence(event.recurrence_rule, now)
+      if (!next) continue
+
+      const hoursUntil = (next.getTime() - now.getTime()) / (1000 * 60 * 60)
+      if (hoursUntil > row.notify_hours_before || hoursUntil < 0) continue
+
+      // Avoid duplicate reminders for the same occurrence
+      const alreadyNudged = await reminderExists(supabase, row.user_id, event.id, next)
+      if (alreadyNudged) continue
+
+      // Create reminder
+      const reminderOk = await createReminder(
+        supabase,
+        row.user_id,
+        event.name,
+        event.target,
+        event.id,
+        next
+      )
+      if (reminderOk) nudged++
+
+      // Create draft if enabled
+      if (row.auto_create_draft) {
+        const draftOk = await createDraftPost(
+          supabase,
+          row.user_id,
+          event.platform,
+          event.name,
+          event.target,
+          next
+        )
+        if (draftOk) draftsCreated++
+      }
     }
 
     return NextResponse.json({ processed, nudged, draftsCreated })

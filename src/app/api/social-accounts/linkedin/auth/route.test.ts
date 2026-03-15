@@ -20,6 +20,7 @@ vi.mock('next/headers', () => ({
 
 import { GET } from './route'
 
+// eslint-disable-next-line max-lines-per-function
 describe('GET /api/social-accounts/linkedin/auth', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -72,21 +73,6 @@ describe('GET /api/social-accounts/linkedin/auth', () => {
     expect(body.url).toContain('client_id=test-client-id')
     expect(body.url).toContain('response_type=code')
     expect(body.url).toContain('scope=')
-  })
-})
-
-describe('GET /api/social-accounts/linkedin/auth - continued', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockRequireAuth.mockResolvedValue({ userId: 'user-123' })
-    mockEnforceSocialAccountLimit.mockResolvedValue({
-      allowed: true,
-      current: 0,
-      limit: 1,
-      plan: 'free',
-    })
-    vi.stubEnv('LINKEDIN_CLIENT_ID', 'test-client-id')
-    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://localhost:3000')
   })
 
   it('sets linkedin_oauth_state cookie with state', async () => {

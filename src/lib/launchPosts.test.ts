@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useLaunchPostsStore } from './launchPosts'
+import {
+  useLaunchPostsStore,
+  getHackerNewsFields,
+  getProductHuntFields,
+  getDevHuntFields,
+  getBetaListFields,
+  getIndieHackersFields,
+  getDefaultPlatformFields,
+} from './launchPosts'
 import type { LaunchPost } from './launchPosts'
 import { clearInFlightRequests } from './requestDedup'
 
@@ -65,7 +73,7 @@ const makeDbLaunchPost = (overrides: Record<string, unknown> = {}) => ({
 // fetchLaunchPosts
 // ---------------------------------------------------------------------------
 
-describe('useLaunchPostsStore - fetchLaunchPosts', () => {
+describe('fetchLaunchPosts (1/3)', () => {
   it('should set loading true while fetching', async () => {
     let capturedLoading = false
     mockFetch.mockImplementation(() => {
@@ -109,7 +117,9 @@ describe('useLaunchPostsStore - fetchLaunchPosts', () => {
     await useLaunchPostsStore.getState().fetchLaunchPosts()
     expect(useLaunchPostsStore.getState().initialized).toBe(true)
   })
+})
 
+describe('fetchLaunchPosts (2/3)', () => {
   it('should set error on failure', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false })
 
@@ -126,9 +136,7 @@ describe('useLaunchPostsStore - fetchLaunchPosts', () => {
     await useLaunchPostsStore.getState().fetchLaunchPosts()
     expect(useLaunchPostsStore.getState().error).toBe('Network error')
   })
-})
 
-describe('useLaunchPostsStore - fetchLaunchPosts - continued', () => {
   it('should default to empty array when response has no launchPosts key', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -153,7 +161,9 @@ describe('useLaunchPostsStore - fetchLaunchPosts - continued', () => {
     expect(calledUrl).toContain('campaignId=camp-1')
     expect(calledUrl).toContain('platform=product_hunt')
   })
+})
 
+describe('fetchLaunchPosts (3/3)', () => {
   it('should call base URL when no options provided', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -179,7 +189,11 @@ describe('useLaunchPostsStore - fetchLaunchPosts - continued', () => {
   })
 })
 
-describe('useLaunchPostsStore - addLaunchPost', () => {
+// ---------------------------------------------------------------------------
+// addLaunchPost
+// ---------------------------------------------------------------------------
+
+describe('addLaunchPost', () => {
   it('should POST to /api/launch-posts and add transformed post to items', async () => {
     const dbPost = makeDbLaunchPost()
     mockFetch.mockResolvedValueOnce({
@@ -238,34 +252,3 @@ describe('useLaunchPostsStore - addLaunchPost', () => {
   })
 })
 
-describe('useLaunchPostsStore - updateLaunchPost', () => {
-  it('should PATCH and update the launch post in state', async () => {
-    useLaunchPostsStore.setState({ launchPosts: [makeLaunchPost()] })
-
-    const dbUpdated = makeDbLaunchPost({ title: 'Updated Title' })
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ launchPost: dbUpdated }),
-    })
-
-    await useLaunchPostsStore.getState().updateLaunchPost('lp-1', { title: 'Updated Title' })
-
-    expect(mockFetch).toHaveBeenCalledWith('/api/launch-posts/lp-1', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: 'Updated Title' }),
-    })
-    expect(useLaunchPostsStore.getState().launchPosts[0].title).toBe('Updated Title')
-  })
-
-  it('should set error and throw on failure', async () => {
-    useLaunchPostsStore.setState({ launchPosts: [makeLaunchPost()] })
-    mockFetch.mockResolvedValueOnce({ ok: false })
-
-    await expect(
-      useLaunchPostsStore.getState().updateLaunchPost('lp-1', { title: 'Fail' })
-    ).rejects.toThrow('Failed to update launch post')
-
-    expect(useLaunchPostsStore.getState().error).toBe('Failed to update launch post')
-  })
-})

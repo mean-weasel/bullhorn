@@ -25,6 +25,7 @@ const UPCOMING_FEATURES = [
   'Higher limits on all resources',
 ]
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function UpgradePromptModal({
   open,
   onDismiss,

@@ -52,7 +52,7 @@ beforeEach(() => {
   vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service-key')
 })
 
-describe('GET /api/cron/refresh-tokens', () => {
+describe('GET /api/cron/refresh-tokens (1/5)', () => {
   it('returns 401 when cron secret does not match', async () => {
     mockSelect.mockResolvedValue({ data: [], error: null })
     const req = createRequest('/api/cron/refresh-tokens', {
@@ -87,7 +87,9 @@ describe('GET /api/cron/refresh-tokens', () => {
     expect(body.skipped).toBe(0)
     expect(mockRefreshTokenIfNeeded).toHaveBeenCalledWith(account)
   })
+})
 
+describe('GET /api/cron/refresh-tokens (2/5)', () => {
   it('refreshes a Reddit token expiring within 30 minutes', async () => {
     const account = makeAccount({
       id: 'reddit-1',
@@ -130,7 +132,7 @@ describe('GET /api/cron/refresh-tokens', () => {
   })
 })
 
-describe('GET /api/cron/refresh-tokens - continued', () => {
+describe('GET /api/cron/refresh-tokens (3/5)', () => {
   it('handles refresh failure gracefully without blocking others', async () => {
     const failing = makeAccount({
       id: 'fail-1',
@@ -162,7 +164,9 @@ describe('GET /api/cron/refresh-tokens - continued', () => {
     expect(body.failed).toBe(1)
     expect(body.skipped).toBe(0)
   })
+})
 
+describe('GET /api/cron/refresh-tokens (4/5)', () => {
   it('returns correct counts with mixed outcomes', async () => {
     const twitterSoon = makeAccount({
       id: 'tw-1',
@@ -199,7 +203,9 @@ describe('GET /api/cron/refresh-tokens - continued', () => {
     expect(body.skipped).toBe(1)
     expect(body.failed).toBe(0)
   })
+})
 
+describe('GET /api/cron/refresh-tokens (5/5)', () => {
   it('skips accounts without refresh_token (filtered by DB)', async () => {
     // DB query filters out null refresh_tokens, so empty result
     mockSelect.mockResolvedValue({ data: [], error: null })

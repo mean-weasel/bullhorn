@@ -6,13 +6,8 @@ import crypto from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
-function generatePkce() {
-  const codeVerifier = crypto.randomBytes(32).toString('base64url')
-  const codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64url')
-  return { codeVerifier, codeChallenge }
-}
-
 // GET /api/social-accounts/twitter/auth - Generate Twitter OAuth 2.0 URL with PKCE
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export async function GET() {
   try {
     let userId: string
@@ -23,6 +18,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Enforce per-provider social account limit
     const limitCheck = await enforceSocialAccountLimit(userId, 'twitter')
     if (!limitCheck.allowed) {
       return NextResponse.json(
@@ -43,9 +39,15 @@ export async function GET() {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const redirectUri = `${baseUrl}/api/social-accounts/twitter/callback`
-    const { codeVerifier, codeChallenge } = generatePkce()
+
+    // Generate PKCE code_verifier and code_challenge
+    const codeVerifier = crypto.randomBytes(32).toString('base64url')
+    const codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64url')
+
+    // Generate state for CSRF protection
     const state = crypto.randomUUID()
 
+    // Store state + code_verifier in HTTP-only cookie (5 min expiry)
     const cookieStore = await cookies()
     cookieStore.set('twitter_oauth_state', JSON.stringify({ state, codeVerifier }), {
       httpOnly: true,
@@ -55,6 +57,7 @@ export async function GET() {
       path: '/api/social-accounts/twitter/callback',
     })
 
+    // Build authorization URL (use x.com, NOT twitter.com)
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: clientId,
@@ -65,7 +68,9 @@ export async function GET() {
       code_challenge_method: 'S256',
     })
 
-    return NextResponse.json({ url: `https://x.com/i/oauth2/authorize?${params.toString()}` })
+    const authUrl = `https://x.com/i/oauth2/authorize?${params.toString()}`
+
+    return NextResponse.json({ url: authUrl })
   } catch (error) {
     console.error('Error generating Twitter OAuth URL:', error)
     return NextResponse.json({ error: 'Failed to generate OAuth URL' }, { status: 500 })

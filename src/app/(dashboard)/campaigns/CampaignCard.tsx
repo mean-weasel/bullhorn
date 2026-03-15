@@ -29,6 +29,7 @@ const STATUS_CONFIG: Record<
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function CampaignCard({
   campaign,
   index,

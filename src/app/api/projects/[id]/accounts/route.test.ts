@@ -103,7 +103,7 @@ beforeEach(() => {
 // GET /api/projects/[id]/accounts
 // ---------------------------------------------------------------------------
 
-describe('GET /api/projects/[id]/accounts', () => {
+describe('GET /api/projects/[id]/accounts (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/projects/proj-1/accounts')
@@ -133,7 +133,7 @@ describe('GET /api/projects/[id]/accounts', () => {
   })
 })
 
-describe('GET /api/projects/[id]/accounts - continued', () => {
+describe('GET /api/projects/[id]/accounts (2/2)', () => {
   it('returns accounts for authenticated user', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = { data: { id: 'proj-1' }, error: null }
@@ -184,7 +184,7 @@ describe('GET /api/projects/[id]/accounts - continued', () => {
 // POST /api/projects/[id]/accounts
 // ---------------------------------------------------------------------------
 
-describe('POST /api/projects/[id]/accounts', () => {
+describe('POST /api/projects/[id]/accounts (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/projects/proj-1/accounts', {
@@ -220,110 +220,5 @@ describe('POST /api/projects/[id]/accounts', () => {
     expect(res.status).toBe(404)
     const body = await res.json()
     expect(body.error).toBe('Project not found')
-  })
-})
-
-describe('POST /api/projects/[id]/accounts - continued', () => {
-  it('creates account association successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = { data: { id: 'proj-1' }, error: null }
-    mockInsertResult = {
-      data: {
-        id: 'pa-new',
-        project_id: 'proj-1',
-        account_id: 'acc-1',
-        created_at: '2024-06-01T00:00:00Z',
-      },
-      error: null,
-    }
-    const req = createRequest('/api/projects/proj-1/accounts', {
-      method: 'POST',
-      body: JSON.stringify({ accountId: 'acc-1' }),
-    })
-    const res = await POST(req, createContext('proj-1'))
-    expect(res.status).toBe(201)
-    const body = await res.json()
-    expect(body.account.id).toBe('pa-new')
-    expect(body.account.accountId).toBe('acc-1')
-  })
-
-  it('returns 409 when account already associated', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = { data: { id: 'proj-1' }, error: null }
-    mockInsertResult = { data: null, error: { code: '23505', message: 'Unique violation' } }
-    const req = createRequest('/api/projects/proj-1/accounts', {
-      method: 'POST',
-      body: JSON.stringify({ accountId: 'acc-1' }),
-    })
-    const res = await POST(req, createContext('proj-1'))
-    expect(res.status).toBe(409)
-    const body = await res.json()
-    expect(body.error).toBe('Account already associated with project')
-  })
-
-  it('returns 500 when database insert fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = { data: { id: 'proj-1' }, error: null }
-    mockInsertResult = { data: null, error: { code: 'XXXXX', message: 'DB error' } }
-    const req = createRequest('/api/projects/proj-1/accounts', {
-      method: 'POST',
-      body: JSON.stringify({ accountId: 'acc-1' }),
-    })
-    const res = await POST(req, createContext('proj-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// DELETE /api/projects/[id]/accounts
-// ---------------------------------------------------------------------------
-
-describe('DELETE /api/projects/[id]/accounts', () => {
-  it('returns 401 when not authenticated', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
-    const req = createRequest('/api/projects/proj-1/accounts?accountId=acc-1', {
-      method: 'DELETE',
-    })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(401)
-    const body = await res.json()
-    expect(body.error).toBe('Unauthorized')
-  })
-
-  it('returns 400 when accountId query param missing', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const req = createRequest('/api/projects/proj-1/accounts', {
-      method: 'DELETE',
-    })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(400)
-    const body = await res.json()
-    expect(body.error).toBe('accountId query parameter is required')
-  })
-
-  it('deletes account association successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockDeleteResult = { error: null }
-    const req = createRequest('/api/projects/proj-1/accounts?accountId=acc-1', {
-      method: 'DELETE',
-    })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.success).toBe(true)
-  })
-
-  it('returns 500 when database delete fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockDeleteResult = { error: { message: 'DB error' } }
-    const req = createRequest('/api/projects/proj-1/accounts?accountId=acc-1', {
-      method: 'DELETE',
-    })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
   })
 })

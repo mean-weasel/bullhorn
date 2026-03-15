@@ -22,6 +22,7 @@ interface MediaUploadProps {
   className?: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function MediaUpload({
   platform,
   maxFiles,

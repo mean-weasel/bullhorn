@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import PasswordStrength from '@/components/ui/PasswordStrength'
 
+// eslint-disable-next-line max-lines-per-function
 export default function ResetPasswordPage() {
   const router = useRouter()
   const supabase = createClient()

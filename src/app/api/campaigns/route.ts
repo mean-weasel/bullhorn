@@ -18,14 +18,19 @@ const createCampaignSchema = z.object({
 // Supports filtering: ?status=active&projectId=uuid (or projectId=unassigned for null)
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['campaigns:read'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['campaigns:read'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -45,6 +50,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status)
     }
 
+    // Filter by project
     if (projectId === 'unassigned') {
       query = query.is('project_id', null)
     } else if (projectId) {
@@ -58,6 +64,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
+    // Transform campaigns from snake_case to camelCase
     const campaigns = (data || []).map((campaign) =>
       transformCampaignFromDb(campaign as DbCampaign)
     )
@@ -69,19 +76,26 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/campaigns - Create campaign
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication - throws if not authenticated
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['campaigns:write'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['campaigns:write'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Enforce plan limit
     const limitCheck = await enforceResourceLimit(userId, 'campaigns')
     if (!limitCheck.allowed) {
       return NextResponse.json(
@@ -98,7 +112,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = createCampaignSchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = createCampaignSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -107,7 +122,9 @@ export async function POST(request: NextRequest) {
     }
 
     const name = parsed.data.name.trim()
-    if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    }
 
     const { data, error } = await supabase
       .from('campaigns')
@@ -129,6 +146,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
+    // Transform campaign from snake_case to camelCase
     const campaign = transformCampaignFromDb(data as DbCampaign)
     return NextResponse.json({ campaign }, { status: 201 })
   } catch (error) {

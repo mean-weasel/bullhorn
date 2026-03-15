@@ -12,6 +12,7 @@ interface ImportResult {
   skipped: { posts: number; campaigns: number }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function DataManagementSection() {
   const [exportFormat, setExportFormat] = useState<ExportFormat>('json')
   const [exportType, setExportType] = useState<ExportType>('all')

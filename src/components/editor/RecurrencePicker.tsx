@@ -26,6 +26,7 @@ function ruleToPreset(rule: string | null): PresetKey {
   return 'custom'
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export default function RecurrencePicker({
   value,
   onChange,

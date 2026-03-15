@@ -9,6 +9,7 @@ import { PlanInitializer } from './components/PlanInitializer'
 import { AuthSyncProvider } from '@/components/ui/AuthSyncProvider'
 import { Toaster } from 'react-hot-toast'
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   let userEmail: string | undefined
   let userDisplayName: string | null | undefined

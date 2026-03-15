@@ -18,6 +18,7 @@ interface PushNotificationsSectionProps {
   onTestNotification: () => void
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function PushNotificationsSection({
   pushSupported,
   pushPermission,
@@ -97,6 +98,7 @@ export function PushNotificationsSection({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 function PushNotificationsEnabled({
   notificationsEnabled,
   pushLoading,
@@ -186,6 +188,7 @@ interface EmailNotificationsSectionProps {
   onRetry?: () => void
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function EmailNotificationsSection({
   emailPrefs,
   emailPrefsLoading,

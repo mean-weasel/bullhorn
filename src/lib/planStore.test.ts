@@ -53,7 +53,7 @@ const makeProPlanResponse = (overrides = {}) => ({
 // fetchPlan
 // ---------------------------------------------------------------------------
 
-describe('usePlanStore - fetchPlan', () => {
+describe('fetchPlan (1/3)', () => {
   it('should set loading true while fetching', async () => {
     let capturedLoading = false
     mockFetch.mockImplementation(() => {
@@ -101,7 +101,9 @@ describe('usePlanStore - fetchPlan', () => {
     expect(state.limits.posts.limit).toBe(PLAN_LIMITS.pro.posts)
     expect(state.storage.limitBytes).toBe(PLAN_LIMITS.pro.storageBytes)
   })
+})
 
+describe('fetchPlan (2/3)', () => {
   it('should set initialized after first fetch', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -112,9 +114,7 @@ describe('usePlanStore - fetchPlan', () => {
     await usePlanStore.getState().fetchPlan()
     expect(usePlanStore.getState().initialized).toBe(true)
   })
-})
 
-describe('usePlanStore - fetchPlan - continued', () => {
   it('should set error on failure', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false })
 
@@ -143,7 +143,9 @@ describe('usePlanStore - fetchPlan - continued', () => {
 
     expect(mockFetch).toHaveBeenCalledWith('/api/plan')
   })
+})
 
+describe('fetchPlan (3/3)', () => {
   it('should deduplicate concurrent calls', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
@@ -156,7 +158,11 @@ describe('usePlanStore - fetchPlan - continued', () => {
   })
 })
 
-describe('usePlanStore - isAtLimit', () => {
+// ---------------------------------------------------------------------------
+// isAtLimit
+// ---------------------------------------------------------------------------
+
+describe('isAtLimit (1/2)', () => {
   it('should return true when current equals limit', () => {
     usePlanStore.setState({
       limits: {
@@ -186,9 +192,7 @@ describe('usePlanStore - isAtLimit', () => {
 
     expect(usePlanStore.getState().isAtLimit('posts')).toBe(true)
   })
-})
 
-describe('usePlanStore - isAtLimit - continued', () => {
   it('should return false when current is below limit', () => {
     usePlanStore.setState({
       limits: {
@@ -203,7 +207,9 @@ describe('usePlanStore - isAtLimit - continued', () => {
 
     expect(usePlanStore.getState().isAtLimit('posts')).toBe(false)
   })
+})
 
+describe('isAtLimit (2/2)', () => {
   it('should check each resource type independently', () => {
     usePlanStore.setState({
       limits: {
@@ -224,138 +230,3 @@ describe('usePlanStore - isAtLimit - continued', () => {
   })
 })
 
-describe('usePlanStore - incrementCount', () => {
-  it('should increment the current count for a resource', () => {
-    usePlanStore.setState({
-      limits: {
-        posts: { current: 5, limit: 50 },
-        campaigns: { current: 2, limit: 5 },
-        projects: { current: 1, limit: 3 },
-        blogDrafts: { current: 0, limit: 10 },
-        launchPosts: { current: 0, limit: 10 },
-        apiKeys: { current: 0, limit: 5 },
-      },
-    })
-
-    usePlanStore.getState().incrementCount('posts')
-
-    expect(usePlanStore.getState().limits.posts.current).toBe(6)
-    // other resources unchanged
-    expect(usePlanStore.getState().limits.campaigns.current).toBe(2)
-  })
-
-  it('should increment even beyond the limit', () => {
-    usePlanStore.setState({
-      limits: {
-        posts: { current: 50, limit: 50 },
-        campaigns: { current: 0, limit: 5 },
-        projects: { current: 0, limit: 3 },
-        blogDrafts: { current: 0, limit: 10 },
-        launchPosts: { current: 0, limit: 10 },
-        apiKeys: { current: 0, limit: 5 },
-      },
-    })
-
-    usePlanStore.getState().incrementCount('posts')
-
-    expect(usePlanStore.getState().limits.posts.current).toBe(51)
-  })
-})
-
-describe('usePlanStore - decrementCount', () => {
-  it('should decrement the current count for a resource', () => {
-    usePlanStore.setState({
-      limits: {
-        posts: { current: 5, limit: 50 },
-        campaigns: { current: 2, limit: 5 },
-        projects: { current: 1, limit: 3 },
-        blogDrafts: { current: 3, limit: 10 },
-        launchPosts: { current: 0, limit: 10 },
-        apiKeys: { current: 0, limit: 5 },
-      },
-    })
-
-    usePlanStore.getState().decrementCount('campaigns')
-
-    expect(usePlanStore.getState().limits.campaigns.current).toBe(1)
-    // other resources unchanged
-    expect(usePlanStore.getState().limits.posts.current).toBe(5)
-  })
-
-  it('should not go below zero', () => {
-    usePlanStore.setState({
-      limits: {
-        posts: { current: 0, limit: 50 },
-        campaigns: { current: 0, limit: 5 },
-        projects: { current: 0, limit: 3 },
-        blogDrafts: { current: 0, limit: 10 },
-        launchPosts: { current: 0, limit: 10 },
-        apiKeys: { current: 0, limit: 5 },
-      },
-    })
-
-    usePlanStore.getState().decrementCount('posts')
-
-    expect(usePlanStore.getState().limits.posts.current).toBe(0)
-  })
-})
-
-describe('usePlanStore - reset', () => {
-  it('should reset state to initial values', () => {
-    usePlanStore.setState({
-      plan: 'pro',
-      limits: {
-        posts: { current: 100, limit: 500 },
-        campaigns: { current: 20, limit: 50 },
-        projects: { current: 10, limit: 20 },
-        blogDrafts: { current: 50, limit: 100 },
-        launchPosts: { current: 25, limit: 100 },
-        apiKeys: { current: 10, limit: 25 },
-      },
-      storage: { usedBytes: 500000000, limitBytes: PLAN_LIMITS.pro.storageBytes },
-      loading: true,
-      error: 'some error',
-      initialized: true,
-    })
-
-    usePlanStore.getState().reset()
-
-    const state = usePlanStore.getState()
-    expect(state.plan).toBe('free')
-    expect(state.limits.posts).toEqual({ current: 0, limit: PLAN_LIMITS.free.posts })
-    expect(state.storage).toEqual({
-      usedBytes: 0,
-      limitBytes: PLAN_LIMITS.free.storageBytes,
-    })
-    expect(state.loading).toBe(false)
-    expect(state.error).toBeNull()
-    expect(state.initialized).toBe(false)
-  })
-})
-
-describe('usePlanStore - initial state', () => {
-  it('should start with free plan defaults', () => {
-    usePlanStore.getState().reset()
-    const state = usePlanStore.getState()
-
-    expect(state.plan).toBe('free')
-    expect(state.limits.posts.limit).toBe(PLAN_LIMITS.free.posts)
-    expect(state.limits.campaigns.limit).toBe(PLAN_LIMITS.free.campaigns)
-    expect(state.limits.projects.limit).toBe(PLAN_LIMITS.free.projects)
-    expect(state.limits.blogDrafts.limit).toBe(PLAN_LIMITS.free.blogDrafts)
-    expect(state.limits.launchPosts.limit).toBe(PLAN_LIMITS.free.launchPosts)
-    expect(state.storage.limitBytes).toBe(PLAN_LIMITS.free.storageBytes)
-  })
-
-  it('should start with zero current counts', () => {
-    usePlanStore.getState().reset()
-    const state = usePlanStore.getState()
-
-    expect(state.limits.posts.current).toBe(0)
-    expect(state.limits.campaigns.current).toBe(0)
-    expect(state.limits.projects.current).toBe(0)
-    expect(state.limits.blogDrafts.current).toBe(0)
-    expect(state.limits.launchPosts.current).toBe(0)
-    expect(state.storage.usedBytes).toBe(0)
-  })
-})

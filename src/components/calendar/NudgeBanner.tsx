@@ -77,6 +77,7 @@ async function findUrgentNudge(
   return null
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function NudgeBanner({ className }: NudgeBannerProps) {
   const [nudge, setNudge] = useState<Nudge | null>(null)
   const [dismissed, setDismissed] = useState(false)

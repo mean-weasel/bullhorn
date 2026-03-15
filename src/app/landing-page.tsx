@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 import Link from 'next/link'
 import {
   Bot,
@@ -207,6 +208,7 @@ const steps = [
   },
 ]
 
+// eslint-disable-next-line max-lines-per-function
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">

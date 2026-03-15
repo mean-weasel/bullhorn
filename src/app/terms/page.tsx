@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: 'Bullhorn Terms of Service',
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function TermsPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">

@@ -16,25 +16,10 @@ const ALLOWED_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES]
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024 // 10MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024 // 100MB
 
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.webm']
-
-function validateMediaFile(file: File | null) {
-  if (!file) return 'No file provided'
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return 'Unsupported file type. Allowed: JPG, PNG, GIF, WebP, MP4, MOV, WebM'
-  }
-  const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type)
-  const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE
-  if (file.size > maxSize) {
-    return `File too large. Maximum size: ${maxSize / (1024 * 1024)}MB`
-  }
-  const ext = path.extname(file.name).toLowerCase()
-  if (!ALLOWED_EXTENSIONS.includes(ext)) return 'Invalid file extension'
-  return null
-}
-
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication for media uploads
     let userId: string
     try {
       const auth = await requireAuth()
@@ -52,12 +37,35 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
-    const validationError = validateMediaFile(file)
-    if (validationError) {
-      return NextResponse.json({ success: false, error: validationError }, { status: 400 })
+
+    if (!file) {
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 })
     }
 
-    const storageCheck = await enforceStorageLimit(userId, file!.size)
+    // Server-side file type validation
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Unsupported file type. Allowed: JPG, PNG, GIF, WebP, MP4, MOV, WebM',
+        },
+        { status: 400 }
+      )
+    }
+
+    // Server-side file size validation
+    const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type)
+    const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE
+    if (file.size > maxSize) {
+      const maxSizeMB = maxSize / (1024 * 1024)
+      return NextResponse.json(
+        { success: false, error: `File too large. Maximum size: ${maxSizeMB}MB` },
+        { status: 400 }
+      )
+    }
+
+    // Enforce storage limit
+    const storageCheck = await enforceStorageLimit(userId, file.size)
     if (!storageCheck.allowed) {
       const limitMB = Math.round(storageCheck.limitBytes / (1024 * 1024))
       return NextResponse.json(
@@ -66,24 +74,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const ext = path.extname(file!.name).toLowerCase()
+    // Generate unique filename and storage path
+    const ext = path.extname(file.name).toLowerCase()
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4', '.mov', '.webm']
+    if (!allowedExtensions.includes(ext)) {
+      return NextResponse.json({ success: false, error: 'Invalid file extension' }, { status: 400 })
+    }
     const filename = `${crypto.randomUUID()}${ext}`
     const storagePath = `${userId}/${filename}`
-    const buffer = Buffer.from(await file!.arrayBuffer())
+
+    // Convert file to buffer and upload to Supabase Storage
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
 
     const supabase = await createClient()
+
     const { error: uploadError } = await supabase.storage
       .from('media')
-      .upload(storagePath, buffer, { contentType: file!.type })
+      .upload(storagePath, buffer, { contentType: file.type })
 
     if (uploadError) {
       console.error('Supabase storage upload error:', uploadError)
       return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 })
     }
 
+    // Track storage usage — roll back upload if tracking fails
     const { error: rpcError } = await supabase.rpc('increment_storage_used', {
       user_id_param: userId,
-      bytes_param: file!.size,
+      bytes_param: file.size,
     })
 
     if (rpcError) {
@@ -95,7 +113,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ success: true, filename, url: `/api/media/${filename}` })
+    return NextResponse.json({
+      success: true,
+      filename,
+      url: `/api/media/${filename}`,
+    })
   } catch (error) {
     console.error('Error uploading file:', error)
     return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 })

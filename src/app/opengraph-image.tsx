@@ -5,6 +5,7 @@ export const alt = 'Bullhorn — Social Media Post Scheduler'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export default function Image() {
   return new ImageResponse(
     <div

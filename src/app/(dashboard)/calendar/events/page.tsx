@@ -5,6 +5,7 @@ import { Megaphone, Loader2 } from 'lucide-react'
 import { useCommunityEventsStore } from '@/lib/communityEvents'
 import { EventBrowser } from '@/components/calendar/EventBrowser'
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export default function CommunityEventsPage() {
   const events = useCommunityEventsStore((s) => s.events)
   const subscriptions = useCommunityEventsStore((s) => s.subscriptions)

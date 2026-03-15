@@ -73,7 +73,7 @@ beforeEach(() => {
 // GET /api/blog-drafts/[id]
 // ---------------------------------------------------------------------------
 
-describe('GET /api/blog-drafts/[id]', () => {
+describe('GET /api/blog-drafts/[id] (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/blog-drafts/draft-1')
@@ -111,7 +111,7 @@ describe('GET /api/blog-drafts/[id]', () => {
   })
 })
 
-describe('GET /api/blog-drafts/[id] - continued', () => {
+describe('GET /api/blog-drafts/[id] (2/2)', () => {
   it('returns 404 when draft not found (PGRST116)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -143,7 +143,7 @@ describe('GET /api/blog-drafts/[id] - continued', () => {
 // PATCH /api/blog-drafts/[id]
 // ---------------------------------------------------------------------------
 
-describe('PATCH /api/blog-drafts/[id]', () => {
+describe('PATCH /api/blog-drafts/[id] (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/blog-drafts/draft-1', {
@@ -181,7 +181,7 @@ describe('PATCH /api/blog-drafts/[id]', () => {
   })
 })
 
-describe('PATCH /api/blog-drafts/[id] - continued', () => {
+describe('PATCH /api/blog-drafts/[id] (2/4)', () => {
   it('returns 400 for invalid status transition', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // Current status is 'draft', trying to go to 'published' (not allowed)
@@ -198,7 +198,9 @@ describe('PATCH /api/blog-drafts/[id] - continued', () => {
     const body = await res.json()
     expect(body.error).toContain('Cannot transition from draft to published')
   })
+})
 
+describe('PATCH /api/blog-drafts/[id] (3/4)', () => {
   it('updates draft successfully with valid status transition', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // Current status is 'draft', going to 'scheduled' (allowed)
@@ -232,7 +234,9 @@ describe('PATCH /api/blog-drafts/[id] - continued', () => {
     const body = await res.json()
     expect(body.draft.status).toBe('scheduled')
   })
+})
 
+describe('PATCH /api/blog-drafts/[id] (4/4)', () => {
   it('returns 500 when update fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

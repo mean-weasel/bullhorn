@@ -15,12 +15,7 @@ const defaultProps = {
   options: mockOptions,
 }
 
-describe('IOSActionSheet', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    document.body.style.overflow = ''
-  })
-
+describe('IOSActionSheet (1/3)', () => {
   it('renders nothing when not open', () => {
     const { container } = render(<IOSActionSheet {...defaultProps} open={false} />)
     expect(container.firstChild).toBeNull()
@@ -68,7 +63,9 @@ describe('IOSActionSheet', () => {
     expect(screen.getByText('Dismiss')).toBeInTheDocument()
     expect(screen.queryByText('Cancel')).not.toBeInTheDocument()
   })
+})
 
+describe('IOSActionSheet (2/3)', () => {
   it('calls onClose when backdrop is clicked', () => {
     const onClose = vi.fn()
     const { container } = render(<IOSActionSheet {...defaultProps} onClose={onClose} />)
@@ -78,13 +75,6 @@ describe('IOSActionSheet', () => {
     fireEvent.click(outerWrapper)
 
     expect(onClose).toHaveBeenCalled()
-  })
-})
-
-describe('IOSActionSheet - continued', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    document.body.style.overflow = ''
   })
 
   it('does not call onClose when clicking inside the sheet content', () => {
@@ -119,7 +109,9 @@ describe('IOSActionSheet - continued', () => {
     render(<IOSActionSheet {...defaultProps} />)
     expect(document.body.style.overflow).toBe('hidden')
   })
+})
 
+describe('IOSActionSheet (3/3)', () => {
   it('restores body scroll when closed', () => {
     const { unmount } = render(<IOSActionSheet {...defaultProps} />)
     expect(document.body.style.overflow).toBe('hidden')

@@ -15,14 +15,138 @@ const clearTimer = (id: number | null) => {
  * and save status transitions.
  */
 
-describe('useAutoSave logic - enabled flag', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-  })
-  afterEach(() => {
-    vi.useRealTimers()
-  })
+beforeEach(() => {
+  vi.useFakeTimers()
+})
 
+afterEach(() => {
+  vi.useRealTimers()
+})
+
+describe('change detection (3/5)', () => {
+  it('transitions to error after all retries exhausted', async () => {
+    type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
+    let status: AutoSaveStatus = 'idle'
+    let retryCount = 0
+    const onSave = vi.fn().mockRejectedValue(new Error('Network error'))
+
+    const save = async () => {
+      status = 'saving'
+      try {
+        await onSave()
+        retryCount = 0
+        status = 'saved'
+        setTimeout(() => {
+          status = 'idle'
+        }, 5000)
+      } catch {
+        if (retryCount < 3) {
+          retryCount += 1
+          status = 'retrying'
+        } else {
+          status = 'error'
+        }
+      }
+    }
+
+    // Exhaust all 3 retries
+    await save() // retry 1
+    expect(status).toBe('retrying')
+    await save() // retry 2
+    expect(status).toBe('retrying')
+    await save() // retry 3
+    expect(status).toBe('retrying')
+
+    // 4th attempt — retries exhausted
+    await save()
+    expect(status).toBe('error')
+  })
+})
+
+describe('change detection (4/5)', () => {
+  it('does not reset to idle after error', async () => {
+    type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
+    let status: AutoSaveStatus = 'idle'
+    let retryCount = 3 // Already exhausted
+    const onSave = vi.fn().mockRejectedValue(new Error('fail'))
+
+    const save = async () => {
+      status = 'saving'
+      try {
+        await onSave()
+        retryCount = 0
+        status = 'saved'
+        setTimeout(() => {
+          status = 'idle'
+        }, 5000)
+      } catch {
+        if (retryCount < 3) {
+          retryCount += 1
+          status = 'retrying'
+        } else {
+          status = 'error'
+        }
+      }
+    }
+
+    await save()
+    expect(status).toBe('error')
+
+    // Even after 5 seconds, error status persists (no setTimeout was scheduled)
+    vi.advanceTimersByTime(5000)
+    expect(status).toBe('error')
+  })
+})
+
+describe('change detection (5/5)', () => {
+  it('resets retry counter on successful save', async () => {
+    type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
+    let status: AutoSaveStatus = 'idle'
+    let retryCount = 0
+    let callCount = 0
+    const onSave = vi.fn().mockImplementation(() => {
+      callCount++
+      // Fail first two times, succeed on third
+      if (callCount <= 2) {
+        return Promise.reject(new Error('fail'))
+      }
+      return Promise.resolve()
+    })
+
+    const save = async () => {
+      status = 'saving'
+      try {
+        await onSave()
+        retryCount = 0
+        status = 'saved'
+        setTimeout(() => {
+          status = 'idle'
+        }, 5000)
+      } catch {
+        if (retryCount < 3) {
+          retryCount += 1
+          status = 'retrying'
+        } else {
+          status = 'error'
+        }
+      }
+    }
+
+    await save() // fails, retry 1
+    expect(status).toBe('retrying')
+    expect(retryCount).toBe(1)
+
+    await save() // fails, retry 2
+    expect(status).toBe('retrying')
+    expect(retryCount).toBe(2)
+
+    await save() // succeeds
+    expect(status).toBe('saved')
+    expect(retryCount).toBe(0)
+  })
+})
+
+describe('enabled flag', () => {
   it('does not schedule save when enabled is false', () => {
     const onSave = vi.fn()
     const delay = 3000
@@ -61,14 +185,7 @@ describe('useAutoSave logic - enabled flag', () => {
   })
 })
 
-describe('useAutoSave logic - skipInitialChange', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-  })
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
+describe('skipInitialChange', () => {
   it('skips the first data change after mount when skipInitialChange is true', () => {
     const onSave = vi.fn()
     const delay = 3000

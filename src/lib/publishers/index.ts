@@ -34,29 +34,23 @@ const publishers: Record<Platform, Publisher> = {
  * @param post - The post to publish
  * @param accountId - The social_accounts row ID
  */
-function buildPublishResult(post: Post, result: PublishOutput): PublishResult {
-  return (
-    result.publishResult || {
-      success: false,
-      platform: post.platform,
-      error: result.error,
-      retryable: result.retryable,
-      retryCount: (post.publishResult?.retryCount || 0) + (result.success ? 0 : 1),
-      lastAttemptAt: new Date().toISOString(),
-    }
-  )
-}
-
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export async function publishPost(post: Post, accountId: string): Promise<PublishOutput> {
   const publisher = publishers[post.platform]
   if (!publisher) {
-    return { success: false, error: `Unsupported platform: ${post.platform}`, retryable: false }
+    return {
+      success: false,
+      error: `Unsupported platform: ${post.platform}`,
+      retryable: false,
+    }
   }
 
   try {
+    // 1. Get a valid access token (refreshes if needed)
     const accessToken = await getValidAccessToken(accountId)
-    const supabase = await createClient()
 
+    // 2. Fetch the account to get providerAccountId
+    const supabase = await createClient()
     const { data: account } = await supabase
       .from('social_accounts')
       .select('provider_account_id')
@@ -67,19 +61,30 @@ export async function publishPost(post: Post, accountId: string): Promise<Publis
       return { success: false, error: 'Social account not found', retryable: false }
     }
 
+    // 3. Call the platform publisher
     const result = await publisher({
       post,
       accessToken,
       providerAccountId: account.provider_account_id,
     })
 
-    const publishResult = buildPublishResult(post, result)
+    // 4. Update post status and publish_result in DB
     const newStatus = result.success ? 'published' : 'failed'
+    const publishResult: PublishResult = result.publishResult || {
+      success: false,
+      platform: post.platform,
+      error: result.error,
+      retryable: result.retryable,
+      retryCount: (post.publishResult?.retryCount || 0) + (result.success ? 0 : 1),
+      lastAttemptAt: new Date().toISOString(),
+    }
+
     await supabase
       .from('posts')
       .update({ status: newStatus, publish_result: publishResult })
       .eq('id', post.id)
 
+    // 5. Update account last_used_at on success
     if (result.success) {
       await supabase
         .from('social_accounts')
@@ -89,6 +94,10 @@ export async function publishPost(post: Post, accountId: string): Promise<Publis
 
     return result
   } catch (error) {
-    return { success: false, error: (error as Error).message, retryable: true }
+    return {
+      success: false,
+      error: (error as Error).message,
+      retryable: true,
+    }
   }
 }

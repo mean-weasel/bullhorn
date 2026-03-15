@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines-per-function -- inner arrow functions in JSX map() callbacks */
 
 import { format } from 'date-fns'
 import { Plus, X, ChevronDown, ChevronUp } from 'lucide-react'
@@ -24,6 +25,7 @@ interface RedditSettingsProps {
   onRemoveSubreddit: (subreddit: string) => void
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const RedditSettings = ({
   post,
   onPostChange,

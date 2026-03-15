@@ -105,46 +105,9 @@ export async function GET() {
   }
 }
 
-function buildNotifUpdates(data: z.infer<typeof updateSchema>) {
-  const updates: Record<string, boolean> = {}
-  if (data.emailPostPublished !== undefined) updates.email_post_published = data.emailPostPublished
-  if (data.emailPostFailed !== undefined) updates.email_post_failed = data.emailPostFailed
-  if (data.emailWeeklyDigest !== undefined) updates.email_weekly_digest = data.emailWeeklyDigest
-  if (data.emailCampaignReminder !== undefined) {
-    updates.email_campaign_reminder = data.emailCampaignReminder
-  }
-  if (data.pushEnabled !== undefined) updates.push_enabled = data.pushEnabled
-  return updates
-}
-
-async function upsertNotifPreferences(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  updates: Record<string, boolean>
-): Promise<{ preferences: NotificationPreferences } | { error: string }> {
-  const { data, error } = await supabase
-    .from('notification_preferences')
-    .update(updates)
-    .eq('user_id', userId)
-    .select()
-    .single()
-
-  if (error && error.code === 'PGRST116') {
-    const { data: inserted, error: insertError } = await supabase
-      .from('notification_preferences')
-      .insert({ user_id: userId, ...updates })
-      .select()
-      .single()
-    if (insertError) return { error: 'Failed to save preferences' }
-    return { preferences: transformFromDb(inserted as DbNotificationPreferences) }
-  }
-
-  if (error) return { error: 'Failed to update preferences' }
-  return { preferences: transformFromDb(data as DbNotificationPreferences) }
-}
-
 // PATCH /api/notification-preferences
 // Updates the current user's notification preferences.
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function PATCH(request: NextRequest) {
   try {
     let userId: string
@@ -157,7 +120,8 @@ export async function PATCH(request: NextRequest) {
 
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = updateSchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = updateSchema.safeParse(body)
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -166,18 +130,65 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
-    const updates = buildNotifUpdates(parsed.data)
+    // Build snake_case updates from validated input
+    const updates: Record<string, boolean> = {}
+    if (parsed.data.emailPostPublished !== undefined) {
+      updates.email_post_published = parsed.data.emailPostPublished
+    }
+    if (parsed.data.emailPostFailed !== undefined) {
+      updates.email_post_failed = parsed.data.emailPostFailed
+    }
+    if (parsed.data.emailWeeklyDigest !== undefined) {
+      updates.email_weekly_digest = parsed.data.emailWeeklyDigest
+    }
+    if (parsed.data.emailCampaignReminder !== undefined) {
+      updates.email_campaign_reminder = parsed.data.emailCampaignReminder
+    }
+    if (parsed.data.pushEnabled !== undefined) {
+      updates.push_enabled = parsed.data.pushEnabled
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
     }
 
     const supabase = await createClient()
-    const result = await upsertNotifPreferences(supabase, userId, updates)
-    if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: 500 })
+
+    // Upsert: update existing row or insert defaults then update
+    // First try to update
+    const { data, error } = await supabase
+      .from('notification_preferences')
+      .update(updates)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error && error.code === 'PGRST116') {
+      // No row to update — insert with the given values
+      const { data: inserted, error: insertError } = await supabase
+        .from('notification_preferences')
+        .insert({ user_id: userId, ...updates })
+        .select()
+        .single()
+
+      if (insertError) {
+        console.error('Error creating notification preferences:', insertError)
+        return NextResponse.json({ error: 'Failed to save preferences' }, { status: 500 })
+      }
+
+      return NextResponse.json({
+        preferences: transformFromDb(inserted as DbNotificationPreferences),
+      })
     }
 
-    return NextResponse.json({ preferences: result.preferences })
+    if (error) {
+      console.error('Error updating notification preferences:', error)
+      return NextResponse.json({ error: 'Failed to update preferences' }, { status: 500 })
+    }
+
+    return NextResponse.json({
+      preferences: transformFromDb(data as DbNotificationPreferences),
+    })
   } catch (error) {
     console.error('Error in PATCH /api/notification-preferences:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

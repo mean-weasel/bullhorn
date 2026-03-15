@@ -5,6 +5,7 @@ import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import Link from 'next/link'
 import * as Sentry from '@sentry/nextjs'
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export default function DashboardError({
   error,
   reset,

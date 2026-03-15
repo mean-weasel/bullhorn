@@ -27,6 +27,7 @@ interface ProjectSettingsTabProps {
   onDelete: () => void
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function ProjectSettingsTab({
   project,
   editName,
@@ -177,6 +178,7 @@ export function ProjectSettingsTab({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 function BrandKitSection({
   editHashtags,
   setEditHashtags,

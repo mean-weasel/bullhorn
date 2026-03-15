@@ -23,6 +23,7 @@ vi.mock('@upstash/redis', () => {
   return { Redis: MockRedis }
 })
 
+// eslint-disable-next-line max-lines-per-function
 describe('rateLimit', () => {
   beforeEach(() => {
     vi.resetModules()
@@ -68,14 +69,6 @@ describe('rateLimit', () => {
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('using in-memory fallback'))
 
     consoleSpy.mockRestore()
-  })
-})
-
-describe('rateLimit - continued', () => {
-  beforeEach(() => {
-    vi.resetModules()
-    vi.unstubAllEnvs()
-    mockLimit.mockReset()
   })
 
   it('in-memory fallback blocks after exceeding limit', async () => {

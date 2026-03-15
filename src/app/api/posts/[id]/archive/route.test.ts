@@ -62,7 +62,7 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-describe('POST /api/posts/[id]/archive', () => {
+describe('POST /api/posts/[id]/archive (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/posts/post-1/archive', { method: 'POST' })
@@ -112,7 +112,7 @@ describe('POST /api/posts/[id]/archive', () => {
   })
 })
 
-describe('POST /api/posts/[id]/archive - continued', () => {
+describe('POST /api/posts/[id]/archive (2/4)', () => {
   it('archives a draft post successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -155,7 +155,9 @@ describe('POST /api/posts/[id]/archive - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Internal server error')
   })
+})
 
+describe('POST /api/posts/[id]/archive (3/4)', () => {
   it('returns 500 when update query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -172,7 +174,9 @@ describe('POST /api/posts/[id]/archive - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Internal server error')
   })
+})
 
+describe('POST /api/posts/[id]/archive (4/4)', () => {
   it('filters by user_id when querying', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

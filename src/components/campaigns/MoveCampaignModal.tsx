@@ -20,6 +20,7 @@ interface MoveCampaignModalProps {
   onMoved?: () => void
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignModalProps) {
   const { projects, fetchProjects, initialized } = useProjectsStore()
   const { moveCampaignToProject } = useCampaignsStore()

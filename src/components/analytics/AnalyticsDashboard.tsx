@@ -77,6 +77,7 @@ function MetricCard({ label, value, icon, compact = false }: MetricCardProps) {
   )
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function AnalyticsDashboard({
   connectionId,
   className,

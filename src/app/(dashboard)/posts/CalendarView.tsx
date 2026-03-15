@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
@@ -173,6 +174,7 @@ function EventDot({ name, platform }: { name: string; platform: string }) {
 }
 
 /** A single day cell in the month grid. */
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 function MonthDayCell({
   day,
   currentDate,
@@ -261,6 +263,7 @@ function MonthDayCell({
 }
 
 /** Month grid: 7-column layout with weekday headers. */
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 function MonthGrid({
   currentDate,
   postsByDate,
@@ -320,6 +323,7 @@ function MonthGrid({
 }
 
 /** A single day row in week view with time-sorted items. */
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 function WeekDayRow({
   day,
   dayPosts,
@@ -517,6 +521,7 @@ function WeekGrid({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function CalendarView({
   posts,
   reminders = [],

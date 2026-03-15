@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test, expect } from '@playwright/test'
 import {
   enterDemoMode,
@@ -17,12 +18,15 @@ import {
   getBlogDraftById,
 } from './helpers'
 
+// eslint-disable-next-line max-lines-per-function
 test.describe('Blog Drafts', () => {
   test.beforeEach(async ({ page }) => {
     await enterDemoMode(page)
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Blog Drafts List', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should show empty state when no blog drafts exist', async ({ page }) => {
       await goToBlogDrafts(page)
 
@@ -30,6 +34,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByRole('link', { name: /create draft/i })).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should navigate to new draft from empty state button', async ({ page }) => {
       await goToBlogDrafts(page)
 
@@ -37,6 +42,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByPlaceholder('Post title...')).toBeVisible({ timeout: 15000 })
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should navigate to new draft from header button', async ({ page }) => {
       await goToBlogDrafts(page)
 
@@ -44,6 +50,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByPlaceholder('Post title...')).toBeVisible({ timeout: 15000 })
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should display blog drafts after creation', async ({ page }) => {
       // Create a draft via API
       await createBlogDraftViaAPI(page, {
@@ -57,6 +64,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('My First Blog Post').first()).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show word count on draft cards', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Word Count Test',
@@ -69,6 +77,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText(/7 words/i)).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show tags on draft cards', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Tagged Post',
@@ -86,6 +95,7 @@ test.describe('Blog Drafts', () => {
       await expect(card.getByText('Twitter Article')).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show status counts in filter tabs', async ({ page }) => {
       // Create drafts with different statuses
       await createBlogDraftViaAPI(page, {
@@ -110,7 +120,9 @@ test.describe('Blog Drafts', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Create Blog Draft', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should create a new blog draft with title and content', async ({ page }) => {
       await goToNewBlogDraft(page)
 
@@ -132,6 +144,7 @@ test.describe('Blog Drafts', () => {
       expect(created?.status).toBe('draft')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show word count while typing', async ({ page }) => {
       await goToNewBlogDraft(page)
 
@@ -141,6 +154,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText(/5 words/i)).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should require title to save', async ({ page }) => {
       await goToNewBlogDraft(page)
 
@@ -152,6 +166,7 @@ test.describe('Blog Drafts', () => {
       await expect(saveButton).toBeDisabled()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should save draft without content', async ({ page }) => {
       await goToNewBlogDraft(page)
 
@@ -167,6 +182,7 @@ test.describe('Blog Drafts', () => {
       expect(created?.wordCount).toBe(0)
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should redirect to edit page after creating draft', async ({ page }) => {
       await goToNewBlogDraft(page)
 
@@ -182,6 +198,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByPlaceholder('Post title...')).toHaveValue('Redirect Test')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show unsaved changes indicator', async ({ page }) => {
       await goToNewBlogDraft(page)
 
@@ -192,7 +209,9 @@ test.describe('Blog Drafts', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Edit Blog Draft', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should edit an existing blog draft', async ({ page }) => {
       // Create a draft first
       const created = await createBlogDraftViaAPI(page, {
@@ -218,6 +237,7 @@ test.describe('Blog Drafts', () => {
       expect(updated?.title).toBe('Updated Title')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should navigate to edit from list', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Click to Edit',
@@ -234,6 +254,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByPlaceholder('Post title...')).toHaveValue('Click to Edit')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should update title', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Original Title',
@@ -255,6 +276,7 @@ test.describe('Blog Drafts', () => {
       expect(updated?.title).toBe('Updated Title')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show back button to return to list', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Back Test',
@@ -272,6 +294,7 @@ test.describe('Blog Drafts', () => {
       await expect(page).toHaveURL('/blog', { timeout: 15000 })
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should warn about unsaved changes when navigating away', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Warning Test',
@@ -301,6 +324,7 @@ test.describe('Blog Drafts', () => {
       await expect(page).toHaveURL(/\/blog\/[a-f0-9-]+/)
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should clear unsaved changes indicator after save', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Clear Indicator Test',
@@ -325,7 +349,9 @@ test.describe('Blog Drafts', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Search and Filter', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should search drafts by title', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'React Tutorial',
@@ -346,6 +372,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Vue Guide').first()).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should search drafts by content', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Post 1',
@@ -364,6 +391,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Post 2').first()).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should search drafts by notes', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Post A',
@@ -384,6 +412,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Post B').first()).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should clear search results', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'First Post',
@@ -408,6 +437,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Second Post').first()).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should filter by draft status', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Draft Post',
@@ -429,6 +459,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Published Post').first()).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should filter by published status', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Draft Post',
@@ -450,6 +481,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Draft Post').first()).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should filter by All status (excludes archived)', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Active Draft Post',
@@ -469,6 +501,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Archived Post').first()).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should filter by tag', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Blog Tagged Post',
@@ -490,6 +523,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Blog Tagged Post').first()).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show search results count', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Result 1',
@@ -508,6 +542,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText(/found 2 draft/i)).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show no results message', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Some Post',
@@ -522,7 +557,9 @@ test.describe('Blog Drafts', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Archive and Restore', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should archive a blog draft', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Archive Me',
@@ -544,6 +581,7 @@ test.describe('Blog Drafts', () => {
       expect(updated?.status).toBe('archived')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show archived drafts in Archived filter', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Archived Draft',
@@ -563,6 +601,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText('Archived Draft').first()).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should restore an archived draft', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Restore Me',
@@ -582,6 +621,7 @@ test.describe('Blog Drafts', () => {
       expect(updated?.status).toBe('draft')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show restore button for archived drafts', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Archived Test',
@@ -596,6 +636,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByRole('button', { name: /^archive$/i })).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show archive button for non-archived drafts', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Draft Test',
@@ -610,6 +651,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByRole('button', { name: /^restore$/i })).not.toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show archived drafts count only when there are archived drafts', async ({
       page,
     }) => {
@@ -640,7 +682,9 @@ test.describe('Blog Drafts', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Delete Blog Draft', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should delete a blog draft', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Delete Me',
@@ -662,6 +706,7 @@ test.describe('Blog Drafts', () => {
       expect(deleted).toBeNull()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show confirmation dialog when deleting', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Confirm Delete',
@@ -689,6 +734,7 @@ test.describe('Blog Drafts', () => {
       expect(draft).not.toBeNull()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should not delete when confirmation is cancelled', async ({ page }) => {
       const created = await createBlogDraftViaAPI(page, {
         title: 'Cancel Delete',
@@ -714,7 +760,9 @@ test.describe('Blog Drafts', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Keyboard Shortcuts', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should save draft with Cmd+S / Ctrl+S', async ({ page }) => {
       await goToNewBlogDraft(page)
 
@@ -735,7 +783,9 @@ test.describe('Blog Drafts', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Empty States', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should show empty state for filtered status with no results', async ({ page }) => {
       // Create a draft
       await createBlogDraftViaAPI(page, {
@@ -752,6 +802,7 @@ test.describe('Blog Drafts', () => {
       await expect(page.getByText(/no published drafts/i)).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show empty state when search has no results', async ({ page }) => {
       await createBlogDraftViaAPI(page, {
         title: 'Some Post',

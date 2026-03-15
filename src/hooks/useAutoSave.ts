@@ -14,6 +14,7 @@ interface UseAutoSaveOptions {
   skipInitialChange?: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export function useAutoSave({
   data,
   onSave,

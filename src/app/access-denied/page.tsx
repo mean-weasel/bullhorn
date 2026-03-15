@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export default function AccessDeniedPage() {
   const router = useRouter()
   const supabase = createClient()

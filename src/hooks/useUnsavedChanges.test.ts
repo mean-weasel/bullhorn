@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
  * and the confirmNavigation helper.
  */
 
+// eslint-disable-next-line max-lines-per-function
 describe('useUnsavedChanges logic', () => {
   let addEventSpy: ReturnType<typeof vi.spyOn>
   let removeEventSpy: ReturnType<typeof vi.spyOn>

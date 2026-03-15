@@ -14,6 +14,7 @@ interface MediaSectionProps {
   onLinkedInMediaUrlChange: (url: string) => void
 }
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export const MediaSection = ({
   platform,
   showMediaInput,

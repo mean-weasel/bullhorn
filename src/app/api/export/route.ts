@@ -61,81 +61,7 @@ function csvEscape(value: string): string {
   return value
 }
 
-interface ExportFilters {
-  status: string | null
-  projectId: string | null
-  campaignId: string | null
-}
-
-async function fetchExportData(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  type: string,
-  filters: ExportFilters
-) {
-  const buildPostsQuery = () => {
-    let query = supabase
-      .from('posts')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-    if (filters.status) query = query.eq('status', filters.status)
-    if (filters.campaignId) query = query.eq('campaign_id', filters.campaignId)
-    return query
-  }
-
-  const buildCampaignsQuery = () => {
-    let query = supabase
-      .from('campaigns')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-    if (filters.status) query = query.eq('status', filters.status)
-    if (filters.projectId) query = query.eq('project_id', filters.projectId)
-    return query
-  }
-
-  let posts: Post[] = []
-  let campaigns: Campaign[] = []
-
-  if (type === 'all') {
-    const [postsResult, campaignsResult] = await Promise.all([
-      buildPostsQuery(),
-      buildCampaignsQuery(),
-    ])
-    if (postsResult.error) throw postsResult.error
-    if (campaignsResult.error) throw campaignsResult.error
-    posts = (postsResult.data || []).map((p) => transformPostFromDb(p as DbPost))
-    campaigns = (campaignsResult.data || []).map((c) => transformCampaignFromDb(c as DbCampaign))
-  } else if (type === 'posts') {
-    const { data, error } = await buildPostsQuery()
-    if (error) throw error
-    posts = (data || []).map((p) => transformPostFromDb(p as DbPost))
-  } else if (type === 'campaigns') {
-    const { data, error } = await buildCampaignsQuery()
-    if (error) throw error
-    campaigns = (data || []).map((c) => transformCampaignFromDb(c as DbCampaign))
-  }
-
-  return { posts, campaigns }
-}
-
-function buildCsvResponse(type: string, posts: Post[], campaigns: Campaign[]) {
-  let csv = ''
-  if (type === 'posts' || type === 'all') csv += '# Posts\n' + postsToCsv(posts)
-  if (type === 'all') csv += '\n\n'
-  if (type === 'campaigns' || type === 'all') csv += '# Campaigns\n' + campaignsToCsv(campaigns)
-  const totalCount = posts.length + campaigns.length
-  return new NextResponse(csv, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/csv',
-      'Content-Disposition': `attachment; filename="bullhorn-export-${new Date().toISOString().slice(0, 10)}.csv"`,
-      'X-Export-Count': String(totalCount),
-    },
-  })
-}
-
+// eslint-disable-next-line max-lines-per-function
 export async function GET(request: NextRequest) {
   try {
     let userId: string
@@ -153,6 +79,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Stricter rate limit for exports (6 per minute per user)
     const rateLimitResult = await rateLimit(`export:${userId}`)
     if (!rateLimitResult.success) {
       return NextResponse.json({ error: 'Too many export requests' }, { status: 429 })
@@ -160,12 +87,17 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
     const { searchParams } = new URL(request.url)
+
     const format = searchParams.get('format') || 'json'
     const type = searchParams.get('type') || 'all'
+    const status = searchParams.get('status')
+    const projectId = searchParams.get('projectId')
+    const campaignId = searchParams.get('campaignId')
 
     if (!['json', 'csv'].includes(format)) {
       return NextResponse.json({ error: 'Invalid format. Use json or csv.' }, { status: 400 })
     }
+
     if (!['posts', 'campaigns', 'all'].includes(type)) {
       return NextResponse.json(
         { error: 'Invalid type. Use posts, campaigns, or all.' },
@@ -173,20 +105,104 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const filters: ExportFilters = {
-      status: searchParams.get('status'),
-      projectId: searchParams.get('projectId'),
-      campaignId: searchParams.get('campaignId'),
+    let posts: Post[] = []
+    let campaigns: Campaign[] = []
+
+    // Build queries
+    const buildPostsQuery = () => {
+      let query = supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (status) query = query.eq('status', status)
+      if (campaignId) query = query.eq('campaign_id', campaignId)
+      return query
     }
 
-    const { posts, campaigns } = await fetchExportData(supabase, userId, type, filters)
+    const buildCampaignsQuery = () => {
+      let query = supabase
+        .from('campaigns')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (status) query = query.eq('status', status)
+      if (projectId) query = query.eq('project_id', projectId)
+      return query
+    }
 
-    if (format === 'csv') return buildCsvResponse(type, posts, campaigns)
+    if (type === 'all') {
+      // Fetch posts and campaigns in parallel
+      const [postsResult, campaignsResult] = await Promise.all([
+        buildPostsQuery(),
+        buildCampaignsQuery(),
+      ])
 
-    return NextResponse.json(
-      { posts, campaigns, exportedAt: new Date().toISOString(), version: '1.0' },
-      { headers: { 'X-Export-Count': String(posts.length + campaigns.length) } }
-    )
+      if (postsResult.error) {
+        console.error('Database error:', postsResult.error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+      }
+      if (campaignsResult.error) {
+        console.error('Database error:', campaignsResult.error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+      }
+
+      posts = (postsResult.data || []).map((p) => transformPostFromDb(p as DbPost))
+      campaigns = (campaignsResult.data || []).map((c) => transformCampaignFromDb(c as DbCampaign))
+    } else if (type === 'posts') {
+      const { data, error } = await buildPostsQuery()
+      if (error) {
+        console.error('Database error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+      }
+      posts = (data || []).map((p) => transformPostFromDb(p as DbPost))
+    } else if (type === 'campaigns') {
+      const { data, error } = await buildCampaignsQuery()
+      if (error) {
+        console.error('Database error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+      }
+      campaigns = (data || []).map((c) => transformCampaignFromDb(c as DbCampaign))
+    }
+
+    const totalCount = posts.length + campaigns.length
+
+    // CSV format
+    if (format === 'csv') {
+      let csv = ''
+      if (type === 'posts' || type === 'all') {
+        csv += '# Posts\n' + postsToCsv(posts)
+      }
+      if (type === 'all') {
+        csv += '\n\n'
+      }
+      if (type === 'campaigns' || type === 'all') {
+        csv += '# Campaigns\n' + campaignsToCsv(campaigns)
+      }
+
+      return new NextResponse(csv, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/csv',
+          'Content-Disposition': `attachment; filename="bullhorn-export-${new Date().toISOString().slice(0, 10)}.csv"`,
+          'X-Export-Count': String(totalCount),
+        },
+      })
+    }
+
+    // JSON format
+    const body = {
+      posts,
+      campaigns,
+      exportedAt: new Date().toISOString(),
+      version: '1.0',
+    }
+
+    return NextResponse.json(body, {
+      headers: {
+        'X-Export-Count': String(totalCount),
+      },
+    })
   } catch (error) {
     console.error('Error exporting data:', error)
     return NextResponse.json({ error: 'Failed to export data' }, { status: 500 })

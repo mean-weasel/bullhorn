@@ -22,23 +22,17 @@ const createPostSchema = z.object({
   groupType: z.string().optional().nullable(),
 })
 
-function parsePostFilters(searchParams: URLSearchParams) {
-  return {
-    status: searchParams.get('status'),
-    platform: searchParams.get('platform'),
-    campaignId: searchParams.get('campaignId'),
-    groupId: searchParams.get('groupId'),
-    limit: Math.min(Math.max(parseInt(searchParams.get('limit') || '50') || 50, 1), 200),
-  }
-}
-
 // GET /api/posts - List posts with optional filters
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
+
+      // Enforce scope check for API-key authenticated requests
       if (auth.scopes) {
         const required: ApiKeyScope[] = ['posts:read']
         validateScopes(auth.scopes, required)
@@ -52,25 +46,44 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const filters = parsePostFilters(new URL(request.url).searchParams)
+    const { searchParams } = new URL(request.url)
+
+    const status = searchParams.get('status')
+    const platform = searchParams.get('platform')
+    const campaignId = searchParams.get('campaignId')
+    const groupId = searchParams.get('groupId')
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '50') || 50, 1), 200)
 
     let query = supabase
       .from('posts')
       .select('*')
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
-    if (filters.status && filters.status !== 'all') query = query.eq('status', filters.status)
-    if (filters.platform) query = query.eq('platform', filters.platform)
-    if (filters.campaignId) query = query.eq('campaign_id', filters.campaignId)
-    if (filters.groupId) query = query.eq('group_id', filters.groupId)
-    if (filters.limit > 0) query = query.limit(filters.limit)
+
+    if (status && status !== 'all') {
+      query = query.eq('status', status)
+    }
+    if (platform) {
+      query = query.eq('platform', platform)
+    }
+    if (campaignId) {
+      query = query.eq('campaign_id', campaignId)
+    }
+    if (groupId) {
+      query = query.eq('group_id', groupId)
+    }
+    if (limit > 0) {
+      query = query.limit(limit)
+    }
 
     const { data, error } = await query
+
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
+    // Transform posts from snake_case to camelCase
     const posts = (data || []).map((post) => transformPostFromDb(post as DbPost))
     return NextResponse.json({ posts })
   } catch (error) {
@@ -79,27 +92,17 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function buildPostInsertData(userId: string, data: z.infer<typeof createPostSchema>) {
-  return {
-    user_id: userId,
-    platform: data.platform,
-    content: data.content,
-    status: data.status || 'draft',
-    scheduled_at: data.scheduled_at || data.scheduledAt,
-    notes: data.notes,
-    campaign_id: data.campaign_id || data.campaignId,
-    group_id: data.group_id || data.groupId,
-    group_type: data.group_type || data.groupType,
-  }
-}
-
 // POST /api/posts - Create new post
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication - throws if not authenticated
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
+
+      // Enforce scope check for API-key authenticated requests
       if (auth.scopes) {
         const required: ApiKeyScope[] = ['posts:write']
         validateScopes(auth.scopes, required)
@@ -112,6 +115,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Enforce plan limit
     const limitCheck = await enforceResourceLimit(userId, 'posts')
     if (!limitCheck.allowed) {
       return NextResponse.json(
@@ -128,7 +132,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = createPostSchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = createPostSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -136,13 +141,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (JSON.stringify(parsed.data.content).length > 50_000) {
+    // Enforce content size limit (50 KB max)
+    const contentStr = JSON.stringify(parsed.data.content)
+    if (contentStr.length > 50_000) {
       return NextResponse.json({ error: 'Content too large (max 50 KB)' }, { status: 400 })
     }
 
     const { data, error } = await supabase
       .from('posts')
-      .insert(buildPostInsertData(userId, parsed.data))
+      .insert({
+        user_id: userId,
+        platform: parsed.data.platform,
+        content: parsed.data.content,
+        status: parsed.data.status || 'draft',
+        scheduled_at: parsed.data.scheduled_at || parsed.data.scheduledAt,
+        notes: parsed.data.notes,
+        campaign_id: parsed.data.campaign_id || parsed.data.campaignId,
+        group_id: parsed.data.group_id || parsed.data.groupId,
+        group_type: parsed.data.group_type || parsed.data.groupType,
+      })
       .select()
       .single()
 
@@ -154,6 +171,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
+    // Transform post from snake_case to camelCase
     const post = transformPostFromDb(data as DbPost)
     return NextResponse.json({ post }, { status: 201 })
   } catch (error) {

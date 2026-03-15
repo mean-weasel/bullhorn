@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { useState, useEffect, useRef } from 'react'
 import { format } from 'date-fns'
@@ -18,6 +19,7 @@ interface IOSDateTimePickerProps {
   'data-testid'?: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function IOSDateTimePicker({
   value,
   onChange,

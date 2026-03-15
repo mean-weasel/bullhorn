@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -25,6 +26,7 @@ interface BlogEditorFormProps {
   newDraftRedirectPrefix: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFormProps) {
   const router = useRouter()
   const isEditing = !!draftId

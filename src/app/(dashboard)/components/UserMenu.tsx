@@ -13,6 +13,7 @@ interface UserMenuProps {
   displayName?: string | null
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function UserMenu({ email, displayName }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)

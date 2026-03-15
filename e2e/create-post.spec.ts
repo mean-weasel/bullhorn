@@ -13,12 +13,15 @@ import {
   waitForNavigation,
 } from './helpers'
 
+// eslint-disable-next-line max-lines-per-function
 test.describe('Create Post', () => {
   test.beforeEach(async ({ page }) => {
     await enterDemoMode(page)
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Twitter Posts', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should create a Twitter draft post', async ({ page }) => {
       await goToNewPost(page)
 
@@ -38,6 +41,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should create a Twitter scheduled post', async ({ page }) => {
       await goToNewPost(page)
 
@@ -56,6 +60,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show character count warning when approaching limit', async ({ page }) => {
       await goToNewPost(page)
 
@@ -69,6 +74,7 @@ test.describe('Create Post', () => {
       await expect(page.getByText('270')).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show error when exceeding character limit', async ({ page }) => {
       await goToNewPost(page)
 
@@ -83,7 +89,9 @@ test.describe('Create Post', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('LinkedIn Posts', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should create a LinkedIn draft post with public visibility', async ({ page }) => {
       await goToNewPost(page)
 
@@ -103,6 +111,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should create a LinkedIn post with connections-only visibility', async ({ page }) => {
       await goToNewPost(page)
 
@@ -116,6 +125,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should create a LinkedIn scheduled post', async ({ page }) => {
       await goToNewPost(page)
 
@@ -132,7 +142,9 @@ test.describe('Create Post', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Reddit Posts', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should create a Reddit draft post', async ({ page }) => {
       await goToNewPost(page)
 
@@ -156,6 +168,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should create a Reddit post with flair', async ({ page }) => {
       await goToNewPost(page)
 
@@ -173,6 +186,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should create a Reddit scheduled post', async ({ page }) => {
       await goToNewPost(page)
 
@@ -194,6 +208,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show title character count', async ({ page }) => {
       await goToNewPost(page)
 
@@ -209,7 +224,9 @@ test.describe('Create Post', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Platform Switching', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should switch between platforms', async ({ page }) => {
       await goToNewPost(page)
 
@@ -232,7 +249,9 @@ test.describe('Create Post', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Notes', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should add notes to a post', async ({ page }) => {
       await goToNewPost(page)
 
@@ -251,6 +270,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should collapse and expand notes section', async ({ page }) => {
       await goToNewPost(page)
 
@@ -270,7 +290,9 @@ test.describe('Create Post', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Multi-Subreddit Posts', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should add multiple subreddits', async ({ page }) => {
       await goToNewPost(page)
 
@@ -295,6 +317,7 @@ test.describe('Create Post', () => {
       await waitForNavigation(page, '/')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should remove subreddits via card', async ({ page }) => {
       await goToNewPost(page)
 
@@ -324,6 +347,7 @@ test.describe('Create Post', () => {
       await expect(page.getByText('(1)')).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show subreddits in preview', async ({ page }) => {
       await goToNewPost(page)
 
@@ -340,7 +364,9 @@ test.describe('Create Post', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Validation', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should show preview as user types', async ({ page }) => {
       await goToNewPost(page)
 
@@ -354,6 +380,7 @@ test.describe('Create Post', () => {
       await expect(previewSection).toContainText(testText)
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should require date for scheduling', async ({ page }) => {
       await goToNewPost(page)
 

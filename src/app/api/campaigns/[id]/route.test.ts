@@ -108,7 +108,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { GET } from './route'
+import { GET, PATCH, DELETE } from './route'
 import { requireAuth } from '@/lib/auth'
 
 const mockRequireAuth = vi.mocked(requireAuth)
@@ -173,7 +173,7 @@ beforeEach(() => {
 // GET /api/campaigns/[id]
 // ---------------------------------------------------------------------------
 
-describe('GET /api/campaigns/[id]', () => {
+describe('GET /api/campaigns/[id] (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/campaigns/camp-1')
@@ -221,7 +221,7 @@ describe('GET /api/campaigns/[id]', () => {
   })
 })
 
-describe('GET /api/campaigns/[id] - continued', () => {
+describe('GET /api/campaigns/[id] (2/2)', () => {
   it('returns 500 when campaign query fails with non-PGRST116 error', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     campaignSingleData = { data: null, error: { code: 'OTHER', message: 'DB error' } }

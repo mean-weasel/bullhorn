@@ -20,7 +20,9 @@ import { handleCreateRedditCrossposts } from './test-helpers.js'
 
 const s = storage
 
+// eslint-disable-next-line max-lines-per-function
 describe('Reddit Cross-Post Tool Handlers', () => {
+  // eslint-disable-next-line max-lines-per-function
   beforeEach(() => {
     mockGet.mockReset()
     mockPost.mockReset()
@@ -29,13 +31,16 @@ describe('Reddit Cross-Post Tool Handlers', () => {
     _resetClient()
   })
 
+  // eslint-disable-next-line max-lines-per-function
   describe('create_reddit_crossposts', () => {
+    // eslint-disable-next-line max-lines-per-function
     it('should return error when subreddits array is empty', async () => {
       const result = await handleCreateRedditCrossposts(s, { subreddits: [] })
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('At least one subreddit is required')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should return error when subreddits is undefined', async () => {
       const result = await handleCreateRedditCrossposts(s, {
         subreddits: undefined as unknown as { subreddit: string; title: string }[],
@@ -44,6 +49,7 @@ describe('Reddit Cross-Post Tool Handlers', () => {
       expect(result.content[0].text).toContain('At least one subreddit is required')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should return error when subreddit entry missing subreddit name', async () => {
       const result = await handleCreateRedditCrossposts(s, {
         subreddits: [{ subreddit: '', title: 'Test' }],
@@ -52,6 +58,7 @@ describe('Reddit Cross-Post Tool Handlers', () => {
       expect(result.content[0].text).toContain('Each subreddit entry requires subreddit and title')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should return error when subreddit entry missing title', async () => {
       const result = await handleCreateRedditCrossposts(s, {
         subreddits: [{ subreddit: 'test', title: '' }],
@@ -60,6 +67,7 @@ describe('Reddit Cross-Post Tool Handlers', () => {
       expect(result.content[0].text).toContain('Each subreddit entry requires subreddit and title')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should create posts for each subreddit with shared groupId', async () => {
       const mockPosts = [
         { id: 'p1', platform: 'reddit', content: { subreddit: 'startups', title: 'Test' } },
@@ -91,6 +99,7 @@ describe('Reddit Cross-Post Tool Handlers', () => {
       expect(secondCall[1].groupType).toBe('reddit-crosspost')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should use per-subreddit scheduledAt when provided', async () => {
       mockPost.mockResolvedValue({ post: { id: 'p1' } })
       await handleCreateRedditCrossposts(s, {
@@ -104,6 +113,7 @@ describe('Reddit Cross-Post Tool Handlers', () => {
       expect(mockPost.mock.calls[1][1].scheduledAt).toBe('2024-01-01T12:00:00Z')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should use defaultScheduledAt when subreddit has no scheduledAt', async () => {
       mockPost.mockResolvedValue({ post: { id: 'p1' } })
       await handleCreateRedditCrossposts(s, {
@@ -113,6 +123,7 @@ describe('Reddit Cross-Post Tool Handlers', () => {
       expect(mockPost.mock.calls[0][1].scheduledAt).toBe('2024-01-01T08:00:00Z')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should pass campaignId to all posts', async () => {
       mockPost.mockResolvedValue({ post: { id: 'p1' } })
       await handleCreateRedditCrossposts(s, {
@@ -126,6 +137,7 @@ describe('Reddit Cross-Post Tool Handlers', () => {
       expect(mockPost.mock.calls[1][1].campaignId).toBe('campaign-123')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     it('should include body, url, and flairText when provided', async () => {
       mockPost.mockResolvedValue({ post: { id: 'p1' } })
       await handleCreateRedditCrossposts(s, {

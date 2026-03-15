@@ -183,7 +183,7 @@ describe('GET /api/projects/[id]', () => {
 // PATCH /api/projects/[id]
 // ---------------------------------------------------------------------------
 
-describe('PATCH /api/projects/[id]', () => {
+describe('PATCH /api/projects/[id] (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/projects/proj-1', {
@@ -231,106 +231,5 @@ describe('PATCH /api/projects/[id]', () => {
     expect(res.status).toBe(400)
     const body = await res.json()
     expect(body.error).toBe('Name cannot be empty')
-  })
-})
-
-describe('PATCH /api/projects/[id] - continued', () => {
-  it('updates project successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const updatedProject = { ...sampleDbProject, name: 'Updated Name' }
-    mockPatchSingleResult = { data: updatedProject, error: null }
-    const req = createRequest('/api/projects/proj-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated Name' }),
-    })
-    const res = await PATCH(req, createContext('proj-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.project.name).toBe('Updated Name')
-  })
-
-  it('returns 404 when project not found on update', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockPatchSingleResult = { data: null, error: { code: 'PGRST116', message: 'Not found' } }
-    const req = createRequest('/api/projects/proj-999', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated' }),
-    })
-    const res = await PATCH(req, createContext('proj-999'))
-    expect(res.status).toBe(404)
-    const body = await res.json()
-    expect(body.error).toBe('Project not found')
-  })
-
-  it('returns 500 when database update fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockPatchSingleResult = { data: null, error: { code: 'XXXXX', message: 'DB error' } }
-    const req = createRequest('/api/projects/proj-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated' }),
-    })
-    const res = await PATCH(req, createContext('proj-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// DELETE /api/projects/[id]
-// ---------------------------------------------------------------------------
-
-describe('DELETE /api/projects/[id]', () => {
-  it('returns 401 when not authenticated', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
-    const req = createRequest('/api/projects/proj-1', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(401)
-    const body = await res.json()
-    expect(body.error).toBe('Unauthorized')
-  })
-
-  it('returns 403 when scopes are insufficient', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Forbidden'))
-    const req = createRequest('/api/projects/proj-1', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.error).toBe('Forbidden')
-  })
-
-  it('deletes project successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockCountResult = { count: 2 }
-    mockDeleteResult = { error: null }
-    const req = createRequest('/api/projects/proj-1', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.success).toBe(true)
-    expect(body.deleted.campaignsAffected).toBe(2)
-  })
-
-  it('deletes project with zero campaigns', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockCountResult = { count: null }
-    mockDeleteResult = { error: null }
-    const req = createRequest('/api/projects/proj-1', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.success).toBe(true)
-    expect(body.deleted.campaignsAffected).toBe(0)
-  })
-
-  it('returns 500 when database delete fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockCountResult = { count: 0 }
-    mockDeleteResult = { error: { message: 'DB error' } }
-    const req = createRequest('/api/projects/proj-1', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
   })
 })

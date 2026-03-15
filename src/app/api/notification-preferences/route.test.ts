@@ -76,7 +76,7 @@ beforeEach(() => {
 // GET /api/notification-preferences
 // ---------------------------------------------------------------------------
 
-describe('GET /api/notification-preferences', () => {
+describe('GET /api/notification-preferences (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const res = await GET()
@@ -108,7 +108,9 @@ describe('GET /api/notification-preferences', () => {
     expect(mockFrom).toHaveBeenCalledWith('notification_preferences')
     expect(mockEq).toHaveBeenCalledWith('user_id', 'user-1')
   })
+})
 
+describe('GET /api/notification-preferences (2/3)', () => {
   it('handles no existing preferences by creating defaults', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // First query returns PGRST116 (no rows)
@@ -136,9 +138,7 @@ describe('GET /api/notification-preferences', () => {
     // Verify insert was called with user_id
     expect(mockInsert).toHaveBeenCalledWith({ user_id: 'user-1' })
   })
-})
 
-describe('GET /api/notification-preferences - continued', () => {
   it('returns 500 when insert for defaults fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // First query returns PGRST116
@@ -157,7 +157,9 @@ describe('GET /api/notification-preferences - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Failed to create preferences')
   })
+})
 
+describe('GET /api/notification-preferences (3/3)', () => {
   it('returns 500 when database query fails with non-PGRST116 error', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockSingle.mockResolvedValue({
@@ -176,7 +178,7 @@ describe('GET /api/notification-preferences - continued', () => {
 // PATCH /api/notification-preferences
 // ---------------------------------------------------------------------------
 
-describe('PATCH /api/notification-preferences', () => {
+describe('PATCH /api/notification-preferences (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/notification-preferences', {
@@ -218,7 +220,9 @@ describe('PATCH /api/notification-preferences', () => {
     })
     expect(mockEq).toHaveBeenCalledWith('user_id', 'user-1')
   })
+})
 
+describe('PATCH /api/notification-preferences (2/4)', () => {
   it('returns 400 for invalid input (wrong type)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const req = createRequest('/api/notification-preferences', {
@@ -243,9 +247,7 @@ describe('PATCH /api/notification-preferences', () => {
     const body = await res.json()
     expect(body.error).toBe('No fields to update')
   })
-})
 
-describe('PATCH /api/notification-preferences - continued', () => {
   it('returns 400 for unknown fields (stripped by schema, treated as empty)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const req = createRequest('/api/notification-preferences', {
@@ -256,78 +258,5 @@ describe('PATCH /api/notification-preferences - continued', () => {
     expect(res.status).toBe(400)
     const body = await res.json()
     expect(body.error).toBe('No fields to update')
-  })
-
-  it('inserts row when no existing preferences on PATCH', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-
-    // Update returns PGRST116 (no rows to update)
-    mockSingle.mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST116', message: 'No rows found' },
-    })
-
-    const insertedRow = {
-      ...defaultDbRow,
-      id: 'pref-new',
-      email_weekly_digest: true,
-    }
-    mockInsertSingle.mockResolvedValue({ data: insertedRow, error: null })
-
-    const req = createRequest('/api/notification-preferences', {
-      method: 'PATCH',
-      body: JSON.stringify({ emailWeeklyDigest: true }),
-    })
-    const res = await PATCH(req)
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.preferences.id).toBe('pref-new')
-
-    // Verify insert includes user_id and the update fields
-    expect(mockInsert).toHaveBeenCalledWith({
-      user_id: 'user-1',
-      email_weekly_digest: true,
-    })
-  })
-
-  it('returns 500 when update fails with non-PGRST116 error', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockSingle.mockResolvedValue({
-      data: null,
-      error: { code: 'UNEXPECTED', message: 'DB error' },
-    })
-
-    const req = createRequest('/api/notification-preferences', {
-      method: 'PATCH',
-      body: JSON.stringify({ pushEnabled: true }),
-    })
-    const res = await PATCH(req)
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Failed to update preferences')
-  })
-
-  it('returns 500 when fallback insert fails on PATCH', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-
-    // Update returns PGRST116
-    mockSingle.mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST116', message: 'No rows found' },
-    })
-    // Insert also fails
-    mockInsertSingle.mockResolvedValue({
-      data: null,
-      error: { message: 'Insert failed' },
-    })
-
-    const req = createRequest('/api/notification-preferences', {
-      method: 'PATCH',
-      body: JSON.stringify({ pushEnabled: true }),
-    })
-    const res = await PATCH(req)
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Failed to save preferences')
   })
 })

@@ -13,6 +13,7 @@ vi.mock('remark-gfm', () => ({
   default: () => {},
 }))
 
+// eslint-disable-next-line max-lines-per-function
 describe('MarkdownEditor', () => {
   const defaultProps = {
     value: '',

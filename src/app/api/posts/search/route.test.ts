@@ -48,7 +48,7 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-describe('GET /api/posts/search', () => {
+describe('GET /api/posts/search (1/6)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/posts/search?q=hello')
@@ -88,7 +88,9 @@ describe('GET /api/posts/search', () => {
     const body = await res.json()
     expect(body.error).toBe('Search query is required')
   })
+})
 
+describe('GET /api/posts/search (2/6)', () => {
   it('returns matching posts using q param', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const dbPosts = [
@@ -118,7 +120,9 @@ describe('GET /api/posts/search', () => {
     // Verify camelCase transform
     expect(body.posts[0].createdAt).toBe('2024-01-01T00:00:00Z')
   })
+})
 
+describe('GET /api/posts/search (3/6)', () => {
   it('returns matching posts using query param', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const dbPosts = [
@@ -148,7 +152,7 @@ describe('GET /api/posts/search', () => {
   })
 })
 
-describe('GET /api/posts/search - continued', () => {
+describe('GET /api/posts/search (4/6)', () => {
   it('filters results client-side by content JSON', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const dbPosts = [
@@ -191,7 +195,9 @@ describe('GET /api/posts/search - continued', () => {
     expect(body.posts).toHaveLength(1)
     expect(body.posts[0].id).toBe('post-match')
   })
+})
 
+describe('GET /api/posts/search (5/6)', () => {
   it('returns empty array when no posts match', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockLimit.mockResolvedValue({ data: [], error: null })
@@ -222,7 +228,9 @@ describe('GET /api/posts/search - continued', () => {
     await GET(req)
     expect(mockNeq).toHaveBeenCalledWith('status', 'archived')
   })
+})
 
+describe('GET /api/posts/search (6/6)', () => {
   it('respects custom limit parameter via client-side slice', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const dbPosts = Array.from({ length: 5 }, (_, i) => ({

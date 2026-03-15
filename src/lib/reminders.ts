@@ -176,73 +176,7 @@ interface RemindersActions {
   getUpcomingReminders: (limit?: number) => Reminder[]
 }
 
-type RemindersSetFn = (
-  partial: Partial<RemindersState> | ((s: RemindersState) => Partial<RemindersState>)
-) => void
-
-async function addReminderAction(
-  reminderData: CreateReminderInput,
-  set: RemindersSetFn
-): Promise<Reminder> {
-  set({ loading: true, error: null })
-  try {
-    const res = await fetch(`${API_BASE}/reminders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reminderData),
-    })
-    if (!res.ok) throw new Error('Failed to create reminder')
-    const data = await res.json()
-    const newReminder = data.reminder as Reminder
-    set((state) => ({ reminders: [newReminder, ...state.reminders], loading: false }))
-    scheduleLocalNotification(
-      newReminder.id,
-      newReminder.title,
-      newReminder.description || 'Reminder is due!',
-      new Date(newReminder.remindAt),
-      { url: '/dashboard' }
-    )
-    return newReminder
-  } catch (error) {
-    set({ error: (error as Error).message, loading: false })
-    throw error
-  }
-}
-
-async function updateReminderAction(id: string, updates: UpdateReminderInput, set: RemindersSetFn) {
-  set({ loading: true, error: null })
-  try {
-    const res = await fetch(`${API_BASE}/reminders/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates),
-    })
-    if (!res.ok) throw new Error('Failed to update reminder')
-    const data = await res.json()
-    const updated = data.reminder as Reminder
-    set((state) => ({
-      reminders: state.reminders.map((r) => (r.id === id ? updated : r)),
-      loading: false,
-    }))
-  } catch (error) {
-    set({ error: (error as Error).message, loading: false })
-    throw error
-  }
-}
-
-async function deleteReminderAction(id: string, set: RemindersSetFn) {
-  set({ loading: true, error: null })
-  try {
-    const res = await fetch(`${API_BASE}/reminders/${id}`, { method: 'DELETE' })
-    if (!res.ok) throw new Error('Failed to delete reminder')
-    cancelLocalNotification(id)
-    set((state) => ({ reminders: state.reminders.filter((r) => r.id !== id), loading: false }))
-  } catch (error) {
-    set({ error: (error as Error).message, loading: false })
-    throw error
-  }
-}
-
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export const useRemindersStore = create<RemindersState & RemindersActions>()((set, get) => ({
   reminders: [],
   loading: false,
@@ -250,7 +184,9 @@ export const useRemindersStore = create<RemindersState & RemindersActions>()((se
   initialized: false,
 
   fetchReminders: async () => {
-    return dedup(createDedupKey('reminders'), async () => {
+    const key = createDedupKey('reminders')
+
+    return dedup(key, async () => {
       set({ loading: true, error: null })
       try {
         const res = await fetch(`${API_BASE}/reminders`)
@@ -263,9 +199,74 @@ export const useRemindersStore = create<RemindersState & RemindersActions>()((se
     })
   },
 
-  addReminder: (data) => addReminderAction(data, set),
-  updateReminder: (id, updates) => updateReminderAction(id, updates, set),
-  deleteReminder: (id) => deleteReminderAction(id, set),
+  addReminder: async (reminderData) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await fetch(`${API_BASE}/reminders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reminderData),
+      })
+      if (!res.ok) throw new Error('Failed to create reminder')
+      const data = await res.json()
+      const newReminder = data.reminder as Reminder
+      set((state) => ({
+        reminders: [newReminder, ...state.reminders],
+        loading: false,
+      }))
+      // Schedule native local notification
+      scheduleLocalNotification(
+        newReminder.id,
+        newReminder.title,
+        newReminder.description || 'Reminder is due!',
+        new Date(newReminder.remindAt),
+        { url: '/dashboard' }
+      )
+      return newReminder
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false })
+      throw error
+    }
+  },
+
+  updateReminder: async (id, updates) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await fetch(`${API_BASE}/reminders/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+      if (!res.ok) throw new Error('Failed to update reminder')
+      const data = await res.json()
+      const updatedReminder = data.reminder as Reminder
+      set((state) => ({
+        reminders: state.reminders.map((r) => (r.id === id ? updatedReminder : r)),
+        loading: false,
+      }))
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false })
+      throw error
+    }
+  },
+
+  deleteReminder: async (id) => {
+    set({ loading: true, error: null })
+    try {
+      const res = await fetch(`${API_BASE}/reminders/${id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Failed to delete reminder')
+      cancelLocalNotification(id)
+      set((state) => ({
+        reminders: state.reminders.filter((r) => r.id !== id),
+        loading: false,
+      }))
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false })
+      throw error
+    }
+  },
 
   completeReminder: async (id) => {
     await get().updateReminder(id, { isCompleted: true })

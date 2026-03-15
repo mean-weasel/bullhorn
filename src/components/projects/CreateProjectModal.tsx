@@ -17,6 +17,7 @@ interface CreateProjectModalProps {
   onSuccess?: (projectId: string) => void
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function CreateProjectModal({ open, onClose, onSuccess }: CreateProjectModalProps) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')

@@ -62,7 +62,7 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-describe('POST /api/blog-drafts/[id]/archive', () => {
+describe('POST /api/blog-drafts/[id]/archive (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/blog-drafts/draft-1/archive', { method: 'POST' })
@@ -112,7 +112,7 @@ describe('POST /api/blog-drafts/[id]/archive', () => {
   })
 })
 
-describe('POST /api/blog-drafts/[id]/archive - continued', () => {
+describe('POST /api/blog-drafts/[id]/archive (2/4)', () => {
   it('archives a blog draft successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -147,7 +147,9 @@ describe('POST /api/blog-drafts/[id]/archive - continued', () => {
     expect(body.draft.campaignId).toBeNull()
     expect(body.draft.images).toEqual(['img1.png'])
   })
+})
 
+describe('POST /api/blog-drafts/[id]/archive (3/4)', () => {
   it('returns 500 when fetch query fails with non-PGRST116 error', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -177,7 +179,9 @@ describe('POST /api/blog-drafts/[id]/archive - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Internal server error')
   })
+})
 
+describe('POST /api/blog-drafts/[id]/archive (4/4)', () => {
   it('filters by user_id when querying', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

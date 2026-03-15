@@ -8,12 +8,14 @@ import { clearBadge, setBadgeCount, calculateBadgeCount } from '@/lib/appBadge'
 import { useRemindersStore } from '@/lib/reminders'
 import { usePostsStore } from '@/lib/storage'
 
+// eslint-disable-next-line max-lines-per-function
 export function NativeInit() {
   const router = useRouter()
   const initialized = useRef(false)
   const reminders = useRemindersStore((s) => s.reminders)
   const posts = usePostsStore((s) => s.posts)
 
+  // eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
   useEffect(() => {
     if (!isNativePlatform() || initialized.current) return
     initialized.current = true

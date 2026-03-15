@@ -4,24 +4,15 @@ import { requireAuth, validateScopes, type ApiKeyScope } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
-function extractMediaFiles(content: Record<string, unknown>): string[] {
-  const mediaFiles: string[] = []
-  if (content.mediaUrls && Array.isArray(content.mediaUrls)) {
-    mediaFiles.push(...(content.mediaUrls as string[]))
-  }
-  if (content.mediaUrl && typeof content.mediaUrl === 'string') {
-    mediaFiles.push(content.mediaUrl)
-  }
-  return mediaFiles
-}
-
 // GET /api/posts/[id]/media - Get signed download URLs for post media
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
+
       if (auth.scopes) {
         const required: ApiKeyScope[] = ['posts:read']
         validateScopes(auth.scopes, required)
@@ -48,7 +39,16 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
 
-    const mediaFiles = extractMediaFiles(post.content as Record<string, unknown>)
+    const content = post.content as Record<string, unknown>
+    const mediaFiles: string[] = []
+
+    if (content.mediaUrls && Array.isArray(content.mediaUrls)) {
+      mediaFiles.push(...(content.mediaUrls as string[]))
+    }
+    if (content.mediaUrl && typeof content.mediaUrl === 'string') {
+      mediaFiles.push(content.mediaUrl)
+    }
+
     if (mediaFiles.length === 0) {
       return NextResponse.json({ media: [], message: 'No media attached to this post' })
     }
@@ -56,9 +56,11 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const media = await Promise.all(
       mediaFiles.map(async (fileUrl) => {
         const filename = fileUrl.split('/').pop() || fileUrl
+        const storagePath = `${userId}/${filename}`
         const { data: signedUrl } = await supabase.storage
           .from('media')
-          .createSignedUrl(`${userId}/${filename}`, 3600)
+          .createSignedUrl(storagePath, 3600)
+
         return {
           filename,
           originalUrl: fileUrl,

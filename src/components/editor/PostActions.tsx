@@ -24,6 +24,7 @@ function getPlatformUrl(post: Post): string | null {
   return null
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function PostActions({ post, onMarkAsPublished, className }: PostActionsProps) {
   const [copied, setCopied] = useState(false)
 

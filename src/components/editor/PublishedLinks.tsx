@@ -20,6 +20,7 @@ interface PublishedLinksProps {
   className?: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const PublishedLinks = ({
   post,
   onPostChange,

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description: 'Bullhorn Privacy Policy',
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function PrivacyPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">

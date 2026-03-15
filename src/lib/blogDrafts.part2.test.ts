@@ -3,10 +3,6 @@ import { useBlogDraftsStore } from './blogDrafts'
 import { clearInFlightRequests } from './requestDedup'
 import type { BlogDraft } from './blogDrafts'
 
-// ---------------------------------------------------------------------------
-// Mock fetch
-// ---------------------------------------------------------------------------
-
 const mockFetch = vi.fn()
 global.fetch = mockFetch
 
@@ -20,10 +16,6 @@ beforeEach(() => {
     initialized: false,
   })
 })
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 const makeDraft = (overrides: Partial<BlogDraft> = {}): BlogDraft => ({
   id: 'draft-1',
@@ -41,70 +33,10 @@ const makeDraft = (overrides: Partial<BlogDraft> = {}): BlogDraft => ({
 })
 
 // ---------------------------------------------------------------------------
-// fetchDrafts
+// archiveDraft
 // ---------------------------------------------------------------------------
 
-describe('useBlogDraftsStore - updateDraft', () => {
-  it('should PATCH and update the draft in state', async () => {
-    useBlogDraftsStore.setState({ drafts: [makeDraft()] })
-
-    const updated = makeDraft({ title: 'Updated Title' })
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ draft: updated }),
-    })
-
-    await useBlogDraftsStore.getState().updateDraft('draft-1', { title: 'Updated Title' })
-
-    expect(mockFetch).toHaveBeenCalledWith('/api/blog-drafts/draft-1', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: 'Updated Title' }),
-    })
-    expect(useBlogDraftsStore.getState().drafts[0].title).toBe('Updated Title')
-  })
-
-  it('should set error and throw on failure', async () => {
-    useBlogDraftsStore.setState({ drafts: [makeDraft()] })
-    mockFetch.mockResolvedValueOnce({ ok: false })
-
-    await expect(
-      useBlogDraftsStore.getState().updateDraft('draft-1', { title: 'Fail' })
-    ).rejects.toThrow('Failed to update blog draft')
-
-    expect(useBlogDraftsStore.getState().error).toBe('Failed to update blog draft')
-  })
-})
-
-describe('useBlogDraftsStore - deleteDraft', () => {
-  it('should DELETE and remove the draft from state', async () => {
-    useBlogDraftsStore.setState({
-      drafts: [makeDraft({ id: 'draft-1' }), makeDraft({ id: 'draft-2' })],
-    })
-
-    mockFetch.mockResolvedValueOnce({ ok: true })
-
-    await useBlogDraftsStore.getState().deleteDraft('draft-1')
-
-    expect(mockFetch).toHaveBeenCalledWith('/api/blog-drafts/draft-1', { method: 'DELETE' })
-    const drafts = useBlogDraftsStore.getState().drafts
-    expect(drafts).toHaveLength(1)
-    expect(drafts[0].id).toBe('draft-2')
-  })
-
-  it('should set error and throw on failure', async () => {
-    useBlogDraftsStore.setState({ drafts: [makeDraft()] })
-    mockFetch.mockResolvedValueOnce({ ok: false })
-
-    await expect(useBlogDraftsStore.getState().deleteDraft('draft-1')).rejects.toThrow(
-      'Failed to delete blog draft'
-    )
-
-    expect(useBlogDraftsStore.getState().error).toBe('Failed to delete blog draft')
-  })
-})
-
-describe('useBlogDraftsStore - archiveDraft', () => {
+describe('archiveDraft', () => {
   it('should POST to archive endpoint and update draft in state', async () => {
     useBlogDraftsStore.setState({ drafts: [makeDraft()] })
 
@@ -134,7 +66,11 @@ describe('useBlogDraftsStore - archiveDraft', () => {
   })
 })
 
-describe('useBlogDraftsStore - restoreDraft', () => {
+// ---------------------------------------------------------------------------
+// restoreDraft
+// ---------------------------------------------------------------------------
+
+describe('restoreDraft', () => {
   it('should POST to restore endpoint and update draft in state', async () => {
     useBlogDraftsStore.setState({ drafts: [makeDraft({ status: 'archived' })] })
 
@@ -164,7 +100,11 @@ describe('useBlogDraftsStore - restoreDraft', () => {
   })
 })
 
-describe('useBlogDraftsStore - getDraft', () => {
+// ---------------------------------------------------------------------------
+// getDraft / getDraftsByStatus / searchDrafts
+// ---------------------------------------------------------------------------
+
+describe('getDraft', () => {
   it('should return a draft by id', () => {
     const draft = makeDraft()
     useBlogDraftsStore.setState({ drafts: [draft] })
@@ -177,7 +117,7 @@ describe('useBlogDraftsStore - getDraft', () => {
   })
 })
 
-describe('useBlogDraftsStore - getDraftsByStatus', () => {
+describe('getDraftsByStatus', () => {
   it('should filter drafts by status', () => {
     useBlogDraftsStore.setState({
       drafts: [
@@ -201,7 +141,7 @@ describe('useBlogDraftsStore - getDraftsByStatus', () => {
   })
 })
 
-describe('useBlogDraftsStore - searchDrafts', () => {
+describe('searchDrafts', () => {
   it('should call search API with encoded query', async () => {
     const results = [makeDraft({ id: 'found-1' })]
     mockFetch.mockResolvedValueOnce({

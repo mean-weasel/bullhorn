@@ -18,6 +18,7 @@ interface ProjectCardProps {
   onDelete?: (e: React.MouseEvent) => void
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function ProjectCard({
   project,
   campaignCount = 0,

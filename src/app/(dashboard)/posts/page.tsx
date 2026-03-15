@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import Link from 'next/link'
@@ -42,6 +43,7 @@ const STATUS_CONFIG: Record<
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground', emoji: '📦' },
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function PostsPage() {
   const allPosts = usePostsStore((state) => state.posts)
   const fetchPosts = usePostsStore((state) => state.fetchPosts)

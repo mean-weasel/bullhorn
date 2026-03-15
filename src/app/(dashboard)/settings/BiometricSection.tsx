@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Fingerprint } from 'lucide-react'
 import { isNativePlatform } from '@/lib/capacitor'
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function BiometricSection() {
   const [available, setAvailable] = useState(false)
   const [biometryType, setBiometryType] = useState<string>('none')

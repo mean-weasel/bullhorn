@@ -69,6 +69,7 @@ vi.mock('@/lib/supabase/server', () => ({
   }),
 }))
 
+// eslint-disable-next-line max-lines-per-function
 describe('POST /api/import', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -150,22 +151,6 @@ describe('POST /api/import', () => {
     expect(body.imported.campaigns).toBe(1)
     expect(body.skipped.posts).toBe(0)
     expect(body.skipped.campaigns).toBe(0)
-  })
-})
-
-describe('POST /api/import - continued', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    fromCallbacks = {
-      campaigns: {
-        selectCb: () => buildSelectChain([]),
-        insertCb: () => buildInsertChain(null),
-      },
-      posts: {
-        selectCb: () => buildSelectChain([]),
-        insertCb: () => buildInsertChain(null),
-      },
-    }
   })
 
   it('skips duplicate campaigns by name', async () => {

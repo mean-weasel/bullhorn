@@ -9,6 +9,7 @@ interface EmailVerificationBannerProps {
   email: string
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function EmailVerificationBanner({ email }: EmailVerificationBannerProps) {
   const [dismissed, setDismissed] = useState(false)
   const [resending, setResending] = useState(false)

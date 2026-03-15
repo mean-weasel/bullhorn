@@ -13,6 +13,7 @@ interface IOSToggleSwitchProps {
   'aria-label'?: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function IOSToggleSwitch({
   checked,
   onChange,

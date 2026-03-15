@@ -23,6 +23,7 @@ interface IOSSegmentedControlProps<T extends string = string> {
   disabled?: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function IOSSegmentedControl<T extends string = string>({
   options,
   value,

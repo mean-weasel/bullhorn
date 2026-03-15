@@ -11,6 +11,7 @@ interface NotesSectionProps {
   className?: string
 }
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export const NotesSection = ({
   notes,
   showNotes,

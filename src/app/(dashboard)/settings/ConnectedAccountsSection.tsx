@@ -70,6 +70,7 @@ function StatusBadge({ account }: { account: SocialAccount }) {
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 function ConnectedAccount({
   account,
   onDisconnect,
@@ -189,6 +190,7 @@ function ConnectButton({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export function ConnectedAccountsSection({
   accounts,
   loading,

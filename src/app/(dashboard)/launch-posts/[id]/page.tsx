@@ -6,6 +6,7 @@ import { Loader2, AlertCircle } from 'lucide-react'
 import { LaunchPostForm } from '@/components/launch-posts/LaunchPostForm'
 import { LaunchPost } from '@/lib/launchPosts'
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export default function EditLaunchPostPage() {
   const params = useParams()
   const router = useRouter()

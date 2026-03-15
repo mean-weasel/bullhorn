@@ -64,6 +64,7 @@ const localStorageMock = (() => {
   }
 })()
 
+// eslint-disable-next-line max-lines-per-function
 describe('useLocalDraft logic', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -212,6 +213,7 @@ describe('useLocalDraft logic', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   describe('handles localStorage errors gracefully', () => {
     it('returns null when localStorage.getItem throws', () => {
       localStorageMock.getItem.mockImplementationOnce(() => {

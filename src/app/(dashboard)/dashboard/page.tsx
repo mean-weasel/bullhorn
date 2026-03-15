@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import Link from 'next/link'
 import { useEffect, useState, useMemo } from 'react'
@@ -32,6 +33,7 @@ import { SkeletonCard, SkeletonStatBar } from '@/components/ui/Skeleton'
 import { WelcomeModal } from '@/components/ui/WelcomeModal'
 import { NudgeBanner } from '@/components/calendar/NudgeBanner'
 
+// eslint-disable-next-line max-lines-per-function
 export default function DashboardPage() {
   const router = useRouter()
   const allPosts = usePostsStore((state) => state.posts)

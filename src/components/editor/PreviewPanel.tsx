@@ -53,6 +53,7 @@ export const PreviewPanel = ({
 
 // --- Sub-components for each platform preview ---
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 const TwitterPreview = ({ content, mediaUrls }: { content: string; mediaUrls: string[] }) => {
   return (
     <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>

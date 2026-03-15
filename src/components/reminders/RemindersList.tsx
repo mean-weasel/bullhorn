@@ -21,6 +21,7 @@ interface RemindersListProps {
   showCompleted?: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function RemindersList({
   limit = 0,
   showAddButton = true,
@@ -207,6 +208,7 @@ export function RemindersList({
 // ReminderCard subcomponent
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line max-lines-per-function
 function ReminderCard({
   reminder,
   isOverdue,

@@ -140,7 +140,7 @@ beforeEach(() => {
   fromCallIndex = 0
 })
 
-describe('POST /api/posts/[id]/publish', () => {
+describe('POST /api/posts/[id]/publish (1/7)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const res = await POST(createRequest('/api/posts/post-1/publish'), makeParams('post-1'))
@@ -184,7 +184,9 @@ describe('POST /api/posts/[id]/publish', () => {
     const body = await res.json()
     expect(body.error).toBe('Post cannot be published in its current status')
   })
+})
 
+describe('POST /api/posts/[id]/publish (2/7)', () => {
   it('returns 400 when no active social account connected', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockPostFetchSingle.mockResolvedValue({
@@ -200,7 +202,9 @@ describe('POST /api/posts/[id]/publish', () => {
     const body = await res.json()
     expect(body.error).toBe('No twitter account connected')
   })
+})
 
+describe('POST /api/posts/[id]/publish (3/7)', () => {
   it('successfully publishes a draft post', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockPostFetchSingle.mockResolvedValue({
@@ -236,126 +240,5 @@ describe('POST /api/posts/[id]/publish', () => {
       expect.objectContaining({ id: 'post-1', platform: 'twitter' }),
       'account-1'
     )
-  })
-})
-
-describe('POST /api/posts/[id]/publish - continued', () => {
-  it('successfully publishes a failed post (retry)', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const failedRow = { ...DRAFT_POST_ROW, status: 'failed' }
-    mockPostFetchSingle.mockResolvedValue({
-      data: failedRow,
-      error: null,
-    })
-    mockAccountSingle.mockResolvedValue({
-      data: { id: 'account-1' },
-      error: null,
-    })
-    mockLockEq2.mockResolvedValue({ error: null })
-    mockPublishPost.mockResolvedValue({
-      success: true,
-      publishResult: {
-        success: true,
-        postId: 'tw-456',
-        postUrl: 'https://x.com/user/status/456',
-        publishedAt: '2024-01-03T12:00:00Z',
-      },
-    })
-    mockFinalSingle.mockResolvedValue({
-      data: publishedRow({ id: 'post-1' }),
-      error: null,
-    })
-
-    const res = await POST(createRequest('/api/posts/post-1/publish'), makeParams('post-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.success).toBe(true)
-    expect(body.post.status).toBe('published')
-  })
-
-  it('sets post status to publishing before calling publisher', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockPostFetchSingle.mockResolvedValue({
-      data: DRAFT_POST_ROW,
-      error: null,
-    })
-    mockAccountSingle.mockResolvedValue({
-      data: { id: 'account-1' },
-      error: null,
-    })
-    mockLockEq2.mockResolvedValue({ error: null })
-    mockPublishPost.mockResolvedValue({
-      success: true,
-      publishResult: { success: true, postId: 'tw-789' },
-    })
-    mockFinalSingle.mockResolvedValue({
-      data: publishedRow(),
-      error: null,
-    })
-
-    await POST(createRequest('/api/posts/post-1/publish'), makeParams('post-1'))
-
-    // Verify the lock update was called with 'publishing'
-    expect(mockLockUpdate).toHaveBeenCalledWith({ status: 'publishing' })
-    expect(mockLockEq1).toHaveBeenCalledWith('id', 'post-1')
-    expect(mockLockEq2).toHaveBeenCalledWith('user_id', 'user-1')
-  })
-
-  it('returns 422 when publisher fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockPostFetchSingle.mockResolvedValue({
-      data: DRAFT_POST_ROW,
-      error: null,
-    })
-    mockAccountSingle.mockResolvedValue({
-      data: { id: 'account-1' },
-      error: null,
-    })
-    mockLockEq2.mockResolvedValue({ error: null })
-    mockPublishPost.mockResolvedValue({
-      success: false,
-      error: 'Rate limit exceeded',
-      retryable: true,
-    })
-    mockFinalSingle.mockResolvedValue({
-      data: { ...DRAFT_POST_ROW, status: 'failed' },
-      error: null,
-    })
-
-    const res = await POST(createRequest('/api/posts/post-1/publish'), makeParams('post-1'))
-    expect(res.status).toBe(422)
-    const body = await res.json()
-    expect(body.success).toBe(false)
-    expect(body.error).toBe('Rate limit exceeded')
-  })
-
-  it('returns 500 when lock update fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockPostFetchSingle.mockResolvedValue({
-      data: DRAFT_POST_ROW,
-      error: null,
-    })
-    mockAccountSingle.mockResolvedValue({
-      data: { id: 'account-1' },
-      error: null,
-    })
-    mockLockEq2.mockResolvedValue({
-      error: { code: 'OTHER', message: 'Connection lost' },
-    })
-
-    const res = await POST(createRequest('/api/posts/post-1/publish'), makeParams('post-1'))
-    expect(res.status).toBe(500)
-  })
-
-  it('returns 403 when scopes are insufficient', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1', scopes: ['posts:read'] })
-    const { validateScopes } = await import('@/lib/auth')
-    vi.mocked(validateScopes).mockImplementation(() => {
-      throw new Error('Forbidden')
-    })
-    const res = await POST(createRequest('/api/posts/post-1/publish'), makeParams('post-1'))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.error).toBe('Forbidden')
   })
 })

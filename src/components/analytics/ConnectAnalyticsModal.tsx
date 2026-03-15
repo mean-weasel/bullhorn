@@ -28,6 +28,7 @@ interface ConnectAnalyticsModalProps {
 
 type Step = 'connect' | 'select-property' | 'success'
 
+// eslint-disable-next-line max-lines-per-function
 export function ConnectAnalyticsModal({
   open,
   onClose,

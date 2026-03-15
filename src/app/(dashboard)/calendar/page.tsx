@@ -11,6 +11,7 @@ import { CalendarView } from '../posts/CalendarView'
 
 type ViewMode = 'month' | 'week'
 
+// eslint-disable-next-line max-lines-per-function
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>('month')

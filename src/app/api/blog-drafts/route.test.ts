@@ -90,7 +90,7 @@ beforeEach(() => {
 // GET /api/blog-drafts
 // ---------------------------------------------------------------------------
 
-describe('GET /api/blog-drafts', () => {
+describe('GET /api/blog-drafts (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/blog-drafts')
@@ -130,7 +130,9 @@ describe('GET /api/blog-drafts', () => {
     expect(body.drafts[0].title).toBe('My Blog Post')
     expect(body.drafts[0].tags).toEqual(['tech'])
   })
+})
 
+describe('GET /api/blog-drafts (2/2)', () => {
   it('returns empty array when user has no drafts', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockQueryData = { data: [], error: null }
@@ -140,9 +142,7 @@ describe('GET /api/blog-drafts', () => {
     const body = await res.json()
     expect(body.drafts).toEqual([])
   })
-})
 
-describe('GET /api/blog-drafts - continued', () => {
   it('returns 500 when database query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockQueryData = { data: null, error: { message: 'DB error' } }
@@ -174,7 +174,7 @@ describe('GET /api/blog-drafts - continued', () => {
 // POST /api/blog-drafts
 // ---------------------------------------------------------------------------
 
-describe('POST /api/blog-drafts', () => {
+describe('POST /api/blog-drafts (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/blog-drafts', {
@@ -202,7 +202,9 @@ describe('POST /api/blog-drafts', () => {
     const body = await res.json()
     expect(body.error).toBe('Blog draft limit reached')
   })
+})
 
+describe('POST /api/blog-drafts (2/3)', () => {
   it('creates draft successfully and returns 201', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({
@@ -240,7 +242,7 @@ describe('POST /api/blog-drafts', () => {
   })
 })
 
-describe('POST /api/blog-drafts - continued', () => {
+describe('POST /api/blog-drafts (3/3)', () => {
   it('returns 400 for invalid input (bad status)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({

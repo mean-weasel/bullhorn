@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ProfileInfoSection, AccountSection, DangerZoneSection } from './ProfileSections'
 
+// eslint-disable-next-line max-lines-per-function
 export default function ProfilePage() {
   const router = useRouter()
   const supabase = createClient()

@@ -30,6 +30,7 @@ import {
   sendLocalNotification,
 } from '@/lib/pushNotifications'
 
+// eslint-disable-next-line max-lines-per-function
 describe('usePushNotifications logic', () => {
   const mockIsPushSupported = vi.mocked(isPushSupported)
   const mockRequestPermission = vi.mocked(requestPermission)
@@ -103,6 +104,7 @@ describe('usePushNotifications logic', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   describe('subscribe flow', () => {
     it('calls subscribeToPush and returns true on success', async () => {
       const mockSubscription = {} as PushSubscription

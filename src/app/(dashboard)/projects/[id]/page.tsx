@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
@@ -29,6 +30,7 @@ import { ProjectSettingsTab } from './ProjectSettingsTab'
 
 type TabType = 'campaigns' | 'settings'
 
+// eslint-disable-next-line max-lines-per-function
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: paramId } = use(params)
   const router = useRouter()

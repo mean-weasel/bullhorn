@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { parseJsonBody } from './auth'
 
-describe('parseJsonBody', () => {
+describe('parseJsonBody (1/2)', () => {
   it('returns parsed data for valid JSON', async () => {
     const body = JSON.stringify({ name: 'test', value: 42 })
     const request = new Request('http://localhost', {
@@ -40,7 +40,9 @@ describe('parseJsonBody', () => {
       expect(result.error.status).toBe(400)
     }
   })
+})
 
+describe('parseJsonBody (2/2)', () => {
   it('works with generic type parameter', async () => {
     interface TestBody {
       name: string

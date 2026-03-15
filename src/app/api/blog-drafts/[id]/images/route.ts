@@ -15,20 +15,26 @@ const addImageSchema = z.object({
 // GET /api/blog-drafts/[id]/images - List images for a blog draft
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['blog:read'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['blog:read'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
     const supabase = await createClient()
 
+    // Defense-in-depth: filter by user_id
     const { data: draft, error } = await supabase
       .from('blog_drafts')
       .select('images')
@@ -51,25 +57,23 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   }
 }
 
-function buildImageEntry(parsed: z.infer<typeof addImageSchema>) {
-  return {
-    filename: parsed.filename || parsed.url || parsed.sourcePath,
-    url: parsed.url,
-    addedAt: new Date().toISOString(),
-  }
-}
-
 // POST /api/blog-drafts/[id]/images - Add image to blog draft
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['blog:write'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['blog:write'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -77,7 +81,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = addImageSchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = addImageSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -85,13 +90,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       )
     }
 
-    if (!parsed.data.filename && !parsed.data.url && !parsed.data.sourcePath) {
+    const { filename, url, sourcePath } = parsed.data
+
+    if (!filename && !url && !sourcePath) {
       return NextResponse.json(
         { error: 'filename, url, or sourcePath is required' },
         { status: 400 }
       )
     }
 
+    // Get current draft (with ownership check)
     const { data: draft, error: fetchError } = await supabase
       .from('blog_drafts')
       .select('images')
@@ -107,7 +115,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const images = [...(draft.images || []), buildImageEntry(parsed.data)]
+    // Add new image to array
+    const images = draft.images || []
+    const newImage = {
+      filename: filename || url || sourcePath,
+      url: url,
+      addedAt: new Date().toISOString(),
+    }
+    images.push(newImage)
+
+    // Update draft (with ownership check)
     const { data, error } = await supabase
       .from('blog_drafts')
       .update({ images })
@@ -121,6 +138,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
+    // Transform to camelCase for frontend
     return NextResponse.json(transformDraftFromDb(data), { status: 201 })
   } catch (error) {
     console.error('Error adding image to blog draft:', error)

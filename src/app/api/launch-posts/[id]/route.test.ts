@@ -73,7 +73,7 @@ beforeEach(() => {
 // GET /api/launch-posts/[id]
 // ---------------------------------------------------------------------------
 
-describe('GET /api/launch-posts/[id]', () => {
+describe('GET /api/launch-posts/[id] (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/launch-posts/lp-1')
@@ -112,7 +112,7 @@ describe('GET /api/launch-posts/[id]', () => {
   })
 })
 
-describe('GET /api/launch-posts/[id] - continued', () => {
+describe('GET /api/launch-posts/[id] (2/2)', () => {
   it('returns 404 when launch post not found (PGRST116)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -144,7 +144,7 @@ describe('GET /api/launch-posts/[id] - continued', () => {
 // PATCH /api/launch-posts/[id]
 // ---------------------------------------------------------------------------
 
-describe('PATCH /api/launch-posts/[id]', () => {
+describe('PATCH /api/launch-posts/[id] (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/launch-posts/lp-1', {
@@ -166,7 +166,9 @@ describe('PATCH /api/launch-posts/[id]', () => {
     const body = await res.json()
     expect(body.error).toBe('Invalid input')
   })
+})
 
+describe('PATCH /api/launch-posts/[id] (2/3)', () => {
   it('updates launch post successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const updatedPost = {
@@ -196,9 +198,7 @@ describe('PATCH /api/launch-posts/[id]', () => {
     expect(body.launchPost.title).toBe('Updated Launch')
     expect(body.launchPost.status).toBe('scheduled')
   })
-})
 
-describe('PATCH /api/launch-posts/[id] - continued', () => {
   it('returns 404 when launch post not found on update', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockUpdateSingle.mockResolvedValue({
@@ -214,7 +214,9 @@ describe('PATCH /api/launch-posts/[id] - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Launch post not found')
   })
+})
 
+describe('PATCH /api/launch-posts/[id] (3/3)', () => {
   it('returns 500 when update fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockUpdateSingle.mockResolvedValue({

@@ -23,6 +23,7 @@ interface AddReminderModalProps {
   defaultCampaignId?: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function AddReminderModal({
   open,
   onClose,

@@ -21,20 +21,26 @@ interface RouteContext {
 // GET /api/projects/[id] - Get single project
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['projects:read'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:read'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await context.params
     const supabase = await createClient()
 
+    // Defense-in-depth: filter by user_id even though RLS should handle this
     const { data, error } = await supabase
       .from('projects')
       .select('*')
@@ -59,16 +65,22 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 }
 
 // PATCH /api/projects/[id] - Update project
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['projects:write'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:write'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -76,7 +88,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = updateProjectSchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = updateProjectSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -86,11 +99,16 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     if (parsed.data.name !== undefined) {
       const trimmedName = parsed.data.name.trim()
-      if (!trimmedName) return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 })
+      if (!trimmedName) {
+        return NextResponse.json({ error: 'Name cannot be empty' }, { status: 400 })
+      }
       parsed.data.name = trimmedName
     }
 
+    // Transform updates to snake_case
     const updates = transformProjectToDb(parsed.data)
+
+    // Update with ownership check (RLS handles this, but add defense-in-depth)
     const { data, error } = await supabase
       .from('projects')
       .update(updates)
@@ -118,26 +136,33 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 // DELETE /api/projects/[id] - Delete project (cascades to campaigns and posts)
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['projects:write'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:write'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await context.params
     const supabase = await createClient()
 
+    // Get counts for confirmation (optional: could be done client-side)
     const { count: campaignCount } = await supabase
       .from('campaigns')
       .select('*', { count: 'exact', head: true })
       .eq('project_id', id)
       .eq('user_id', userId)
 
+    // Delete with ownership check (cascading delete happens via FK)
     const { error } = await supabase.from('projects').delete().eq('id', id).eq('user_id', userId)
 
     if (error) {

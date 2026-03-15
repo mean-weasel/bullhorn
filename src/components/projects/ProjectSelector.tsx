@@ -21,6 +21,7 @@ interface ProjectSelectorProps {
   disabled?: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function ProjectSelector({
   value,
   onChange,
@@ -188,6 +189,7 @@ export function ProjectSelector({
               No projects yet
             </div>
           ) : (
+            // eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
             projects.map((project) => (
               <button
                 key={project.id}

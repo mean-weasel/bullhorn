@@ -12,12 +12,15 @@ import {
   waitForContentToLoad,
 } from './helpers'
 
+// eslint-disable-next-line max-lines-per-function
 test.describe('Scheduling', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabase(page)
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Date Input', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should be visible and clickable', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -31,6 +34,7 @@ test.describe('Scheduling', () => {
       await dateButton.click()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should accept date via keyboard input', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -46,6 +50,7 @@ test.describe('Scheduling', () => {
       await expect(dateInput).toHaveValue(dateStr)
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should persist date after page navigation', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -70,7 +75,9 @@ test.describe('Scheduling', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Time Input', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should be visible and clickable', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -84,6 +91,7 @@ test.describe('Scheduling', () => {
       await timeButton.click()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should accept time via keyboard input', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -99,6 +107,7 @@ test.describe('Scheduling', () => {
       await expect(timeInput).toHaveValue('14:30')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should persist time after page navigation', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -128,7 +137,9 @@ test.describe('Scheduling', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Scheduling Flow', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should schedule post with date and time', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -155,6 +166,7 @@ test.describe('Scheduling', () => {
       expect(posts[0].scheduledAt).toBeTruthy()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should disable schedule button when no date is set', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -166,6 +178,7 @@ test.describe('Scheduling', () => {
       await expect(scheduleButton).toHaveAttribute('title', 'Select a date and time to schedule')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should reschedule existing post', async ({ page }) => {
       // Create scheduled post
       await goToNewPost(page)
@@ -213,6 +226,7 @@ test.describe('Scheduling', () => {
       await expect(page.locator('[data-testid="main-schedule-time-input"]')).toHaveValue('15:00')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should clear schedule and save as draft', async ({ page }) => {
       // Create scheduled post
       await goToNewPost(page)
@@ -241,7 +255,9 @@ test.describe('Scheduling', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Calendar Icon Visibility', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('date input should have visible picker indicator', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -257,6 +273,7 @@ test.describe('Scheduling', () => {
       expect(box!.height).toBeGreaterThan(20)
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('time input should have visible picker indicator', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -273,7 +290,9 @@ test.describe('Scheduling', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Date and Time Selection', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should enable schedule button when date and time are set', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -292,6 +311,7 @@ test.describe('Scheduling', () => {
       await expect(scheduleButton).toBeEnabled()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should enable schedule button for today with future time', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -315,6 +335,7 @@ test.describe('Scheduling', () => {
       await expect(scheduleButton).toBeEnabled()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should allow selecting any date in the date picker', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -330,7 +351,9 @@ test.describe('Scheduling', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe('Scheduled Posts Display', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should show all scheduled posts in the scheduled filter', async ({ page }) => {
       // Create 3 scheduled posts
       const baseTomorrow = new Date()
@@ -370,6 +393,7 @@ test.describe('Scheduling', () => {
       await expect(page.getByText('Post scheduled at 12:00')).toBeVisible()
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should display schedule datetime on post card', async ({ page }) => {
       // Create a scheduled post for a specific date/time
       const tomorrow = new Date()

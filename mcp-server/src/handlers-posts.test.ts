@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockGet = vi.fn()
@@ -153,7 +154,9 @@ async function handleSearchPosts(args: { query?: string; limit?: number }): Prom
   return ok({ count: posts.length, posts })
 }
 
-describe('Post Tool Handlers - create_post', () => {
+// eslint-disable-next-line max-lines-per-function
+describe('Post Tool Handlers', () => {
+  // eslint-disable-next-line max-lines-per-function
   beforeEach(() => {
     mockGet.mockReset()
     mockPost.mockReset()
@@ -162,417 +165,397 @@ describe('Post Tool Handlers - create_post', () => {
     _resetClient()
   })
 
-  it('should create a twitter post with valid content', async () => {
-    const mockPostData = {
-      id: 'post-1',
-      platform: 'twitter',
-      content: { text: 'Hello world' },
-      status: 'draft',
-    }
-    mockPost.mockResolvedValueOnce({ post: mockPostData })
+  // eslint-disable-next-line max-lines-per-function
+  describe('create_post', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should create a twitter post with valid content', async () => {
+      const mockPostData = {
+        id: 'post-1',
+        platform: 'twitter',
+        content: { text: 'Hello world' },
+        status: 'draft',
+      }
+      mockPost.mockResolvedValueOnce({ post: mockPostData })
 
-    const result = await handleCreatePost({
-      platform: 'twitter',
-      content: { text: 'Hello world' },
-    })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.post).toEqual(mockPostData)
-  })
-
-  it('should create a linkedin post with valid content', async () => {
-    const mockPostData = {
-      id: 'post-2',
-      platform: 'linkedin',
-      content: { text: 'Professional update', visibility: 'public' },
-      status: 'draft',
-    }
-    mockPost.mockResolvedValueOnce({ post: mockPostData })
-
-    const result = await handleCreatePost({
-      platform: 'linkedin',
-      content: { text: 'Professional update', visibility: 'public' },
-    })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.post).toEqual(mockPostData)
-  })
-
-  it('should create a reddit post with valid content', async () => {
-    const mockPostData = {
-      id: 'post-3',
-      platform: 'reddit',
-      content: { subreddit: 'test', title: 'Test Post' },
-      status: 'draft',
-    }
-    mockPost.mockResolvedValueOnce({ post: mockPostData })
-
-    const result = await handleCreatePost({
-      platform: 'reddit',
-      content: { subreddit: 'test', title: 'Test Post' },
-    })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.post).toEqual(mockPostData)
-  })
-
-  it('should return error for invalid platform', async () => {
-    const result = await handleCreatePost({
-      platform: 'instagram',
-      content: { text: 'hello' },
-    })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain(
-      'platform is required and must be one of: twitter, linkedin, reddit'
-    )
-  })
-
-  it('should return error for missing platform', async () => {
-    const result = await handleCreatePost({
-      content: { text: 'hello' },
-    })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('platform is required')
-  })
-
-  it('should return error for missing content', async () => {
-    const result = await handleCreatePost({
-      platform: 'twitter',
-    })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('content is required')
-  })
-})
-
-describe('Post Tool Handlers - create_post - continued', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
-  })
-
-  it('should return error for twitter content without text', async () => {
-    const result = await handleCreatePost({
-      platform: 'twitter',
-      content: { mediaUrls: ['url'] },
-    })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Twitter content requires a non-empty "text" field')
-  })
-
-  it('should return error for reddit content without subreddit', async () => {
-    const result = await handleCreatePost({
-      platform: 'reddit',
-      content: { title: 'Test' },
-    })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Reddit content requires: subreddit')
-  })
-
-  it('should return error for reddit content without title', async () => {
-    const result = await handleCreatePost({
-      platform: 'reddit',
-      content: { subreddit: 'test' },
-    })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Reddit content requires: title')
-  })
-
-  it('should return error for linkedin content with invalid visibility', async () => {
-    const result = await handleCreatePost({
-      platform: 'linkedin',
-      content: { text: 'test', visibility: 'private' },
-    })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('LinkedIn visibility must be')
-  })
-
-  it('should pass scheduledAt, status, notes, and campaignId', async () => {
-    const mockPostData = { id: 'post-4', platform: 'twitter', status: 'scheduled' }
-    mockPost.mockResolvedValueOnce({ post: mockPostData })
-
-    await handleCreatePost({
-      platform: 'twitter',
-      content: { text: 'Scheduled post' },
-      scheduledAt: '2026-03-01T10:00:00Z',
-      status: 'scheduled',
-      notes: 'A note',
-      campaignId: 'campaign-1',
+      const result = await handleCreatePost({
+        platform: 'twitter',
+        content: { text: 'Hello world' },
+      })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.post).toEqual(mockPostData)
     })
 
-    expect(mockPost).toHaveBeenCalledWith('/posts', {
-      platform: 'twitter',
-      content: { text: 'Scheduled post' },
-      scheduledAt: '2026-03-01T10:00:00Z',
-      status: 'scheduled',
-      notes: 'A note',
-      campaignId: 'campaign-1',
-      groupId: null,
-      groupType: null,
+    // eslint-disable-next-line max-lines-per-function
+    it('should create a linkedin post with valid content', async () => {
+      const mockPostData = {
+        id: 'post-2',
+        platform: 'linkedin',
+        content: { text: 'Professional update', visibility: 'public' },
+        status: 'draft',
+      }
+      mockPost.mockResolvedValueOnce({ post: mockPostData })
+
+      const result = await handleCreatePost({
+        platform: 'linkedin',
+        content: { text: 'Professional update', visibility: 'public' },
+      })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.post).toEqual(mockPostData)
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should create a reddit post with valid content', async () => {
+      const mockPostData = {
+        id: 'post-3',
+        platform: 'reddit',
+        content: { subreddit: 'test', title: 'Test Post' },
+        status: 'draft',
+      }
+      mockPost.mockResolvedValueOnce({ post: mockPostData })
+
+      const result = await handleCreatePost({
+        platform: 'reddit',
+        content: { subreddit: 'test', title: 'Test Post' },
+      })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.post).toEqual(mockPostData)
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error for invalid platform', async () => {
+      const result = await handleCreatePost({
+        platform: 'instagram',
+        content: { text: 'hello' },
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain(
+        'platform is required and must be one of: twitter, linkedin, reddit'
+      )
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error for missing platform', async () => {
+      const result = await handleCreatePost({
+        content: { text: 'hello' },
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('platform is required')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error for missing content', async () => {
+      const result = await handleCreatePost({
+        platform: 'twitter',
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('content is required')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error for twitter content without text', async () => {
+      const result = await handleCreatePost({
+        platform: 'twitter',
+        content: { mediaUrls: ['url'] },
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Twitter content requires a non-empty "text" field')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error for reddit content without subreddit', async () => {
+      const result = await handleCreatePost({
+        platform: 'reddit',
+        content: { title: 'Test' },
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Reddit content requires: subreddit')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error for reddit content without title', async () => {
+      const result = await handleCreatePost({
+        platform: 'reddit',
+        content: { subreddit: 'test' },
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Reddit content requires: title')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error for linkedin content with invalid visibility', async () => {
+      const result = await handleCreatePost({
+        platform: 'linkedin',
+        content: { text: 'test', visibility: 'private' },
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('LinkedIn visibility must be')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should pass scheduledAt, status, notes, and campaignId', async () => {
+      const mockPostData = { id: 'post-4', platform: 'twitter', status: 'scheduled' }
+      mockPost.mockResolvedValueOnce({ post: mockPostData })
+
+      await handleCreatePost({
+        platform: 'twitter',
+        content: { text: 'Scheduled post' },
+        scheduledAt: '2026-03-01T10:00:00Z',
+        status: 'scheduled',
+        notes: 'A note',
+        campaignId: 'campaign-1',
+      })
+
+      expect(mockPost).toHaveBeenCalledWith('/posts', {
+        platform: 'twitter',
+        content: { text: 'Scheduled post' },
+        scheduledAt: '2026-03-01T10:00:00Z',
+        status: 'scheduled',
+        notes: 'A note',
+        campaignId: 'campaign-1',
+        groupId: null,
+        groupType: null,
+      })
     })
   })
-})
 
-describe('Post Tool Handlers - get_post', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
-  })
+  // eslint-disable-next-line max-lines-per-function
+  describe('get_post', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should return post when found', async () => {
+      const mockPostData = { id: 'post-1', platform: 'twitter', content: { text: 'Hello' } }
+      mockGet.mockResolvedValueOnce({ post: mockPostData })
 
-  it('should return post when found', async () => {
-    const mockPostData = { id: 'post-1', platform: 'twitter', content: { text: 'Hello' } }
-    mockGet.mockResolvedValueOnce({ post: mockPostData })
-
-    const result = await handleGetPost({ id: 'post-1' })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.post).toEqual(mockPostData)
-  })
-
-  it('should return error when post not found', async () => {
-    mockGet.mockRejectedValueOnce(new Error('Not found'))
-
-    const result = await handleGetPost({ id: 'nonexistent' })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Post with ID nonexistent not found')
-  })
-})
-
-describe('Post Tool Handlers - update_post', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
-  })
-
-  it('should update post with valid data', async () => {
-    const mockPostData = { id: 'post-1', platform: 'twitter', status: 'scheduled' }
-    mockPatch.mockResolvedValueOnce({ post: mockPostData })
-
-    const result = await handleUpdatePost({ id: 'post-1', status: 'scheduled' })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.post).toEqual(mockPostData)
-  })
-
-  it('should return error when post not found', async () => {
-    mockPatch.mockRejectedValueOnce(new Error('Not found'))
-
-    const result = await handleUpdatePost({ id: 'nonexistent', status: 'draft' })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Post with ID nonexistent not found')
-  })
-
-  it('should validate content when both platform and content are provided', async () => {
-    const result = await handleUpdatePost({
-      id: 'post-1',
-      platform: 'twitter',
-      content: { mediaUrls: [] },
+      const result = await handleGetPost({ id: 'post-1' })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.post).toEqual(mockPostData)
     })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Twitter content requires a non-empty "text" field')
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when post not found', async () => {
+      mockGet.mockRejectedValueOnce(new Error('Not found'))
+
+      const result = await handleGetPost({ id: 'nonexistent' })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Post with ID nonexistent not found')
+    })
   })
 
-  it('should skip validation when only content is provided without platform', async () => {
-    const mockPostData = { id: 'post-1', content: { text: 'Updated' } }
-    mockPatch.mockResolvedValueOnce({ post: mockPostData })
+  // eslint-disable-next-line max-lines-per-function
+  describe('update_post', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should update post with valid data', async () => {
+      const mockPostData = { id: 'post-1', platform: 'twitter', status: 'scheduled' }
+      mockPatch.mockResolvedValueOnce({ post: mockPostData })
 
-    const result = await handleUpdatePost({ id: 'post-1', content: { text: 'Updated' } })
-    expect(result.isError).toBeUndefined()
-  })
-})
+      const result = await handleUpdatePost({ id: 'post-1', status: 'scheduled' })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.post).toEqual(mockPostData)
+    })
 
-describe('Post Tool Handlers - delete_post', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when post not found', async () => {
+      mockPatch.mockRejectedValueOnce(new Error('Not found'))
 
-  it('should delete post when confirmed', async () => {
-    mockDelete.mockResolvedValueOnce({})
+      const result = await handleUpdatePost({ id: 'nonexistent', status: 'draft' })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Post with ID nonexistent not found')
+    })
 
-    const result = await handleDeletePost({ id: 'post-1', confirmed: true })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.message).toContain('Post post-1 permanently deleted')
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should validate content when both platform and content are provided', async () => {
+      const result = await handleUpdatePost({
+        id: 'post-1',
+        platform: 'twitter',
+        content: { mediaUrls: [] },
+      })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Twitter content requires a non-empty "text" field')
+    })
 
-  it('should return error when not confirmed', async () => {
-    const result = await handleDeletePost({ id: 'post-1', confirmed: false })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Deletion not confirmed')
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should skip validation when only content is provided without platform', async () => {
+      const mockPostData = { id: 'post-1', content: { text: 'Updated' } }
+      mockPatch.mockResolvedValueOnce({ post: mockPostData })
 
-  it('should return error when post not found', async () => {
-    mockDelete.mockRejectedValueOnce(new Error('Not found'))
-
-    const result = await handleDeletePost({ id: 'nonexistent', confirmed: true })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Post with ID nonexistent not found')
-  })
-})
-
-describe('Post Tool Handlers - archive_post', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
+      const result = await handleUpdatePost({ id: 'post-1', content: { text: 'Updated' } })
+      expect(result.isError).toBeUndefined()
+    })
   })
 
-  it('should archive post when confirmed', async () => {
-    const mockPostData = { id: 'post-1', status: 'archived' }
-    mockPatch.mockResolvedValueOnce({ post: mockPostData })
+  // eslint-disable-next-line max-lines-per-function
+  describe('delete_post', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should delete post when confirmed', async () => {
+      mockDelete.mockResolvedValueOnce({})
 
-    const result = await handleArchivePost({ id: 'post-1', confirmed: true })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.post.status).toBe('archived')
+      const result = await handleDeletePost({ id: 'post-1', confirmed: true })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.message).toContain('Post post-1 permanently deleted')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when not confirmed', async () => {
+      const result = await handleDeletePost({ id: 'post-1', confirmed: false })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Deletion not confirmed')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when post not found', async () => {
+      mockDelete.mockRejectedValueOnce(new Error('Not found'))
+
+      const result = await handleDeletePost({ id: 'nonexistent', confirmed: true })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Post with ID nonexistent not found')
+    })
   })
 
-  it('should return error when not confirmed', async () => {
-    const result = await handleArchivePost({ id: 'post-1', confirmed: false })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Archive not confirmed')
+  // eslint-disable-next-line max-lines-per-function
+  describe('archive_post', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should archive post when confirmed', async () => {
+      const mockPostData = { id: 'post-1', status: 'archived' }
+      mockPatch.mockResolvedValueOnce({ post: mockPostData })
+
+      const result = await handleArchivePost({ id: 'post-1', confirmed: true })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.post.status).toBe('archived')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when not confirmed', async () => {
+      const result = await handleArchivePost({ id: 'post-1', confirmed: false })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Archive not confirmed')
+    })
+
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when post not found', async () => {
+      mockPatch.mockRejectedValueOnce(new Error('Not found'))
+
+      const result = await handleArchivePost({ id: 'nonexistent', confirmed: true })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Post with ID nonexistent not found')
+    })
   })
 
-  it('should return error when post not found', async () => {
-    mockPatch.mockRejectedValueOnce(new Error('Not found'))
+  // eslint-disable-next-line max-lines-per-function
+  describe('restore_post', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should restore archived post', async () => {
+      const mockPostData = { id: 'post-1', status: 'draft' }
+      mockPatch.mockResolvedValueOnce({ post: mockPostData })
 
-    const result = await handleArchivePost({ id: 'nonexistent', confirmed: true })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Post with ID nonexistent not found')
-  })
-})
+      const result = await handleRestorePost({ id: 'post-1' })
+      expect(result.isError).toBeUndefined()
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.post.status).toBe('draft')
+    })
 
-describe('Post Tool Handlers - restore_post', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when post not found', async () => {
+      mockPatch.mockRejectedValueOnce(new Error('Not found'))
 
-  it('should restore archived post', async () => {
-    const mockPostData = { id: 'post-1', status: 'draft' }
-    mockPatch.mockResolvedValueOnce({ post: mockPostData })
-
-    const result = await handleRestorePost({ id: 'post-1' })
-    expect(result.isError).toBeUndefined()
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.post.status).toBe('draft')
+      const result = await handleRestorePost({ id: 'nonexistent' })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('Post with ID nonexistent not found')
+    })
   })
 
-  it('should return error when post not found', async () => {
-    mockPatch.mockRejectedValueOnce(new Error('Not found'))
+  // eslint-disable-next-line max-lines-per-function
+  describe('list_posts', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should list posts with no filters', async () => {
+      const mockPosts = [{ id: 'p1' }, { id: 'p2' }]
+      mockGet.mockResolvedValueOnce({ posts: mockPosts })
 
-    const result = await handleRestorePost({ id: 'nonexistent' })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('Post with ID nonexistent not found')
-  })
-})
+      const result = await handleListPosts({})
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.count).toBe(2)
+      expect(response.posts).toEqual(mockPosts)
+    })
 
-describe('Post Tool Handlers - list_posts', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should pass status filter', async () => {
+      mockGet.mockResolvedValueOnce({ posts: [] })
 
-  it('should list posts with no filters', async () => {
-    const mockPosts = [{ id: 'p1' }, { id: 'p2' }]
-    mockGet.mockResolvedValueOnce({ posts: mockPosts })
+      await handleListPosts({ status: 'draft' })
+      expect(mockGet).toHaveBeenCalledWith('/posts', expect.objectContaining({ status: 'draft' }))
+    })
 
-    const result = await handleListPosts({})
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.count).toBe(2)
-    expect(response.posts).toEqual(mockPosts)
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should pass platform filter', async () => {
+      mockGet.mockResolvedValueOnce({ posts: [] })
 
-  it('should pass status filter', async () => {
-    mockGet.mockResolvedValueOnce({ posts: [] })
+      await handleListPosts({ platform: 'twitter' })
+      expect(mockGet).toHaveBeenCalledWith(
+        '/posts',
+        expect.objectContaining({ platform: 'twitter' })
+      )
+    })
 
-    await handleListPosts({ status: 'draft' })
-    expect(mockGet).toHaveBeenCalledWith('/posts', expect.objectContaining({ status: 'draft' }))
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should use default limit of 50', async () => {
+      mockGet.mockResolvedValueOnce({ posts: [] })
 
-  it('should pass platform filter', async () => {
-    mockGet.mockResolvedValueOnce({ posts: [] })
-
-    await handleListPosts({ platform: 'twitter' })
-    expect(mockGet).toHaveBeenCalledWith('/posts', expect.objectContaining({ platform: 'twitter' }))
-  })
-
-  it('should use default limit of 50', async () => {
-    mockGet.mockResolvedValueOnce({ posts: [] })
-
-    await handleListPosts({})
-    expect(mockGet).toHaveBeenCalledWith('/posts', expect.objectContaining({ limit: '50' }))
-  })
-})
-
-describe('Post Tool Handlers - search_posts', () => {
-  beforeEach(() => {
-    mockGet.mockReset()
-    mockPost.mockReset()
-    mockPatch.mockReset()
-    mockDelete.mockReset()
-    _resetClient()
+      await handleListPosts({})
+      expect(mockGet).toHaveBeenCalledWith('/posts', expect.objectContaining({ limit: '50' }))
+    })
   })
 
-  it('should return matching posts', async () => {
-    const mockPosts = [{ id: 'p1', content: { text: 'hello world' } }]
-    mockGet.mockResolvedValueOnce({ posts: mockPosts })
+  // eslint-disable-next-line max-lines-per-function
+  describe('search_posts', () => {
+    // eslint-disable-next-line max-lines-per-function
+    it('should return matching posts', async () => {
+      const mockPosts = [{ id: 'p1', content: { text: 'hello world' } }]
+      mockGet.mockResolvedValueOnce({ posts: mockPosts })
 
-    const result = await handleSearchPosts({ query: 'hello' })
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.count).toBe(1)
-    expect(response.posts).toEqual(mockPosts)
-  })
+      const result = await handleSearchPosts({ query: 'hello' })
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.count).toBe(1)
+      expect(response.posts).toEqual(mockPosts)
+    })
 
-  it('should return empty results', async () => {
-    mockGet.mockResolvedValueOnce({ posts: [] })
+    // eslint-disable-next-line max-lines-per-function
+    it('should return empty results', async () => {
+      mockGet.mockResolvedValueOnce({ posts: [] })
 
-    const result = await handleSearchPosts({ query: 'nonexistent' })
-    const response = JSON.parse(result.content[0].text)
-    expect(response.success).toBe(true)
-    expect(response.count).toBe(0)
-    expect(response.posts).toEqual([])
-  })
+      const result = await handleSearchPosts({ query: 'nonexistent' })
+      const response = JSON.parse(result.content[0].text)
+      expect(response.success).toBe(true)
+      expect(response.count).toBe(0)
+      expect(response.posts).toEqual([])
+    })
 
-  it('should return error when query is empty', async () => {
-    const result = await handleSearchPosts({ query: '' })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('search query is required')
-  })
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when query is empty', async () => {
+      const result = await handleSearchPosts({ query: '' })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('search query is required')
+    })
 
-  it('should return error when query is whitespace', async () => {
-    const result = await handleSearchPosts({ query: '   ' })
-    expect(result.isError).toBe(true)
-    expect(result.content[0].text).toContain('search query is required')
+    // eslint-disable-next-line max-lines-per-function
+    it('should return error when query is whitespace', async () => {
+      const result = await handleSearchPosts({ query: '   ' })
+      expect(result.isError).toBe(true)
+      expect(result.content[0].text).toContain('search query is required')
+    })
   })
 })

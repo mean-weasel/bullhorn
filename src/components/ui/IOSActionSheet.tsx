@@ -22,6 +22,7 @@ interface IOSActionSheetProps<T = string> {
   cancelText?: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function IOSActionSheet<T = string>({
   open,
   onClose,

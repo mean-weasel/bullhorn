@@ -62,6 +62,7 @@ export function formatRecurrenceRule(rule: string): string {
   return rule
 }
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function EventCard({ event, subscription, onSubscribe, onUnsubscribe }: EventCardProps) {
   const style = PLATFORM_STYLES[event.platform] || PLATFORM_STYLES.twitter
 

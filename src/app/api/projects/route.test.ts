@@ -143,7 +143,7 @@ describe('GET /api/projects', () => {
 // POST /api/projects
 // ---------------------------------------------------------------------------
 
-describe('POST /api/projects', () => {
+describe('POST /api/projects (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/projects', {
@@ -192,7 +192,7 @@ describe('POST /api/projects', () => {
   })
 })
 
-describe('POST /api/projects - continued', () => {
+describe('POST /api/projects (2/3)', () => {
   it('returns 400 for empty name', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({
@@ -239,7 +239,9 @@ describe('POST /api/projects - continued', () => {
     expect(body.project.id).toBe('proj-new')
     expect(body.project.name).toBe('New Project')
   })
+})
 
+describe('POST /api/projects (3/3)', () => {
   it('returns 500 when insert fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({

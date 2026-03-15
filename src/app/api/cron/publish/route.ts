@@ -100,46 +100,7 @@ async function scheduleNextRecurrence(
   }
 }
 
-function buildPushPayload(userPosts: DbPostRow[]) {
-  if (userPosts.length === 1) {
-    return {
-      title: `Ready to publish on ${userPosts[0].platform}`,
-      body: getPreview(userPosts[0]) || 'Your scheduled post is ready',
-      url: `/edit/${userPosts[0].id}`,
-    }
-  }
-  return {
-    title: `${userPosts.length} posts ready to publish`,
-    body: userPosts.map((p) => p.platform).join(', '),
-    url: '/posts?status=ready',
-  }
-}
-
-async function notifyUser(
-  supabase: ReturnType<typeof createServiceClient>,
-  userId: string,
-  userPosts: DbPostRow[]
-) {
-  try {
-    const pushPayload = buildPushPayload(userPosts)
-    await Promise.all([sendPushToUser(userId, pushPayload), sendApnsToUser(userId, pushPayload)])
-  } catch (pushErr) {
-    console.error(`[notify-due-posts] Push failed for user ${userId}:`, pushErr)
-  }
-
-  try {
-    const { data: userData } = await supabase.auth.admin.getUserById(userId)
-    if (userData?.user?.email) {
-      await sendPostsReadyEmail(
-        userData.user.email,
-        userPosts.map((p) => ({ id: p.id, platform: p.platform, preview: getPreview(p) }))
-      )
-    }
-  } catch (emailErr) {
-    console.error(`[notify-due-posts] Email failed for user ${userId}:`, emailErr)
-  }
-}
-
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request)
   if (authError) return authError
@@ -199,8 +160,47 @@ export async function GET(request: NextRequest) {
       await scheduleNextRecurrence(dbPost, supabase)
     }
 
+    // Send batched notifications per user (one push + one email per user)
     for (const [userId, userPosts] of readyByUser) {
-      await notifyUser(supabase, userId, userPosts)
+      // Push notification (single summary)
+      try {
+        const pushPayload =
+          userPosts.length === 1
+            ? {
+                title: `Ready to publish on ${userPosts[0].platform}`,
+                body: getPreview(userPosts[0]) || 'Your scheduled post is ready',
+                url: `/edit/${userPosts[0].id}`,
+              }
+            : {
+                title: `${userPosts.length} posts ready to publish`,
+                body: userPosts.map((p) => p.platform).join(', '),
+                url: '/posts?status=ready',
+              }
+        await Promise.all([
+          sendPushToUser(userId, pushPayload),
+          sendApnsToUser(userId, pushPayload),
+        ])
+      } catch (pushErr) {
+        console.error(`[notify-due-posts] Push failed for user ${userId}:`, pushErr)
+      }
+
+      // Email notification (single digest)
+      try {
+        const { data: userData } = await supabase.auth.admin.getUserById(userId)
+        if (userData?.user?.email) {
+          await sendPostsReadyEmail(
+            userData.user.email,
+            userPosts.map((p) => ({
+              id: p.id,
+              platform: p.platform,
+              preview: getPreview(p),
+            }))
+          )
+        }
+      } catch (emailErr) {
+        console.error(`[notify-due-posts] Email failed for user ${userId}:`, emailErr)
+      }
+
       notified++
     }
 

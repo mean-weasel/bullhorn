@@ -12,6 +12,7 @@ import { LimitGate } from '@/components/ui/LimitGate'
 import { SkeletonListPage } from '@/components/ui/Skeleton'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
+// eslint-disable-next-line max-lines-per-function
 export default function ProjectsPage() {
   const router = useRouter()
   const { projects, fetchProjects, initialized, deleteProject } = useProjectsStore()

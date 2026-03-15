@@ -69,27 +69,14 @@ export async function GET() {
   }
 }
 
-async function checkApiKeyLimit(supabase: ReturnType<typeof getServiceClient>, userId: string) {
-  const plan = await getUserPlan(userId)
-  const limit = PLAN_LIMITS[plan].apiKeys
-  const { count } = await supabase
-    .from('api_keys')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .is('revoked_at', null)
-  const current = count || 0
-  return { allowed: current < limit, limit, current, plan }
-}
-
-const API_KEY_SELECT =
-  'id, name, key_prefix, scopes, expires_at, last_used_at, revoked_at, created_at, updated_at'
-
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function POST(request: Request) {
   try {
     const { userId } = await requireSessionAuth()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = createApiKeySchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = createApiKeySchema.safeParse(body)
     if (!parsed.success) {
       return Response.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -97,32 +84,43 @@ export async function POST(request: Request) {
       )
     }
 
+    // Enforce API key limit (count only non-revoked keys)
+    const plan = await getUserPlan(userId)
+    const limit = PLAN_LIMITS[plan].apiKeys
     const supabase = getServiceClient()
-    const limitCheck = await checkApiKeyLimit(supabase, userId)
-    if (!limitCheck.allowed) {
+    const { count } = await supabase
+      .from('api_keys')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .is('revoked_at', null)
+    const current = count || 0
+    if (current >= limit) {
       return Response.json(
-        {
-          error: 'API key limit reached',
-          limit: limitCheck.limit,
-          current: limitCheck.current,
-          plan: limitCheck.plan,
-        },
+        { error: 'API key limit reached', limit, current, plan },
         { status: 403 }
       )
     }
 
+    // Generate raw key: bh_ + 40 hex chars (20 random bytes = 160 bits)
     const rawKey = `bh_${randomBytes(20).toString('hex')}`
+    const keyPrefix = rawKey.slice(0, 12)
+
+    // HMAC-SHA256 hash for storage (falls back to SHA-256 if secret not set)
+    const keyHash = hashApiKey(rawKey)
+
     const { data, error } = await supabase
       .from('api_keys')
       .insert({
         user_id: userId,
         name: parsed.data.name.trim(),
-        key_hash: hashApiKey(rawKey),
-        key_prefix: rawKey.slice(0, 12),
+        key_hash: keyHash,
+        key_prefix: keyPrefix,
         scopes: parsed.data.scopes || ALL_SCOPES,
         expires_at: parsed.data.expiresAt || null,
       })
-      .select(API_KEY_SELECT)
+      .select(
+        'id, name, key_prefix, scopes, expires_at, last_used_at, revoked_at, created_at, updated_at'
+      )
       .single()
 
     if (error) {
@@ -132,7 +130,16 @@ export async function POST(request: Request) {
       throw error
     }
 
-    return Response.json({ apiKey: { ...transformKeyFromDb(data), rawKey } }, { status: 201 })
+    // Return the raw key exactly once — it is never stored or retrievable again
+    return Response.json(
+      {
+        apiKey: {
+          ...transformKeyFromDb(data),
+          rawKey,
+        },
+      },
+      { status: 201 }
+    )
   } catch (error) {
     if ((error as Error).message === 'Unauthorized') {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })

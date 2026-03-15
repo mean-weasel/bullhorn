@@ -32,6 +32,7 @@ interface EditorActionsProps {
   isOverLimit?: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 function PublishButton({
   postStatus,
   isPublishing,
@@ -121,6 +122,7 @@ function PublishButton({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function
 export const EditorActions = ({
   isNew,
   isSaving,

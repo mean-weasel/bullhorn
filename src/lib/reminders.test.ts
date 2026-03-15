@@ -25,7 +25,7 @@ const NOW = new Date('2026-03-04T12:00:00.000Z')
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('reminder recurrence expansion', () => {
+describe('reminder recurrence expansion (1/4)', () => {
   it('expands a recurring reminder into multiple instances', () => {
     const weekly = makeReminder({
       id: 'weekly-1',
@@ -67,7 +67,9 @@ describe('reminder recurrence expansion', () => {
     expect(results[0].id).toBe('once-1') // original id, not composite
     expect(results[0].title).toBe('One-time task')
   })
+})
 
+describe('reminder recurrence expansion (2/4)', () => {
   it('does not expand completed reminders', () => {
     const completed = makeReminder({
       id: 'done-1',
@@ -93,7 +95,7 @@ describe('reminder recurrence expansion', () => {
   })
 })
 
-describe('reminder recurrence expansion - continued', () => {
+describe('reminder recurrence expansion (3/4)', () => {
   it('merges recurring and one-time reminders sorted by date', () => {
     const oneTime = makeReminder({
       id: 'once-1',
@@ -138,7 +140,9 @@ describe('reminder recurrence expansion - continued', () => {
     const results1 = expandUpcomingReminders([daily], NOW, 1)
     expect(results1).toHaveLength(1)
   })
+})
 
+describe('reminder recurrence expansion (4/4)', () => {
   it('generates unique ids for each virtual instance', () => {
     const weekly = makeReminder({
       id: 'weekly-1',

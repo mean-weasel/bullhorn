@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
+// eslint-disable-next-line max-lines-per-function
 export default function ForgotPasswordPage() {
   const supabase = createClient()
   const [email, setEmail] = useState('')

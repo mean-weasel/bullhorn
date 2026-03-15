@@ -7,11 +7,7 @@ const defaultProps = {
   onChange: vi.fn(),
 }
 
-describe('IOSToggleSwitch', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
+describe('IOSToggleSwitch (1/4)', () => {
   it('renders a switch role element', () => {
     render(<IOSToggleSwitch {...defaultProps} />)
     expect(screen.getByRole('switch')).toBeInTheDocument()
@@ -63,7 +59,9 @@ describe('IOSToggleSwitch', () => {
     const switchEl = screen.getByRole('switch')
     expect(switchEl.className).toContain('opacity-50')
   })
+})
 
+describe('IOSToggleSwitch (2/4)', () => {
   it('renders label text when provided', () => {
     render(<IOSToggleSwitch {...defaultProps} label="Enable notifications" />)
     expect(screen.getByText('Enable notifications')).toBeInTheDocument()
@@ -113,11 +111,7 @@ describe('IOSToggleSwitch', () => {
   })
 })
 
-describe('IOSToggleSwitch - continued', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
+describe('IOSToggleSwitch (3/4)', () => {
   it('does not call onChange on wrapper click when disabled', () => {
     const onChange = vi.fn()
     const { container } = render(
@@ -164,7 +158,9 @@ describe('IOSToggleSwitch - continued', () => {
     expect(switchEl.className).toContain('w-9')
     expect(switchEl.className).toContain('h-5')
   })
+})
 
+describe('IOSToggleSwitch (4/4)', () => {
   it('renders with medium size (default)', () => {
     render(<IOSToggleSwitch {...defaultProps} />)
     const switchEl = screen.getByRole('switch')

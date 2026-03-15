@@ -12,6 +12,7 @@ interface AppHeaderProps {
   userDisplayName?: string | null
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function AppHeader({ userEmail, userDisplayName }: AppHeaderProps) {
   const pathname = usePathname()
   const isEditorPage =

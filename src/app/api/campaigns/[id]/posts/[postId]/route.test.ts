@@ -89,7 +89,7 @@ beforeEach(() => {
 // DELETE /api/campaigns/[id]/posts/[postId]
 // ---------------------------------------------------------------------------
 
-describe('DELETE /api/campaigns/[id]/posts/[postId]', () => {
+describe('DELETE /api/campaigns/[id]/posts/[postId] (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/campaigns/camp-1/posts/post-1', { method: 'DELETE' })
@@ -138,7 +138,7 @@ describe('DELETE /api/campaigns/[id]/posts/[postId]', () => {
   })
 })
 
-describe('DELETE /api/campaigns/[id]/posts/[postId] - continued', () => {
+describe('DELETE /api/campaigns/[id]/posts/[postId] (2/3)', () => {
   it('returns 400 when post does not belong to this campaign', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // Campaign check passes, post found but belongs to different campaign
@@ -177,7 +177,9 @@ describe('DELETE /api/campaigns/[id]/posts/[postId] - continued', () => {
     expect(body.id).toBe('post-1')
     expect(body.campaign_id).toBeNull()
   })
+})
 
+describe('DELETE /api/campaigns/[id]/posts/[postId] (3/3)', () => {
   it('returns 500 when post fetch fails with non-PGRST116 error', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     fromCallResults = [

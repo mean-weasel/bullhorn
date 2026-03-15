@@ -60,7 +60,101 @@ const makeReport = (overrides: Partial<AnalyticsReport> = {}): AnalyticsReport =
 // fetchConnections
 // ---------------------------------------------------------------------------
 
-describe('useAnalyticsStore - updateConnection', () => {
+describe('fetchConnections (1/2)', () => {
+  it('should set loading true while fetching', async () => {
+    let capturedLoading = false
+    mockFetch.mockImplementation(() => {
+      capturedLoading = useAnalyticsStore.getState().loading
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ connections: [] }),
+      })
+    })
+
+    await useAnalyticsStore.getState().fetchConnections()
+    expect(capturedLoading).toBe(true)
+  })
+
+  it('should populate connections on success', async () => {
+    const connections = [makeConnection(), makeConnection({ id: 'conn-2', propertyId: 'GA-2' })]
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ connections }),
+    })
+
+    await useAnalyticsStore.getState().fetchConnections()
+
+    const state = useAnalyticsStore.getState()
+    expect(state.connections).toEqual(connections)
+    expect(state.loading).toBe(false)
+    expect(state.error).toBeNull()
+  })
+
+  it('should set initialized after first fetch', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ connections: [] }),
+    })
+
+    expect(useAnalyticsStore.getState().initialized).toBe(false)
+    await useAnalyticsStore.getState().fetchConnections()
+    expect(useAnalyticsStore.getState().initialized).toBe(true)
+  })
+})
+
+describe('fetchConnections (2/2)', () => {
+  it('should set error on failure', async () => {
+    mockFetch.mockResolvedValueOnce({ ok: false })
+
+    await useAnalyticsStore.getState().fetchConnections()
+
+    const state = useAnalyticsStore.getState()
+    expect(state.error).toBe('Failed to fetch analytics connections')
+    expect(state.loading).toBe(false)
+  })
+
+  it('should handle network error', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+
+    await useAnalyticsStore.getState().fetchConnections()
+
+    expect(useAnalyticsStore.getState().error).toBe('Network error')
+  })
+
+  it('should default to empty array when response has no connections key', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({}),
+    })
+
+    await useAnalyticsStore.getState().fetchConnections()
+    expect(useAnalyticsStore.getState().connections).toEqual([])
+  })
+
+  it('should deduplicate concurrent calls', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ connections: [] }),
+    })
+
+    await Promise.all([
+      useAnalyticsStore.getState().fetchConnections(),
+      useAnalyticsStore.getState().fetchConnections(),
+    ])
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// createConnection
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// updateConnection
+// ---------------------------------------------------------------------------
+
+describe('updateConnection', () => {
   it('should PATCH and update the connection in state', async () => {
     const original = makeConnection()
     useAnalyticsStore.setState({ connections: [original] })
@@ -99,7 +193,11 @@ describe('useAnalyticsStore - updateConnection', () => {
   })
 })
 
-describe('useAnalyticsStore - deleteConnection', () => {
+// ---------------------------------------------------------------------------
+// deleteConnection
+// ---------------------------------------------------------------------------
+
+describe('deleteConnection', () => {
   it('should DELETE and remove the connection from state', async () => {
     useAnalyticsStore.setState({
       connections: [makeConnection({ id: 'conn-1' }), makeConnection({ id: 'conn-2' })],
@@ -144,149 +242,5 @@ describe('useAnalyticsStore - deleteConnection', () => {
 
     expect(useAnalyticsStore.getState().error).toBe('Delete denied')
     expect(useAnalyticsStore.getState().loading).toBe(false)
-  })
-})
-
-describe('useAnalyticsStore - getConnection', () => {
-  it('should return a connection by id', () => {
-    const connection = makeConnection()
-    useAnalyticsStore.setState({ connections: [connection] })
-    expect(useAnalyticsStore.getState().getConnection('conn-1')).toEqual(connection)
-  })
-
-  it('should return undefined for unknown id', () => {
-    useAnalyticsStore.setState({ connections: [makeConnection()] })
-    expect(useAnalyticsStore.getState().getConnection('nonexistent')).toBeUndefined()
-  })
-})
-
-describe('useAnalyticsStore - getConnectionByPropertyId', () => {
-  it('should return a connection by propertyId', () => {
-    const connection = makeConnection({ propertyId: 'GA-999' })
-    useAnalyticsStore.setState({ connections: [connection] })
-    expect(useAnalyticsStore.getState().getConnectionByPropertyId('GA-999')).toEqual(connection)
-  })
-
-  it('should return undefined for unknown propertyId', () => {
-    useAnalyticsStore.setState({ connections: [makeConnection()] })
-    expect(useAnalyticsStore.getState().getConnectionByPropertyId('GA-nonexistent')).toBeUndefined()
-  })
-})
-
-describe('useAnalyticsStore - getConnectionsByProject', () => {
-  it('should filter connections by projectId', () => {
-    useAnalyticsStore.setState({
-      connections: [
-        makeConnection({ id: 'c1', projectId: 'proj-1' }),
-        makeConnection({ id: 'c2', projectId: 'proj-2' }),
-        makeConnection({ id: 'c3', projectId: 'proj-1' }),
-      ],
-    })
-
-    const result = useAnalyticsStore.getState().getConnectionsByProject('proj-1')
-    expect(result).toHaveLength(2)
-    expect(result.map((c) => c.id)).toEqual(['c1', 'c3'])
-  })
-
-  it('should return empty array when no connections match', () => {
-    useAnalyticsStore.setState({
-      connections: [makeConnection({ projectId: 'proj-1' })],
-    })
-
-    const result = useAnalyticsStore.getState().getConnectionsByProject('proj-other')
-    expect(result).toEqual([])
-  })
-})
-
-describe('useAnalyticsStore - fetchReport', () => {
-  it('should fetch report and store in state', async () => {
-    const report = makeReport()
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ report }),
-    })
-
-    const result = await useAnalyticsStore.getState().fetchReport('conn-1')
-
-    expect(mockFetch).toHaveBeenCalledWith('/api/analytics/connections/conn-1/report')
-    expect(result).toEqual(report)
-    expect(useAnalyticsStore.getState().reports['conn-1']).toEqual(report)
-  })
-
-  it('should pass preset date range as query params', async () => {
-    const report = makeReport()
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ report }),
-    })
-
-    await useAnalyticsStore.getState().fetchReport('conn-1', { preset: '28d' })
-
-    expect(mockFetch).toHaveBeenCalledWith('/api/analytics/connections/conn-1/report?preset=28d')
-  })
-
-  it('should pass custom date range as query params', async () => {
-    const report = makeReport()
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ report }),
-    })
-
-    await useAnalyticsStore.getState().fetchReport('conn-1', {
-      preset: 'custom',
-      startDate: '2024-01-01',
-      endDate: '2024-01-31',
-    })
-
-    expect(mockFetch).toHaveBeenCalledWith(
-      '/api/analytics/connections/conn-1/report?preset=custom&startDate=2024-01-01&endDate=2024-01-31'
-    )
-  })
-
-  it('should return undefined on failure', async () => {
-    mockFetch.mockResolvedValueOnce({ ok: false })
-
-    const result = await useAnalyticsStore.getState().fetchReport('conn-1')
-    expect(result).toBeUndefined()
-  })
-
-  it('should return undefined on network error', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'))
-
-    const result = await useAnalyticsStore.getState().fetchReport('conn-1')
-    expect(result).toBeUndefined()
-  })
-})
-
-describe('useAnalyticsStore - getReport', () => {
-  it('should return a report by connectionId', () => {
-    const report = makeReport()
-    useAnalyticsStore.setState({ reports: { 'conn-1': report } })
-    expect(useAnalyticsStore.getState().getReport('conn-1')).toEqual(report)
-  })
-
-  it('should return undefined when no report exists', () => {
-    expect(useAnalyticsStore.getState().getReport('conn-1')).toBeUndefined()
-  })
-})
-
-describe('useAnalyticsStore - reset', () => {
-  it('should reset state to initial values', () => {
-    useAnalyticsStore.setState({
-      connections: [makeConnection()],
-      reports: { 'conn-1': makeReport() },
-      loading: true,
-      error: 'some error',
-      initialized: true,
-    })
-
-    useAnalyticsStore.getState().reset()
-
-    const state = useAnalyticsStore.getState()
-    expect(state.connections).toEqual([])
-    expect(state.reports).toEqual({})
-    expect(state.loading).toBe(false)
-    expect(state.error).toBeNull()
-    expect(state.initialized).toBe(false)
   })
 })

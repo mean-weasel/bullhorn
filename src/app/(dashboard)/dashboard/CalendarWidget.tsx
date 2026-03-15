@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines-per-function -- inner arrow functions in JSX map() callbacks */
 
 import { useMemo } from 'react'
 import Link from 'next/link'
@@ -34,6 +35,7 @@ interface DayData {
   reminders: Reminder[]
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function CalendarWidget({ posts, reminders, days = 7 }: CalendarWidgetProps) {
   const today = startOfDay(new Date())
 

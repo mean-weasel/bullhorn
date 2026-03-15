@@ -7,74 +7,11 @@ export const dynamic = 'force-dynamic'
 // Google Analytics Admin API endpoint
 const GA_ADMIN_API = 'https://analyticsadmin.googleapis.com/v1beta'
 
-interface GaProperty {
-  propertyId: string
-  displayName: string
-  accountName: string
-  timeZone?: string
-  currencyCode?: string
-}
-
-function extractPropertyId(name: string) {
-  const match = name?.match(/properties\/(\d+)/)
-  return match ? match[1] : name
-}
-
-function mapProperties(
-  properties: Array<Record<string, string>>,
-  accountName: string
-): GaProperty[] {
-  return properties.map((property) => ({
-    propertyId: extractPropertyId(property.name),
-    displayName: property.displayName || `Property ${extractPropertyId(property.name)}`,
-    accountName,
-    timeZone: property.timeZone,
-    currencyCode: property.currencyCode,
-  }))
-}
-
-async function fetchAllGaProperties(accessToken: string): Promise<GaProperty[]> {
-  const accountsResponse = await fetch(`${GA_ADMIN_API}/accounts`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
-
-  if (!accountsResponse.ok) {
-    const errorData = await accountsResponse.json()
-    console.error('GA Admin API accounts error:', errorData)
-    throw new Error('Failed to fetch Google Analytics accounts')
-  }
-
-  const accountsData = await accountsResponse.json()
-  const accounts = accountsData.accounts || []
-  const allProperties: GaProperty[] = []
-
-  for (const account of accounts) {
-    const accountName = account.displayName || account.name
-    const propertiesResponse = await fetch(`${GA_ADMIN_API}/${account.name}/properties`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-    if (propertiesResponse.ok) {
-      const propertiesData = await propertiesResponse.json()
-      allProperties.push(...mapProperties(propertiesData.properties || [], accountName))
-    }
-  }
-
-  if (allProperties.length === 0) {
-    const directResponse = await fetch(`${GA_ADMIN_API}/properties`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-    if (directResponse.ok) {
-      const propertiesData = await directResponse.json()
-      allProperties.push(...mapProperties(propertiesData.properties || [], 'Default Account'))
-    }
-  }
-
-  return allProperties
-}
-
 // GET /api/analytics/properties - List available GA4 properties
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function GET(request: NextRequest) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
@@ -83,6 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Look up access token from DB using connectionId query param
     const connectionId = request.nextUrl.searchParams.get('connectionId')
     if (!connectionId) {
       return NextResponse.json({ error: 'connectionId query param required' }, { status: 400 })
@@ -100,12 +38,95 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Connection not found' }, { status: 404 })
     }
 
-    const allProperties = await fetchAllGaProperties(connection.access_token)
+    const accessToken = connection.access_token
+
+    // Fetch accounts first
+    const accountsResponse = await fetch(`${GA_ADMIN_API}/accounts`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!accountsResponse.ok) {
+      const errorData = await accountsResponse.json()
+      console.error('GA Admin API accounts error:', errorData)
+      return NextResponse.json(
+        { error: 'Failed to fetch Google Analytics accounts' },
+        { status: 502 }
+      )
+    }
+
+    const accountsData = await accountsResponse.json()
+    const accounts = accountsData.accounts || []
+
+    // Fetch properties for each account
+    const allProperties: Array<{
+      propertyId: string
+      displayName: string
+      accountName: string
+      timeZone?: string
+      currencyCode?: string
+    }> = []
+
+    for (const account of accounts) {
+      const accountName = account.displayName || account.name
+
+      // List properties for this account
+      const propertiesResponse = await fetch(`${GA_ADMIN_API}/${account.name}/properties`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      if (propertiesResponse.ok) {
+        const propertiesData = await propertiesResponse.json()
+        const properties = propertiesData.properties || []
+
+        for (const property of properties) {
+          // Extract property ID from resource name (e.g., "properties/123456789")
+          const propertyIdMatch = property.name?.match(/properties\/(\d+)/)
+          const propertyId = propertyIdMatch ? propertyIdMatch[1] : property.name
+
+          allProperties.push({
+            propertyId,
+            displayName: property.displayName || `Property ${propertyId}`,
+            accountName,
+            timeZone: property.timeZone,
+            currencyCode: property.currencyCode,
+          })
+        }
+      }
+    }
+
+    // If no properties found via accounts, try direct property listing
+    if (allProperties.length === 0) {
+      const directPropertiesResponse = await fetch(`${GA_ADMIN_API}/properties`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      if (directPropertiesResponse.ok) {
+        const propertiesData = await directPropertiesResponse.json()
+        const properties = propertiesData.properties || []
+
+        for (const property of properties) {
+          const propertyIdMatch = property.name?.match(/properties\/(\d+)/)
+          const propertyId = propertyIdMatch ? propertyIdMatch[1] : property.name
+
+          allProperties.push({
+            propertyId,
+            displayName: property.displayName || `Property ${propertyId}`,
+            accountName: 'Default Account',
+            timeZone: property.timeZone,
+            currencyCode: property.currencyCode,
+          })
+        }
+      }
+    }
+
     return NextResponse.json({ properties: allProperties })
   } catch (error) {
-    if (error instanceof Error && error.message.includes('Failed to fetch')) {
-      return NextResponse.json({ error: error.message }, { status: 502 })
-    }
     console.error('Error fetching GA4 properties:', error)
     return NextResponse.json({ error: 'Failed to fetch GA4 properties' }, { status: 500 })
   }

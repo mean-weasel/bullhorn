@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { LaunchPlatform, LAUNCH_PLATFORM_INFO } from '@/lib/launchPosts'
 import { cn } from '@/lib/utils'
@@ -9,6 +10,7 @@ interface PlatformFieldProps {
   updatePlatformField: (key: string, value: string) => void
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function ProductHuntFields({
   platform,
   getPlatformFieldString,
@@ -156,6 +158,7 @@ export function AskHNFields({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function BetaListFieldsSection({
   platform,
   getPlatformFieldString,
@@ -217,6 +220,7 @@ export function BetaListFieldsSection({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function IndieHackersFieldsSection({
   platform,
   getPlatformFieldString,
@@ -286,6 +290,7 @@ export function IndieHackersFieldsSection({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function DevHuntFieldsSection({
   platform,
   getPlatformFieldString,

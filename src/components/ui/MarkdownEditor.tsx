@@ -14,11 +14,13 @@ interface MarkdownEditorProps {
 
 type FormatAction = 'bold' | 'italic' | 'heading' | 'link' | 'code' | 'list'
 
+// eslint-disable-next-line max-lines-per-function
 export function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorProps) {
   const [mode, setMode] = useState<'write' | 'preview'>('write')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const insertFormat = useCallback(
+    // eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
     (action: FormatAction) => {
       const textarea = textareaRef.current
       if (!textarea) return

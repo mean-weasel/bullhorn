@@ -32,11 +32,7 @@ function buildChainableMock(resolvedData: unknown[] = []) {
   return chain
 }
 
-describe('GET /api/export', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
+describe('GET /api/export (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
 
@@ -74,11 +70,7 @@ describe('GET /api/export', () => {
   })
 })
 
-describe('GET /api/export - continued', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
+describe('GET /api/export (2/4)', () => {
   it('returns JSON export with posts and campaigns', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
 
@@ -126,7 +118,9 @@ describe('GET /api/export - continued', () => {
     expect(body.exportedAt).toBeDefined()
     expect(response.headers.get('X-Export-Count')).toBe('2')
   })
+})
 
+describe('GET /api/export (3/4)', () => {
   it('returns CSV format with Content-Disposition header', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
 
@@ -164,7 +158,9 @@ describe('GET /api/export - continued', () => {
     expect(text).toContain('# Posts')
     expect(text).toContain('id,title,content,platform')
   })
+})
 
+describe('GET /api/export (4/4)', () => {
   it('filters by campaignId when provided', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
 

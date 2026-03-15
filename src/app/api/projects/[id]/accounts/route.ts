@@ -16,20 +16,26 @@ interface RouteContext {
 // GET /api/projects/[id]/accounts - List accounts associated with project
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['projects:read'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:read'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id: projectId } = await context.params
     const supabase = await createClient()
 
+    // Verify project exists and user owns it (defense-in-depth alongside RLS)
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')
@@ -41,6 +47,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
+    // Fetch account associations
     const { data, error } = await supabase
       .from('project_accounts')
       .select('*')
@@ -53,6 +60,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
+    // Transform to camelCase
     const accounts = (data || []).map((pa) => ({
       id: pa.id,
       projectId: pa.project_id,
@@ -68,16 +76,22 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 }
 
 // POST /api/projects/[id]/accounts - Add account to project
+// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['projects:write'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:write'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -85,7 +99,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = addAccountSchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = addAccountSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -93,6 +108,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       )
     }
 
+    // Verify project exists and user owns it (defense-in-depth alongside RLS)
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')
@@ -104,14 +120,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
+    // Create association
     const { data, error } = await supabase
       .from('project_accounts')
-      .insert({ project_id: projectId, account_id: parsed.data.accountId })
+      .insert({
+        project_id: projectId,
+        account_id: parsed.data.accountId,
+      })
       .select()
       .single()
 
     if (error) {
       if (error.code === '23505') {
+        // Unique violation
         return NextResponse.json(
           { error: 'Account already associated with project' },
           { status: 409 }
@@ -141,14 +162,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
 // DELETE /api/projects/[id]/accounts - Remove account from project
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['projects:write'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['projects:write'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -161,6 +187,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'accountId query parameter is required' }, { status: 400 })
     }
 
+    // Verify project ownership (defense-in-depth alongside RLS)
     const { data: project, error: projectError } = await supabase
       .from('projects')
       .select('id')
@@ -172,6 +199,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
+    // Delete association
     const { error } = await supabase
       .from('project_accounts')
       .delete()

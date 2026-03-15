@@ -79,7 +79,7 @@ beforeEach(() => {
 // GET /api/launch-posts
 // ---------------------------------------------------------------------------
 
-describe('GET /api/launch-posts', () => {
+describe('GET /api/launch-posts (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/launch-posts')
@@ -119,7 +119,9 @@ describe('GET /api/launch-posts', () => {
     expect(body.launchPosts[0].platform).toBe('product_hunt')
     expect(body.launchPosts[0].title).toBe('Launch my app')
   })
+})
 
+describe('GET /api/launch-posts (2/2)', () => {
   it('returns empty array when user has no launch posts', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockQueryData = { data: [], error: null }
@@ -129,9 +131,7 @@ describe('GET /api/launch-posts', () => {
     const body = await res.json()
     expect(body.launchPosts).toEqual([])
   })
-})
 
-describe('GET /api/launch-posts - continued', () => {
   it('returns 500 when database query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockQueryData = { data: null, error: { message: 'DB error' } }
@@ -163,7 +163,7 @@ describe('GET /api/launch-posts - continued', () => {
 // POST /api/launch-posts
 // ---------------------------------------------------------------------------
 
-describe('POST /api/launch-posts', () => {
+describe('POST /api/launch-posts (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/launch-posts', {
@@ -197,7 +197,9 @@ describe('POST /api/launch-posts', () => {
     const body = await res.json()
     expect(body.error).toBe('Launch post limit reached')
   })
+})
 
+describe('POST /api/launch-posts (2/4)', () => {
   it('returns 400 for invalid input (missing title)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({
@@ -215,9 +217,7 @@ describe('POST /api/launch-posts', () => {
     const body = await res.json()
     expect(body.error).toBe('Invalid input')
   })
-})
 
-describe('POST /api/launch-posts - continued', () => {
   it('returns 400 for invalid platform', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockEnforceResourceLimit.mockResolvedValue({
@@ -234,66 +234,5 @@ describe('POST /api/launch-posts - continued', () => {
     expect(res.status).toBe(400)
     const body = await res.json()
     expect(body.error).toBe('Invalid input')
-  })
-
-  it('creates launch post successfully and returns 201', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockEnforceResourceLimit.mockResolvedValue({
-      allowed: true,
-      current: 0,
-      limit: 10,
-      plan: 'free',
-    })
-    const createdPost = {
-      id: 'lp-new',
-      created_at: '2024-06-01T00:00:00Z',
-      updated_at: '2024-06-01T00:00:00Z',
-      platform: 'product_hunt',
-      status: 'draft',
-      scheduled_at: null,
-      posted_at: null,
-      title: 'New Launch',
-      url: 'https://example.com',
-      description: 'Description',
-      platform_fields: {},
-      campaign_id: null,
-      notes: null,
-      user_id: 'user-1',
-    }
-    mockInsertSingle.mockResolvedValue({ data: createdPost, error: null })
-    const req = createRequest('/api/launch-posts', {
-      method: 'POST',
-      body: JSON.stringify({
-        platform: 'product_hunt',
-        title: 'New Launch',
-        url: 'https://example.com',
-        description: 'Description',
-      }),
-    })
-    const res = await POST(req)
-    expect(res.status).toBe(201)
-    const body = await res.json()
-    expect(body.launchPost.id).toBe('lp-new')
-    expect(body.launchPost.platform).toBe('product_hunt')
-    expect(body.launchPost.title).toBe('New Launch')
-  })
-
-  it('returns 500 when insert fails', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockEnforceResourceLimit.mockResolvedValue({
-      allowed: true,
-      current: 0,
-      limit: 10,
-      plan: 'free',
-    })
-    mockInsertSingle.mockResolvedValue({ data: null, error: { message: 'Insert failed' } })
-    const req = createRequest('/api/launch-posts', {
-      method: 'POST',
-      body: JSON.stringify({ platform: 'product_hunt', title: 'Test' }),
-    })
-    const res = await POST(req)
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
   })
 })

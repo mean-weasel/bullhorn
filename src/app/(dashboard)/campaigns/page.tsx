@@ -36,6 +36,7 @@ const STATUS_CONFIG: Record<
   archived: { label: 'Archived', icon: Archive, color: 'text-muted-foreground' },
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function CampaignsPage() {
   const campaigns = useCampaignsStore((s) => s.campaigns)
   const fetchCampaigns = useCampaignsStore((s) => s.fetchCampaigns)

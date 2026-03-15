@@ -17,6 +17,7 @@ interface ApiKey {
   createdAt: string
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function ApiKeyManager() {
   const [keys, setKeys] = useState<ApiKey[]>([])
   const [loading, setLoading] = useState(true)

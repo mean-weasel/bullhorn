@@ -104,7 +104,7 @@ describe('isTokenExpiringSoon', () => {
 // refreshTokenIfNeeded — token still fresh
 // ---------------------------------------------------------------------------
 
-describe('refreshTokenIfNeeded', () => {
+describe('refreshTokenIfNeeded (1/3)', () => {
   it('returns current tokens when token is not expiring', async () => {
     const account = makeAccount()
     const result = await refreshTokenIfNeeded(account)
@@ -140,7 +140,9 @@ describe('refreshTokenIfNeeded', () => {
       })
     )
   })
+})
 
+describe('refreshTokenIfNeeded (2/3)', () => {
   it('refreshes LinkedIn token when expired', async () => {
     const account = expiredAccount('linkedin')
     mockSuccessfulRefresh({
@@ -183,7 +185,7 @@ describe('refreshTokenIfNeeded', () => {
   })
 })
 
-describe('refreshTokenIfNeeded - continued', () => {
+describe('refreshTokenIfNeeded (3/3)', () => {
   it('marks account as expired on 401 response', async () => {
     const account = expiredAccount('twitter')
     mockFetch.mockResolvedValueOnce({

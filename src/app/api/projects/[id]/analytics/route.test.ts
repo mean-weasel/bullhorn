@@ -114,7 +114,7 @@ beforeEach(() => {
   }
 })
 
-describe('GET /api/projects/[id]/analytics', () => {
+describe('GET /api/projects/[id]/analytics (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/projects/proj-1/analytics')
@@ -162,7 +162,7 @@ describe('GET /api/projects/[id]/analytics', () => {
   })
 })
 
-describe('GET /api/projects/[id]/analytics - continued', () => {
+describe('GET /api/projects/[id]/analytics (2/3)', () => {
   it('returns rolled-up analytics with post status counts', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = { data: { id: 'proj-1' }, error: null }
@@ -201,7 +201,9 @@ describe('GET /api/projects/[id]/analytics - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Internal server error')
   })
+})
 
+describe('GET /api/projects/[id]/analytics (3/3)', () => {
   it('returns 500 when posts query fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = { data: { id: 'proj-1' }, error: null }

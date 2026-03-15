@@ -9,6 +9,7 @@ interface AutoSaveIndicatorProps {
   retry?: () => void
 }
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export function AutoSaveIndicator({ status, className, retry }: AutoSaveIndicatorProps) {
   return (
     <div

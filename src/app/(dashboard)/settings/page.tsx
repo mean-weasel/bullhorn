@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -26,6 +27,7 @@ import {
   EmailPreferences,
 } from './NotificationSections'
 
+// eslint-disable-next-line max-lines-per-function
 export default function SettingsPage() {
   const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()

@@ -15,6 +15,7 @@ interface FeatureCarouselProps {
   autoAdvanceMs?: number
 }
 
+// eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function FeatureCarousel({ slides, autoAdvanceMs = 4000 }: FeatureCarouselProps) {
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)

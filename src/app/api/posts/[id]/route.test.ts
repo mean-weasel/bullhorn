@@ -69,7 +69,7 @@ beforeEach(() => {
 // GET /api/posts/[id]
 // ---------------------------------------------------------------------------
 
-describe('GET /api/posts/[id]', () => {
+describe('GET /api/posts/[id] (1/2)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/posts/post-1')
@@ -103,9 +103,7 @@ describe('GET /api/posts/[id]', () => {
     const body = await res.json()
     expect(body.post.id).toBe('post-1')
   })
-})
 
-describe('GET /api/posts/[id] - continued', () => {
   it('returns 404 when post not found (PGRST116)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -118,7 +116,9 @@ describe('GET /api/posts/[id] - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Post not found')
   })
+})
 
+describe('GET /api/posts/[id] (2/2)', () => {
   it('returns 500 for other database errors', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -137,7 +137,7 @@ describe('GET /api/posts/[id] - continued', () => {
 // PATCH /api/posts/[id]
 // ---------------------------------------------------------------------------
 
-describe('PATCH /api/posts/[id]', () => {
+describe('PATCH /api/posts/[id] (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/posts/post-1', {
@@ -176,7 +176,7 @@ describe('PATCH /api/posts/[id]', () => {
   })
 })
 
-describe('PATCH /api/posts/[id] - continued', () => {
+describe('PATCH /api/posts/[id] (2/4)', () => {
   it('returns 400 for invalid status transition', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // Current post status is 'draft'
@@ -193,7 +193,9 @@ describe('PATCH /api/posts/[id] - continued', () => {
     const body = await res.json()
     expect(body.error).toContain('Cannot transition from draft to published')
   })
+})
 
+describe('PATCH /api/posts/[id] (3/4)', () => {
   it('updates post successfully with valid status transition', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     // First call: get current post status
@@ -226,7 +228,9 @@ describe('PATCH /api/posts/[id] - continued', () => {
     const body = await res.json()
     expect(body.post.status).toBe('scheduled')
   })
+})
 
+describe('PATCH /api/posts/[id] (4/4)', () => {
   it('returns 500 when update fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

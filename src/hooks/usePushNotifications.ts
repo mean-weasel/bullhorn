@@ -25,6 +25,7 @@ interface UsePushNotificationsReturn {
   sendTestNotification: () => Promise<void>
 }
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function usePushNotifications(): UsePushNotificationsReturn {
   const [isSupported, setIsSupported] = useState(false)
   const [permission, setPermission] = useState<NotificationPermission>('default')

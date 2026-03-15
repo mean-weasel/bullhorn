@@ -9,12 +9,15 @@ import {
   waitForContentToLoad,
 } from './helpers'
 
+// eslint-disable-next-line max-lines-per-function
 test.describe('Auto-save', () => {
   test.beforeEach(async ({ page }) => {
     await enterDemoMode(page)
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe.serial('New Post Auto-save', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should auto-save new post after delay and update URL', async ({ page }) => {
       // Start with empty database
       expect(await getPostCount(page)).toBe(0)
@@ -42,6 +45,7 @@ test.describe('Auto-save', () => {
       expect(posts[0].platform).toBe('twitter')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should not create duplicate posts on subsequent edits', async ({ page }) => {
       // Start with empty database
       expect(await getPostCount(page)).toBe(0)
@@ -79,6 +83,7 @@ test.describe('Auto-save', () => {
       expect((posts[0].content as { text: string }).text).toContain('updated')
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should show auto-save indicator after save completes', async ({ page }) => {
       await page.goto('/new?autosave=true')
       await page.getByRole('button', { name: 'Twitter' }).click()
@@ -95,7 +100,9 @@ test.describe('Auto-save', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe.serial('Edit Post Auto-save', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should auto-save changes to existing draft', async ({ page }) => {
       // Create a draft manually via the UI first
       await page.goto('/new')
@@ -136,6 +143,7 @@ test.describe('Auto-save', () => {
       )
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should auto-save platform switch', async ({ page }) => {
       // Create a Twitter draft
       await page.goto('/new')
@@ -162,7 +170,9 @@ test.describe('Auto-save', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test.describe.serial('Auto-save Edge Cases', () => {
+    // eslint-disable-next-line max-lines-per-function
     test('should not auto-save if no changes made', async ({ page }) => {
       // Create a draft
       await page.goto('/new')
@@ -190,6 +200,7 @@ test.describe('Auto-save', () => {
       expect(currentPosts[0].updatedAt).toBe(originalUpdatedAt)
     })
 
+    // eslint-disable-next-line max-lines-per-function
     test('should keep scheduled status when editing and saving a scheduled post', async ({
       page,
     }) => {

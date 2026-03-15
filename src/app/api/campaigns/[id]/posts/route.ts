@@ -14,20 +14,26 @@ const addPostToCampaignSchema = z.object({
 // GET /api/campaigns/[id]/posts - Get posts for campaign
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['campaigns:read'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['campaigns:read'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { id } = await params
     const supabase = await createClient()
 
+    // Verify user owns the campaign first
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
       .select('id')
@@ -62,16 +68,22 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 }
 
 // POST /api/campaigns/[id]/posts - Add post to campaign
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    // Require authentication
     let userId: string
     try {
       const auth = await requireAuth()
       userId = auth.userId
-      if (auth.scopes) validateScopes(auth.scopes, ['campaigns:write'])
+      if (auth.scopes) {
+        validateScopes(auth.scopes, ['campaigns:write'])
+      }
     } catch (authError) {
       const msg = (authError as Error).message
-      if (msg === 'Forbidden') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (msg === 'Forbidden') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -79,7 +91,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const supabase = await createClient()
     const jsonResult = await parseJsonBody(request)
     if ('error' in jsonResult) return jsonResult.error
-    const parsed = addPostToCampaignSchema.safeParse(jsonResult.data)
+    const body = jsonResult.data
+    const parsed = addPostToCampaignSchema.safeParse(body)
     if (!parsed.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: parsed.error.flatten() },
@@ -88,8 +101,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     const postId = parsed.data.postId || parsed.data.post_id
-    if (!postId) return NextResponse.json({ error: 'postId is required' }, { status: 400 })
 
+    if (!postId) {
+      return NextResponse.json({ error: 'postId is required' }, { status: 400 })
+    }
+
+    // CRITICAL: Verify user owns the campaign
     const { data: campaign, error: campaignError } = await supabase
       .from('campaigns')
       .select('id')
@@ -101,6 +118,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
     }
 
+    // Update post with campaign_id (user_id check ensures ownership)
+    // If the post doesn't exist or belong to the user, the update matches
+    // 0 rows and returns PGRST116, which is handled as 404 below.
     const { data, error } = await supabase
       .from('posts')
       .update({ campaign_id: id })
@@ -117,7 +137,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    return NextResponse.json(transformPostFromDb(data as DbPost))
+    const post = transformPostFromDb(data as DbPost)
+    return NextResponse.json(post)
   } catch (error) {
     console.error('Error adding post to campaign:', error)
     return NextResponse.json({ error: 'Failed to add post to campaign' }, { status: 500 })

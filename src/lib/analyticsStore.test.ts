@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { clearInFlightRequests } from './requestDedup'
-import type { AnalyticsConnection } from './analytics.types'
+import type { AnalyticsConnection, AnalyticsReport } from './analytics.types'
 
 // ---------------------------------------------------------------------------
 // Mock fetch
@@ -35,11 +35,32 @@ const makeConnection = (overrides: Partial<AnalyticsConnection> = {}): Analytics
   ...overrides,
 })
 
+const makeReport = (overrides: Partial<AnalyticsReport> = {}): AnalyticsReport => ({
+  connectionId: 'conn-1',
+  propertyId: 'GA-123456',
+  propertyName: 'My Site',
+  dateRange: { startDate: '2024-01-01', endDate: '2024-01-31' },
+  metrics: {
+    activeUsers: 100,
+    sessions: 200,
+    pageViews: 500,
+    screenPageViews: 500,
+    engagementRate: 0.65,
+    averageSessionDuration: 120,
+    bounceRate: 0.35,
+    newUsers: 50,
+    totalUsers: 150,
+    eventCount: 1000,
+  },
+  fetchedAt: '2024-02-01T00:00:00Z',
+  ...overrides,
+})
+
 // ---------------------------------------------------------------------------
 // fetchConnections
 // ---------------------------------------------------------------------------
 
-describe('useAnalyticsStore - fetchConnections', () => {
+describe('fetchConnections (1/2)', () => {
   it('should set loading true while fetching', async () => {
     let capturedLoading = false
     mockFetch.mockImplementation(() => {
@@ -79,7 +100,9 @@ describe('useAnalyticsStore - fetchConnections', () => {
     await useAnalyticsStore.getState().fetchConnections()
     expect(useAnalyticsStore.getState().initialized).toBe(true)
   })
+})
 
+describe('fetchConnections (2/2)', () => {
   it('should set error on failure', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false })
 
@@ -89,9 +112,7 @@ describe('useAnalyticsStore - fetchConnections', () => {
     expect(state.error).toBe('Failed to fetch analytics connections')
     expect(state.loading).toBe(false)
   })
-})
 
-describe('useAnalyticsStore - fetchConnections - continued', () => {
   it('should handle network error', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
@@ -125,7 +146,11 @@ describe('useAnalyticsStore - fetchConnections - continued', () => {
   })
 })
 
-describe('useAnalyticsStore - createConnection', () => {
+// ---------------------------------------------------------------------------
+// createConnection
+// ---------------------------------------------------------------------------
+
+describe('createConnection (1/3)', () => {
   it('should POST to /api/analytics/connections and add to state', async () => {
     const newConnection = makeConnection()
     mockFetch.mockResolvedValueOnce({
@@ -152,7 +177,9 @@ describe('useAnalyticsStore - createConnection', () => {
     expect(useAnalyticsStore.getState().connections).toHaveLength(1)
     expect(useAnalyticsStore.getState().connections[0]).toEqual(newConnection)
   })
+})
 
+describe('createConnection (2/3)', () => {
   it('should prepend new connection to existing list', async () => {
     const existing = makeConnection({ id: 'existing-1' })
     useAnalyticsStore.setState({ connections: [existing] })
@@ -174,9 +201,7 @@ describe('useAnalyticsStore - createConnection', () => {
     expect(connections[0].id).toBe('new-1')
     expect(connections[1].id).toBe('existing-1')
   })
-})
 
-describe('useAnalyticsStore - createConnection - continued', () => {
   it('should set error and throw on failure', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
@@ -194,7 +219,9 @@ describe('useAnalyticsStore - createConnection - continued', () => {
     expect(useAnalyticsStore.getState().error).toBe('Invalid property ID')
     expect(useAnalyticsStore.getState().loading).toBe(false)
   })
+})
 
+describe('createConnection (3/3)', () => {
   it('should use default error message when API returns no error field', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
@@ -210,3 +237,4 @@ describe('useAnalyticsStore - createConnection - continued', () => {
     ).rejects.toThrow('Failed to create connection')
   })
 })
+

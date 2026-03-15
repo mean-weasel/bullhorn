@@ -129,7 +129,7 @@ describe('GET /api/api-keys', () => {
 // POST /api/api-keys
 // ---------------------------------------------------------------------------
 
-describe('POST /api/api-keys', () => {
+describe('POST /api/api-keys (1/3)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = new Request('http://localhost:3000/api/api-keys', {
@@ -163,7 +163,7 @@ describe('POST /api/api-keys', () => {
   })
 })
 
-describe('POST /api/api-keys - continued', () => {
+describe('POST /api/api-keys (2/3)', () => {
   it('creates API key successfully and returns 201 with raw key', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     const insertedRow = {
@@ -209,7 +209,9 @@ describe('POST /api/api-keys - continued', () => {
     expect(body.current).toBe(PLAN_LIMITS.free.apiKeys)
     expect(body.plan).toBe('free')
   })
+})
 
+describe('POST /api/api-keys (3/3)', () => {
   it('returns 500 when insert fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockInsertSingle.mockResolvedValue({ data: null, error: { message: 'Insert failed' } })

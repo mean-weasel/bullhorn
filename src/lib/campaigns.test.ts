@@ -40,7 +40,7 @@ const makeCampaign = (overrides: Partial<Campaign> = {}): Campaign => ({
 // fetchCampaigns
 // ---------------------------------------------------------------------------
 
-describe('useCampaignsStore - fetchCampaigns', () => {
+describe('fetchCampaigns (1/3)', () => {
   it('should set loading true while fetching', async () => {
     let capturedLoading = false
     mockFetch.mockImplementation(() => {
@@ -80,7 +80,9 @@ describe('useCampaignsStore - fetchCampaigns', () => {
     await useCampaignsStore.getState().fetchCampaigns()
     expect(useCampaignsStore.getState().initialized).toBe(true)
   })
+})
 
+describe('fetchCampaigns (2/3)', () => {
   it('should set error on failure', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false })
 
@@ -90,9 +92,7 @@ describe('useCampaignsStore - fetchCampaigns', () => {
     expect(state.error).toBe('Failed to fetch campaigns')
     expect(state.loading).toBe(false)
   })
-})
 
-describe('useCampaignsStore - fetchCampaigns - continued', () => {
   it('should handle network error', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
@@ -121,7 +121,9 @@ describe('useCampaignsStore - fetchCampaigns - continued', () => {
 
     expect(mockFetch).toHaveBeenCalledWith('/api/campaigns?projectId=proj-42')
   })
+})
 
+describe('fetchCampaigns (3/3)', () => {
   it('should deduplicate concurrent calls', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
@@ -137,7 +139,11 @@ describe('useCampaignsStore - fetchCampaigns - continued', () => {
   })
 })
 
-describe('useCampaignsStore - addCampaign', () => {
+// ---------------------------------------------------------------------------
+// addCampaign
+// ---------------------------------------------------------------------------
+
+describe('addCampaign', () => {
   it('should POST to /api/campaigns and add to items', async () => {
     const newCampaign = makeCampaign()
     mockFetch.mockResolvedValueOnce({
@@ -189,7 +195,11 @@ describe('useCampaignsStore - addCampaign', () => {
   })
 })
 
-describe('useCampaignsStore - updateCampaign', () => {
+// ---------------------------------------------------------------------------
+// updateCampaign / deleteCampaign / getCampaign / getCampaignsByStatus
+// ---------------------------------------------------------------------------
+
+describe('updateCampaign', () => {
   it('should PATCH and update the campaign in state', async () => {
     const original = makeCampaign()
     useCampaignsStore.setState({ campaigns: [original] })
@@ -219,5 +229,70 @@ describe('useCampaignsStore - updateCampaign', () => {
     ).rejects.toThrow('Failed to update campaign')
 
     expect(useCampaignsStore.getState().error).toBe('Failed to update campaign')
+  })
+})
+
+describe('deleteCampaign', () => {
+  it('should DELETE and remove the campaign from state', async () => {
+    useCampaignsStore.setState({
+      campaigns: [makeCampaign({ id: 'camp-1' }), makeCampaign({ id: 'camp-2' })],
+    })
+
+    mockFetch.mockResolvedValueOnce({ ok: true })
+
+    await useCampaignsStore.getState().deleteCampaign('camp-1')
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/campaigns/camp-1', { method: 'DELETE' })
+    const campaigns = useCampaignsStore.getState().campaigns
+    expect(campaigns).toHaveLength(1)
+    expect(campaigns[0].id).toBe('camp-2')
+  })
+
+  it('should set error and throw on failure', async () => {
+    useCampaignsStore.setState({ campaigns: [makeCampaign()] })
+    mockFetch.mockResolvedValueOnce({ ok: false })
+
+    await expect(useCampaignsStore.getState().deleteCampaign('camp-1')).rejects.toThrow(
+      'Failed to delete campaign'
+    )
+
+    expect(useCampaignsStore.getState().error).toBe('Failed to delete campaign')
+  })
+})
+
+describe('getCampaign', () => {
+  it('should return a campaign by id', () => {
+    const campaign = makeCampaign()
+    useCampaignsStore.setState({ campaigns: [campaign] })
+    expect(useCampaignsStore.getState().getCampaign('camp-1')).toEqual(campaign)
+  })
+
+  it('should return undefined for unknown id', () => {
+    useCampaignsStore.setState({ campaigns: [makeCampaign()] })
+    expect(useCampaignsStore.getState().getCampaign('nonexistent')).toBeUndefined()
+  })
+})
+
+describe('getCampaignsByStatus', () => {
+  it('should filter campaigns by status', () => {
+    useCampaignsStore.setState({
+      campaigns: [
+        makeCampaign({ id: '1', status: 'active' }),
+        makeCampaign({ id: '2', status: 'paused' }),
+        makeCampaign({ id: '3', status: 'active' }),
+      ],
+    })
+
+    const active = useCampaignsStore.getState().getCampaignsByStatus('active')
+    expect(active).toHaveLength(2)
+    expect(active.map((c) => c.id)).toEqual(['1', '3'])
+  })
+
+  it('should return all campaigns when no status provided', () => {
+    useCampaignsStore.setState({
+      campaigns: [makeCampaign({ id: '1' }), makeCampaign({ id: '2' })],
+    })
+
+    expect(useCampaignsStore.getState().getCampaignsByStatus()).toHaveLength(2)
   })
 })

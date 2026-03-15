@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { isNativePlatform } from '@/lib/capacitor'
 import { nativeGoogleSignIn } from '@/lib/googleSignIn'
 
+// eslint-disable-next-line max-lines-per-function
 export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()

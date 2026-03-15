@@ -68,7 +68,7 @@ beforeEach(async () => {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('GET /api/cron/publish (notify-due-posts)', () => {
+describe('GET /api/cron/publish (notify-due-posts) (1/5)', () => {
   it('returns 401 when CRON_SECRET is set and header does not match', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
     mockCreateClient.mockReturnValue({ from: vi.fn() })
@@ -88,7 +88,9 @@ describe('GET /api/cron/publish (notify-due-posts)', () => {
 
     expect(res.status).toBe(500)
   })
+})
 
+describe('GET /api/cron/publish (notify-due-posts) (2/5)', () => {
   it('transitions scheduled posts to ready status', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
 
@@ -126,7 +128,7 @@ describe('GET /api/cron/publish (notify-due-posts)', () => {
   })
 })
 
-describe('GET /api/cron/publish (notify-due-posts) - continued', () => {
+describe('GET /api/cron/publish (notify-due-posts) (3/5)', () => {
   it('returns zero counts when no posts are due', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
 
@@ -154,7 +156,9 @@ describe('GET /api/cron/publish (notify-due-posts) - continued', () => {
     expect(body.processed).toBe(0)
     expect(body.notified).toBe(0)
   })
+})
 
+describe('GET /api/cron/publish (notify-due-posts) (4/5)', () => {
   it('returns 500 when database query fails', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
 
@@ -183,7 +187,9 @@ describe('GET /api/cron/publish (notify-due-posts) - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Database query failed')
   })
+})
 
+describe('GET /api/cron/publish (notify-due-posts) (5/5)', () => {
   it('continues processing when individual post update fails', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
 

@@ -32,6 +32,7 @@ export default function BlogDraftsPage() {
   )
 }
 
+// eslint-disable-next-line max-lines-per-function
 function BlogDraftsContent() {
   const { drafts, loading, error, initialized, fetchDrafts } = useBlogDraftsStore()
   const searchParams = useSearchParams()

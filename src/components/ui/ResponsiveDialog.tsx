@@ -19,6 +19,7 @@ interface ResponsiveDialogProps {
   preventBackdropClose?: boolean
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function ResponsiveDialog({
   open,
   onClose,
@@ -184,6 +185,7 @@ export function ResponsiveDialogActions({
   )
 }
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function ResponsiveDialogButton({
   children,
   onClick,

@@ -41,10 +41,10 @@ const makeDraft = (overrides: Partial<BlogDraft> = {}): BlogDraft => ({
 })
 
 // ---------------------------------------------------------------------------
-// fetchDrafts
+// fetchDrafts — success cases
 // ---------------------------------------------------------------------------
 
-describe('useBlogDraftsStore - fetchDrafts', () => {
+describe('fetchDrafts success', () => {
   it('should set loading true while fetching', async () => {
     let capturedLoading = false
     mockFetch.mockImplementation(() => {
@@ -85,6 +85,26 @@ describe('useBlogDraftsStore - fetchDrafts', () => {
     expect(useBlogDraftsStore.getState().initialized).toBe(true)
   })
 
+  it('should deduplicate concurrent calls', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ drafts: [] }),
+    })
+
+    await Promise.all([
+      useBlogDraftsStore.getState().fetchDrafts(),
+      useBlogDraftsStore.getState().fetchDrafts(),
+    ])
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// fetchDrafts — error / edge cases
+// ---------------------------------------------------------------------------
+
+describe('fetchDrafts errors', () => {
   it('should set error on failure', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false })
 
@@ -94,9 +114,7 @@ describe('useBlogDraftsStore - fetchDrafts', () => {
     expect(state.error).toBe('Failed to fetch blog drafts')
     expect(state.loading).toBe(false)
   })
-})
 
-describe('useBlogDraftsStore - fetchDrafts - continued', () => {
   it('should handle network error', async () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
@@ -113,23 +131,13 @@ describe('useBlogDraftsStore - fetchDrafts - continued', () => {
     await useBlogDraftsStore.getState().fetchDrafts()
     expect(useBlogDraftsStore.getState().drafts).toEqual([])
   })
-
-  it('should deduplicate concurrent calls', async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({ drafts: [] }),
-    })
-
-    await Promise.all([
-      useBlogDraftsStore.getState().fetchDrafts(),
-      useBlogDraftsStore.getState().fetchDrafts(),
-    ])
-
-    expect(mockFetch).toHaveBeenCalledTimes(1)
-  })
 })
 
-describe('useBlogDraftsStore - addDraft', () => {
+// ---------------------------------------------------------------------------
+// addDraft
+// ---------------------------------------------------------------------------
+
+describe('addDraft (1/2)', () => {
   it('should POST to /api/blog-drafts and add to items', async () => {
     const newDraft = makeDraft()
     mockFetch.mockResolvedValueOnce({
@@ -178,7 +186,7 @@ describe('useBlogDraftsStore - addDraft', () => {
   })
 })
 
-describe('useBlogDraftsStore - addDraft - continued', () => {
+describe('addDraft (2/2)', () => {
   it('should set error and throw on failure', async () => {
     mockFetch.mockResolvedValueOnce({ ok: false })
 
@@ -194,5 +202,69 @@ describe('useBlogDraftsStore - addDraft - continued', () => {
 
     expect(useBlogDraftsStore.getState().error).toBe('Failed to create blog draft')
     expect(useBlogDraftsStore.getState().loading).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// updateDraft / deleteDraft
+// ---------------------------------------------------------------------------
+
+describe('updateDraft', () => {
+  it('should PATCH and update the draft in state', async () => {
+    useBlogDraftsStore.setState({ drafts: [makeDraft()] })
+
+    const updated = makeDraft({ title: 'Updated Title' })
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ draft: updated }),
+    })
+
+    await useBlogDraftsStore.getState().updateDraft('draft-1', { title: 'Updated Title' })
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/blog-drafts/draft-1', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Updated Title' }),
+    })
+    expect(useBlogDraftsStore.getState().drafts[0].title).toBe('Updated Title')
+  })
+
+  it('should set error and throw on failure', async () => {
+    useBlogDraftsStore.setState({ drafts: [makeDraft()] })
+    mockFetch.mockResolvedValueOnce({ ok: false })
+
+    await expect(
+      useBlogDraftsStore.getState().updateDraft('draft-1', { title: 'Fail' })
+    ).rejects.toThrow('Failed to update blog draft')
+
+    expect(useBlogDraftsStore.getState().error).toBe('Failed to update blog draft')
+  })
+})
+
+describe('deleteDraft', () => {
+  it('should DELETE and remove the draft from state', async () => {
+    useBlogDraftsStore.setState({
+      drafts: [makeDraft({ id: 'draft-1' }), makeDraft({ id: 'draft-2' })],
+    })
+
+    mockFetch.mockResolvedValueOnce({ ok: true })
+
+    await useBlogDraftsStore.getState().deleteDraft('draft-1')
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/blog-drafts/draft-1', { method: 'DELETE' })
+    const drafts = useBlogDraftsStore.getState().drafts
+    expect(drafts).toHaveLength(1)
+    expect(drafts[0].id).toBe('draft-2')
+  })
+
+  it('should set error and throw on failure', async () => {
+    useBlogDraftsStore.setState({ drafts: [makeDraft()] })
+    mockFetch.mockResolvedValueOnce({ ok: false })
+
+    await expect(useBlogDraftsStore.getState().deleteDraft('draft-1')).rejects.toThrow(
+      'Failed to delete blog draft'
+    )
+
+    expect(useBlogDraftsStore.getState().error).toBe('Failed to delete blog draft')
   })
 })

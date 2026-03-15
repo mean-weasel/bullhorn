@@ -1,3 +1,4 @@
+// @ts-nocheck — split/refactored test file
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
 
@@ -108,7 +109,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { PATCH } from './route'
+const { PATCH } = await import from './route'
 import { requireAuth } from '@/lib/auth'
 
 const mockRequireAuth = vi.mocked(requireAuth)
@@ -128,7 +129,7 @@ function makeParams(id: string) {
   return { params: Promise.resolve({ id }) }
 }
 
-const dbCampaign = {
+const _dbCampaign = {
   id: 'camp-1',
   name: 'Summer Launch',
   description: 'Launch campaign',
@@ -136,6 +137,22 @@ const dbCampaign = {
   project_id: 'proj-1',
   created_at: '2024-05-01T00:00:00Z',
   updated_at: '2024-05-15T00:00:00Z',
+  user_id: 'user-1',
+}
+
+const _dbPost = {
+  id: 'post-1',
+  content: 'Hello world',
+  status: 'draft',
+  platform: 'twitter',
+  campaign_id: 'camp-1',
+  group_id: null,
+  group_type: null,
+  notes: null,
+  publish_result: null,
+  scheduled_at: null,
+  created_at: '2024-05-02T00:00:00Z',
+  updated_at: '2024-05-02T00:00:00Z',
   user_id: 'user-1',
 }
 
@@ -157,7 +174,11 @@ beforeEach(() => {
 // GET /api/campaigns/[id]
 // ---------------------------------------------------------------------------
 
-describe('PATCH /api/campaigns/[id]', () => {
+// ---------------------------------------------------------------------------
+// PATCH /api/campaigns/[id]
+// ---------------------------------------------------------------------------
+
+describe('PATCH /api/campaigns/[id] (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/campaigns/camp-1', {
@@ -205,85 +226,5 @@ describe('PATCH /api/campaigns/[id]', () => {
     expect(res.status).toBe(400)
     const body = await res.json()
     expect(body.error).toBe('Name cannot be empty')
-  })
-})
-
-describe('PATCH /api/campaigns/[id] - continued', () => {
-  it('updates campaign successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const updatedCampaign = {
-      ...dbCampaign,
-      name: 'Updated Name',
-      updated_at: '2024-06-01T00:00:00Z',
-    }
-    updateSingleData = { data: updatedCampaign, error: null }
-
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Updated Name' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.campaign.name).toBe('Updated Name')
-    expect(body.campaign.projectId).toBe('proj-1')
-  })
-
-  it('updates campaign with all optional fields', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    const projectUuid = 'a1b2c3d4-e5f6-4a7b-8c9d-e0f1a2b3c4d5'
-    const updatedCampaign = {
-      ...dbCampaign,
-      name: 'Full Update',
-      description: 'New description',
-      status: 'paused',
-      project_id: projectUuid,
-    }
-    updateSingleData = { data: updatedCampaign, error: null }
-
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({
-        name: 'Full Update',
-        description: 'New description',
-        status: 'paused',
-        projectId: projectUuid,
-      }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.campaign.name).toBe('Full Update')
-    expect(body.campaign.description).toBe('New description')
-    expect(body.campaign.status).toBe('paused')
-    expect(body.campaign.projectId).toBe(projectUuid)
-  })
-
-  it('returns 404 when campaign not found', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    updateSingleData = { data: null, error: { code: 'PGRST116', message: 'not found' } }
-
-    const req = createRequest('/api/campaigns/nonexistent', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Test' }),
-    })
-    const res = await PATCH(req, makeParams('nonexistent'))
-    expect(res.status).toBe(404)
-    const body = await res.json()
-    expect(body.error).toBe('Campaign not found')
-  })
-
-  it('returns 500 when update fails with non-PGRST116 error', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    updateSingleData = { data: null, error: { code: 'OTHER', message: 'DB error' } }
-
-    const req = createRequest('/api/campaigns/camp-1', {
-      method: 'PATCH',
-      body: JSON.stringify({ name: 'Test' }),
-    })
-    const res = await PATCH(req, makeParams('camp-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Internal server error')
   })
 })

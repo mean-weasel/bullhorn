@@ -27,6 +27,7 @@ interface LaunchPostCardProps {
   onCopy?: () => void
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function LaunchPostCard({ post, index = 0, onEdit, onDelete, onCopy }: LaunchPostCardProps) {
   const [showMenu, setShowMenu] = useState(false)
   const platformInfo = LAUNCH_PLATFORM_INFO[post.platform]

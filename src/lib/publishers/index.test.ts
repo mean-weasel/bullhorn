@@ -112,15 +112,7 @@ describe('splitIntoThread', () => {
   })
 })
 
-describe('publishPost', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockUpdate.mockReturnValue({ eq: mockEq })
-    mockSingle.mockResolvedValue({
-      data: { provider_account_id: 'account-123' },
-    })
-  })
-
+describe('publishPost (1/3)', () => {
   it('calls correct publisher for twitter', async () => {
     const { publishPost } = await import('./index')
     mockFetchSuccess({ data: { id: 'tweet-123', text: 'Hello' } })
@@ -163,7 +155,9 @@ describe('publishPost', () => {
       expect.objectContaining({ method: 'POST' })
     )
   })
+})
 
+describe('publishPost (2/3)', () => {
   it('calls correct publisher for reddit', async () => {
     const { publishPost } = await import('./index')
     mockFetchSuccess({
@@ -204,15 +198,7 @@ describe('publishPost', () => {
   })
 })
 
-describe('publishPost - continued', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockUpdate.mockReturnValue({ eq: mockEq })
-    mockSingle.mockResolvedValue({
-      data: { provider_account_id: 'account-123' },
-    })
-  })
-
+describe('publishPost (3/3)', () => {
   it('updates post status to failed on failure', async () => {
     const { publishPost } = await import('./index')
     mockFetchError(403, { detail: 'Forbidden' })

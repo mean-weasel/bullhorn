@@ -87,11 +87,7 @@ function createRequest(file: File | null): NextRequest {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('POST /api/media/upload', () => {
-  // -----------------------------------------------------------------------
-  // Authentication
-  // -----------------------------------------------------------------------
-
+describe('POST /api/media/upload (1/6)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest(createMockFile('photo.jpg', 'image/jpeg', 100))
@@ -114,10 +110,6 @@ describe('POST /api/media/upload', () => {
     expect(body.error).toBe('Forbidden')
   })
 
-  // -----------------------------------------------------------------------
-  // Missing file
-  // -----------------------------------------------------------------------
-
   it('returns 400 when no file is provided', async () => {
     const req = createRequest(null)
     const res = await POST(req)
@@ -125,11 +117,10 @@ describe('POST /api/media/upload', () => {
     const body = await res.json()
     expect(body.error).toBe('No file provided')
   })
+})
 
-  // -----------------------------------------------------------------------
-  // MIME type validation
-  // -----------------------------------------------------------------------
-
+// eslint-disable-next-line max-lines-per-function -- data-driven loop tests for all MIME types
+describe('POST /api/media/upload (2/6)', () => {
   describe('file type validation', () => {
     const validImageTypes = [
       { ext: 'jpg', mime: 'image/jpeg' },
@@ -185,11 +176,9 @@ describe('POST /api/media/upload', () => {
       })
     }
   })
+})
 
-  // -----------------------------------------------------------------------
-  // File size validation
-  // -----------------------------------------------------------------------
-
+describe('POST /api/media/upload (3/6)', () => {
   describe('file size validation', () => {
     it('rejects images over 10MB', async () => {
       const overLimit = 10 * 1024 * 1024 + 1 // 10 MB + 1 byte
@@ -237,101 +226,6 @@ describe('POST /api/media/upload', () => {
       expect(res.status).toBe(200)
       const body = await res.json()
       expect(body.success).toBe(true)
-    })
-  })
-
-  // -----------------------------------------------------------------------
-  // Storage quota enforcement
-  // -----------------------------------------------------------------------
-
-  describe('storage quota enforcement', () => {
-    it('returns 403 when storage limit is exceeded', async () => {
-      mockEnforceStorageLimit.mockResolvedValue({
-        allowed: false,
-        currentBytes: 50 * 1024 * 1024,
-        limitBytes: 50 * 1024 * 1024,
-        plan: 'free',
-      })
-      const req = createRequest(createMockFile('photo.jpg', 'image/jpeg', 100))
-      const res = await POST(req)
-      expect(res.status).toBe(403)
-      const body = await res.json()
-      expect(body.success).toBe(false)
-      expect(body.error).toContain('Storage limit reached')
-      expect(body.error).toContain('50 MB')
-    })
-
-    it('passes userId and file size to enforceStorageLimit', async () => {
-      const fileSize = 5000
-      const req = createRequest(createMockFile('photo.jpg', 'image/jpeg', fileSize))
-      await POST(req)
-      expect(mockEnforceStorageLimit).toHaveBeenCalledWith('user-1', fileSize)
-    })
-  })
-
-  // -----------------------------------------------------------------------
-  // Successful upload
-  // -----------------------------------------------------------------------
-
-  describe('successful upload', () => {
-    it('returns filename and url on success', async () => {
-      const req = createRequest(createMockFile('photo.jpg', 'image/jpeg', 100))
-      const res = await POST(req)
-      expect(res.status).toBe(200)
-      const body = await res.json()
-      expect(body.success).toBe(true)
-      expect(body.filename).toBeDefined()
-      expect(body.filename).toMatch(/\.jpg$/)
-      expect(body.url).toMatch(/^\/api\/media\//)
-    })
-
-    it('generates a UUID-based filename', async () => {
-      const req = createRequest(createMockFile('my-photo.png', 'image/png', 100))
-      const res = await POST(req)
-      const body = await res.json()
-      // Filename should be a UUID + extension, not the original name
-      expect(body.filename).not.toContain('my-photo')
-      expect(body.filename).toMatch(/\.png$/)
-      // UUID pattern: 8-4-4-4-12
-      const uuidPart = body.filename.replace('.png', '')
-      expect(uuidPart).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
-    })
-
-    it('calls supabase storage upload with correct path', async () => {
-      const req = createRequest(createMockFile('photo.jpg', 'image/jpeg', 100))
-      await POST(req)
-      expect(mockUpload).toHaveBeenCalledTimes(1)
-      const [storagePath, buffer, options] = mockUpload.mock.calls[0]
-      expect(storagePath).toMatch(/^user-1\//)
-      expect(storagePath).toMatch(/\.jpg$/)
-      expect(buffer).toBeInstanceOf(Buffer)
-      expect(options.contentType).toBe('image/jpeg')
-    })
-
-    it('calls increment_storage_used rpc after upload', async () => {
-      const fileSize = 2048
-      const req = createRequest(createMockFile('photo.jpg', 'image/jpeg', fileSize))
-      await POST(req)
-      expect(mockRpc).toHaveBeenCalledWith('increment_storage_used', {
-        user_id_param: 'user-1',
-        bytes_param: fileSize,
-      })
-    })
-  })
-
-  // -----------------------------------------------------------------------
-  // Upload failure
-  // -----------------------------------------------------------------------
-
-  describe('upload failure', () => {
-    it('returns 500 when supabase storage upload fails', async () => {
-      mockUpload.mockResolvedValue({ error: { message: 'Storage error' } })
-      const req = createRequest(createMockFile('photo.jpg', 'image/jpeg', 100))
-      const res = await POST(req)
-      expect(res.status).toBe(500)
-      const body = await res.json()
-      expect(body.success).toBe(false)
-      expect(body.error).toBe('Upload failed')
     })
   })
 })

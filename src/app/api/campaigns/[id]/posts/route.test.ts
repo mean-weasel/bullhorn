@@ -118,6 +118,7 @@ beforeEach(() => {
 // GET /api/campaigns/[id]/posts
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line max-lines-per-function
 describe('GET /api/campaigns/[id]/posts', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
@@ -202,6 +203,7 @@ describe('GET /api/campaigns/[id]/posts', () => {
 // POST /api/campaigns/[id]/posts - Add post to campaign
 // ---------------------------------------------------------------------------
 
+// eslint-disable-next-line max-lines-per-function
 describe('POST /api/campaigns/[id]/posts', () => {
   const validPostId = 'a1b2c3d4-e5f6-4a7b-8c9d-e0f1a2b3c4d5'
 

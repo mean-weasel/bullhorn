@@ -3,6 +3,7 @@
 import { Post, getPostPreviewText } from '@/lib/posts'
 import { cn } from '@/lib/utils'
 
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export function AddPostModal({
   posts,
   onClose,

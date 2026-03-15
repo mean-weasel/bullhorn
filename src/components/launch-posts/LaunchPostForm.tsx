@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -28,6 +29,7 @@ interface LaunchPostFormProps {
   campaignId?: string // If provided, associate with campaign
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
   const router = useRouter()
   const { addLaunchPost, updateLaunchPost } = useLaunchPostsStore()

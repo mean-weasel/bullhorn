@@ -11,79 +11,18 @@ export const dynamic = 'force-dynamic'
 const PUBLISHABLE_STATUSES = ['draft', 'scheduled', 'failed']
 
 // POST /api/posts/[id]/publish - Immediately publish a post
-function validatePublishable(
-  postRow: { status: string },
-  post: ReturnType<typeof transformPostFromDb>
-) {
-  if (!PUBLISHABLE_STATUSES.includes(postRow.status)) {
-    return { error: 'Post cannot be published in its current status' }
-  }
-  const textContent = getTextFromContent(post.content, post.platform)
-  const charLimit = CHAR_LIMITS[post.platform]
-  if (textContent.length > charLimit) {
-    return { error: `Content exceeds the ${charLimit}-character limit` }
-  }
-  return null
-}
-
-async function findActiveAccount(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  platform: string
-) {
-  const { data, error } = await supabase
-    .from('social_accounts')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('provider', platform)
-    .eq('status', 'active')
-    .limit(1)
-    .single()
-  return { account: data, error }
-}
-
-async function executePublish(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  post: ReturnType<typeof transformPostFromDb>,
-  accountId: string,
-  id: string,
-  userId: string
-) {
-  const { error: lockError } = await supabase
-    .from('posts')
-    .update({ status: 'publishing' })
-    .eq('id', id)
-    .eq('user_id', userId)
-
-  if (lockError) throw new Error('Failed to set publishing status')
-
-  const result = await publishPost(post, accountId)
-  const { data: updatedRow, error: updateError } = await supabase
-    .from('posts')
-    .update({
-      status: result.success ? 'published' : 'failed',
-      publish_result: result.publishResult ?? null,
-    })
-    .eq('id', id)
-    .eq('user_id', userId)
-    .select()
-    .single()
-
-  if (updateError) throw new Error('Failed to update post after publish')
-
-  const updatedPost = transformPostFromDb(updatedRow as DbPost)
-  return { result, updatedPost }
-}
-
+// eslint-disable-next-line max-lines-per-function
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuth()
     const userId = auth.userId
-    if (auth.scopes) validateScopes(auth.scopes, ['posts:write'])
-
+    if (auth.scopes) {
+      validateScopes(auth.scopes, ['posts:write'])
+    }
     const { id } = await params
     const supabase = await createClient()
 
+    // 1. Fetch post and verify ownership
     const { data: postRow, error: fetchError } = await supabase
       .from('posts')
       .select('*')
@@ -92,20 +31,44 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       .single()
 
     if (fetchError) {
-      if (fetchError.code === 'PGRST116')
+      if (fetchError.code === 'PGRST116') {
         return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+      }
+      console.error('Database error:', fetchError)
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const post = transformPostFromDb(postRow as DbPost)
-    const valErr = validatePublishable(postRow, post)
-    if (valErr) return NextResponse.json(valErr, { status: 400 })
+    // 2. Validate the post is in a publishable status
+    if (!PUBLISHABLE_STATUSES.includes(postRow.status)) {
+      return NextResponse.json(
+        { error: 'Post cannot be published in its current status' },
+        { status: 400 }
+      )
+    }
 
-    const { account, error: accountError } = await findActiveAccount(
-      supabase,
-      userId,
-      postRow.platform
-    )
+    // 2b. Validate content does not exceed platform character limit
+    const transformedPost = transformPostFromDb(postRow as DbPost)
+    const textContent = getTextFromContent(transformedPost.content, transformedPost.platform)
+    const charLimit = CHAR_LIMITS[transformedPost.platform]
+    if (textContent.length > charLimit) {
+      return NextResponse.json(
+        {
+          error: `Content exceeds the ${charLimit}-character limit`,
+        },
+        { status: 400 }
+      )
+    }
+
+    // 3. Find an active social account for this platform
+    const accountQuery = supabase
+      .from('social_accounts')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('provider', postRow.platform)
+      .eq('status', 'active')
+
+    const { data: account, error: accountError } = await accountQuery.limit(1).single()
+
     if (accountError || !account) {
       return NextResponse.json(
         { error: `No ${postRow.platform} account connected` },
@@ -113,7 +76,41 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       )
     }
 
-    const { result, updatedPost } = await executePublish(supabase, post, account.id, id, userId)
+    // 4. Set status to 'publishing' (optimistic lock)
+    const { error: lockError } = await supabase
+      .from('posts')
+      .update({ status: 'publishing' })
+      .eq('id', id)
+      .eq('user_id', userId)
+
+    if (lockError) {
+      console.error('Failed to set publishing status:', lockError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+
+    // 5. Call the publisher
+    const post = transformedPost
+    const result = await publishPost(post, account.id)
+
+    // 6. Update post with result
+    const finalStatus = result.success ? 'published' : 'failed'
+    const { data: updatedRow, error: updateError } = await supabase
+      .from('posts')
+      .update({
+        status: finalStatus,
+        publish_result: result.publishResult ?? null,
+      })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (updateError) {
+      console.error('Failed to update post after publish:', updateError)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+
+    const updatedPost = transformPostFromDb(updatedRow as DbPost)
 
     if (result.success) {
       return NextResponse.json({
@@ -122,15 +119,18 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         publishResult: result.publishResult,
       })
     }
+
     return NextResponse.json(
       { success: false, post: updatedPost, error: result.error },
       { status: 422 }
     )
   } catch (error) {
-    if (error instanceof Error && error.message === 'Forbidden')
+    if (error instanceof Error && error.message === 'Forbidden') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    if (error instanceof Error && error.message === 'Unauthorized')
+    }
+    if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error publishing post:', error)
     return NextResponse.json({ error: 'Failed to publish post' }, { status: 500 })
   }

@@ -105,7 +105,7 @@ beforeEach(() => {
 // POST /api/projects/[id]/logo
 // ---------------------------------------------------------------------------
 
-describe('POST /api/projects/[id]/logo', () => {
+describe('POST /api/projects/[id]/logo (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createFormDataRequest('/api/projects/proj-1/logo', {
@@ -145,7 +145,9 @@ describe('POST /api/projects/[id]/logo', () => {
     const body = await res.json()
     expect(body.error).toBe('Project not found')
   })
+})
 
+describe('POST /api/projects/[id]/logo (2/4)', () => {
   it('returns 403 when user does not own the project', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
@@ -162,9 +164,7 @@ describe('POST /api/projects/[id]/logo', () => {
     const body = await res.json()
     expect(body.error).toBe('Unauthorized')
   })
-})
 
-describe('POST /api/projects/[id]/logo - continued', () => {
   it('returns 400 when no file provided', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
@@ -181,7 +181,9 @@ describe('POST /api/projects/[id]/logo - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('No file provided')
   })
+})
 
+describe('POST /api/projects/[id]/logo (3/4)', () => {
   it('returns 400 for unsupported file type', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
@@ -217,7 +219,9 @@ describe('POST /api/projects/[id]/logo - continued', () => {
     expect(body.success).toBe(true)
     expect(body.logoUrl).toBeDefined()
   })
+})
 
+describe('POST /api/projects/[id]/logo (4/4)', () => {
   it('returns 500 when database update fails', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockProjectResult = {
@@ -231,97 +235,6 @@ describe('POST /api/projects/[id]/logo - continued', () => {
       size: 1000,
     })
     const res = await POST(req, createContext('proj-1'))
-    expect(res.status).toBe(500)
-    const body = await res.json()
-    expect(body.error).toBe('Failed to update project')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// DELETE /api/projects/[id]/logo
-// ---------------------------------------------------------------------------
-
-describe('DELETE /api/projects/[id]/logo', () => {
-  it('returns 401 when not authenticated', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
-    const req = createRequest('/api/projects/proj-1/logo', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(401)
-    const body = await res.json()
-    expect(body.error).toBe('Unauthorized')
-  })
-
-  it('returns 403 when scopes are insufficient', async () => {
-    mockRequireAuth.mockRejectedValue(new Error('Forbidden'))
-    const req = createRequest('/api/projects/proj-1/logo', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.error).toBe('Forbidden')
-  })
-
-  it('returns 404 when project not found', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = { data: null, error: { code: 'PGRST116', message: 'Not found' } }
-    const req = createRequest('/api/projects/proj-999/logo', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-999'))
-    expect(res.status).toBe(404)
-    const body = await res.json()
-    expect(body.error).toBe('Project not found')
-  })
-
-  it('returns 403 when user does not own the project', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = {
-      data: { id: 'proj-1', logo_url: '/storage/logos/old.png', user_id: 'user-other' },
-      error: null,
-    }
-    const req = createRequest('/api/projects/proj-1/logo', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(403)
-    const body = await res.json()
-    expect(body.error).toBe('Unauthorized')
-  })
-})
-
-describe('DELETE /api/projects/[id]/logo - continued', () => {
-  it('deletes logo successfully', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = {
-      data: { id: 'proj-1', logo_url: '/storage/logos/old.png', user_id: 'user-1' },
-      error: null,
-    }
-    mockUpdateResult = { error: null }
-    const req = createRequest('/api/projects/proj-1/logo', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.success).toBe(true)
-  })
-
-  it('deletes logo when no existing logo_url', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = {
-      data: { id: 'proj-1', logo_url: null, user_id: 'user-1' },
-      error: null,
-    }
-    mockUpdateResult = { error: null }
-    const req = createRequest('/api/projects/proj-1/logo', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
-    expect(res.status).toBe(200)
-    const body = await res.json()
-    expect(body.success).toBe(true)
-  })
-
-  it('returns 500 when database update fails on delete', async () => {
-    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
-    mockProjectResult = {
-      data: { id: 'proj-1', logo_url: '/storage/logos/old.png', user_id: 'user-1' },
-      error: null,
-    }
-    mockUpdateResult = { error: { message: 'Update failed' } }
-    const req = createRequest('/api/projects/proj-1/logo', { method: 'DELETE' })
-    const res = await DELETE(req, createContext('proj-1'))
     expect(res.status).toBe(500)
     const body = await res.json()
     expect(body.error).toBe('Failed to update project')

@@ -3,6 +3,7 @@
 import { LaunchPost, LAUNCH_PLATFORM_INFO } from '@/lib/launchPosts'
 import { cn } from '@/lib/utils'
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export function AddLaunchPostModal({
   launchPosts,
   onClose,

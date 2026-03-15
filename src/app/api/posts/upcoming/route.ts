@@ -4,25 +4,8 @@ import { requireAuth, validateScopes, type ApiKeyScope } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
-function transformUpcomingPost(p: {
-  id: string
-  platform: string
-  scheduled_at: string
-  content: unknown
-  campaign_id: string | null
-}) {
-  const content = p.content as Record<string, unknown>
-  const text = (content.text as string) || (content.title as string) || ''
-  return {
-    id: p.id,
-    platform: p.platform,
-    scheduledAt: p.scheduled_at,
-    preview: text.slice(0, 100) + (text.length > 100 ? '...' : ''),
-    campaignId: p.campaign_id,
-  }
-}
-
 // GET /api/posts/upcoming - Get posts scheduled within the next N hours
+// eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export async function GET(request: NextRequest) {
   try {
     let userId: string
@@ -64,7 +47,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 
-    const posts = (data || []).map((p) => transformUpcomingPost(p))
+    const posts = (data || []).map((p) => {
+      const content = p.content as Record<string, unknown>
+      const text = (content.text as string) || (content.title as string) || ''
+      return {
+        id: p.id,
+        platform: p.platform,
+        scheduledAt: p.scheduled_at,
+        preview: text.slice(0, 100) + (text.length > 100 ? '...' : ''),
+        campaignId: p.campaign_id,
+      }
+    })
 
     return NextResponse.json({ posts, hours })
   } catch (error) {

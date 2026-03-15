@@ -48,7 +48,18 @@ vi.mock('@supabase/supabase-js', () => ({
 // Import the module under test AFTER mocks are registered
 // ---------------------------------------------------------------------------
 
-import { isTestMode, requireAuth, getOptionalAuth, getApiKeyFromHeaders } from './auth'
+import {
+  isTestMode,
+  requireAuth,
+  getOptionalAuth,
+  getApiKeyFromHeaders,
+  resolveApiKey,
+  hashApiKey,
+  validatePostOwnership,
+  validateCampaignOwnership,
+  validateProjectOwnership,
+  validateBlogDraftOwnership,
+} from './auth'
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -97,6 +108,10 @@ describe('isTestMode', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// getApiKeyFromHeaders
+// ---------------------------------------------------------------------------
+
 describe('getApiKeyFromHeaders', () => {
   it('returns the API key when Authorization header has Bearer bh_ prefix', async () => {
     mockHeadersGet.mockReturnValue('Bearer bh_abc123def456ghi789')
@@ -122,6 +137,10 @@ describe('getApiKeyFromHeaders', () => {
     expect(key).toBeNull()
   })
 })
+
+// ---------------------------------------------------------------------------
+// requireAuth
+// ---------------------------------------------------------------------------
 
 describe('requireAuth', () => {
   it('returns test user ID in test mode', async () => {
@@ -161,6 +180,10 @@ describe('requireAuth', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// getOptionalAuth
+// ---------------------------------------------------------------------------
+
 describe('getOptionalAuth', () => {
   it('returns test user ID in test mode', async () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
@@ -186,3 +209,46 @@ describe('getOptionalAuth', () => {
     expect(result).toEqual({ userId: null })
   })
 })
+
+// ---------------------------------------------------------------------------
+// resolveApiKey
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// hashApiKey
+// ---------------------------------------------------------------------------
+
+describe('hashApiKey', () => {
+  it('returns SHA-256 hash when no HMAC secret is provided', () => {
+    vi.stubEnv('API_KEY_HMAC_SECRET', '')
+    const hash = hashApiKey('bh_testkey1234567890ab')
+    // Should be a 64-char hex string (SHA-256)
+    expect(hash).toMatch(/^[a-f0-9]{64}$/)
+  })
+
+  it('returns HMAC-SHA256 hash when secret is provided', () => {
+    const hash = hashApiKey('bh_testkey1234567890ab', 'my-secret')
+    expect(hash).toMatch(/^[a-f0-9]{64}$/)
+  })
+
+  it('HMAC hash differs from plain SHA-256 hash for same input', () => {
+    vi.stubEnv('API_KEY_HMAC_SECRET', '')
+    const plainHash = hashApiKey('bh_testkey1234567890ab')
+    const hmacHash = hashApiKey('bh_testkey1234567890ab', 'my-secret')
+    expect(plainHash).not.toBe(hmacHash)
+  })
+
+  it('uses API_KEY_HMAC_SECRET env var when no explicit secret', () => {
+    vi.stubEnv('API_KEY_HMAC_SECRET', 'env-secret')
+    const envHash = hashApiKey('bh_testkey1234567890ab')
+    const explicitHash = hashApiKey('bh_testkey1234567890ab', 'env-secret')
+    expect(envHash).toBe(explicitHash)
+  })
+
+  it('produces deterministic results', () => {
+    const hash1 = hashApiKey('bh_testkey1234567890ab', 'secret')
+    const hash2 = hashApiKey('bh_testkey1234567890ab', 'secret')
+    expect(hash1).toBe(hash2)
+  })
+})
+

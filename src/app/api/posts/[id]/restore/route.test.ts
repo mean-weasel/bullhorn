@@ -62,7 +62,7 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-describe('POST /api/posts/[id]/restore', () => {
+describe('POST /api/posts/[id]/restore (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/posts/post-1/restore', { method: 'POST' })
@@ -110,7 +110,9 @@ describe('POST /api/posts/[id]/restore', () => {
     const body = await res.json()
     expect(body.error).toBe('Post is not archived')
   })
+})
 
+describe('POST /api/posts/[id]/restore (2/4)', () => {
   it('returns 400 when post is scheduled (not archived)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -123,9 +125,7 @@ describe('POST /api/posts/[id]/restore', () => {
     const body = await res.json()
     expect(body.error).toBe('Post is not archived')
   })
-})
 
-describe('POST /api/posts/[id]/restore - continued', () => {
   it('restores an archived post successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -157,7 +157,9 @@ describe('POST /api/posts/[id]/restore - continued', () => {
     // Verify camelCase transform
     expect(body.post.createdAt).toBe('2024-01-01T00:00:00Z')
   })
+})
 
+describe('POST /api/posts/[id]/restore (3/4)', () => {
   it('returns 500 when fetch query fails with non-PGRST116 error', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -187,7 +189,9 @@ describe('POST /api/posts/[id]/restore - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Internal server error')
   })
+})
 
+describe('POST /api/posts/[id]/restore (4/4)', () => {
   it('sets status to draft when restoring', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

@@ -15,14 +15,15 @@ const clearTimer = (id: number | null) => {
  * and save status transitions.
  */
 
-describe('useAutoSave logic - retry backoff', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-  })
-  afterEach(() => {
-    vi.useRealTimers()
-  })
+beforeEach(() => {
+  vi.useFakeTimers()
+})
 
+afterEach(() => {
+  vi.useRealTimers()
+})
+
+describe('retry backoff (1/2)', () => {
   it('uses exponential backoff delays for retries', () => {
     const onSave = vi.fn()
     const backoffDelays = [2000, 4000, 8000]
@@ -65,7 +66,9 @@ describe('useAutoSave logic - retry backoff', () => {
     // No more retries
     expect(scheduleRetry()).toBeNull()
   })
+})
 
+describe('retry backoff (2/2)', () => {
   it('resets retry counter when new data changes come in', () => {
     const onSave = vi.fn()
     let retryCount = 2 // Simulate 2 failed retries
@@ -93,14 +96,7 @@ describe('useAutoSave logic - retry backoff', () => {
   })
 })
 
-describe('useAutoSave logic - cleanup', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
-  })
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
+describe('cleanup', () => {
   it('clears timeout on cleanup', () => {
     const onSave = vi.fn()
     const delay = 3000

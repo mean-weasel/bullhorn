@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- large page component with extracted sub-components */
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -281,6 +282,7 @@ function ToolTable({ tools }: { tools: { name: string; description: string }[] }
   )
 }
 
+// eslint-disable-next-line max-lines-per-function
 export default function McpDocsPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">

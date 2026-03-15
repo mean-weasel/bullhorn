@@ -8,6 +8,7 @@ import { isNativePlatform } from '@/lib/capacitor'
 import { nativeGoogleSignIn } from '@/lib/googleSignIn'
 import PasswordStrength from '@/components/ui/PasswordStrength'
 
+// eslint-disable-next-line max-lines-per-function
 export default function SignUpPage() {
   const supabase = createClient()
   const [email, setEmail] = useState('')

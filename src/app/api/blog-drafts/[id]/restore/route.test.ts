@@ -62,7 +62,7 @@ beforeEach(() => {
   vi.clearAllMocks()
 })
 
-describe('POST /api/blog-drafts/[id]/restore', () => {
+describe('POST /api/blog-drafts/[id]/restore (1/4)', () => {
   it('returns 401 when not authenticated', async () => {
     mockRequireAuth.mockRejectedValue(new Error('Unauthorized'))
     const req = createRequest('/api/blog-drafts/draft-1/restore', { method: 'POST' })
@@ -110,7 +110,9 @@ describe('POST /api/blog-drafts/[id]/restore', () => {
     const body = await res.json()
     expect(body.error).toBe('Blog draft is not archived')
   })
+})
 
+describe('POST /api/blog-drafts/[id]/restore (2/4)', () => {
   it('returns 400 when blog draft is scheduled (not archived)', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -123,9 +125,7 @@ describe('POST /api/blog-drafts/[id]/restore', () => {
     const body = await res.json()
     expect(body.error).toBe('Blog draft is not archived')
   })
-})
 
-describe('POST /api/blog-drafts/[id]/restore - continued', () => {
   it('restores an archived blog draft successfully', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -159,7 +159,9 @@ describe('POST /api/blog-drafts/[id]/restore - continued', () => {
     expect(body.draft.wordCount).toBe(2)
     expect(body.draft.campaignId).toBe('camp-1')
   })
+})
 
+describe('POST /api/blog-drafts/[id]/restore (3/4)', () => {
   it('returns 500 when fetch query fails with non-PGRST116 error', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({
@@ -189,7 +191,9 @@ describe('POST /api/blog-drafts/[id]/restore - continued', () => {
     const body = await res.json()
     expect(body.error).toBe('Internal server error')
   })
+})
 
+describe('POST /api/blog-drafts/[id]/restore (4/4)', () => {
   it('sets status to draft when restoring', async () => {
     mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
     mockFetchSingle.mockResolvedValue({

@@ -37,6 +37,7 @@ function truncateError(error: string, maxLen = 40): string {
   return error.slice(0, maxLen) + '…'
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function PostCard({ post, index }: { post: Post; index: number }) {
   const statusConfig = STATUS_CONFIG[post.status]
   const [retrying, setRetrying] = useState(false)

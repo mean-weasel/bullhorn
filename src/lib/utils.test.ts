@@ -23,6 +23,7 @@ describe('cn', () => {
   })
 
   it('uses tailwind-merge to resolve conflicts', () => {
+    // tailwind-merge should keep only the last conflicting utility
     expect(cn('p-4', 'p-2')).toBe('p-2')
     expect(cn('text-red-500', 'text-blue-500')).toBe('text-blue-500')
   })
@@ -94,6 +95,7 @@ describe('camelToSnake', () => {
 
   it('handles consecutive uppercase letters', () => {
     const input = { myURLPath: '/api' }
+    // Each uppercase letter gets its own underscore prefix
     expect(camelToSnake(input)).toEqual({ my_u_r_l_path: '/api' })
   })
 
@@ -136,7 +138,7 @@ const sampleDbPost: DbPost = {
   user_id: 'user-abc',
 }
 
-describe('transformPostFromDb - field mapping', () => {
+describe('transformPostFromDb', () => {
   it('maps all snake_case fields to camelCase', () => {
     const post = transformPostFromDb(sampleDbPost)
     expect(post.id).toBe('post-001')
@@ -149,18 +151,6 @@ describe('transformPostFromDb - field mapping', () => {
     expect(post.campaignId).toBe('camp-001')
     expect(post.groupId).toBe('grp-001')
     expect(post.groupType).toBe('reddit-crosspost')
-  })
-
-  it('does not include user_id in the output', () => {
-    const post = transformPostFromDb(sampleDbPost) as unknown as Record<string, unknown>
-    expect(post.user_id).toBeUndefined()
-    expect(post.userId).toBeUndefined()
-  })
-})
-
-describe('transformPostFromDb - nulls', () => {
-  it('preserves content and publishResult', () => {
-    const post = transformPostFromDb(sampleDbPost)
     expect(post.content).toEqual({
       text: 'Hello world!',
       mediaUrls: ['https://img.example.com/1.png'],
@@ -171,6 +161,12 @@ describe('transformPostFromDb - nulls', () => {
       postUrl: 'https://twitter.com/user/status/12345',
       publishedAt: '2024-06-05T15:01:00Z',
     })
+  })
+
+  it('does not include user_id in the output', () => {
+    const post = transformPostFromDb(sampleDbPost) as unknown as Record<string, unknown>
+    expect(post.user_id).toBeUndefined()
+    expect(post.userId).toBeUndefined()
   })
 
   it('converts null optional fields to undefined', () => {
@@ -205,6 +201,8 @@ describe('transformPostToDb', () => {
     expect(dbPost.platform).toBe('twitter')
     expect(dbPost.notes).toBe('Remember hashtags')
     expect(dbPost.campaign_id).toBe('camp-001')
+    expect(dbPost.group_id).toBe('grp-001')
+    expect(dbPost.group_type).toBe('reddit-crosspost')
   })
 
   it('handles partial post data', () => {
@@ -213,6 +211,7 @@ describe('transformPostToDb', () => {
     expect(dbPost.status).toBe('draft')
     expect(dbPost.platform).toBe('linkedin')
     expect(dbPost.id).toBeUndefined()
+    expect(dbPost.notes).toBeUndefined()
   })
 })
 
@@ -222,6 +221,8 @@ describe('Post roundtrip', () => {
     const dbPost = transformPostToDb(post)
     expect(dbPost.id).toBe(sampleDbPost.id)
     expect(dbPost.created_at).toBe(sampleDbPost.created_at)
+    expect(dbPost.updated_at).toBe(sampleDbPost.updated_at)
+    expect(dbPost.scheduled_at).toBe(sampleDbPost.scheduled_at)
     expect(dbPost.status).toBe(sampleDbPost.status)
     expect(dbPost.platform).toBe(sampleDbPost.platform)
     expect(dbPost.content).toEqual(sampleDbPost.content)
@@ -262,7 +263,11 @@ describe('transformCampaignFromDb', () => {
   })
 
   it('converts null optional fields to undefined', () => {
-    const dbCampaign: DbCampaign = { ...sampleDbCampaign, description: null, project_id: null }
+    const dbCampaign: DbCampaign = {
+      ...sampleDbCampaign,
+      description: null,
+      project_id: null,
+    }
     const campaign = transformCampaignFromDb(dbCampaign)
     expect(campaign.description).toBeUndefined()
     expect(campaign.projectId).toBeUndefined()

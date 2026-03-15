@@ -12,11 +12,13 @@ import {
 } from './helpers'
 
 // Delete tests need serial execution to avoid interference
+// eslint-disable-next-line max-lines-per-function
 test.describe.serial('Delete Post', () => {
   test.beforeEach(async ({ page }) => {
     await enterDemoMode(page)
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test('should permanently delete an archived post from editor', async ({ page }, testInfo) => {
     const testId = generateTestId(testInfo)
     const content = uniqueContent('Post to delete', testId)
@@ -42,6 +44,7 @@ test.describe.serial('Delete Post', () => {
     await waitForNavigation(page, '/')
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test('should delete a scheduled post after archiving', async ({ page }, testInfo) => {
     const testId = generateTestId(testInfo)
     const content = uniqueContent('Scheduled post to delete', testId)
@@ -71,6 +74,7 @@ test.describe.serial('Delete Post', () => {
     await waitForNavigation(page, '/')
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test('should cancel delete when declining confirmation on archived post', async ({ page }) => {
     // Create and archive a post
     await createTestPost(page, { platform: 'twitter', content: 'Post to keep' })
@@ -99,6 +103,7 @@ test.describe.serial('Delete Post', () => {
     await expect(page.getByRole('heading', { name: /edit post/i })).toBeVisible()
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test('should show delete button only on archived posts', async ({ page }) => {
     // Create and archive a post
     await createTestPost(page, { platform: 'twitter', content: 'Test post' })
@@ -122,6 +127,7 @@ test.describe.serial('Delete Post', () => {
     await expect(page.getByRole('button', { name: /delete/i })).toBeVisible()
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test('should not show delete button on new post page', async ({ page }) => {
     await page.goto('/new')
 
@@ -129,6 +135,7 @@ test.describe.serial('Delete Post', () => {
     await expect(deleteBtn).not.toBeVisible()
   })
 
+  // eslint-disable-next-line max-lines-per-function
   test('should show confirmation dialog before delete', async ({ page }) => {
     // Create and archive a post
     await createTestPost(page, { platform: 'twitter', content: 'Test post' })

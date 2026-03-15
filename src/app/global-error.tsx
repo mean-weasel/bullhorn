@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import * as Sentry from '@sentry/nextjs'
 
+// eslint-disable-next-line max-lines-per-function -- near-borderline, extraction would hurt readability
 export default function GlobalError({
   error,
   reset,

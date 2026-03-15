@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
  * keys, input element exclusion, and cleanup behavior.
  */
 
+// eslint-disable-next-line max-lines-per-function
 describe('useKeyboardShortcuts logic', () => {
   let addEventSpy: ReturnType<typeof vi.spyOn>
   let removeEventSpy: ReturnType<typeof vi.spyOn>
@@ -105,6 +106,7 @@ describe('useKeyboardShortcuts logic', () => {
     })
   })
 
+  // eslint-disable-next-line max-lines-per-function
   describe('shortcut matching', () => {
     it('calls the handler for a matching simple key shortcut', () => {
       const handler = vi.fn()
