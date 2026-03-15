@@ -55,7 +55,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { POST, DELETE } from './route'
+import { POST } from './route'
 import { requireAuth } from '@/lib/auth'
 
 const mockRequireAuth = vi.mocked(requireAuth)
@@ -84,12 +84,6 @@ function createFormDataRequest(
   })
 }
 
-function createRequest(url: string, init?: RequestInit): NextRequest {
-  return new NextRequest(
-    new URL(url, 'http://localhost:3000'),
-    init as ConstructorParameters<typeof NextRequest>[1]
-  )
-}
 
 // ---------------------------------------------------------------------------
 // Tests

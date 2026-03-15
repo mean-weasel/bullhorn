@@ -67,7 +67,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { GET, POST, DELETE } from './route'
+import { GET, POST } from './route'
 import { requireAuth } from '@/lib/auth'
 
 const mockRequireAuth = vi.mocked(requireAuth)

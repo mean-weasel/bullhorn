@@ -48,18 +48,7 @@ vi.mock('@supabase/supabase-js', () => ({
 // Import the module under test AFTER mocks are registered
 // ---------------------------------------------------------------------------
 
-import {
-  isTestMode,
-  requireAuth,
-  getOptionalAuth,
-  getApiKeyFromHeaders,
-  resolveApiKey,
-  hashApiKey,
-  validatePostOwnership,
-  validateCampaignOwnership,
-  validateProjectOwnership,
-  validateBlogDraftOwnership,
-} from './auth'
+import { isTestMode, requireAuth, getOptionalAuth, getApiKeyFromHeaders } from './auth'
 
 // ---------------------------------------------------------------------------
 // Tests

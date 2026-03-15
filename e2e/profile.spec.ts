@@ -12,9 +12,9 @@ import {
 
 // eslint-disable-next-line max-lines-per-function
 test.describe('User Profile Page', () => {
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Profile Page Access', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display profile page with all sections', async ({ page }) => {
       await goToProfile(page)
 
@@ -36,7 +36,7 @@ test.describe('User Profile Page', () => {
       await expect(page.getByRole('button', { name: /delete account/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display avatar with initials', async ({ page }) => {
       await goToProfile(page)
 
@@ -47,7 +47,7 @@ test.describe('User Profile Page', () => {
       await expect(avatar).toContainText('T')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display user email in read-only field', async ({ page }) => {
       await goToProfile(page)
 
@@ -58,9 +58,9 @@ test.describe('User Profile Page', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Display Name Update Flow', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should enable save button when display name changes', async ({ page }) => {
       await goToProfile(page)
 
@@ -77,7 +77,7 @@ test.describe('User Profile Page', () => {
       await expect(saveButton).toBeEnabled()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should disable save button when display name reverts', async ({ page }) => {
       await goToProfile(page)
 
@@ -96,7 +96,7 @@ test.describe('User Profile Page', () => {
       await expect(saveButton).toBeDisabled()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show saving state when clicking save', async ({ page }) => {
       await goToProfile(page)
 
@@ -107,7 +107,7 @@ test.describe('User Profile Page', () => {
       await expect(page.getByRole('button', { name: 'Saving...' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show success message after saving', async ({ page }) => {
       await goToProfile(page)
 
@@ -118,7 +118,7 @@ test.describe('User Profile Page', () => {
       await expect(page.getByText('Profile updated successfully')).toBeVisible({ timeout: 10000 })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should clear success message after timeout', async ({ page }) => {
       await goToProfile(page)
 
@@ -137,7 +137,7 @@ test.describe('User Profile Page', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Password Change Flow', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display password change fields', async ({ page }) => {
       await goToProfile(page)
 
@@ -146,7 +146,7 @@ test.describe('User Profile Page', () => {
       await expect(page.getByRole('button', { name: 'Update Password' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should have password fields hidden by default', async ({ page }) => {
       await goToProfile(page)
 
@@ -157,7 +157,7 @@ test.describe('User Profile Page', () => {
       await expect(confirmPasswordInput).toHaveAttribute('type', 'password')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should toggle password visibility for new password', async ({ page }) => {
       await goToProfile(page)
 
@@ -179,7 +179,7 @@ test.describe('User Profile Page', () => {
       await expect(newPasswordInput).toHaveAttribute('type', 'password')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should toggle password visibility for confirm password', async ({ page }) => {
       await goToProfile(page)
 
@@ -192,7 +192,7 @@ test.describe('User Profile Page', () => {
       await expect(confirmPasswordInput).toHaveAttribute('type', 'text')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should disable update button when fields are empty', async ({ page }) => {
       await goToProfile(page)
 
@@ -200,7 +200,7 @@ test.describe('User Profile Page', () => {
       await expect(updateButton).toBeDisabled()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should enable update button when both passwords filled', async ({ page }) => {
       await goToProfile(page)
 
@@ -210,7 +210,7 @@ test.describe('User Profile Page', () => {
       await expect(updateButton).toBeEnabled()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show error when password is too short', async ({ page }) => {
       await goToProfile(page)
 
@@ -220,7 +220,7 @@ test.describe('User Profile Page', () => {
       await expect(page.getByText('New password must be at least 8 characters')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show error when passwords do not match', async ({ page }) => {
       await goToProfile(page)
 
@@ -230,7 +230,7 @@ test.describe('User Profile Page', () => {
       await expect(page.getByText('Passwords do not match')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show updating state when submitting valid password', async ({ page }) => {
       await goToProfile(page)
 
@@ -241,7 +241,7 @@ test.describe('User Profile Page', () => {
       await expect(page.getByRole('button', { name: 'Updating...' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show password strength indicator when typing new password', async ({ page }) => {
       await goToProfile(page)
 
@@ -264,9 +264,9 @@ test.describe('User Profile Page', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Account Deletion Flow', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show delete account button in danger zone', async ({ page }) => {
       await goToProfile(page)
 
@@ -274,7 +274,7 @@ test.describe('User Profile Page', () => {
       await expect(deleteButton).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should open confirmation dialog on delete click', async ({ page }) => {
       await goToProfile(page)
 
@@ -288,7 +288,7 @@ test.describe('User Profile Page', () => {
       await expect(dialog.getByText(/permanently deleted/i)).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should have cancel and confirm buttons in delete dialog', async ({ page }) => {
       await goToProfile(page)
 
@@ -299,7 +299,7 @@ test.describe('User Profile Page', () => {
       await expect(dialog.getByRole('button', { name: /delete account/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should close dialog on cancel', async ({ page }) => {
       await goToProfile(page)
 
@@ -313,7 +313,7 @@ test.describe('User Profile Page', () => {
       await expect(dialog).not.toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should close dialog on escape key', async ({ page }) => {
       await goToProfile(page)
 
@@ -327,7 +327,7 @@ test.describe('User Profile Page', () => {
       await expect(dialog).not.toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show deleting state when confirming delete', async ({ page }) => {
       await goToProfile(page)
 
@@ -339,9 +339,9 @@ test.describe('User Profile Page', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Error Handling', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display error message styling correctly', async ({ page }) => {
       await goToProfile(page)
 

@@ -100,7 +100,7 @@ async function handleListProjects(args: { limit?: number; offset?: number }): Pr
 
 // eslint-disable-next-line max-lines-per-function
 describe('Project Tool Handlers', () => {
-  // eslint-disable-next-line max-lines-per-function
+   
   beforeEach(() => {
     mockGet.mockReset()
     mockPost.mockReset()
@@ -111,7 +111,7 @@ describe('Project Tool Handlers', () => {
 
   // eslint-disable-next-line max-lines-per-function
   describe('create_project', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should create a project with valid name', async () => {
       const mockProject = {
         id: 'proj-1',
@@ -131,7 +131,7 @@ describe('Project Tool Handlers', () => {
       expect(response.message).toBe('Project created successfully.')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should create a project with all fields', async () => {
       const mockProject = {
         id: 'proj-2',
@@ -160,7 +160,7 @@ describe('Project Tool Handlers', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should indicate when at limit', async () => {
       const mockProject = { id: 'proj-3', name: 'Third Project' }
       mockPost.mockResolvedValueOnce({ project: mockProject, meta: { atLimit: true } })
@@ -172,28 +172,28 @@ describe('Project Tool Handlers', () => {
       expect(response.message).toContain('reached the soft limit')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return error when name is missing', async () => {
       const result = await handleCreateProject({})
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('name is required')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return error when name is empty', async () => {
       const result = await handleCreateProject({ name: '' })
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('name is required')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return error when name is whitespace', async () => {
       const result = await handleCreateProject({ name: '   ' })
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('name is required')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should trim the name', async () => {
       const mockProject = { id: 'proj-4', name: 'Trimmed' }
       mockPost.mockResolvedValueOnce({ project: mockProject, meta: { atLimit: false } })
@@ -206,9 +206,9 @@ describe('Project Tool Handlers', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   describe('get_project', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return project when found', async () => {
       const mockProject = {
         id: 'proj-1',
@@ -225,7 +225,7 @@ describe('Project Tool Handlers', () => {
       expect(response.project).toEqual(mockProject)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return error when project not found', async () => {
       mockGet.mockRejectedValueOnce(new Error('Not found'))
 
@@ -235,9 +235,9 @@ describe('Project Tool Handlers', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   describe('update_project', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should update project with valid data', async () => {
       const mockProject = { id: 'proj-1', name: 'Updated Name', hashtags: ['#new'] }
       mockPatch.mockResolvedValueOnce({ project: mockProject })
@@ -253,7 +253,7 @@ describe('Project Tool Handlers', () => {
       expect(response.project).toEqual(mockProject)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return error when project not found', async () => {
       mockPatch.mockRejectedValueOnce(new Error('Not found'))
 
@@ -262,7 +262,7 @@ describe('Project Tool Handlers', () => {
       expect(result.content[0].text).toContain('Project with ID nonexistent not found')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should update brand colors', async () => {
       const mockProject = {
         id: 'proj-1',
@@ -283,9 +283,9 @@ describe('Project Tool Handlers', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   describe('delete_project', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should delete project when confirmed', async () => {
       mockDelete.mockResolvedValueOnce({
         success: true,
@@ -300,21 +300,21 @@ describe('Project Tool Handlers', () => {
       expect(response.message).toContain('2 campaigns became unassigned')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return error when not confirmed', async () => {
       const result = await handleDeleteProject({ id: 'proj-1', confirmed: false })
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('Deletion not confirmed')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should return error when confirmed is missing', async () => {
       const result = await handleDeleteProject({ id: 'proj-1' })
       expect(result.isError).toBe(true)
       expect(result.content[0].text).toContain('Deletion not confirmed')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should handle delete with zero campaigns affected', async () => {
       mockDelete.mockResolvedValueOnce({
         success: true,
@@ -328,9 +328,9 @@ describe('Project Tool Handlers', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   describe('list_projects', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should list projects with no filters', async () => {
       const mockProjects = [
         { id: 'p1', name: 'Project 1' },
@@ -350,7 +350,7 @@ describe('Project Tool Handlers', () => {
       expect(response.atLimit).toBe(false)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should use default limit of 50', async () => {
       mockGet.mockResolvedValueOnce({
         projects: [],
@@ -361,7 +361,7 @@ describe('Project Tool Handlers', () => {
       expect(mockGet).toHaveBeenCalledWith('/projects', expect.objectContaining({ limit: '50' }))
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should pass custom limit and offset', async () => {
       mockGet.mockResolvedValueOnce({
         projects: [],
@@ -375,7 +375,7 @@ describe('Project Tool Handlers', () => {
       )
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('should indicate when at limit', async () => {
       mockGet.mockResolvedValueOnce({
         projects: [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }],

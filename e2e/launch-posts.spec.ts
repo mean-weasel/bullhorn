@@ -32,7 +32,7 @@ test.describe('Launch Posts', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Launch Posts List', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show empty state when no launch posts exist', async ({ page }) => {
       await goToLaunchPosts(page)
 
@@ -42,7 +42,7 @@ test.describe('Launch Posts', () => {
       ).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to new launch post from empty state', async ({ page }) => {
       await goToLaunchPosts(page)
 
@@ -50,7 +50,7 @@ test.describe('Launch Posts', () => {
       await expect(page.getByRole('heading', { name: /new launch post/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to new launch post from header button', async ({ page }) => {
       await goToLaunchPosts(page)
 
@@ -58,7 +58,7 @@ test.describe('Launch Posts', () => {
       await expect(page.getByRole('heading', { name: /new launch post/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display launch posts after creation', async ({ page }) => {
       // Create a launch post via API
       await createLaunchPostViaAPI(page, {
@@ -72,7 +72,7 @@ test.describe('Launch Posts', () => {
       await expect(page.getByText('Show HN: Test Product')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should filter launch posts by platform', async ({ page }) => {
       // Create posts for different platforms
       await createLaunchPostViaAPI(page, {
@@ -100,7 +100,7 @@ test.describe('Launch Posts', () => {
       await expect(page.getByText('Show HN: Test 1')).not.toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should filter launch posts by status', async ({ page }) => {
       // Create a draft post
       await createLaunchPostViaAPI(page, {
@@ -124,9 +124,9 @@ test.describe('Launch Posts', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Create Launch Posts', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test.describe('Show HN', () => {
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should create a Show HN launch post', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -146,7 +146,7 @@ test.describe('Launch Posts', () => {
         expect(createdPost?.platform).toBe('hacker_news_show')
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show character limit for title', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -157,9 +157,9 @@ test.describe('Launch Posts', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test.describe('Ask HN', () => {
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should create an Ask HN launch post', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -183,7 +183,7 @@ test.describe('Launch Posts', () => {
         expect(createdPost?.platformFields).toHaveProperty('text')
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show Ask HN specific fields', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -195,9 +195,9 @@ test.describe('Launch Posts', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test.describe('Product Hunt', () => {
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should create a Product Hunt launch post', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -225,7 +225,7 @@ test.describe('Launch Posts', () => {
         expect(createdPost?.platformFields).toHaveProperty('pricing', 'freemium')
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show Product Hunt specific fields', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -237,7 +237,7 @@ test.describe('Launch Posts', () => {
         await expect(page.getByLabel(/first comment/i)).toBeVisible()
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show tagline character limit', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -249,9 +249,9 @@ test.describe('Launch Posts', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test.describe('Dev Hunt', () => {
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should create a Dev Hunt launch post', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -279,7 +279,7 @@ test.describe('Launch Posts', () => {
         )
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show Dev Hunt specific fields', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -291,9 +291,9 @@ test.describe('Launch Posts', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test.describe('BetaList', () => {
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should create a BetaList launch post', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -320,7 +320,7 @@ test.describe('Launch Posts', () => {
         )
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show BetaList specific fields', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -330,7 +330,7 @@ test.describe('Launch Posts', () => {
         await expect(page.getByLabel(/one-sentence pitch/i)).toBeVisible()
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show pitch character limit', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -342,9 +342,9 @@ test.describe('Launch Posts', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test.describe('Indie Hackers', () => {
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should create an Indie Hackers launch post', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -369,7 +369,7 @@ test.describe('Launch Posts', () => {
         expect(createdPost?.platformFields).toHaveProperty('revenue', '$1,000/mo')
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should show Indie Hackers specific fields', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -381,9 +381,9 @@ test.describe('Launch Posts', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test.describe('Common Fields', () => {
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should save internal notes', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -400,7 +400,7 @@ test.describe('Launch Posts', () => {
         expect(createdPost?.notes).toBe('Remember to post at 9am PST')
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should require title', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -412,7 +412,7 @@ test.describe('Launch Posts', () => {
         await expect(saveButton).toBeDisabled()
       })
 
-      // eslint-disable-next-line max-lines-per-function
+       
       test('should require URL for most platforms', async ({ page }) => {
         await goToNewLaunchPost(page)
 
@@ -427,7 +427,7 @@ test.describe('Launch Posts', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Edit Launch Posts', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should edit an existing launch post', async ({ page }) => {
       // Create a post first
       const created = await createLaunchPostViaAPI(page, {
@@ -450,7 +450,7 @@ test.describe('Launch Posts', () => {
       expect(updated?.title).toBe('Updated Title')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to edit from list', async ({ page }) => {
       await createLaunchPostViaAPI(page, {
         platform: 'hacker_news_show',
@@ -465,7 +465,7 @@ test.describe('Launch Posts', () => {
       await expect(page.getByLabel(/^title/i)).toHaveValue('Edit Test Post', { timeout: 15000 })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should change platform when editing', async ({ page }) => {
       const created = await createLaunchPostViaAPI(page, {
         platform: 'hacker_news_show',
@@ -489,7 +489,7 @@ test.describe('Launch Posts', () => {
       expect(updated?.platform).toBe('product_hunt')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should update status', async ({ page }) => {
       const created = await createLaunchPostViaAPI(page, {
         platform: 'hacker_news_show',
@@ -510,9 +510,9 @@ test.describe('Launch Posts', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Delete Launch Posts', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should delete a launch post from list', async ({ page }) => {
       await createLaunchPostViaAPI(page, {
         platform: 'hacker_news_show',
@@ -537,9 +537,9 @@ test.describe('Launch Posts', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Platform Links', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show link to platform submission page', async ({ page }) => {
       await goToNewLaunchPost(page)
 
@@ -548,7 +548,7 @@ test.describe('Launch Posts', () => {
       await expect(link).toHaveAttribute('href', 'https://news.ycombinator.com/submit')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should update platform link when switching platforms', async ({ page }) => {
       await goToNewLaunchPost(page)
 
@@ -559,9 +559,9 @@ test.describe('Launch Posts', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Platform Switching', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should switch between platforms', async ({ page }) => {
       await goToNewLaunchPost(page)
 
@@ -582,7 +582,7 @@ test.describe('Launch Posts', () => {
       await expect(page.getByText('Product Hunt Fields')).not.toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should preserve common fields when switching platforms', async ({ page }) => {
       await goToNewLaunchPost(page)
 
@@ -601,9 +601,9 @@ test.describe('Launch Posts', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Copy to Clipboard', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should have copy button in launch post dropdown menu', async ({ page }) => {
       await createLaunchPostViaAPI(page, {
         platform: 'hacker_news_show',

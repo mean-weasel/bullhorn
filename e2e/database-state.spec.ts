@@ -28,7 +28,7 @@ test.describe('Database State Verification', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe.serial('Create Operations', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create exactly one Twitter draft', async ({ page }) => {
       expect(await getPostCount(page)).toBe(0)
 
@@ -47,7 +47,7 @@ test.describe('Database State Verification', () => {
       expect(posts[0].content).toMatchObject({ text: 'Twitter draft content' })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create exactly one LinkedIn draft', async ({ page }) => {
       expect(await getPostCount(page)).toBe(0)
 
@@ -64,7 +64,7 @@ test.describe('Database State Verification', () => {
       expect(posts[0].content).toMatchObject({ text: 'LinkedIn draft content' })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create exactly one Reddit draft with metadata', async ({ page }) => {
       expect(await getPostCount(page)).toBe(0)
 
@@ -85,7 +85,7 @@ test.describe('Database State Verification', () => {
       })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create exactly one scheduled post', async ({ page }) => {
       expect(await getPostCount(page)).toBe(0)
 
@@ -110,7 +110,7 @@ test.describe('Database State Verification', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe.serial('Edit Operations', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should update content without creating duplicates', async ({ page }) => {
       // Create a post first
       await createTestPost(page, { platform: 'twitter', content: 'Original content' })
@@ -135,7 +135,7 @@ test.describe('Database State Verification', () => {
       expect(updatedPost?.content).toMatchObject({ text: 'Updated content' })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should switch platform without creating duplicates', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Platform test' })
       expect(await getPostCount(page)).toBe(1)
@@ -158,7 +158,7 @@ test.describe('Database State Verification', () => {
       expect(updatedPost?.platform).toBe('linkedin')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should convert draft to scheduled without creating duplicates', async ({ page }) => {
       await createTestPost(page, {
         platform: 'twitter',
@@ -189,9 +189,9 @@ test.describe('Database State Verification', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Delete Operations', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should remove post from database after deletion', async ({ page }) => {
       // Create and archive a post (required before deletion)
       await createTestPost(page, { platform: 'twitter', content: 'Post to delete' })
@@ -213,7 +213,7 @@ test.describe('Database State Verification', () => {
       expect(await getPostCount(page)).toBe(0)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should delete one post and leave others intact', async ({ page }) => {
       // Create two posts
       await createTestPost(page, { platform: 'twitter', content: 'Post to keep' })
@@ -246,9 +246,9 @@ test.describe('Database State Verification', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Archive Operations', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should archive post without creating duplicates', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Post to archive' })
       expect(await getPostCount(page)).toBe(1)
@@ -268,7 +268,7 @@ test.describe('Database State Verification', () => {
       expect(archivedPost?.status).toBe('archived')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should restore post without creating duplicates', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Post to restore' })
       expect(await getPostCount(page)).toBe(1)

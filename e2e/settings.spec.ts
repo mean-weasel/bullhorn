@@ -9,7 +9,7 @@ test.describe('Settings', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Appearance / Theme Toggle', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display theme options', async ({ page }) => {
       await page.goto('/settings')
       await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
@@ -23,7 +23,7 @@ test.describe('Settings', () => {
       await expect(page.locator('button').filter({ hasText: 'System' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should switch to dark theme', async ({ page }) => {
       await page.goto('/settings')
 
@@ -43,7 +43,7 @@ test.describe('Settings', () => {
       expect(theme).toBe('dark')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should switch to light theme', async ({ page }) => {
       await page.goto('/settings')
 
@@ -67,7 +67,7 @@ test.describe('Settings', () => {
       expect(theme).toBe('light')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should switch to system theme', async ({ page }) => {
       await page.goto('/settings')
 
@@ -88,7 +88,7 @@ test.describe('Settings', () => {
       expect(htmlClass).toMatch(/light|dark/)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should persist theme after reload', async ({ page }) => {
       await page.goto('/settings')
 
@@ -117,7 +117,7 @@ test.describe('Settings', () => {
       expect(lightTheme).toBe('light')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should switch between all themes in sequence', async ({ page }) => {
       await page.goto('/settings')
 

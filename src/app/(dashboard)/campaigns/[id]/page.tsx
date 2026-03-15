@@ -33,7 +33,7 @@ function useCampaignStores() {
     fetchProjects,
     launchPostStore.initialized,
     launchPostStore.fetchLaunchPosts,
-  ]) // eslint-disable-line react-hooks/exhaustive-deps
+  ])
   return { campaignStore, allPosts, updatePost, projects, launchPostStore }
 }
 
@@ -73,6 +73,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const [showMoveModal, setShowMoveModal] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<'campaign' | string | null>(null)
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (campaign) {
       setEditName(campaign.name)
@@ -80,6 +81,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
     }
   }, [campaign])
 
+  /* eslint-enable react-hooks/set-state-in-effect */
   const handleSave = async () => {
     if (!campaign || !editName.trim()) return
     await campaignStore.updateCampaign(campaign.id, {

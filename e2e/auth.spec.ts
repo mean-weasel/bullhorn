@@ -8,7 +8,7 @@ test.describe('Authentication', () => {
       await page.goto('/login')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display login page with all elements', async ({ page }) => {
       // Check heading
       await expect(page.getByRole('heading', { name: 'Bullhorn' })).toBeVisible()
@@ -27,7 +27,7 @@ test.describe('Authentication', () => {
       await expect(page.getByRole('link', { name: 'Sign up' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show error for invalid credentials', async ({ page }) => {
       // Fill in form with invalid credentials
       await page.getByLabel('Email').fill('invalid@example.com')
@@ -40,7 +40,7 @@ test.describe('Authentication', () => {
       await expect(page.getByText(/invalid|error|failed/i)).toBeVisible({ timeout: 10000 })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should require email field', async ({ page }) => {
       // Try to submit with only password
       await page.getByLabel('Password').fill('somepassword')
@@ -51,7 +51,7 @@ test.describe('Authentication', () => {
       await expect(emailInput).toHaveAttribute('required', '')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should require password field', async ({ page }) => {
       // Try to submit with only email
       await page.getByLabel('Email').fill('test@example.com')
@@ -62,24 +62,24 @@ test.describe('Authentication', () => {
       await expect(passwordInput).toHaveAttribute('required', '')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to signup page', async ({ page }) => {
       await page.getByRole('link', { name: 'Sign up' }).click()
       await expect(page).toHaveURL('/signup', { timeout: 15000 })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should have forgot password link', async ({ page }) => {
       await expect(page.getByRole('link', { name: 'Forgot password?' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to forgot password page', async ({ page }) => {
       await page.getByRole('link', { name: 'Forgot password?' }).click()
       await expect(page).toHaveURL('/forgot-password', { timeout: 15000 })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show loading state when signing in', async ({ page }) => {
       await page.getByLabel('Email').fill('test@example.com')
       await page.getByLabel('Password').fill('password123')
@@ -118,7 +118,7 @@ test.describe('Authentication', () => {
       await page.goto('/signup')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display signup page with all elements', async ({ page }) => {
       // Check heading
       await expect(page.getByRole('heading', { name: 'Create an account' })).toBeVisible()
@@ -138,7 +138,7 @@ test.describe('Authentication', () => {
       await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show error when passwords do not match', async ({ page }) => {
       await page.getByLabel('Email').fill('newuser@example.com')
       await page.getByLabel('Password', { exact: true }).fill('password123')
@@ -149,7 +149,7 @@ test.describe('Authentication', () => {
       await expect(page.getByText('Passwords do not match')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should have password minimum length validation via HTML5', async ({ page }) => {
       // Verify HTML5 minLength attribute is set for browser validation
       const passwordInput = page.getByLabel('Password', { exact: true })
@@ -159,7 +159,7 @@ test.describe('Authentication', () => {
       await expect(confirmInput).toHaveAttribute('minLength', '8')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should require all fields via HTML5', async ({ page }) => {
       // Check that all fields have required attribute for browser validation
       await expect(page.getByLabel('Email')).toHaveAttribute('required', '')
@@ -167,13 +167,13 @@ test.describe('Authentication', () => {
       await expect(page.getByLabel('Confirm Password')).toHaveAttribute('required', '')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to login page', async ({ page }) => {
       await page.getByRole('link', { name: 'Sign in' }).click()
       await expect(page).toHaveURL('/login', { timeout: 15000 })
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show loading state when creating account', async ({ page }) => {
       await page.getByLabel('Email').fill('newuser@example.com')
       await page.getByLabel('Password', { exact: true }).fill('password123')
@@ -206,13 +206,13 @@ test.describe('Authentication', () => {
       expect(wasDisabled).toBe(true)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should validate email format via HTML5', async ({ page }) => {
       const emailInput = page.getByLabel('Email')
       await expect(emailInput).toHaveAttribute('type', 'email')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show password strength indicator when typing password', async ({ page }) => {
       const passwordInput = page.getByLabel('Password', { exact: true })
 
@@ -236,7 +236,7 @@ test.describe('Authentication', () => {
       await expect(page.getByText('Strong')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show helpful tips for weak passwords', async ({ page }) => {
       const passwordInput = page.getByLabel('Password', { exact: true })
 
@@ -247,13 +247,13 @@ test.describe('Authentication', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Forgot Password Page', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/forgot-password')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display forgot password page with all elements', async ({ page }) => {
       // Check heading
       await expect(page.getByRole('heading', { name: 'Reset password' })).toBeVisible()
@@ -268,14 +268,14 @@ test.describe('Authentication', () => {
       await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should require email field', async ({ page }) => {
       const emailInput = page.getByLabel('Email')
       await expect(emailInput).toHaveAttribute('required', '')
       await expect(emailInput).toHaveAttribute('type', 'email')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show loading state when sending reset link', async ({ page }) => {
       await page.getByLabel('Email').fill('test@example.com')
 
@@ -306,27 +306,27 @@ test.describe('Authentication', () => {
       expect(wasDisabled).toBe(true)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate back to login page', async ({ page }) => {
       await page.getByRole('link', { name: 'Sign in' }).click()
       await expect(page).toHaveURL('/login', { timeout: 15000 })
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Reset Password Page', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/reset-password')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show invalid/expired link message when accessed directly', async ({ page }) => {
       // When accessed without a valid recovery session, should show error
       await expect(page.getByText(/invalid or expired link/i)).toBeVisible({ timeout: 10000 })
       await expect(page.getByRole('link', { name: 'Request new reset link' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to forgot password from invalid session', async ({ page }) => {
       await expect(page.getByText(/invalid or expired link/i)).toBeVisible({ timeout: 10000 })
       await page.getByRole('link', { name: 'Request new reset link' }).click()
@@ -334,9 +334,9 @@ test.describe('Authentication', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Navigation between auth pages', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate from login to signup and back', async ({ page }) => {
       // Start at login
       await page.goto('/login')
@@ -353,7 +353,7 @@ test.describe('Authentication', () => {
       await expect(page.getByRole('heading', { name: 'Bullhorn' })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate through forgot password flow', async ({ page }) => {
       // Start at login
       await page.goto('/login')

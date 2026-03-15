@@ -1,4 +1,5 @@
-// @ts-nocheck — split/refactored test file
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/ban-ts-comment */
+// @ts-nocheck — split test file with shared mock setup
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
 
@@ -109,7 +110,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-const { PATCH } = await import from './route'
+import { PATCH, DELETE } from './route'
 import { requireAuth } from '@/lib/auth'
 
 const mockRequireAuth = vi.mocked(requireAuth)
@@ -129,7 +130,7 @@ function makeParams(id: string) {
   return { params: Promise.resolve({ id }) }
 }
 
-const _dbCampaign = {
+const dbCampaign = {
   id: 'camp-1',
   name: 'Summer Launch',
   description: 'Launch campaign',
@@ -140,7 +141,7 @@ const _dbCampaign = {
   user_id: 'user-1',
 }
 
-const _dbPost = {
+const dbPost = {
   id: 'post-1',
   content: 'Hello world',
   status: 'draft',

@@ -1,7 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { IOSDateTimePicker } from './IOSDateTimePicker'
-import { useIsMobile } from './IOSActionSheet'
 
 // Mock useIsMobile - default to false (desktop mode)
 vi.mock('./IOSActionSheet', () => ({

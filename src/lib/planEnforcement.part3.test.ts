@@ -15,7 +15,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { getUserPlan, enforceResourceLimit, enforceStorageLimit } from './planEnforcement'
+import { enforceStorageLimit } from './planEnforcement'
 import { PLAN_LIMITS } from './limits'
 
 // ---------------------------------------------------------------------------
@@ -36,33 +36,6 @@ beforeEach(() => {
  * Because planEnforcement calls `createClient()` twice (once for profile, once for count),
  * we need the mock chain to handle both calls. We track call order via mockFrom.
  */
-function setupResourceMocks(plan: string, count: number) {
-  // The module calls createClient() which returns { from }
-  // First call: from('user_profiles').select('plan').eq('id', userId).single()
-  // Second call: from(table).select('*', opts).eq(col, userId) -> returns { count }
-  let fromCallIndex = 0
-  mockFrom.mockImplementation(() => {
-    fromCallIndex++
-    if (fromCallIndex === 1) {
-      // Profile lookup
-      return {
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            single: vi.fn().mockResolvedValue({ data: { plan }, error: null }),
-          })),
-        })),
-      }
-    } else {
-      // Count query
-      return {
-        select: vi.fn(() => ({
-          eq: vi.fn().mockResolvedValue({ count, error: null }),
-        })),
-      }
-    }
-  })
-}
-
 function setupStorageMocks(plan: string, storageUsedBytes: number) {
   mockFrom.mockImplementation(() => ({
     select: vi.fn(() => ({
@@ -76,21 +49,8 @@ function setupStorageMocks(plan: string, storageUsedBytes: number) {
   }))
 }
 
-function setupProfileMock(plan: string | null) {
-  mockFrom.mockImplementation(() => ({
-    select: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        single: vi.fn().mockResolvedValue({
-          data: plan !== null ? { plan } : null,
-          error: plan !== null ? null : { message: 'Not found' },
-        }),
-      })),
-    })),
-  }))
-}
-
 // ---------------------------------------------------------------------------
-// getUserPlan
+// enforceStorageLimit
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------

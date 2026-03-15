@@ -256,7 +256,7 @@ export default function EditorPage() {
     state.subredditsInput,
     state.subredditTitles,
     state.subredditSchedules,
-  ]) // eslint-disable-line react-hooks/exhaustive-deps
+  ])  
 
   useKeyboardShortcuts({
     shortcuts: [

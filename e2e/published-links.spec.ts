@@ -20,9 +20,9 @@ test.describe('Published Links', () => {
     await enterDemoMode(page)
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('UI Display', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show Published Links section when a platform is selected', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -31,7 +31,7 @@ test.describe('Published Links', () => {
       await expect(page.getByRole('button', { name: /published links/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should expand Published Links section when clicked', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -43,7 +43,7 @@ test.describe('Published Links', () => {
       await expect(page.getByPlaceholder('https://twitter.com/user/status/...')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show correct platform field when switching platforms', async ({ page }) => {
       await goToNewPost(page)
 
@@ -60,9 +60,9 @@ test.describe('Published Links', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Twitter Launched URL', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should save Twitter launched URL', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'twitter')
@@ -83,7 +83,7 @@ test.describe('Published Links', () => {
       expect(getTwitterContent(posts[0])?.launchedUrl).toBe(twitterUrl)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should persist Twitter launched URL on reload', async ({ page }) => {
       // Create post with launched URL
       await goToNewPost(page)
@@ -107,9 +107,9 @@ test.describe('Published Links', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('LinkedIn Launched URL', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should save LinkedIn launched URL', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'linkedin')
@@ -130,7 +130,7 @@ test.describe('Published Links', () => {
       expect(getLinkedInContent(posts[0])?.launchedUrl).toBe(linkedInUrl)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should persist LinkedIn launched URL on reload', async ({ page }) => {
       // Create post with launched URL
       await goToNewPost(page)
@@ -154,9 +154,9 @@ test.describe('Published Links', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Reddit Launched URLs', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show URL field for Reddit post', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -174,7 +174,7 @@ test.describe('Published Links', () => {
       await expect(page.getByPlaceholder('https://reddit.com/r/...')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should save Reddit launched URL', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -199,7 +199,7 @@ test.describe('Published Links', () => {
       expect(getRedditContent(posts[0])?.launchedUrl).toBe(redditUrl)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should persist Reddit launched URL on reload', async ({ page }) => {
       // Create post with launched URL
       await goToNewPost(page)
@@ -226,9 +226,9 @@ test.describe('Published Links', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Auto-expand behavior', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should auto-expand Published Links when loading post with URLs', async ({ page }) => {
       // Create post with launched URL
       await goToNewPost(page)

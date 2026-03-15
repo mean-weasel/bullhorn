@@ -43,7 +43,7 @@ test.describe('Reddit Cross-posting', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Multiple Subreddit Post Creation', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create separate posts for each subreddit', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -73,7 +73,7 @@ test.describe('Reddit Cross-posting', () => {
       }
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should link posts with shared groupId', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -100,7 +100,7 @@ test.describe('Reddit Cross-posting', () => {
       expect(posts[1].groupType).toBe('reddit-crosspost')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create single post for single subreddit (no groupId)', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -126,7 +126,7 @@ test.describe('Reddit Cross-posting', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Independent Scheduling', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should schedule all subreddit posts with same initial time', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -158,7 +158,7 @@ test.describe('Reddit Cross-posting', () => {
       expect(posts[1].scheduledAt).toBeTruthy()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should allow editing individual subreddit post schedule', async ({ page }) => {
       // Create cross-posts
       await goToNewPost(page)
@@ -224,7 +224,7 @@ test.describe('Reddit Cross-posting', () => {
       )
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should allow different statuses for grouped posts', async ({ page }) => {
       // Create cross-posts as drafts
       await goToNewPost(page)
@@ -272,7 +272,7 @@ test.describe('Reddit Cross-posting', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Post Content Independence', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should allow editing individual post content independently', async ({ page }) => {
       // Create cross-posts
       await goToNewPost(page)
@@ -310,7 +310,7 @@ test.describe('Reddit Cross-posting', () => {
       expect(getRedditContent(smallbizPost)?.title).toBe('Original title')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should track launchedUrl independently per subreddit', async ({ page }) => {
       // Create cross-posts
       await goToNewPost(page)
@@ -358,7 +358,7 @@ test.describe('Reddit Cross-posting', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Per-Subreddit Collapsible Cards', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display collapsible card for each subreddit', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -378,7 +378,7 @@ test.describe('Reddit Cross-posting', () => {
       await expect(entrepreneurCard.getByText('r/entrepreneur')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should set unique titles per subreddit', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -408,7 +408,7 @@ test.describe('Reddit Cross-posting', () => {
       expect(getRedditContent(entrepreneurPost)?.title).toBe('Entrepreneur Title')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should set unique schedules per subreddit via cards', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -444,7 +444,7 @@ test.describe('Reddit Cross-posting', () => {
       expect(jsPost.status).toBe('scheduled')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show preview text when card is collapsed', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -463,7 +463,7 @@ test.describe('Reddit Cross-posting', () => {
       await expect(card.getByText(/My Amazing Post/)).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should expand/collapse cards independently', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -488,7 +488,7 @@ test.describe('Reddit Cross-posting', () => {
       await expect(progTitle).not.toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should remove subreddit via card X button', async ({ page }) => {
       await goToNewPost(page)
       await selectPlatform(page, 'reddit')
@@ -507,7 +507,7 @@ test.describe('Reddit Cross-posting', () => {
       await expect(page.locator('[data-testid="subreddit-card-entrepreneur"]')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should preserve title when editing existing post', async ({ page }) => {
       // Create a post first
       await goToNewPost(page)

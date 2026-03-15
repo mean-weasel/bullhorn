@@ -1,13 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import {
-  useLaunchPostsStore,
-  getHackerNewsFields,
-  getProductHuntFields,
-  getDevHuntFields,
-  getBetaListFields,
-  getIndieHackersFields,
-  getDefaultPlatformFields,
-} from './launchPosts'
+import { useLaunchPostsStore } from './launchPosts'
 import type { LaunchPost } from './launchPosts'
 import { clearInFlightRequests } from './requestDedup'
 
@@ -251,4 +243,3 @@ describe('addLaunchPost', () => {
     expect(useLaunchPostsStore.getState().loading).toBe(false)
   })
 })
-

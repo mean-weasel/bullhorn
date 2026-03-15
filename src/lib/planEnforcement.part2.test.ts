@@ -15,8 +15,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { getUserPlan, enforceResourceLimit, enforceStorageLimit } from './planEnforcement'
-import { PLAN_LIMITS } from './limits'
+import { getUserPlan, enforceResourceLimit } from './planEnforcement'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,19 +60,6 @@ function setupResourceMocks(plan: string, count: number) {
       }
     }
   })
-}
-
-function setupStorageMocks(plan: string, storageUsedBytes: number) {
-  mockFrom.mockImplementation(() => ({
-    select: vi.fn(() => ({
-      eq: vi.fn(() => ({
-        single: vi.fn().mockResolvedValue({
-          data: { plan, storage_used_bytes: storageUsedBytes },
-          error: null,
-        }),
-      })),
-    })),
-  }))
 }
 
 function setupProfileMock(plan: string | null) {

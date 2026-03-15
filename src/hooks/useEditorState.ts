@@ -189,9 +189,11 @@ export function useDirtyTracking(deps: {
       platform: deps.platform,
       notes: deps.notes,
     })
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (initialContentRef.current && currentContent !== initialContentRef.current) {
       setIsDirty(true)
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [
     deps.content,
     deps.mediaUrls,
@@ -220,6 +222,7 @@ export function useLoadExistingPost(
     initialContentRef: React.MutableRefObject<string>
   }
 ) {
+  /* eslint-disable react-hooks/immutability */
   useEffect(() => {
     if (existingPost) {
       loadExistingPostData(existingPost, setters)

@@ -13,9 +13,9 @@ test.describe('Usage Limits', () => {
   // API-Level Enforcement
   // ---------------------------------------------------------------------------
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('API Enforcement', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should return 403 when project limit reached (free = 3)', async ({ page }) => {
       // Create 3 projects (free tier limit)
       for (let i = 1; i <= 3; i++) {
@@ -37,7 +37,7 @@ test.describe('Usage Limits', () => {
       expect(body.current).toBe(3)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should return 403 when campaign limit reached (free = 5)', async ({ page }) => {
       // Create 5 campaigns (free tier limit)
       for (let i = 1; i <= 5; i++) {
@@ -58,7 +58,7 @@ test.describe('Usage Limits', () => {
       expect(body.current).toBe(5)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should allow creation when under the limit', async ({ page }) => {
       // Create 2 projects (under free limit of 3)
       await createProjectViaAPI(page, { name: 'Project 1' })
@@ -76,9 +76,9 @@ test.describe('Usage Limits', () => {
   // Plan API
   // ---------------------------------------------------------------------------
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Plan API', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should return plan info with correct counts', async ({ page }) => {
       // Create some resources
       await createProjectViaAPI(page, { name: 'Plan Test Project' })
@@ -107,9 +107,9 @@ test.describe('Usage Limits', () => {
   // UI Enforcement — LimitGate
   // ---------------------------------------------------------------------------
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('UI Enforcement', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should disable create button and show upgrade modal at project limit', async ({
       page,
     }) => {
@@ -145,7 +145,7 @@ test.describe('Usage Limits', () => {
       await expect(page.getByText(/limit reached/i)).not.toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should not disable create button when under limit', async ({ page }) => {
       // Create 1 project (under limit)
       await createProjectViaAPI(page, { name: 'Under Limit Project' })
@@ -170,9 +170,9 @@ test.describe('Usage Limits', () => {
   // Settings Page — Plan Display
   // ---------------------------------------------------------------------------
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Settings Page Plan Display', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show Free plan badge and beta messaging', async ({ page }) => {
       await page.goto('/settings')
       await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()
@@ -183,7 +183,7 @@ test.describe('Usage Limits', () => {
       await expect(page.getByText('Free during beta')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show usage bars with correct counts', async ({ page }) => {
       // Create some resources to show in usage bars
       await createProjectViaAPI(page, { name: 'Settings Test Project 1' })
@@ -203,7 +203,7 @@ test.describe('Usage Limits', () => {
       await expect(page.getByText('1 / 5')).toBeVisible() // campaigns
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show paid plans coming soon messaging', async ({ page }) => {
       await page.goto('/settings')
       await expect(page.getByRole('heading', { name: /settings/i })).toBeVisible()

@@ -21,9 +21,9 @@ test.describe('Edit Post', () => {
     await enterDemoMode(page)
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Navigate to Edit', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to edit page from posts list', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Test post', testId)
@@ -39,7 +39,7 @@ test.describe('Edit Post', () => {
       await expect(page.getByRole('heading', { name: /edit post/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should load existing post content in editor', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const testContent = uniqueContent('This is my test content', testId)
@@ -54,9 +54,9 @@ test.describe('Edit Post', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Edit Post Content', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should edit post content', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Original content' })
 
@@ -75,7 +75,7 @@ test.describe('Edit Post', () => {
       await waitForNavigation(page, '/')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should change draft post to scheduled', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Draft to schedule' })
 
@@ -94,9 +94,9 @@ test.describe('Edit Post', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Edit Scheduled Posts', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should reschedule a post', async ({ page }) => {
       // Create a scheduled post
       await createTestPost(page, {
@@ -119,7 +119,7 @@ test.describe('Edit Post', () => {
       await waitForNavigation(page, '/')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should convert scheduled post to draft', async ({ page }) => {
       // Create a scheduled post
       await createTestPost(page, {
@@ -140,9 +140,9 @@ test.describe('Edit Post', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Edit Notes', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should add notes to existing post', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Post without notes', testId)
@@ -168,7 +168,7 @@ test.describe('Edit Post', () => {
       await expect(notesTextarea).toHaveValue('Added notes after creation')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should edit existing notes', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Post to edit notes', testId)
@@ -194,9 +194,9 @@ test.describe('Edit Post', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Validation', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should preserve changes when switching platforms', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Original' })
 
@@ -218,7 +218,7 @@ test.describe('Edit Post', () => {
       await expect(textarea).toHaveValue(originalContent)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show save button as enabled when content changes', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Original' })
 

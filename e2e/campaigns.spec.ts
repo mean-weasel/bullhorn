@@ -21,7 +21,7 @@ test.describe('Campaigns', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Campaign CRUD Operations', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create a new campaign', async ({ page }) => {
       // Navigate to campaigns
       await page.goto('/campaigns')
@@ -52,7 +52,7 @@ test.describe('Campaigns', () => {
       expect(campaigns[0].description).toBe('Marketing campaign for new product release')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should edit a campaign name and description', async ({ page }) => {
       // First create a campaign via API or UI
       await page.goto('/campaigns')
@@ -90,7 +90,7 @@ test.describe('Campaigns', () => {
       expect(campaigns[0].name).toBe('Updated Campaign Name')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should change campaign status', async ({ page }) => {
       // Create a campaign
       await page.goto('/campaigns')
@@ -107,7 +107,7 @@ test.describe('Campaigns', () => {
       expect(campaigns[0].status).toBe('active')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should delete a campaign', async ({ page }) => {
       // Create a campaign
       await page.goto('/campaigns')
@@ -139,9 +139,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign with Twitter Post', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create Twitter post within a campaign', async ({ page }) => {
       // Create a campaign first
       await page.goto('/campaigns')
@@ -185,9 +185,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign with LinkedIn Post', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create LinkedIn post within a campaign', async ({ page }) => {
       // Create a campaign
       await page.goto('/campaigns')
@@ -223,9 +223,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign with Reddit Post', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create Reddit post within a campaign', async ({ page }) => {
       // Create a campaign
       await page.goto('/campaigns')
@@ -261,9 +261,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign with Twitter and LinkedIn Posts', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create Twitter and LinkedIn posts in same campaign', async ({ page }) => {
       // Create campaign
       await page.goto('/campaigns')
@@ -304,9 +304,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign with Twitter and Reddit Posts', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create Twitter and Reddit posts in same campaign', async ({ page }) => {
       // Create campaign
       await page.goto('/campaigns')
@@ -351,9 +351,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign with LinkedIn and Reddit Posts', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should create LinkedIn and Reddit posts in same campaign', async ({ page }) => {
       // Create campaign
       await page.goto('/campaigns')
@@ -476,7 +476,7 @@ test.describe('Campaigns', () => {
 
   // eslint-disable-next-line max-lines-per-function
   test.describe('Campaign Post Management', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should add existing post to a campaign', async ({ page }) => {
       // Create a post first (without campaign)
       await goToNewPost(page)
@@ -517,7 +517,7 @@ test.describe('Campaigns', () => {
       expect(campaignPosts[0].id).toBe(postId)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should remove post from campaign', async ({ page }) => {
       // Create campaign with a post
       await page.goto('/campaigns')
@@ -565,9 +565,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign Filtering', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should filter campaigns by status', async ({ page }) => {
       // Create two campaigns (both will be 'active' by default)
       await page.goto('/campaigns')
@@ -619,9 +619,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Empty States', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show empty state when no campaigns exist', async ({ page }) => {
       // Navigate to campaigns page with fresh database (reset in beforeEach)
       await page.goto('/campaigns')
@@ -633,7 +633,7 @@ test.describe('Campaigns', () => {
       await expect(page.getByRole('button', { name: /create your first campaign/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show empty state for campaign with no posts', async ({ page }) => {
       // Create a new campaign
       await page.goto('/campaigns')
@@ -652,9 +652,9 @@ test.describe('Campaigns', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('Campaign Post Count', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display post count on campaign detail page', async ({ page }) => {
       // Create a campaign
       await page.goto('/campaigns')
@@ -686,7 +686,7 @@ test.describe('Campaigns', () => {
       await expect(page.getByText('2 posts')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should update post count when posts are removed from campaign', async ({ page }) => {
       // Create a campaign with 2 posts
       await page.goto('/campaigns')

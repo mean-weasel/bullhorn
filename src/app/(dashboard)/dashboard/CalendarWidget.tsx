@@ -35,7 +35,7 @@ interface DayData {
   reminders: Reminder[]
 }
 
-// eslint-disable-next-line max-lines-per-function
+ 
 export function CalendarWidget({ posts, reminders, days = 7 }: CalendarWidgetProps) {
   const today = startOfDay(new Date())
 

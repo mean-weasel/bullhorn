@@ -49,12 +49,7 @@ vi.mock('@supabase/supabase-js', () => ({
 // ---------------------------------------------------------------------------
 
 import {
-  isTestMode,
-  requireAuth,
-  getOptionalAuth,
-  getApiKeyFromHeaders,
   resolveApiKey,
-  hashApiKey,
   validatePostOwnership,
   validateCampaignOwnership,
   validateProjectOwnership,

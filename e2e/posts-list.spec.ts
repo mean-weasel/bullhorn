@@ -14,9 +14,9 @@ test.describe('Posts List', () => {
     await enterDemoMode(page)
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Navigation', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to posts list from dashboard', async ({ page }) => {
       await page.goto('/')
 
@@ -28,9 +28,9 @@ test.describe('Posts List', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Filter Tabs', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show all posts by default', async ({ page }) => {
       await goToPosts(page)
 
@@ -39,7 +39,7 @@ test.describe('Posts List', () => {
       await expect(allTab).toHaveClass(/bg-primary/)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should filter to drafts', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Draft post', testId)
@@ -60,7 +60,7 @@ test.describe('Posts List', () => {
       }
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should filter to scheduled', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Scheduled post', testId)
@@ -85,7 +85,7 @@ test.describe('Posts List', () => {
       }
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show counts in filter tabs', async ({ page }) => {
       // Create some posts first
       await createTestPost(page, { platform: 'twitter', content: 'Post 1' })
@@ -102,9 +102,9 @@ test.describe('Posts List', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Post Cards', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display platform indicators', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Test post', testId)
@@ -121,7 +121,7 @@ test.describe('Posts List', () => {
       expect(indicatorCount).toBeGreaterThan(0)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display content preview', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('My post content preview', testId)
@@ -135,7 +135,7 @@ test.describe('Posts List', () => {
       await expect(firstCard).toContainText(content)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display status badge', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Test post', testId)
@@ -150,7 +150,7 @@ test.describe('Posts List', () => {
       expect(hasStatus).toBeGreaterThan(0)
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to editor when clicked', async ({ page }, testInfo) => {
       const testId = generateTestId(testInfo)
       const content = uniqueContent('Clickable post', testId)
@@ -166,9 +166,9 @@ test.describe('Posts List', () => {
     })
   })
 
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe('New Post Button', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should have new post button in header', async ({ page }) => {
       await goToPosts(page)
 
@@ -177,7 +177,7 @@ test.describe('Posts List', () => {
       await expect(newPostBtn).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should navigate to new post page', async ({ page }) => {
       await goToPosts(page)
 

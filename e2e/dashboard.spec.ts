@@ -24,14 +24,14 @@ test.describe('Dashboard', () => {
   // Stats tests need serial execution to ensure accurate counts
   // eslint-disable-next-line max-lines-per-function
   test.describe.serial('Stats Bar', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show zero stats when no posts exist', async ({ page }) => {
       await expect(page.locator('[data-testid="stat-scheduled"]')).toHaveText('0')
       await expect(page.locator('[data-testid="stat-drafts"]')).toHaveText('0')
       await expect(page.locator('[data-testid="stat-published"]')).toHaveText('0')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should increment drafts count when draft is created', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Test draft', asDraft: true })
       await gotoDashboard(page)
@@ -40,7 +40,7 @@ test.describe('Dashboard', () => {
       await expect(page.locator('[data-testid="stat-scheduled"]')).toHaveText('0')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should increment scheduled count when post is scheduled', async ({ page }) => {
       await createTestPost(page, {
         platform: 'twitter',
@@ -53,7 +53,7 @@ test.describe('Dashboard', () => {
       await expect(page.locator('[data-testid="stat-drafts"]')).toHaveText('0')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show correct counts with multiple posts', async ({ page }) => {
       // Create posts via API to avoid slow UI navigation (5 sequential UI saves is flaky in CI)
       await createPostViaAPI(page, { platform: 'twitter', content: 'Draft 1', status: 'draft' })
@@ -81,7 +81,7 @@ test.describe('Dashboard', () => {
       await expect(page.locator('[data-testid="stat-published"]')).toHaveText('0')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should decrement count when post is deleted', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Draft to keep', asDraft: true })
       await createTestPost(page, {
@@ -126,7 +126,7 @@ test.describe('Dashboard', () => {
       await expect(page).toHaveURL('/dashboard')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should decrement count when post is archived', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Post to keep', asDraft: false })
       await createTestPost(page, {
@@ -153,9 +153,9 @@ test.describe('Dashboard', () => {
   })
 
   // Empty state tests need serial execution to ensure no posts exist
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Empty State', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show welcome message when no posts exist', async ({ page }) => {
       await expect(
         page.getByRole('heading', { name: /welcome to bullhorn/i }).first()
@@ -163,7 +163,7 @@ test.describe('Dashboard', () => {
       await expect(page.getByText('Create your first post to get started')).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should have create first post button', async ({ page }) => {
       const createBtn = page.getByRole('link', { name: /create your first post/i })
       await expect(createBtn).toBeVisible()
@@ -172,7 +172,7 @@ test.describe('Dashboard', () => {
       await expect(page).toHaveURL('/new')
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should hide empty state when posts exist', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'Test post', asDraft: true })
       await gotoDashboard(page)
@@ -184,9 +184,9 @@ test.describe('Dashboard', () => {
   })
 
   // Upcoming tests need serial execution to check empty/non-empty states
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Upcoming Section', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show upcoming posts section when scheduled posts exist', async ({ page }) => {
       await createTestPost(page, {
         platform: 'twitter',
@@ -198,7 +198,7 @@ test.describe('Dashboard', () => {
       await expect(page.getByRole('heading', { name: /upcoming/i }).first()).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show empty state when no scheduled posts', async ({ page }) => {
       await createTestPost(page, {
         platform: 'twitter',
@@ -212,9 +212,9 @@ test.describe('Dashboard', () => {
   })
 
   // Drafts tests need serial execution to check empty/non-empty states
-  // eslint-disable-next-line max-lines-per-function
+   
   test.describe.serial('Drafts Section', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show drafts section when drafts exist', async ({ page }) => {
       await createTestPost(page, { platform: 'twitter', content: 'My draft', asDraft: true })
       await gotoDashboard(page)
@@ -222,7 +222,7 @@ test.describe('Dashboard', () => {
       await expect(page.getByRole('heading', { name: /drafts/i })).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should show empty state when no drafts', async ({ page }) => {
       await createTestPost(page, {
         platform: 'twitter',
@@ -234,7 +234,7 @@ test.describe('Dashboard', () => {
       await expect(page.getByText(/no drafts/i)).toBeVisible()
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     test('should display draft content preview', async ({ page }) => {
       const content = 'This is my draft post content for testing'
       await createTestPost(page, { platform: 'twitter', content, asDraft: true })

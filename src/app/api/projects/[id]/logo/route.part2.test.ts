@@ -55,7 +55,7 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { POST, DELETE } from './route'
+import { DELETE } from './route'
 import { requireAuth } from '@/lib/auth'
 
 const mockRequireAuth = vi.mocked(requireAuth)
@@ -66,22 +66,6 @@ const mockRequireAuth = vi.mocked(requireAuth)
 
 function createContext(id: string) {
   return { params: Promise.resolve({ id }) }
-}
-
-function createFormDataRequest(
-  url: string,
-  file?: { name: string; type: string; size: number; content?: string }
-): NextRequest {
-  const formData = new FormData()
-  if (file) {
-    const blob = new Blob([file.content || 'fake-image-data'], { type: file.type })
-    const f = new File([blob], file.name, { type: file.type })
-    formData.append('file', f)
-  }
-  return new NextRequest(new URL(url, 'http://localhost:3000'), {
-    method: 'POST',
-    body: formData,
-  })
 }
 
 function createRequest(url: string, init?: RequestInit): NextRequest {

@@ -292,7 +292,7 @@ describe('API Key Lifecycle E2E', () => {
     await waitForServer(`${API_URL}/api/health`, 60000)
   }, 120000)
 
-  // eslint-disable-next-line max-lines-per-function
+   
   afterAll(async () => {
     // Clean up test posts via Management API SQL
     for (const postId of createdPostIds) {
@@ -332,9 +332,9 @@ describe('API Key Lifecycle E2E', () => {
   // -------------------------------------------------------------------------
   // Full-scope key
   // -------------------------------------------------------------------------
-  // eslint-disable-next-line max-lines-per-function
+   
   describe('Full-scope key', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('MCP operations succeed with a valid all-scope key', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -374,7 +374,7 @@ describe('API Key Lifecycle E2E', () => {
       }
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('MCP operations fail after key revocation', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -402,9 +402,9 @@ describe('API Key Lifecycle E2E', () => {
   // -------------------------------------------------------------------------
   // Scope enforcement
   // -------------------------------------------------------------------------
-  // eslint-disable-next-line max-lines-per-function
+   
   describe('Scope enforcement', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('Read-only key allows reads but blocks writes', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -433,7 +433,7 @@ describe('API Key Lifecycle E2E', () => {
       }
     })
 
-    // eslint-disable-next-line max-lines-per-function
+     
     it('Posts-only key blocks campaign operations', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -475,9 +475,9 @@ describe('API Key Lifecycle E2E', () => {
   // -------------------------------------------------------------------------
   // Key expiration
   // -------------------------------------------------------------------------
-  // eslint-disable-next-line max-lines-per-function
+   
   describe('Key expiration', () => {
-    // eslint-disable-next-line max-lines-per-function
+     
     it('Expired key is rejected', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)

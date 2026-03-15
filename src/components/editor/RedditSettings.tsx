@@ -25,7 +25,7 @@ interface RedditSettingsProps {
   onRemoveSubreddit: (subreddit: string) => void
 }
 
-// eslint-disable-next-line max-lines-per-function
+ 
 export const RedditSettings = ({
   post,
   onPostChange,
