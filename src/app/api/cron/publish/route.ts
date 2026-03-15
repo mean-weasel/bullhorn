@@ -3,7 +3,7 @@ import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { getNextOccurrence } from '@/lib/rrule'
 import { sendPushToUser } from '@/lib/webPushSender'
 import { sendApnsToUser } from '@/lib/apnsSender'
-import { sendPostReadyEmail } from '@/lib/emailSender'
+import { sendPostsReadyEmail } from '@/lib/emailSender'
 import { verifyCronSecret } from '@/lib/cronAuth'
 import { PLAN_LIMITS, type PlanType } from '@/lib/limits'
 
@@ -42,6 +42,13 @@ interface DbPostRow {
   group_id: string | null
   group_type: string | null
   notes: string | null
+}
+
+function getPreview(post: DbPostRow): string {
+  if (typeof post.content !== 'object' || post.content === null) return ''
+  const c = post.content as Record<string, string>
+  const raw = c.text || c.title || c.body || ''
+  return raw.length > 80 ? raw.slice(0, 80) + '...' : raw
 }
 
 async function scheduleNextRecurrence(
@@ -125,6 +132,9 @@ export async function GET(request: NextRequest) {
     let processed = 0
     let notified = 0
 
+    // Group processed posts by user for batched notifications
+    const readyByUser = new Map<string, DbPostRow[]>()
+
     for (const post of posts) {
       const dbPost = post as DbPostRow
 
@@ -141,55 +151,59 @@ export async function GET(request: NextRequest) {
 
       processed++
 
-      // Fire push notifications (web + native)
-      try {
-        const preview =
-          typeof dbPost.content === 'object' && dbPost.content !== null
-            ? (dbPost.content as Record<string, string>).text ||
-              (dbPost.content as Record<string, string>).title ||
-              ''
-            : ''
-        const truncated = preview.length > 80 ? preview.slice(0, 80) + '...' : preview
-        const pushPayload = {
-          title: `Ready to publish on ${dbPost.platform}`,
-          body: truncated || 'Your scheduled post is ready',
-          url: `/edit/${dbPost.id}`,
-        }
-        await Promise.all([
-          sendPushToUser(dbPost.user_id, pushPayload),
-          sendApnsToUser(dbPost.user_id, pushPayload),
-        ])
-      } catch (pushErr) {
-        console.error(`[notify-due-posts] Push failed for ${dbPost.id}:`, pushErr)
-      }
-
-      // Fire email notification
-      try {
-        const { data: userData } = await supabase.auth.admin.getUserById(dbPost.user_id)
-        if (userData?.user?.email) {
-          const preview =
-            typeof dbPost.content === 'object' && dbPost.content !== null
-              ? (dbPost.content as Record<string, string>).text ||
-                (dbPost.content as Record<string, string>).title ||
-                ''
-              : ''
-          await sendPostReadyEmail(userData.user.email, {
-            id: dbPost.id,
-            platform: dbPost.platform,
-            preview,
-          })
-        }
-      } catch (emailErr) {
-        console.error(`[notify-due-posts] Email failed for ${dbPost.id}:`, emailErr)
-      }
-
-      notified++
+      const userPosts = readyByUser.get(dbPost.user_id) || []
+      userPosts.push(dbPost)
+      readyByUser.set(dbPost.user_id, userPosts)
 
       // Schedule next recurrence if applicable
       await scheduleNextRecurrence(dbPost, supabase)
     }
 
-    console.log(`[notify-due-posts] Processed: ${processed}, Notified: ${notified}`)
+    // Send batched notifications per user (one push + one email per user)
+    for (const [userId, userPosts] of readyByUser) {
+      // Push notification (single summary)
+      try {
+        const pushPayload =
+          userPosts.length === 1
+            ? {
+                title: `Ready to publish on ${userPosts[0].platform}`,
+                body: getPreview(userPosts[0]) || 'Your scheduled post is ready',
+                url: `/edit/${userPosts[0].id}`,
+              }
+            : {
+                title: `${userPosts.length} posts ready to publish`,
+                body: userPosts.map((p) => p.platform).join(', '),
+                url: '/posts?status=ready',
+              }
+        await Promise.all([
+          sendPushToUser(userId, pushPayload),
+          sendApnsToUser(userId, pushPayload),
+        ])
+      } catch (pushErr) {
+        console.error(`[notify-due-posts] Push failed for user ${userId}:`, pushErr)
+      }
+
+      // Email notification (single digest)
+      try {
+        const { data: userData } = await supabase.auth.admin.getUserById(userId)
+        if (userData?.user?.email) {
+          await sendPostsReadyEmail(
+            userData.user.email,
+            userPosts.map((p) => ({
+              id: p.id,
+              platform: p.platform,
+              preview: getPreview(p),
+            }))
+          )
+        }
+      } catch (emailErr) {
+        console.error(`[notify-due-posts] Email failed for user ${userId}:`, emailErr)
+      }
+
+      notified++
+    }
+
+    console.log(`[notify-due-posts] Processed: ${processed}, Notified: ${notified} users`)
     return NextResponse.json({ processed, notified })
   } catch (err) {
     console.error('[notify-due-posts] Unexpected error:', err)
