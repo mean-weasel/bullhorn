@@ -40,7 +40,10 @@ export async function uploadLinkedInImage(
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': contentType,
     },
-    body: imageBuffer,
+    body: imageBuffer.buffer.slice(
+      imageBuffer.byteOffset,
+      imageBuffer.byteOffset + imageBuffer.byteLength
+    ) as unknown as ArrayBuffer,
   })
 
   if (!putRes.ok) {
