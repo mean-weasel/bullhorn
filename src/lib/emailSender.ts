@@ -108,3 +108,51 @@ export async function sendPostsReadyEmail(userEmail: string, posts: ReadyPost[])
     return false
   }
 }
+
+const FEATURE_LABELS: Record<string, string> = {
+  auto_publish: 'Auto-Publishing',
+}
+
+/**
+ * Send a waitlist confirmation email.
+ * Silently no-ops if RESEND_API_KEY is not configured.
+ */
+export async function sendWaitlistConfirmation(
+  userEmail: string,
+  feature: string
+): Promise<boolean> {
+  if (!RESEND_API_KEY) {
+    console.warn('[email] RESEND_API_KEY not configured, skipping waitlist email')
+    return false
+  }
+
+  const resend = new Resend(RESEND_API_KEY)
+  const featureLabel = FEATURE_LABELS[feature] || feature
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject: `You're on the ${featureLabel} waitlist!`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+          <h2 style="color: #ce9a08; margin: 0 0 16px;">You're on the list!</h2>
+          <p style="color: #333; margin: 0 0 12px;">
+            Thanks for your interest in <strong>${featureLabel}</strong> on Bullhorn.
+          </p>
+          <p style="color: #333; margin: 0 0 12px;">
+            We'll notify you as soon as it's available. In the meantime, keep scheduling
+            your posts — we'll let you know when they can go out automatically.
+          </p>
+          <p style="color: #999; font-size: 12px; margin: 24px 0 0;">
+            Sent by <a href="${APP_URL}" style="color: #ce9a08;">Bullhorn</a>
+          </p>
+        </div>
+      `,
+    })
+    return true
+  } catch (err) {
+    console.error('[email] Failed to send waitlist confirmation:', err)
+    return false
+  }
+}

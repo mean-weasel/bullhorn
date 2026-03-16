@@ -203,8 +203,11 @@ export async function refreshTokenIfNeeded(
   }
 }
 
-export async function getValidAccessToken(accountId: string): Promise<string> {
-  const supabase = await createClient()
+export async function getValidAccessToken(
+  accountId: string,
+  injectedClient?: Awaited<ReturnType<typeof createClient>>
+): Promise<string> {
+  const supabase = injectedClient ?? (await createClient())
 
   const { data, error } = await supabase
     .from('social_accounts')

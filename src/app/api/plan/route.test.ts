@@ -296,3 +296,27 @@ describe('GET /api/plan (5/5)', () => {
     expect(fromCalls).toContain('api_keys')
   })
 })
+
+describe('GET /api/plan — features (6/5)', () => {
+  it('returns features.autoPublish=false for free plan', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    setupMocks({ profile: { plan: 'free', storage_used_bytes: 0 } })
+
+    const res = await GET()
+    const body = await res.json()
+
+    expect(body.features).toBeDefined()
+    expect(body.features.autoPublish).toBe(false)
+  })
+
+  it('returns features.autoPublish=true for pro plan', async () => {
+    mockRequireAuth.mockResolvedValue({ userId: 'user-1' })
+    setupMocks({ profile: { plan: 'pro', storage_used_bytes: 0 } })
+
+    const res = await GET()
+    const body = await res.json()
+
+    expect(body.features).toBeDefined()
+    expect(body.features.autoPublish).toBe(true)
+  })
+})

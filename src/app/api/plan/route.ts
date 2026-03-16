@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/auth'
-import { PLAN_LIMITS, type PlanType } from '@/lib/limits'
+import { PLAN_LIMITS, PLAN_FEATURES, type PlanType } from '@/lib/limits'
 
 // Ensure this route is always dynamic (never cached by Next.js)
 export const dynamic = 'force-dynamic'
@@ -50,6 +50,7 @@ export async function GET() {
 
     return NextResponse.json({
       plan,
+      features: PLAN_FEATURES[plan],
       limits: {
         posts: { current: posts.count ?? 0, limit: planLimits.posts },
         campaigns: { current: campaigns.count ?? 0, limit: planLimits.campaigns },
