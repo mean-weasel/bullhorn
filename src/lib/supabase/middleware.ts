@@ -118,6 +118,9 @@ export async function updateSession(request: NextRequest) {
     '/api',
     '/access-denied',
     '/docs',
+    '/privacy',
+    '/terms',
+    '/articles',
   ]
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path)) || pathname === '/'
 
