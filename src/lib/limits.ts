@@ -25,6 +25,17 @@ export const PLAN_LIMITS = {
 
 export type ResourceType = keyof typeof PLAN_LIMITS.free
 
+export const PLAN_FEATURES = {
+  free: {
+    autoPublish: false,
+  },
+  pro: {
+    autoPublish: true,
+  },
+} as const
+
+export type FeatureType = keyof typeof PLAN_FEATURES.free
+
 export const RESOURCE_LABELS: Record<ResourceType, string> = {
   posts: 'Posts',
   campaigns: 'Campaigns',
