@@ -11,7 +11,7 @@ export default function Image() {
   return new ImageResponse(
     <div
       style={{
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+        background: '#0f172a',
         width: '100%',
         height: '100%',
         display: 'flex',
@@ -19,45 +19,83 @@ export default function Image() {
         alignItems: 'center',
         justifyContent: 'center',
         fontFamily: 'sans-serif',
+        position: 'relative',
       }}
     >
       <div
         style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 6,
+          background: '#ce9a08',
+        }}
+      />
+      <div
+        style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          width: 120,
-          height: 120,
-          borderRadius: 24,
-          background: '#ce9a08',
-          border: '4px solid #2a2a4a',
-          fontSize: 64,
-          marginBottom: 32,
+          gap: 20,
+          marginBottom: 24,
         }}
       >
-        📢
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 80,
+            height: 80,
+            borderRadius: 16,
+            background: '#ce9a08',
+            fontSize: 44,
+          }}
+        >
+          📢
+        </div>
+        <div
+          style={{
+            fontSize: 72,
+            fontWeight: 900,
+            color: '#ce9a08',
+            letterSpacing: -2,
+          }}
+        >
+          Bullhorn
+        </div>
       </div>
       <div
         style={{
-          fontSize: 64,
-          fontWeight: 900,
+          fontSize: 32,
+          fontWeight: 700,
           color: 'white',
-          letterSpacing: -2,
-          marginBottom: 16,
+          marginBottom: 12,
         }}
       >
-        Bullhorn
+        Social Media Post Scheduler
       </div>
       <div
         style={{
-          fontSize: 28,
-          color: '#a0a0b8',
-          maxWidth: 600,
+          fontSize: 22,
+          color: '#94a3b8',
+          maxWidth: 700,
           textAlign: 'center',
+          lineHeight: 1.4,
         }}
       >
-        Schedule and manage social media posts for Twitter, LinkedIn, and Reddit
+        For developers, indie hackers, and teams who ship fast
       </div>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 6,
+          background: '#ce9a08',
+        }}
+      />
     </div>,
     { ...size }
   )
