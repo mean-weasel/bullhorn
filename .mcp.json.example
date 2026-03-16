@@ -13,26 +13,18 @@
       "args": ["-y", "@anthropic-ai/mcp-github"]
     },
     "supabase": {
-      "command": "doppler",
-      "args": [
-        "run",
-        "--project",
-        "bullhorn",
-        "--config",
-        "dev",
-        "--",
-        "npx",
-        "-y",
-        "@supabase/mcp-server-supabase@latest"
-      ],
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest"],
       "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}",
         "SUPABASE_PROJECT_REF": "<your-supabase-project-ref>"
       }
     },
     "bullhorn": {
-      "command": "doppler",
-      "args": ["run", "--project", "bullhorn", "--config", "prd", "--", "npx", "-y", "@mean-weasel/bullhorn-mcp"],
+      "command": "npx",
+      "args": ["-y", "@mean-weasel/bullhorn-mcp"],
       "env": {
+        "BULLHORN_API_KEY": "${BULLHORN_API_KEY}",
         "BULLHORN_API_URL": "https://bullhorn.to"
       }
     }

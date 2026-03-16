@@ -389,7 +389,7 @@ Contributors: You will need your own Apple Developer account and App Store Conne
 ### Environment & Secrets
 
 - **Vercel is the source of truth** for all secrets. Runtime secrets (Supabase keys, Google OAuth client IDs, etc.) live in Vercel environment variables across Production/Preview/Development.
-- **Doppler** is legacy — only contains `SUPABASE_ACCESS_TOKEN` (CLI-only, not runtime). Use `doppler run` when running Supabase CLI commands locally (`supabase db push`, etc.).
+- **Supabase CLI auth**: `SUPABASE_ACCESS_TOKEN` is set in the local shell environment (e.g. `~/.zshrc`). Used by `supabase db push` and other CLI commands. Not a runtime secret.
 - **App Store Connect API keys** (`ASC_KEY_ID`, `ASC_ISSUER_ID`) are stored in Vercel. The `.p8` private key file is stored locally at `~/.appstoreconnect/private_keys/` and registered with the `asc` CLI keychain.
 - **Environment variables are validated on startup** - see `src/lib/envValidation.ts` and `docs/environment-variables.md` for details
 - **Upstash Redis** (`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) is **recommended but optional** - enables rate limiting (10 req/10sec per IP). If not configured, rate limiting is disabled with warnings logged.

@@ -12,7 +12,6 @@
  * All test data uses a [SMOKE] prefix and is cleaned up after each run.
  *
  * Usage: BULLHORN_API_KEY=bh_xxx node smoke-test.mjs
- *    or: doppler run --project bullhorn --config prd -- node smoke-test.mjs
  */
 
 import { spawn } from 'child_process'
@@ -23,7 +22,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 if (!process.env.BULLHORN_API_KEY) {
   console.error('Error: BULLHORN_API_KEY is required')
-  console.error('Usage: doppler run --project bullhorn --config prd -- node smoke-test.mjs')
+  console.error('Usage: BULLHORN_API_KEY=bh_xxx node smoke-test.mjs')
   process.exit(1)
 }
 

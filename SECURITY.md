@@ -53,7 +53,7 @@ The following components are within the scope of this security policy:
 
 The following are outside the scope of this policy:
 
-- Third-party services (Supabase infrastructure, Vercel platform, Doppler)
+- Third-party services (Supabase infrastructure, Vercel platform)
 - Social media platform APIs (Twitter/X, LinkedIn, Reddit)
 - Issues that require physical access to a user's device
 - Social engineering attacks against Bullhorn users or team members

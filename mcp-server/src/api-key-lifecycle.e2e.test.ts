@@ -214,7 +214,7 @@ describe('API Key Lifecycle E2E', () => {
     if (!sbAccessToken) {
       throw new Error(
         'Missing SUPABASE_ACCESS_TOKEN. ' +
-          'Run with: doppler run --project bullhorn --config prd -- npm run test:e2e'
+          'Set SUPABASE_ACCESS_TOKEN in your environment, then run: npm run test:e2e'
       )
     }
     accessToken = sbAccessToken
@@ -292,7 +292,6 @@ describe('API Key Lifecycle E2E', () => {
     await waitForServer(`${API_URL}/api/health`, 60000)
   }, 120000)
 
-   
   afterAll(async () => {
     // Clean up test posts via Management API SQL
     for (const postId of createdPostIds) {
@@ -332,9 +331,8 @@ describe('API Key Lifecycle E2E', () => {
   // -------------------------------------------------------------------------
   // Full-scope key
   // -------------------------------------------------------------------------
-   
+
   describe('Full-scope key', () => {
-     
     it('MCP operations succeed with a valid all-scope key', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -374,7 +372,6 @@ describe('API Key Lifecycle E2E', () => {
       }
     })
 
-     
     it('MCP operations fail after key revocation', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -402,9 +399,8 @@ describe('API Key Lifecycle E2E', () => {
   // -------------------------------------------------------------------------
   // Scope enforcement
   // -------------------------------------------------------------------------
-   
+
   describe('Scope enforcement', () => {
-     
     it('Read-only key allows reads but blocks writes', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -433,7 +429,6 @@ describe('API Key Lifecycle E2E', () => {
       }
     })
 
-     
     it('Posts-only key blocks campaign operations', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)
@@ -475,9 +470,8 @@ describe('API Key Lifecycle E2E', () => {
   // -------------------------------------------------------------------------
   // Key expiration
   // -------------------------------------------------------------------------
-   
+
   describe('Key expiration', () => {
-     
     it('Expired key is rejected', async () => {
       const key = generateTestKey()
       createdKeyHashes.push(key.keyHash)

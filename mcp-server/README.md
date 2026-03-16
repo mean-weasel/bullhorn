@@ -30,7 +30,7 @@ Add to your `.mcp.json`:
 }
 ```
 
-Set `BULLHORN_API_KEY` in your shell environment or via Doppler/dotenv.
+Set `BULLHORN_API_KEY` in your shell environment or via dotenv.
 
 For local development, point to your dev server:
 
