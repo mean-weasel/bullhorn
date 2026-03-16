@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { isNativePlatform } from '@/lib/capacitor'
+import { enableFullTracking } from '@/lib/posthog'
 
 // EU/EEA + UK country codes that require GDPR cookie consent
 const GDPR_COUNTRIES = new Set([
@@ -58,6 +59,7 @@ export function CookieConsent() {
 
   const handleAccept = () => {
     localStorage.setItem('cookie_consent', 'accepted')
+    enableFullTracking()
     setVisible(false)
   }
 

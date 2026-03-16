@@ -52,7 +52,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <h1 className="mt-2 text-3xl font-extrabold leading-tight">{article.title}</h1>
       </header>
 
-      <div className="prose prose-invert mt-8 max-w-none">
+      <div className="prose dark:prose-invert mt-8 max-w-none">
         <Content />
       </div>
 
