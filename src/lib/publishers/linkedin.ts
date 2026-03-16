@@ -1,5 +1,7 @@
 import type { PublishInput, PublishOutput } from './index'
 import type { LinkedInContent } from '@/lib/posts'
+import { downloadMediaFromStorage } from './mediaDownload'
+import { uploadLinkedInImage } from './linkedinMedia'
 
 const LINKEDIN_API_URL = 'https://api.linkedin.com/rest/posts'
 const LINKEDIN_API_VERSION = '202501'
@@ -17,7 +19,21 @@ export async function publishToLinkedIn(input: PublishInput): Promise<PublishOut
       'X-Restli-Protocol-Version': '2.0.0',
     }
 
-    // TODO: Add media upload support in follow-up task.
+    let imageUrn: string | undefined
+
+    if (content.mediaUrl && input.supabase && input.userId) {
+      const { buffer, contentType } = await downloadMediaFromStorage(
+        input.supabase,
+        input.userId,
+        content.mediaUrl
+      )
+      imageUrn = await uploadLinkedInImage(
+        input.accessToken,
+        providerAccountId,
+        buffer,
+        contentType
+      )
+    }
 
     const postBody = {
       author: `urn:li:person:${providerAccountId}`,
@@ -30,6 +46,12 @@ export async function publishToLinkedIn(input: PublishInput): Promise<PublishOut
       },
       lifecycleState: 'PUBLISHED',
       isReshareDisabledByAuthor: false,
+    }
+
+    if (imageUrn) {
+      ;(postBody as Record<string, unknown>).content = {
+        media: { title: '', id: imageUrn },
+      }
     }
 
     const res = await fetch(LINKEDIN_API_URL, {

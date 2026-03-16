@@ -1,7 +1,15 @@
 import type { PublishInput, PublishOutput } from './index'
 import type { TwitterContent } from '@/lib/posts'
+import { downloadMediaFromStorage } from './mediaDownload'
+import { uploadTwitterMedia } from './twitterMedia'
 
 const TWITTER_API_URL = 'https://api.x.com/2/tweets'
+
+function inferMediaCategory(contentType: string): 'tweet_image' | 'tweet_video' | 'tweet_gif' {
+  if (contentType.startsWith('video/')) return 'tweet_video'
+  if (contentType === 'image/gif') return 'tweet_gif'
+  return 'tweet_image'
+}
 
 /**
  * Split text into tweet-sized chunks at word boundaries.
@@ -39,8 +47,21 @@ export async function publishToTwitter(input: PublishInput): Promise<PublishOutp
   const { accessToken } = input
 
   try {
-    // TODO: Add media upload support in follow-up task.
-    // Media upload via Twitter API v2 requires chunked upload flow.
+    let mediaIds: string[] | undefined
+
+    if (content.mediaUrls?.length && input.supabase && input.userId) {
+      mediaIds = []
+      for (const mediaUrl of content.mediaUrls) {
+        const { buffer, contentType } = await downloadMediaFromStorage(
+          input.supabase,
+          input.userId,
+          mediaUrl
+        )
+        const category = inferMediaCategory(contentType)
+        const mediaId = await uploadTwitterMedia(input.accessToken, buffer, contentType, category)
+        mediaIds.push(mediaId)
+      }
+    }
 
     const tweets = splitIntoThread(content.text)
     const tweetIds: string[] = []
@@ -50,6 +71,9 @@ export async function publishToTwitter(input: PublishInput): Promise<PublishOutp
       const body: Record<string, unknown> = { text: tweetText }
       if (lastTweetId) {
         body.reply = { in_reply_to_tweet_id: lastTweetId }
+      }
+      if (!lastTweetId && mediaIds?.length) {
+        body.media = { media_ids: mediaIds }
       }
 
       const res = await fetch(TWITTER_API_URL, {

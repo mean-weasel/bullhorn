@@ -7,6 +7,7 @@ import { SocialAccount } from '@/lib/socialAccounts'
 type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error' | 'retrying'
 import { AlertCircle } from 'lucide-react'
 import { AutoSaveIndicator } from '@/components/ui/AutoSaveIndicator'
+import { AutoPublishIndicator } from '@/components/editor/AutoPublishIndicator'
 import {
   PlatformSelector,
   CampaignSelector,
@@ -214,6 +215,11 @@ export function EditorFormPanel(props: EditorFormPanelProps) {
           platform={PLATFORM_INFO[props.post.platform].name}
         />
       )}
+      <AutoPublishIndicator
+        hasAccount={!!props.post.socialAccountId}
+        hasSchedule={!!props.post.scheduledAt}
+        platform={props.post.platform}
+      />
       {props.mediaUrls.length > 0 && <MediaWarning />}
       <EditorActions
         isNew={props.isNew}
