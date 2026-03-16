@@ -5,16 +5,18 @@ import { sendPushToUser } from '@/lib/webPushSender'
 import { sendApnsToUser } from '@/lib/apnsSender'
 import { sendPostsReadyEmail } from '@/lib/emailSender'
 import { verifyCronSecret } from '@/lib/cronAuth'
-import { PLAN_LIMITS, type PlanType } from '@/lib/limits'
+import { PLAN_LIMITS, PLAN_FEATURES, type PlanType } from '@/lib/limits'
+import { publishPost } from '@/lib/publishers'
+import { transformPostFromDb } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Cron: notify-due-posts
+ * Cron: publish-due-posts
  *
- * Runs every 5 minutes. Transitions scheduled posts that are due to "ready"
- * status and fires notifications. Actual publishing happens externally
- * (Claude in Chrome, Share Sheet, or manual copy/paste).
+ * Runs every 5 minutes. For Pro users with linked social accounts,
+ * auto-publishes directly. For Free users (or Reddit posts), transitions
+ * to "ready" status and sends notifications for manual publishing.
  */
 
 function createServiceClient() {
@@ -42,6 +44,9 @@ interface DbPostRow {
   group_id: string | null
   group_type: string | null
   notes: string | null
+  created_at: string
+  updated_at: string
+  publish_result?: Record<string, unknown> | null
 }
 
 function getPreview(post: DbPostRow): string {
@@ -75,7 +80,7 @@ async function scheduleNextRecurrence(
     .eq('user_id', post.user_id)
   if ((count || 0) >= limit) {
     console.warn(
-      `[notify-due-posts] Skipping recurrence for ${post.id}: user ${post.user_id} at post limit (${count}/${limit})`
+      `[publish] Skipping recurrence for ${post.id}: user ${post.user_id} at post limit (${count}/${limit})`
     )
     return
   }
@@ -96,11 +101,73 @@ async function scheduleNextRecurrence(
   })
 
   if (error) {
-    console.error(`[notify-due-posts] Failed to schedule next recurrence for ${post.id}:`, error)
+    console.error(`[publish] Failed to schedule next recurrence for ${post.id}:`, error)
   }
 }
 
-// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
+/**
+ * Send batched notifications per user for a group of posts.
+ */
+async function sendNotifications(
+  userPostsMap: Map<string, DbPostRow[]>,
+  supabase: ReturnType<typeof createServiceClient>,
+  notificationType: 'ready' | 'failed'
+) {
+  let notified = 0
+
+  for (const [userId, userPosts] of userPostsMap) {
+    // Push notification (single summary)
+    try {
+      const pushPayload =
+        notificationType === 'failed'
+          ? {
+              title:
+                userPosts.length === 1
+                  ? `Failed to auto-publish on ${userPosts[0].platform}`
+                  : `${userPosts.length} posts failed to auto-publish`,
+              body: 'Manual action needed',
+              url: '/posts?status=ready',
+            }
+          : userPosts.length === 1
+            ? {
+                title: `Ready to publish on ${userPosts[0].platform}`,
+                body: getPreview(userPosts[0]) || 'Your scheduled post is ready',
+                url: `/edit/${userPosts[0].id}`,
+              }
+            : {
+                title: `${userPosts.length} posts ready to publish`,
+                body: userPosts.map((p) => p.platform).join(', '),
+                url: '/posts?status=ready',
+              }
+      await Promise.all([sendPushToUser(userId, pushPayload), sendApnsToUser(userId, pushPayload)])
+    } catch (pushErr) {
+      console.error(`[publish] Push failed for user ${userId}:`, pushErr)
+    }
+
+    // Email notification (single digest)
+    try {
+      const { data: userData } = await supabase.auth.admin.getUserById(userId)
+      if (userData?.user?.email) {
+        await sendPostsReadyEmail(
+          userData.user.email,
+          userPosts.map((p) => ({
+            id: p.id,
+            platform: p.platform,
+            preview: getPreview(p),
+          }))
+        )
+      }
+    } catch (emailErr) {
+      console.error(`[publish] Email failed for user ${userId}:`, emailErr)
+    }
+
+    notified++
+  }
+
+  return notified
+}
+
+// eslint-disable-next-line max-lines-per-function -- handler requires auth+db+publish in single try/catch
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request)
   if (authError) return authError
@@ -119,10 +186,10 @@ export async function GET(request: NextRequest) {
       .lte('scheduled_at', now.toISOString())
       .gte('scheduled_at', oneHourAgo.toISOString())
       .order('scheduled_at', { ascending: true })
-      .limit(50)
+      .limit(8)
 
     if (error) {
-      console.error('[notify-due-posts] Query error:', error)
+      console.error('[publish] Query error:', error)
       return NextResponse.json({ error: 'Database query failed' }, { status: 500 })
     }
 
@@ -131,22 +198,86 @@ export async function GET(request: NextRequest) {
     }
 
     let processed = 0
-    let notified = 0
 
-    // Group processed posts by user for batched notifications
+    // Group posts by user for batched notifications
     const readyByUser = new Map<string, DbPostRow[]>()
+    const failedAutoPublish = new Map<string, DbPostRow[]>()
 
+    // Batch-fetch user plans
+    const uniqueUserIds = [...new Set(posts.map((p: DbPostRow) => p.user_id))]
+    const userPlans = new Map<string, PlanType>()
+    for (const uid of uniqueUserIds) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('plan')
+        .eq('id', uid)
+        .single()
+      userPlans.set(uid, (profile?.plan as PlanType) || 'free')
+    }
+
+    // Split posts into auto-publish candidates and notify-only
+    const autoPublishCandidates: DbPostRow[] = []
+    const notifyOnlyPosts: DbPostRow[] = []
     for (const post of posts) {
       const dbPost = post as DbPostRow
+      const plan = userPlans.get(dbPost.user_id) || 'free'
+      const canAutoPublish =
+        dbPost.social_account_id && dbPost.platform !== 'reddit' && PLAN_FEATURES[plan].autoPublish
+      if (canAutoPublish) {
+        autoPublishCandidates.push(dbPost)
+      } else {
+        notifyOnlyPosts.push(dbPost)
+      }
+    }
 
-      // Transition to ready
+    // Process auto-publish candidates concurrently
+    let autoPublished = 0
+    const publishPromises = autoPublishCandidates.map(async (dbPost) => {
+      const { data: updated, error: updateError } = await supabase
+        .from('posts')
+        .update({ status: 'publishing', updated_at: now.toISOString() })
+        .match({ id: dbPost.id, status: 'scheduled' })
+        .select('id')
+
+      if (updateError || !updated?.length) return
+
+      try {
+        const post = transformPostFromDb(dbPost as unknown as import('@/lib/utils').DbPost)
+        const result = await publishPost(post, dbPost.social_account_id!, {
+          supabaseClient: supabase,
+          userId: dbPost.user_id,
+        })
+
+        if (result.success) {
+          autoPublished++
+          processed++
+        } else {
+          const userPosts = failedAutoPublish.get(dbPost.user_id) || []
+          userPosts.push(dbPost)
+          failedAutoPublish.set(dbPost.user_id, userPosts)
+          processed++
+        }
+      } catch (err) {
+        console.error(`[publish] Auto-publish failed for ${dbPost.id}:`, err)
+        const userPosts = failedAutoPublish.get(dbPost.user_id) || []
+        userPosts.push(dbPost)
+        failedAutoPublish.set(dbPost.user_id, userPosts)
+        processed++
+      }
+
+      await scheduleNextRecurrence(dbPost, supabase)
+    })
+    await Promise.allSettled(publishPromises)
+
+    // Process notify-only posts (transition to ready)
+    for (const dbPost of notifyOnlyPosts) {
       const { error: updateError } = await supabase
         .from('posts')
         .update({ status: 'ready', updated_at: now.toISOString() })
         .match({ id: dbPost.id, status: 'scheduled' })
 
       if (updateError) {
-        console.error(`[notify-due-posts] Failed to update post ${dbPost.id}:`, updateError)
+        console.error(`[publish] Failed to update post ${dbPost.id}:`, updateError)
         continue
       }
 
@@ -160,54 +291,17 @@ export async function GET(request: NextRequest) {
       await scheduleNextRecurrence(dbPost, supabase)
     }
 
-    // Send batched notifications per user (one push + one email per user)
-    for (const [userId, userPosts] of readyByUser) {
-      // Push notification (single summary)
-      try {
-        const pushPayload =
-          userPosts.length === 1
-            ? {
-                title: `Ready to publish on ${userPosts[0].platform}`,
-                body: getPreview(userPosts[0]) || 'Your scheduled post is ready',
-                url: `/edit/${userPosts[0].id}`,
-              }
-            : {
-                title: `${userPosts.length} posts ready to publish`,
-                body: userPosts.map((p) => p.platform).join(', '),
-                url: '/posts?status=ready',
-              }
-        await Promise.all([
-          sendPushToUser(userId, pushPayload),
-          sendApnsToUser(userId, pushPayload),
-        ])
-      } catch (pushErr) {
-        console.error(`[notify-due-posts] Push failed for user ${userId}:`, pushErr)
-      }
+    // Send notifications for both groups
+    let notified = 0
+    notified += await sendNotifications(readyByUser, supabase, 'ready')
+    notified += await sendNotifications(failedAutoPublish, supabase, 'failed')
 
-      // Email notification (single digest)
-      try {
-        const { data: userData } = await supabase.auth.admin.getUserById(userId)
-        if (userData?.user?.email) {
-          await sendPostsReadyEmail(
-            userData.user.email,
-            userPosts.map((p) => ({
-              id: p.id,
-              platform: p.platform,
-              preview: getPreview(p),
-            }))
-          )
-        }
-      } catch (emailErr) {
-        console.error(`[notify-due-posts] Email failed for user ${userId}:`, emailErr)
-      }
-
-      notified++
-    }
-
-    console.log(`[notify-due-posts] Processed: ${processed}, Notified: ${notified} users`)
-    return NextResponse.json({ processed, notified })
+    console.log(
+      `[publish] Processed: ${processed}, Notified: ${notified} users, Auto-published: ${autoPublished}`
+    )
+    return NextResponse.json({ processed, notified, autoPublished })
   } catch (err) {
-    console.error('[notify-due-posts] Unexpected error:', err)
+    console.error('[publish] Unexpected error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

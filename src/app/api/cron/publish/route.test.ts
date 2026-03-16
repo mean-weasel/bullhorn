@@ -14,6 +14,24 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: (...args: unknown[]) => mockCreateClient(...args),
 }))
 
+vi.mock('@/lib/publishers', () => ({
+  publishPost: vi.fn(),
+}))
+
+vi.mock('@/lib/utils', () => ({
+  transformPostFromDb: vi.fn((p) => ({
+    id: p.id,
+    platform: p.platform,
+    content: p.content,
+    status: p.status,
+    socialAccountId: p.social_account_id,
+    scheduledAt: p.scheduled_at,
+    createdAt: p.created_at,
+    updatedAt: p.updated_at,
+    publishResult: p.publish_result,
+  })),
+}))
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -101,18 +119,32 @@ describe('GET /api/cron/publish (notify-due-posts) (2/5)', () => {
     const postsLimit = vi.fn(() => Promise.resolve({ data: [post], error: null }))
 
     mockCreateClient.mockReturnValue({
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            lte: vi.fn(() => ({
-              gte: vi.fn(() => ({
-                order: vi.fn(() => ({ limit: postsLimit })),
+      from: vi.fn((table: string) => {
+        if (table === 'posts') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                lte: vi.fn(() => ({
+                  gte: vi.fn(() => ({
+                    order: vi.fn(() => ({ limit: postsLimit })),
+                  })),
+                })),
               })),
             })),
-          })),
-        })),
-        update: updateFn,
-      })),
+            update: updateFn,
+          }
+        }
+        if (table === 'user_profiles') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                single: vi.fn(() => Promise.resolve({ data: { plan: 'free' }, error: null })),
+              })),
+            })),
+          }
+        }
+        return { select: vi.fn(() => ({ eq: vi.fn() })) }
+      }),
     })
 
     const req = makeRequest({ authorization: 'Bearer my-secret' })
@@ -209,18 +241,32 @@ describe('GET /api/cron/publish (notify-due-posts) (5/5)', () => {
     const postsLimit = vi.fn(() => Promise.resolve({ data: [post1, post2], error: null }))
 
     mockCreateClient.mockReturnValue({
-      from: vi.fn(() => ({
-        select: vi.fn(() => ({
-          eq: vi.fn(() => ({
-            lte: vi.fn(() => ({
-              gte: vi.fn(() => ({
-                order: vi.fn(() => ({ limit: postsLimit })),
+      from: vi.fn((table: string) => {
+        if (table === 'posts') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                lte: vi.fn(() => ({
+                  gte: vi.fn(() => ({
+                    order: vi.fn(() => ({ limit: postsLimit })),
+                  })),
+                })),
               })),
             })),
-          })),
-        })),
-        update: updateFn,
-      })),
+            update: updateFn,
+          }
+        }
+        if (table === 'user_profiles') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                single: vi.fn(() => Promise.resolve({ data: { plan: 'free' }, error: null })),
+              })),
+            })),
+          }
+        }
+        return { select: vi.fn(() => ({ eq: vi.fn() })) }
+      }),
     })
 
     const req = makeRequest({ authorization: 'Bearer my-secret' })
@@ -231,5 +277,176 @@ describe('GET /api/cron/publish (notify-due-posts) (5/5)', () => {
     // First post failed to update, second succeeded
     expect(body.processed).toBe(1)
     expect(body.notified).toBe(1)
+  })
+})
+
+describe('GET /api/cron/publish — auto-publish for pro (6/8)', () => {
+  it('auto-publishes posts with social_account_id when user is pro', async () => {
+    vi.stubEnv('CRON_SECRET', 'my-secret')
+
+    const { publishPost } = await import('@/lib/publishers')
+
+    const post = makeDbPost({
+      id: 'post-auto',
+      social_account_id: 'acc-1',
+      user_id: 'pro-user',
+      platform: 'twitter',
+    })
+
+    const postsLimit = vi.fn(() => Promise.resolve({ data: [post], error: null }))
+
+    const selectAfterMatch = vi.fn(() =>
+      Promise.resolve({ data: [{ id: 'post-auto' }], error: null })
+    )
+    const matchFn = vi.fn(() => ({ select: selectAfterMatch }))
+    const updateFn = vi.fn(() => ({ match: matchFn }))
+
+    const profileSingle = vi.fn(() => Promise.resolve({ data: { plan: 'pro' }, error: null }))
+
+    mockCreateClient.mockReturnValue({
+      from: vi.fn((table: string) => {
+        if (table === 'posts') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                lte: vi.fn(() => ({
+                  gte: vi.fn(() => ({
+                    order: vi.fn(() => ({ limit: postsLimit })),
+                  })),
+                })),
+              })),
+            })),
+            update: updateFn,
+          }
+        }
+        if (table === 'user_profiles') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({ single: profileSingle })),
+            })),
+          }
+        }
+        return { select: vi.fn(() => ({ eq: vi.fn() })) }
+      }),
+    })
+
+    vi.mocked(publishPost).mockResolvedValue({ success: true })
+
+    const req = makeRequest({ authorization: 'Bearer my-secret' })
+    const res = await GET(req)
+
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.autoPublished).toBe(1)
+
+    expect(updateFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'publishing' }))
+    expect(publishPost).toHaveBeenCalled()
+  })
+})
+
+describe('GET /api/cron/publish — free user notify-only (7/8)', () => {
+  it('sends notification instead of auto-publishing for free users', async () => {
+    vi.stubEnv('CRON_SECRET', 'my-secret')
+
+    const { publishPost } = await import('@/lib/publishers')
+
+    const post = makeDbPost({
+      social_account_id: 'acc-1',
+      user_id: 'free-user',
+    })
+
+    const postsLimit = vi.fn(() => Promise.resolve({ data: [post], error: null }))
+    const matchFn = vi.fn(() => Promise.resolve({ data: null, error: null }))
+    const updateFn = vi.fn(() => ({ match: matchFn }))
+
+    const profileSingle = vi.fn(() => Promise.resolve({ data: { plan: 'free' }, error: null }))
+
+    mockCreateClient.mockReturnValue({
+      from: vi.fn((table: string) => {
+        if (table === 'posts') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                lte: vi.fn(() => ({
+                  gte: vi.fn(() => ({
+                    order: vi.fn(() => ({ limit: postsLimit })),
+                  })),
+                })),
+              })),
+            })),
+            update: updateFn,
+          }
+        }
+        if (table === 'user_profiles') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({ single: profileSingle })),
+            })),
+          }
+        }
+        return { select: vi.fn(() => ({ eq: vi.fn() })) }
+      }),
+    })
+
+    const req = makeRequest({ authorization: 'Bearer my-secret' })
+    const res = await GET(req)
+
+    expect(res.status).toBe(200)
+    expect(updateFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'ready' }))
+    expect(publishPost).not.toHaveBeenCalled()
+  })
+})
+
+describe('GET /api/cron/publish — Reddit skip (8/8)', () => {
+  it('routes Reddit posts to notify-only even with social_account_id on pro', async () => {
+    vi.stubEnv('CRON_SECRET', 'my-secret')
+
+    const { publishPost } = await import('@/lib/publishers')
+
+    const post = makeDbPost({
+      social_account_id: 'acc-reddit',
+      user_id: 'pro-user',
+      platform: 'reddit',
+    })
+
+    const postsLimit = vi.fn(() => Promise.resolve({ data: [post], error: null }))
+    const matchFn = vi.fn(() => Promise.resolve({ data: null, error: null }))
+    const updateFn = vi.fn(() => ({ match: matchFn }))
+
+    const profileSingle = vi.fn(() => Promise.resolve({ data: { plan: 'pro' }, error: null }))
+
+    mockCreateClient.mockReturnValue({
+      from: vi.fn((table: string) => {
+        if (table === 'posts') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                lte: vi.fn(() => ({
+                  gte: vi.fn(() => ({
+                    order: vi.fn(() => ({ limit: postsLimit })),
+                  })),
+                })),
+              })),
+            })),
+            update: updateFn,
+          }
+        }
+        if (table === 'user_profiles') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({ single: profileSingle })),
+            })),
+          }
+        }
+        return { select: vi.fn(() => ({ eq: vi.fn() })) }
+      }),
+    })
+
+    const req = makeRequest({ authorization: 'Bearer my-secret' })
+    const res = await GET(req)
+
+    expect(res.status).toBe(200)
+    expect(updateFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'ready' }))
+    expect(publishPost).not.toHaveBeenCalled()
   })
 })
