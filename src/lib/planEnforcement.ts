@@ -1,5 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
-import { PLAN_LIMITS, type PlanType, type ResourceType } from './limits'
+import {
+  PLAN_LIMITS,
+  PLAN_FEATURES,
+  type PlanType,
+  type ResourceType,
+  type FeatureType,
+} from './limits'
 
 /**
  * Check if a Supabase error is a plan limit violation from the DB trigger.
@@ -110,4 +116,13 @@ export async function enforceStorageLimit(
     limitBytes,
     plan,
   }
+}
+
+export async function hasFeature(
+  userId: string,
+  feature: FeatureType,
+  preloadedPlan?: PlanType
+): Promise<boolean> {
+  const plan = preloadedPlan || (await getUserPlan(userId))
+  return PLAN_FEATURES[plan][feature]
 }

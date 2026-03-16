@@ -16,7 +16,12 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
-import { getUserPlan, enforceResourceLimit, enforceStorageLimit } from './planEnforcement'
+import {
+  getUserPlan,
+  enforceResourceLimit,
+  enforceStorageLimit,
+  hasFeature,
+} from './planEnforcement'
 import { PLAN_LIMITS } from './limits'
 
 // ---------------------------------------------------------------------------
@@ -439,5 +444,34 @@ describe('enforceStorageLimit', () => {
     const result = await enforceStorageLimit('user-1', 1024)
     expect(result.currentBytes).toBe(0)
     expect(result.allowed).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// hasFeature
+// ---------------------------------------------------------------------------
+
+describe('hasFeature', () => {
+  it('returns false for autoPublish on free plan', async () => {
+    setupProfileMock('free')
+    const result = await hasFeature('user-1', 'autoPublish')
+    expect(result).toBe(false)
+  })
+
+  it('returns true for autoPublish on pro plan', async () => {
+    setupProfileMock('pro')
+    const result = await hasFeature('user-1', 'autoPublish')
+    expect(result).toBe(true)
+  })
+
+  it('defaults to free plan when profile not found', async () => {
+    setupProfileMock(null)
+    const result = await hasFeature('user-1', 'autoPublish')
+    expect(result).toBe(false)
+  })
+
+  it('accepts a preloaded plan to avoid DB lookup', async () => {
+    const result = await hasFeature('user-1', 'autoPublish', 'pro')
+    expect(result).toBe(true)
   })
 })
