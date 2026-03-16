@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import '../index.css'
 import '@/lib/envValidation' // Validate env vars on startup
 import { CookieConsent } from '@/components/ui/CookieConsent'
+import { PostHogProvider } from '@/lib/posthog'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bullhorn.to'
 
@@ -51,7 +52,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans">
-        <Providers>{children}</Providers>
+        <PostHogProvider>
+          <Providers>{children}</Providers>
+        </PostHogProvider>
         <Analytics />
         <SpeedInsights />
         <CookieConsent />

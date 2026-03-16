@@ -65,6 +65,11 @@ export default function PrivacyPage() {
             <li>
               <strong className="text-foreground">Google</strong> — OAuth authentication only
             </li>
+            <li>
+              <strong className="text-foreground">PostHog</strong> — Product analytics with
+              anonymized pageviews and events. Users are identified by UUID only — no email or
+              personal data is sent. Data hosted in US region.
+            </li>
           </ul>
         </section>
 

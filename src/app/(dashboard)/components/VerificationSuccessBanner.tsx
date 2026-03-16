@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { CheckCircle, X } from 'lucide-react'
+import { captureEvent } from '@/lib/posthog'
 
 /**
  * Shows a success banner when ?verified=true is in the URL.
@@ -15,6 +16,7 @@ export function VerificationSuccessBanner() {
 
   useEffect(() => {
     if (!show) return
+    captureEvent('signup_completed')
     // Clean up URL
     window.history.replaceState({}, '', window.location.pathname)
     // Auto-dismiss after 5 seconds

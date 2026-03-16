@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { isNativePlatform } from '@/lib/capacitor'
 import { nativeGoogleSignIn } from '@/lib/googleSignIn'
 import PasswordStrength from '@/components/ui/PasswordStrength'
+import { captureEvent } from '@/lib/posthog'
 
 // eslint-disable-next-line max-lines-per-function
 export default function SignUpPage() {
@@ -43,6 +44,7 @@ export default function SignUpPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
+    captureEvent('signup_started', { method: 'email' })
 
     // eslint-disable-next-line security/detect-possible-timing-attacks -- comparing UI form fields, not secrets
     if (password !== confirmPassword) {

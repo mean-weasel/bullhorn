@@ -3,6 +3,7 @@ import { Campaign, CampaignStatus, Post } from './posts'
 import { dedup, createDedupKey } from './requestDedup'
 import { hapticSuccess } from './haptics'
 import { usePlanStore } from './planStore'
+import { captureEvent } from './posthog'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -83,6 +84,7 @@ export const useCampaignsStore = create<CampaignsState & CampaignsActions>()((se
       const newCampaign = data.campaign as Campaign
       set({ campaigns: [newCampaign, ...previous], loading: false })
       hapticSuccess()
+      captureEvent('campaign_created', { campaignId: newCampaign.id })
       usePlanStore.getState().incrementCount('campaigns')
       return newCampaign
     } catch (error) {

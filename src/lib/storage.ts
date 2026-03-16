@@ -3,6 +3,7 @@ import { Post, PostStatus } from './posts'
 import { dedup, createDedupKey } from './requestDedup'
 import { hapticSuccess } from './haptics'
 import { usePlanStore } from './planStore'
+import { captureEvent } from './posthog'
 
 // API URL - use relative path for Next.js API routes
 const API_BASE = '/api'
@@ -67,6 +68,7 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
       const newPost = data.post as Post
       set({ posts: [newPost, ...previous], loading: false })
       hapticSuccess()
+      captureEvent('post_created', { postId: newPost.id })
       usePlanStore.getState().incrementCount('posts')
       return newPost
     } catch (error) {
@@ -95,6 +97,9 @@ export const usePostsStore = create<PostsState & PostsActions>()((set, get) => (
         posts: previous.map((p) => (p.id === id ? updatedPost : p)),
         loading: false,
       })
+      if (updates.status === 'scheduled') {
+        captureEvent('post_scheduled', { postId: id })
+      }
     } catch (error) {
       set({ posts: previous, error: (error as Error).message, loading: false })
       throw error

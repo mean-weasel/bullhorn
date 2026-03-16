@@ -6,11 +6,13 @@ import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import { VerificationSuccessBanner } from './components/VerificationSuccessBanner'
 import { NativeInit } from './components/NativeInit'
 import { PlanInitializer } from './components/PlanInitializer'
+import { PostHogIdentify } from './components/PostHogIdentify'
 import { AuthSyncProvider } from '@/components/ui/AuthSyncProvider'
 import { Toaster } from 'react-hot-toast'
 
 // eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  let userId: string | undefined
   let userEmail: string | undefined
   let userDisplayName: string | null | undefined
   let isEmailVerified = true
@@ -32,6 +34,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     }
 
     const user = session.user
+    userId = user.id
     userEmail = user.email
     isEmailVerified = !!user.email_confirmed_at
     isOAuthUser = user.app_metadata?.provider === 'google'
@@ -58,6 +61,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         />
         <NativeInit />
         <PlanInitializer />
+        {userId && <PostHogIdentify userId={userId} />}
         {/* Skip to content link for keyboard users */}
         <a
           href="#main-content"
