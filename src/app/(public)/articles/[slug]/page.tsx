@@ -1,0 +1,73 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { getAllArticles, getArticleBySlug } from '../content'
+
+interface ArticlePageProps {
+  params: Promise<{ slug: string }>
+}
+
+export async function generateStaticParams() {
+  return getAllArticles().map((article) => ({ slug: article.slug }))
+}
+
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params
+  const article = getArticleBySlug(slug)
+  if (!article) return {}
+
+  return {
+    title: article.title,
+    description: article.description,
+    openGraph: {
+      title: article.title,
+      description: article.description,
+      type: 'article',
+      publishedTime: article.publishedAt,
+    },
+  }
+}
+
+export default async function ArticlePage({ params }: ArticlePageProps) {
+  const { slug } = await params
+  const article = getArticleBySlug(slug)
+  if (!article) notFound()
+
+  const Content = article.content
+
+  return (
+    <article>
+      <Link href="/articles" className="text-sm text-muted-foreground hover:text-foreground">
+        &larr; All articles
+      </Link>
+
+      <header className="mt-4">
+        <time dateTime={article.publishedAt} className="text-sm text-muted-foreground">
+          {new Date(article.publishedAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </time>
+        <h1 className="mt-2 text-3xl font-extrabold leading-tight">{article.title}</h1>
+      </header>
+
+      <div className="prose prose-invert mt-8 max-w-none">
+        <Content />
+      </div>
+
+      <div className="mt-12 rounded-lg border-3 border-[hsl(var(--gold))] bg-[hsl(var(--gold))/0.05] p-6 text-center">
+        <p className="text-lg font-bold">Ready to schedule your posts?</p>
+        <p className="mt-1 text-muted-foreground">
+          Schedule across Twitter, LinkedIn, and Reddit from one place.
+        </p>
+        <Link
+          href="/signup"
+          className="sticker-button mt-4 inline-block bg-[hsl(var(--gold))] px-6 py-3"
+        >
+          Try Bullhorn Free
+        </Link>
+      </div>
+    </article>
+  )
+}
