@@ -102,16 +102,18 @@ function EditorHeader({
   )
 }
 
-function MediaWarning() {
-  return (
-    <div className="flex items-center gap-2 p-3 rounded-md bg-sticker-orange/10 text-sticker-orange text-sm border-2 border-sticker-orange/30 mb-4 md:mb-6">
-      <AlertCircle className="w-4 h-4 shrink-0" />
-      <span className="font-medium">
-        Media attachments are not yet supported for publishing. Your text will be published without
-        images/videos.
-      </span>
-    </div>
-  )
+function MediaWarning({ platform }: { platform: string }) {
+  if (platform === 'reddit') {
+    return (
+      <div className="flex items-center gap-2 p-3 rounded-md bg-sticker-orange/10 text-sticker-orange text-sm border-2 border-sticker-orange/30 mb-4 md:mb-6">
+        <AlertCircle className="w-4 h-4 shrink-0" />
+        <span className="font-medium">
+          Media attachments are not yet supported for Reddit publishing.
+        </span>
+      </div>
+    )
+  }
+  return null
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -220,7 +222,7 @@ export function EditorFormPanel(props: EditorFormPanelProps) {
         hasSchedule={!!props.post.scheduledAt}
         platform={props.post.platform}
       />
-      {props.mediaUrls.length > 0 && <MediaWarning />}
+      {props.mediaUrls.length > 0 && <MediaWarning platform={props.post.platform} />}
       <EditorActions
         isNew={props.isNew}
         isSaving={props.isSaving}
