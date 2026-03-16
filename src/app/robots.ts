@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/login', '/signup', '/docs/mcp'],
+        allow: ['/', '/login', '/signup', '/docs/mcp', '/privacy', '/terms', '/articles'],
         disallow: [
           '/dashboard',
           '/posts',
@@ -14,7 +14,6 @@ export default function robots(): MetadataRoute.Robots {
           '/campaigns',
           '/projects',
           '/launch-posts',
-          '/blog',
           '/settings',
           '/profile',
           '/api',
