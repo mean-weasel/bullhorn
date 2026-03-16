@@ -15,7 +15,7 @@
     "@capacitor/keyboard",
     "@capacitor/splash-screen",
     "@capacitor/status-bar",
-    "@octokit/rest",
+    "@tailwindcss/typography",
     "gh-pages",
     "tsx",
     "@semantic-release/commit-analyzer",
