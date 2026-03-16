@@ -4,11 +4,19 @@ import { createClient } from '@/lib/supabase/server'
 import { publishToTwitter } from './twitter'
 import { publishToLinkedIn } from './linkedin'
 import { publishToReddit } from './reddit'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export interface PublishInput {
   post: Post
   accessToken: string
   providerAccountId: string
+  supabase?: SupabaseClient
+  userId?: string
+}
+
+interface PublishOptions {
+  supabaseClient?: SupabaseClient
+  userId?: string
 }
 
 export interface PublishOutput {
@@ -35,7 +43,11 @@ const publishers: Record<Platform, Publisher> = {
  * @param accountId - The social_accounts row ID
  */
 // eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
-export async function publishPost(post: Post, accountId: string): Promise<PublishOutput> {
+export async function publishPost(
+  post: Post,
+  accountId: string,
+  options?: PublishOptions
+): Promise<PublishOutput> {
   const publisher = publishers[post.platform]
   if (!publisher) {
     return {
@@ -46,11 +58,14 @@ export async function publishPost(post: Post, accountId: string): Promise<Publis
   }
 
   try {
-    // 1. Get a valid access token (refreshes if needed)
-    const accessToken = await getValidAccessToken(accountId)
+    // 1. Resolve the Supabase client (injected or freshly created)
+    const supabaseClient = options?.supabaseClient
+    const supabase = supabaseClient || (await createClient())
 
-    // 2. Fetch the account to get providerAccountId
-    const supabase = await createClient()
+    // 2. Get a valid access token (refreshes if needed)
+    const accessToken = await getValidAccessToken(accountId, supabaseClient)
+
+    // 3. Fetch the account to get providerAccountId
     const { data: account } = await supabase
       .from('social_accounts')
       .select('provider_account_id')
@@ -61,14 +76,16 @@ export async function publishPost(post: Post, accountId: string): Promise<Publis
       return { success: false, error: 'Social account not found', retryable: false }
     }
 
-    // 3. Call the platform publisher
+    // 4. Call the platform publisher
     const result = await publisher({
       post,
       accessToken,
       providerAccountId: account.provider_account_id,
+      supabase,
+      userId: options?.userId,
     })
 
-    // 4. Update post status and publish_result in DB
+    // 5. Update post status and publish_result in DB
     const newStatus = result.success ? 'published' : 'failed'
     const publishResult: PublishResult = result.publishResult || {
       success: false,
@@ -84,7 +101,7 @@ export async function publishPost(post: Post, accountId: string): Promise<Publis
       .update({ status: newStatus, publish_result: publishResult })
       .eq('id', post.id)
 
-    // 5. Update account last_used_at on success
+    // 6. Update account last_used_at on success
     if (result.success) {
       await supabase
         .from('social_accounts')

@@ -32,6 +32,7 @@ const makeFreePlanResponse = (overrides = {}) => ({
     apiKeys: { current: 1, limit: PLAN_LIMITS.free.apiKeys },
   },
   storage: { usedBytes: 1024 * 1024, limitBytes: PLAN_LIMITS.free.storageBytes },
+  features: { autoPublish: false },
   ...overrides,
 })
 
@@ -46,6 +47,7 @@ const makeProPlanResponse = (overrides = {}) => ({
     apiKeys: { current: 5, limit: PLAN_LIMITS.pro.apiKeys },
   },
   storage: { usedBytes: 100 * 1024 * 1024, limitBytes: PLAN_LIMITS.pro.storageBytes },
+  features: { autoPublish: true },
   ...overrides,
 })
 
@@ -230,3 +232,44 @@ describe('isAtLimit (2/2)', () => {
   })
 })
 
+// ---------------------------------------------------------------------------
+// features and hasFeature
+// ---------------------------------------------------------------------------
+
+describe('features and hasFeature', () => {
+  it('defaults features to free tier (autoPublish=false)', () => {
+    const state = usePlanStore.getState()
+    expect(state.features.autoPublish).toBe(false)
+  })
+
+  it('hasFeature returns false for autoPublish on free plan', () => {
+    const state = usePlanStore.getState()
+    expect(state.hasFeature('autoPublish')).toBe(false)
+  })
+
+  it('updates features when fetchPlan returns pro plan', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(makeProPlanResponse()),
+    })
+
+    await usePlanStore.getState().fetchPlan()
+    const state = usePlanStore.getState()
+    expect(state.features.autoPublish).toBe(true)
+    expect(state.hasFeature('autoPublish')).toBe(true)
+  })
+
+  it('falls back to PLAN_FEATURES[plan] when features not in response', async () => {
+    const response = makeProPlanResponse()
+    delete (response as Record<string, unknown>).features
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(response),
+    })
+
+    await usePlanStore.getState().fetchPlan()
+    const state = usePlanStore.getState()
+    expect(state.features.autoPublish).toBe(true)
+  })
+})

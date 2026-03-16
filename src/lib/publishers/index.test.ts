@@ -248,3 +248,42 @@ describe('publishPost (3/3)', () => {
     expect(result.retryable).toBe(true)
   })
 })
+
+describe('publishPost with injected client (6/6)', () => {
+  it('uses injected supabaseClient and passes to getValidAccessToken', async () => {
+    const mockInjectedClient = {
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            single: vi.fn(() =>
+              Promise.resolve({
+                data: { provider_account_id: 'ext-123' },
+                error: null,
+              })
+            ),
+          })),
+        })),
+        update: vi.fn(() => ({
+          eq: vi.fn(() => Promise.resolve({ error: null })),
+        })),
+      })),
+    }
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ data: { id: 'tweet-1' } }),
+    })
+    vi.stubGlobal('fetch', mockFetch)
+
+    const { publishPost } = await import('./index')
+    const post = makePost({ platform: 'twitter', content: { text: 'Hello' } })
+    const result = await publishPost(post, 'acc-1', {
+      supabaseClient: mockInjectedClient as never,
+      userId: 'user-1',
+    })
+
+    expect(result.success).toBe(true)
+
+    vi.unstubAllGlobals()
+  })
+})

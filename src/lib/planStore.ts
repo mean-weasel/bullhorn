@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { dedup } from './requestDedup'
-import { type PlanType, PLAN_LIMITS } from './limits'
+import { type PlanType, PLAN_LIMITS, PLAN_FEATURES, type FeatureType } from './limits'
 import { type GenericResource } from './planEnforcement'
 
 interface LimitInfo {
@@ -13,6 +13,7 @@ type TrackedResource = GenericResource | 'apiKeys'
 
 interface PlanState {
   plan: PlanType
+  features: Record<FeatureType, boolean>
   limits: Record<TrackedResource, LimitInfo>
   storage: { usedBytes: number; limitBytes: number }
   loading: boolean
@@ -22,6 +23,7 @@ interface PlanState {
 
 interface PlanActions {
   fetchPlan: () => Promise<void>
+  hasFeature: (feature: FeatureType) => boolean
   isAtLimit: (resource: TrackedResource) => boolean
   isNearAnyLimit: () => { resource: string; current: number; limit: number } | null
   incrementCount: (resource: TrackedResource) => void
@@ -40,6 +42,7 @@ const defaultLimits: PlanState['limits'] = {
 
 const initialState: PlanState = {
   plan: 'free',
+  features: { ...PLAN_FEATURES.free },
   limits: defaultLimits,
   storage: { usedBytes: 0, limitBytes: PLAN_LIMITS.free.storageBytes },
   loading: false,
@@ -60,6 +63,7 @@ export const usePlanStore = create<PlanState & PlanActions>()((set, get) => ({
         const data = await res.json()
         set({
           plan: data.plan,
+          features: data.features || PLAN_FEATURES[data.plan as PlanType],
           limits: data.limits,
           storage: data.storage,
           loading: false,
@@ -69,6 +73,10 @@ export const usePlanStore = create<PlanState & PlanActions>()((set, get) => ({
         set({ error: (error as Error).message, loading: false })
       }
     })
+  },
+
+  hasFeature: (feature) => {
+    return get().features[feature] ?? false
   },
 
   isAtLimit: (resource) => {

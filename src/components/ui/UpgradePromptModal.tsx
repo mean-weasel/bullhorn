@@ -7,6 +7,7 @@ import {
   ResponsiveDialogDescription,
   ResponsiveDialogActions,
 } from './ResponsiveDialog'
+import { cn } from '@/lib/utils'
 
 interface UpgradePromptModalProps {
   open: boolean
@@ -16,6 +17,9 @@ interface UpgradePromptModalProps {
   resourceName?: string
   currentCount?: number
   limit?: number
+  mode?: 'resource-limit' | 'feature-locked'
+  onJoinWaitlist?: () => void
+  waitlistJoined?: boolean
 }
 
 const UPCOMING_FEATURES = [
@@ -34,6 +38,9 @@ export function UpgradePromptModal({
   resourceName = 'Resources',
   currentCount = 3,
   limit = 3,
+  mode = 'resource-limit',
+  onJoinWaitlist,
+  waitlistJoined,
 }: UpgradePromptModalProps) {
   const dismissButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -64,20 +71,22 @@ export function UpgradePromptModal({
       </ResponsiveDialogDescription>
 
       {/* Usage indicator */}
-      <div className="mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-sticker-sm">
-        <div className="flex items-center justify-between text-sm mb-3">
-          <span className="text-muted-foreground font-medium">{resourceName} used</span>
-          <span className="font-bold text-foreground">
-            {currentCount} / {limit}
-          </span>
+      {mode !== 'feature-locked' && (
+        <div className="mb-6 p-4 rounded-md bg-card border-[3px] border-border shadow-sticker-sm">
+          <div className="flex items-center justify-between text-sm mb-3">
+            <span className="text-muted-foreground font-medium">{resourceName} used</span>
+            <span className="font-bold text-foreground">
+              {currentCount} / {limit}
+            </span>
+          </div>
+          <div className="h-3 bg-muted rounded-full overflow-hidden border-2 border-border">
+            <div
+              className="h-full bg-linear-to-r from-sticker-yellow via-sticker-pink to-sticker-purple rounded-full transition-all"
+              style={{ width: `${Math.min((currentCount / limit) * 100, 100)}%` }}
+            />
+          </div>
         </div>
-        <div className="h-3 bg-muted rounded-full overflow-hidden border-2 border-border">
-          <div
-            className="h-full bg-linear-to-r from-sticker-yellow via-sticker-pink to-sticker-purple rounded-full transition-all"
-            style={{ width: `${Math.min((currentCount / limit) * 100, 100)}%` }}
-          />
-        </div>
-      </div>
+      )}
 
       {/* Upcoming pro features */}
       <div className="mb-6">
@@ -98,6 +107,20 @@ export function UpgradePromptModal({
 
       {/* Actions */}
       <ResponsiveDialogActions>
+        {mode === 'feature-locked' && onJoinWaitlist && (
+          <button
+            onClick={waitlistJoined ? undefined : onJoinWaitlist}
+            disabled={waitlistJoined}
+            className={cn(
+              'flex-1 px-4 py-3 md:py-3 py-3.5 min-h-[52px] md:min-h-0 rounded-md font-bold text-sm border-[3px] border-border shadow-sticker-sm transition-all',
+              waitlistJoined
+                ? 'bg-sticker-green text-white cursor-default'
+                : 'bg-accent text-white hover:-translate-y-px hover:shadow-sticker'
+            )}
+          >
+            {waitlistJoined ? "You're on the list!" : 'Join Waitlist'}
+          </button>
+        )}
         <button
           ref={dismissButtonRef}
           onClick={onDismiss}
