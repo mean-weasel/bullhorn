@@ -221,6 +221,12 @@ export function LandingPage() {
           </Link>
           <div className="flex items-center gap-3">
             <Link
+              href="/articles"
+              className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Articles
+            </Link>
+            <Link
               href="/docs/mcp"
               className="text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -246,11 +252,12 @@ export function LandingPage() {
             <span className="sticker-badge bg-sticker-pink/10 text-sticker-pink">Now in beta</span>
           </div>
           <h1 className="mb-6 text-4xl font-black leading-tight tracking-tight sm:text-5xl md:text-6xl">
-            Your single source of truth for <span className="text-primary">product context</span>
+            Schedule social media posts for{' '}
+            <span className="text-primary">Twitter, LinkedIn, and Reddit</span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-            Capture product updates while working with AI. Organize and polish in the UI. One place
-            for all your launches, updates, and social content.
+            Capture post ideas while working with AI. Organize into campaigns. Schedule across
+            platforms. Free for developers, indie hackers, and teams who ship fast.
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
@@ -279,11 +286,11 @@ export function LandingPage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Built for teams who work with AI
+              The scheduling tool built for AI workflows
             </h2>
             <p className="mx-auto max-w-2xl text-muted-foreground">
-              Capture ideas in flow, organize them later, and ship when ready. Your entire product
-              communication workflow in one tool.
+              Capture post ideas from Claude, Cursor, or any AI tool. Organize into campaigns.
+              Schedule across Twitter, LinkedIn, and Reddit — all in one place.
             </p>
           </div>
 
@@ -387,10 +394,11 @@ export function LandingPage() {
       <section className="border-t-[3px] border-border bg-card px-4 py-16 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Ready to ship?
+            Start scheduling for free
           </h2>
           <p className="mb-8 text-lg text-muted-foreground">
-            Stop juggling tabs and start scheduling. Bullhorn is free to get started.
+            50 posts, 5 campaigns, 3 projects — no credit card required. Schedule across Twitter,
+            LinkedIn, and Reddit in minutes.
           </p>
           <Link
             href="/signup"
@@ -409,6 +417,12 @@ export function LandingPage() {
             <span className="text-sm font-bold">Bullhorn</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <Link href="/articles" className="transition-colors hover:text-foreground">
+              Articles
+            </Link>
+            <Link href="/docs/mcp" className="transition-colors hover:text-foreground">
+              Docs
+            </Link>
             <a
               href="https://github.com/mean-weasel/bullhorn"
               target="_blank"
@@ -417,8 +431,11 @@ export function LandingPage() {
             >
               GitHub
             </a>
-            <Link href="/docs/mcp" className="transition-colors hover:text-foreground">
-              Docs
+            <Link href="/privacy" className="transition-colors hover:text-foreground">
+              Privacy
+            </Link>
+            <Link href="/terms" className="transition-colors hover:text-foreground">
+              Terms
             </Link>
             <span>&copy; {new Date().getFullYear()} Bullhorn</span>
           </div>

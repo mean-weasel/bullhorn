@@ -34,6 +34,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   if (!article) notFound()
 
   const Content = article.content
+  const otherArticles = getAllArticles()
+    .filter((a) => a.slug !== slug)
+    .slice(0, 3)
 
   return (
     <article>
@@ -68,6 +71,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           Try Bullhorn Free
         </Link>
       </div>
+
+      {otherArticles.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-xl font-bold">More articles</h2>
+          <div className="mt-4 space-y-3">
+            {otherArticles.map((other) => (
+              <Link
+                key={other.slug}
+                href={`/articles/${other.slug}`}
+                className="block rounded-lg border-2 border-border p-4 transition-colors hover:border-[hsl(var(--gold))]"
+              >
+                <p className="font-bold">{other.title}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{other.description}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </article>
   )
 }

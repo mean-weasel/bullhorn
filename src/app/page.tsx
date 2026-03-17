@@ -7,7 +7,7 @@ import { LandingPage } from './landing-page'
 export const metadata: Metadata = {
   title: 'Bullhorn — Social Media Post Scheduler',
   description:
-    'Schedule and manage social media posts for Twitter, LinkedIn, and Reddit. Organize campaigns, track projects, and automate with MCP.',
+    'Free social media scheduler for Twitter, LinkedIn, and Reddit. Schedule posts, organize campaigns, and capture ideas from AI tools. Built for developers and indie hackers.',
 }
 
 export default async function Home() {
