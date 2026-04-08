@@ -15,6 +15,8 @@ import {
 import { FeatureCarousel } from '@/components/ui/FeatureCarousel'
 import type { LucideIcon } from 'lucide-react'
 
+const LANDING_IMG = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/landing`
+
 interface Feature {
   icon: LucideIcon
   title: string
@@ -32,17 +34,17 @@ const features: Feature[] = [
     color: 'bg-sticker-purple',
     slides: [
       {
-        src: '/landing/feature-1/terminal-1.png',
+        src: `${LANDING_IMG}/feature-1/terminal-1.png`,
         alt: 'MCP create_post in Claude Code',
         caption: 'Save a tweet draft from Claude Code via MCP',
       },
       {
-        src: '/landing/feature-1/step-2.png',
+        src: `${LANDING_IMG}/feature-1/step-2.png`,
         alt: 'Dashboard overview with stats',
         caption: 'Your dashboard shows all captured drafts at a glance',
       },
       {
-        src: '/landing/feature-1/step-3.png',
+        src: `${LANDING_IMG}/feature-1/step-3.png`,
         alt: 'Dashboard drafts section',
         caption: 'Drafts captured via MCP appear instantly',
       },
@@ -56,22 +58,22 @@ const features: Feature[] = [
     color: 'bg-sticker-blue',
     slides: [
       {
-        src: '/landing/feature-2/step-1.png',
+        src: `${LANDING_IMG}/feature-2/step-1.png`,
         alt: 'Posts list with filter tabs',
         caption: 'Filter posts by status — drafts, scheduled, or all',
       },
       {
-        src: '/landing/feature-2/step-2.png',
+        src: `${LANDING_IMG}/feature-2/step-2.png`,
         alt: 'Post editor with content',
         caption: 'Edit content, assign campaigns, and set platforms',
       },
       {
-        src: '/landing/feature-2/step-3.png',
+        src: `${LANDING_IMG}/feature-2/step-3.png`,
         alt: 'Post editor scheduling controls',
         caption: 'Schedule posts and configure platform-specific settings',
       },
       {
-        src: '/landing/feature-2/step-4.png',
+        src: `${LANDING_IMG}/feature-2/step-4.png`,
         alt: 'Create new post form',
         caption: 'Create posts for Twitter, LinkedIn, or Reddit',
       },
@@ -85,7 +87,7 @@ const features: Feature[] = [
     color: 'bg-sticker-green',
     slides: [
       {
-        src: '/landing/feature-3/terminal-1.png',
+        src: `${LANDING_IMG}/feature-3/terminal-1.png`,
         alt: 'MCP fork blog to tweets in Claude Code',
         caption: 'Turn a blog post into a tweet thread via MCP',
       },
@@ -99,17 +101,17 @@ const features: Feature[] = [
     color: 'bg-sticker-orange',
     slides: [
       {
-        src: '/landing/feature-4/step-1.png',
+        src: `${LANDING_IMG}/feature-4/step-1.png`,
         alt: 'Dashboard campaigns section',
         caption: 'See all campaigns from your dashboard',
       },
       {
-        src: '/landing/feature-4/step-2.png',
+        src: `${LANDING_IMG}/feature-4/step-2.png`,
         alt: 'Campaigns list with filters',
         caption: 'Filter campaigns by status — active, planning, or completed',
       },
       {
-        src: '/landing/feature-4/step-3.png',
+        src: `${LANDING_IMG}/feature-4/step-3.png`,
         alt: 'Campaign detail with posts',
         caption: 'Drill into a campaign to see all its posts',
       },
@@ -123,17 +125,17 @@ const features: Feature[] = [
     color: 'bg-sticker-pink',
     slides: [
       {
-        src: '/landing/feature-5/step-1.png',
+        src: `${LANDING_IMG}/feature-5/step-1.png`,
         alt: 'Launch posts list',
         caption: 'Dedicated launch posts for Product Hunt and Hacker News',
       },
       {
-        src: '/landing/feature-5/step-2.png',
+        src: `${LANDING_IMG}/feature-5/step-2.png`,
         alt: 'Launch post creation form',
         caption: 'Create launch posts with platform-specific fields',
       },
       {
-        src: '/landing/feature-5/step-3.png',
+        src: `${LANDING_IMG}/feature-5/step-3.png`,
         alt: 'Product Hunt specific fields',
         caption: 'Fill in tagline, pricing, and maker comment for PH',
       },
@@ -147,12 +149,12 @@ const features: Feature[] = [
     color: 'bg-sticker-yellow',
     slides: [
       {
-        src: '/landing/feature-6/step-1.png',
+        src: `${LANDING_IMG}/feature-6/step-1.png`,
         alt: 'Blog drafts list',
         caption: 'Manage blog drafts with word counts and timestamps',
       },
       {
-        src: '/landing/feature-6/step-2.png',
+        src: `${LANDING_IMG}/feature-6/step-2.png`,
         alt: 'Blog editor with markdown',
         caption: 'Rich markdown editor with live word count',
       },
@@ -166,17 +168,17 @@ const features: Feature[] = [
     color: 'bg-sticker-black',
     slides: [
       {
-        src: '/landing/feature-7/step-1.png',
+        src: `${LANDING_IMG}/feature-7/step-1.png`,
         alt: 'Dashboard projects section',
         caption: 'Projects overview right on your dashboard',
       },
       {
-        src: '/landing/feature-7/step-2.png',
+        src: `${LANDING_IMG}/feature-7/step-2.png`,
         alt: 'Projects list page',
         caption: 'Browse all projects with descriptions and stats',
       },
       {
-        src: '/landing/feature-7/step-3.png',
+        src: `${LANDING_IMG}/feature-7/step-3.png`,
         alt: 'Project detail with campaigns and posts',
         caption: 'Drill into a project to see campaigns and posts',
       },

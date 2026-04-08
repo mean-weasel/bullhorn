@@ -51,6 +51,14 @@ workflows/screenshots/
 # Root-level screenshots (debug/temp artifacts)
 /*.png
 
+# Landing page images (hosted on Supabase Storage)
+public/landing/
+
+# Source assets and iOS image assets (backed up to Supabase Storage `ios-assets` bucket)
+assets/*.png
+assets/*.svg
+ios/App/App/Assets.xcassets/**/*.png
+
 # Claude session plans and internal thinking (ephemeral)
 .claude/plans/
 .claude/thinking/
