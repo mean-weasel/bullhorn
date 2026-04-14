@@ -159,6 +159,7 @@ jobs:
             !.next/cache
           retention-days: 1
           if-no-files-found: error
+          include-hidden-files: true
 
   e2e-tests:
     name: E2E Tests (Shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }})
