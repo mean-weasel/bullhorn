@@ -31,7 +31,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `E2E_TEST_MODE=true NEXT_PUBLIC_E2E_TEST_MODE=true npm run dev -- --port ${PORT}`,
+    command: process.env.CI
+      ? `E2E_TEST_MODE=true NEXT_PUBLIC_E2E_TEST_MODE=true npm start -- --port ${PORT}`
+      : `E2E_TEST_MODE=true NEXT_PUBLIC_E2E_TEST_MODE=true npm run dev -- --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 180_000 : 120_000,
