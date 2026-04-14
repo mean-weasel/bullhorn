@@ -8,9 +8,11 @@ const TEST_USER_ID = '00000000-0000-0000-0000-000000000001'
 const TEST_USER_EMAIL = 'test@example.com'
 
 export async function POST() {
-  // SECURITY: Never allow reset in production environment
-  if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'Reset endpoint is disabled in production' }, { status: 403 })
+  // SECURITY: Never allow reset on Vercel (build or runtime).
+  // Can't gate on NODE_ENV !== 'production' because `next start` forces
+  // NODE_ENV=production in CI; VERCEL=1 is the correct Vercel-only signal.
+  if (process.env.VERCEL === '1') {
+    return NextResponse.json({ error: 'Reset endpoint is disabled on Vercel' }, { status: 403 })
   }
 
   // Only allow in E2E test mode (requires CI=true + E2E_TEST_MODE=true)

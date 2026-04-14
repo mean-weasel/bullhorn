@@ -7,11 +7,15 @@ import { createClient } from './supabase/server'
 /**
  * Check if we're running in test mode.
  * IMPORTANT: Test mode requires BOTH E2E_TEST_MODE=true AND CI=true.
- * This prevents accidental RLS bypass in production or preview environments.
+ * Safety: Never allow test mode on Vercel (build or runtime). We can't gate on
+ * NODE_ENV !== 'production' because `next start` forces NODE_ENV=production in
+ * CI so the E2E shards can reuse a shared production build artifact. VERCEL=1
+ * is set by Vercel in every build and runtime environment and never on GitHub
+ * Actions runners, so it directly expresses "not a Vercel deploy."
  */
 export function isTestMode(): boolean {
-  // Safety check: Never allow test mode in production
-  if (process.env.NODE_ENV === 'production') {
+  // Safety check: Never allow test mode on Vercel (build or runtime)
+  if (process.env.VERCEL === '1') {
     return false
   }
   // Only allow test mode in CI environments (not preview/staging deployments)

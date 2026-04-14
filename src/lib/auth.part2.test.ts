@@ -78,21 +78,21 @@ describe('isTestMode', () => {
   it('returns true when E2E_TEST_MODE and CI are both "true" and not production', () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
     vi.stubEnv('CI', 'true')
-    vi.stubEnv('NODE_ENV', 'test')
+    vi.stubEnv('VERCEL', '')
     expect(isTestMode()).toBe(true)
   })
 
-  it('returns false in production even if E2E_TEST_MODE and CI are "true"', () => {
+  it('returns false on Vercel even if E2E_TEST_MODE and CI are "true"', () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
     vi.stubEnv('CI', 'true')
-    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('VERCEL', '1')
     expect(isTestMode()).toBe(false)
   })
 
   it('returns false when CI is not set even if E2E_TEST_MODE is "true"', () => {
     vi.stubEnv('E2E_TEST_MODE', 'true')
     vi.stubEnv('CI', '')
-    vi.stubEnv('NODE_ENV', 'test')
+    vi.stubEnv('VERCEL', '')
     expect(isTestMode()).toBe(false)
   })
 })
