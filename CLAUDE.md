@@ -317,6 +317,7 @@ Guidelines:
 | `/ship` | Build, lint, typecheck, and deploy | Ready to deploy changes |
 | `/monitor-ci` | Watch CI pipeline and debug failures | After pushing to remote |
 | `/deploy-check` | Check Vercel deployment status and drift | After merging or to verify production state |
+| `/e2e-debug` | Systematic Playwright failure diagnosis | A CI E2E shard fails and you need to find root cause |
 
 ### Agents
 
@@ -326,10 +327,12 @@ Guidelines:
 | `security-reviewer` | Focused security audit (OWASP, auth, RLS) | After auth/API/database changes |
 | `ios-tester` | Test workflows on iOS Simulator | After UI changes affecting mobile |
 | `performance-analyzer` | Find query, store, and bundle performance issues | After adding API routes, stores, or heavy components |
+| `e2e-reviewer` | Review Playwright specs for selector stability, race conditions, prod-vs-dev fragility | After writing or modifying E2E tests |
 
 ### Hooks (automatic)
 
-- **protect-files** (PreToolUse): Blocks edits to `.env.local`, `package-lock.json`, and existing migrations
+- **protect-files** (PreToolUse, Edit|Write): Blocks edits to `.env.local`, `package-lock.json`, and existing migrations
+- **enforce-pr-review** (PreToolUse, Bash): Blocks `gh pr create` until `/pr-review-toolkit:review-pr all` has run; append ` # reviewed` to the command after running the review to bypass. Copied verbatim from [neonwatty/pr-review-hooks](https://github.com/neonwatty/pr-review-hooks) for clean upstream pulls.
 - **auto-format** (PostToolUse): Runs Prettier on `.ts`, `.tsx`, `.css` files after edits
 - **typecheck** (PostToolUse): Runs `tsc --noEmit` after `.ts`/`.tsx` edits to surface type errors
 - **lint-security** (PostToolUse): Runs ESLint security rules on edited `.ts`/`.tsx` files
@@ -403,6 +406,21 @@ Contributors: You will need your own Apple Developer account and App Store Conne
 
 - When deploying database changes, always verify migrations are applied to ALL environments (production AND staging). After applying migrations, verify the schema cache is refreshed and RLS policies are updated.
 - Never edit existing migration files — create new ones with `make db-new name=description`.
+
+## Playwright Profiles
+
+Authenticated browser profiles are available at `.playwright/profiles/`.
+Available profiles:
+- **free-user**: Free plan user — default tier with standard limits
+  Test files: valid-image.png (valid), valid-video.mp4 (valid), oversized-image.png (error case), corrupted-file.jpg (error case)
+  Acceptance: upload accepted, processing completes
+- **pro-user**: Pro plan user — premium tier with expanded limits
+  Test files: valid-image.png (valid), valid-video.mp4 (valid), oversized-image.png (error case), corrupted-file.jpg (error case)
+  Acceptance: upload accepted, processing completes
+
+Config: `.playwright/profiles.json`
+To load a profile, use `playwright-cli -s={session} state-load .playwright/profiles/<role>.json` to restore cookies and localStorage. Restore sessionStorage entries individually with `sessionstorage-set` if the profile includes them.
+Run `/setup-profiles` to create new profiles or refresh expired sessions.
 
 ## Known Issues
 
