@@ -1,6 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AppHeader, FloatingActionButton } from './components/AppHeader'
+
+// Dashboard pages are session-authenticated — never statically generate.
+// eslint-disable-next-line react-refresh/only-export-components
+export const dynamic = 'force-dynamic'
 import { BottomNav } from './components/BottomNav'
 import { EmailVerificationBanner } from './components/EmailVerificationBanner'
 import { VerificationSuccessBanner } from './components/VerificationSuccessBanner'
