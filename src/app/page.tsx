@@ -11,11 +11,9 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  // Skip auth check in E2E test mode (requires CI=true + E2E_TEST_MODE=true + non-production)
+  // Skip auth check in E2E test mode. See dashboard/layout.tsx for the full gate rationale.
   const isTestMode =
-    process.env.E2E_TEST_MODE === 'true' &&
-    process.env.CI === 'true' &&
-    process.env.NODE_ENV !== 'production'
+    process.env.E2E_TEST_MODE === 'true' && process.env.CI === 'true' && process.env.VERCEL !== '1'
   if (isTestMode) {
     redirect('/dashboard')
   }

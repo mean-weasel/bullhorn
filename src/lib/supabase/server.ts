@@ -6,12 +6,15 @@ import { getApiKeyFromHeaders } from '../auth'
 // eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export async function createClient() {
   // In E2E test mode, use service role key to bypass RLS
-  // SECURITY: Requires CI=true + E2E_TEST_MODE=true + non-production
+  // SECURITY: Requires CI=true + E2E_TEST_MODE=true + not on Vercel.
+  // VERCEL=1 is set by Vercel at build and runtime and never on GitHub Actions runners,
+  // so this rejects any Vercel deploy. NODE_ENV !== 'production' would be wrong here
+  // because `next start` forces NODE_ENV=production in CI.
   if (
     process.env.E2E_TEST_MODE === 'true' &&
     process.env.CI === 'true' &&
     process.env.SUPABASE_SERVICE_ROLE_KEY &&
-    process.env.NODE_ENV !== 'production'
+    process.env.VERCEL !== '1'
   ) {
     if (process.env.NODE_ENV === 'development') {
       console.warn('[Supabase] E2E test mode active - RLS bypassed')
