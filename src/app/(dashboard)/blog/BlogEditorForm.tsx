@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import {
   ArrowLeft,
   Save,
@@ -157,7 +158,9 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
           scheduledAt: null,
           tags,
         })
-        setMessage({ type: 'success', text: 'Draft created' })
+        // Use toast (persists across navigation) so users — and e2e tests —
+        // actually see the confirmation before router.replace unmounts this page.
+        toast.success('Draft created')
         router.replace(`${newDraftRedirectPrefix}${newDraft.id}`)
       }
     } catch (error) {
