@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { enforceSocialAccountLimit } from '@/lib/planEnforcement'
+import { isSelfHosted } from '@/lib/selfHosted'
 import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
@@ -15,6 +16,11 @@ export async function GET() {
       userId = auth.userId
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (isSelfHosted() && process.env.REDDIT_USERNAME && process.env.REDDIT_PASSWORD) {
+      const { POST: connectScript } = await import('../connect/route')
+      return connectScript()
     }
 
     // Enforce per-provider social account limit
