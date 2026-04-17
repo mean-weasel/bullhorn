@@ -49,7 +49,7 @@ const ENV_CHECKS: EnvCheck[] = [
     description: 'Sentry DSN for error monitoring',
   },
 
-  // Platform OAuth (optional - platform features disabled without these)
+  // Platform credentials (optional - platform features disabled without these)
   {
     name: 'TWITTER_CLIENT_ID',
     required: false,
@@ -63,7 +63,7 @@ const ENV_CHECKS: EnvCheck[] = [
   {
     name: 'REDDIT_CLIENT_ID',
     required: false,
-    description: 'Reddit OAuth client ID for posting',
+    description: 'Reddit client ID for posting',
   },
 ]
 

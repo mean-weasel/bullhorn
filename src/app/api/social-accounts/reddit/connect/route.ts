@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { isSelfHosted } from '@/lib/selfHosted'
-import { refreshRedditViaPasswordGrant, REDDIT_USER_AGENT } from '@/lib/tokenRefresh'
+import {
+  refreshRedditViaPasswordGrant,
+  REDDIT_USER_AGENT,
+  type PlatformTokenResponse,
+} from '@/lib/tokenRefresh'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +43,7 @@ export async function POST() {
     }
 
     // Password grant to get access token
-    let tokens: { access_token: string; refresh_token?: string | null; expires_in: number }
+    let tokens: PlatformTokenResponse
     try {
       tokens = await refreshRedditViaPasswordGrant()
       if (!tokens.access_token) {

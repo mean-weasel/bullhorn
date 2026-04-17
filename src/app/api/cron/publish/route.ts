@@ -68,24 +68,28 @@ async function scheduleNextRecurrence(
   const nextDate = getNextOccurrence(post.recurrence_rule, new Date(post.scheduled_at))
   if (!nextDate) return
 
-  // Enforce plan limit before creating the next recurrence
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('plan')
-    .eq('id', post.user_id)
-    .single()
-  const plan = (profile?.plan as PlanType) || 'free'
-  const limit = PLAN_LIMITS[plan].posts
+  // In self-hosted mode, skip plan limit check (limits are unlimited)
+  if (isSelfHosted()) {
+    // No resource limits in self-hosted mode; proceed to create next recurrence
+  } else {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('plan')
+      .eq('id', post.user_id)
+      .single()
+    const plan = (profile?.plan as PlanType) || 'free'
+    const limit = PLAN_LIMITS[plan].posts
 
-  const { count } = await supabase
-    .from('posts')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', post.user_id)
-  if ((count || 0) >= limit) {
-    console.warn(
-      `[publish] Skipping recurrence for ${post.id}: user ${post.user_id} at post limit (${count}/${limit})`
-    )
-    return
+    const { count } = await supabase
+      .from('posts')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', post.user_id)
+    if ((count || 0) >= limit) {
+      console.warn(
+        `[publish] Skipping recurrence for ${post.id}: user ${post.user_id} at post limit (${count}/${limit})`
+      )
+      return
+    }
   }
 
   const { error } = await supabase.from('posts').insert({

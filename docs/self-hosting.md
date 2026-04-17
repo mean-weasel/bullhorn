@@ -19,6 +19,8 @@ make self-host-init    # Clones Supabase Docker, creates env files
 # Edit self-hosted/.env with generated secrets
 # Edit .env.local with your platform API keys
 make self-host-up      # Start Supabase Docker stack
+# Link the Supabase CLI to your local Docker database:
+supabase link --project-ref local --db-url postgresql://postgres:your-postgres-password@localhost:5432/postgres
 make db-push           # Apply database migrations
 make self-host-dev     # Start Next.js with internal cron
 ```
