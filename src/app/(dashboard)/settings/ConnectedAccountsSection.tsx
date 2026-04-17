@@ -213,8 +213,11 @@ export function ConnectedAccountsSection({
       } else if (data.url) {
         // OAuth flow — redirect to provider
         window.location.href = data.url
+      } else {
+        throw new Error('Unexpected auth response')
       }
-    } catch {
+    } catch (err) {
+      console.error(`Failed to connect ${provider}:`, err)
       setConnecting(null)
     }
   }

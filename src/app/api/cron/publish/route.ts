@@ -6,6 +6,7 @@ import { sendApnsToUser } from '@/lib/apnsSender'
 import { sendPostsReadyEmail } from '@/lib/emailSender'
 import { verifyCronSecret } from '@/lib/cronAuth'
 import { PLAN_LIMITS, PLAN_FEATURES, type PlanType } from '@/lib/limits'
+import { getUserPlan } from '@/lib/planEnforcement'
 import { isSelfHosted } from '@/lib/selfHosted'
 import { publishPost } from '@/lib/publishers'
 import { transformPostFromDb } from '@/lib/utils'
@@ -15,9 +16,10 @@ export const dynamic = 'force-dynamic'
 /**
  * Cron: publish-due-posts
  *
- * Runs every 5 minutes. For Pro users with linked social accounts,
- * auto-publishes directly. For Free users (or Reddit posts), transitions
- * to "ready" status and sends notifications for manual publishing.
+ * Runs every 5 minutes. In self-hosted mode, auto-publishes all posts with
+ * linked social accounts (including Reddit). In SaaS mode, auto-publishes
+ * for Pro users (excluding Reddit), and transitions other posts to "ready"
+ * status with notifications for manual publishing.
  */
 
 function createServiceClient() {
@@ -208,12 +210,8 @@ export async function GET(request: NextRequest) {
     const uniqueUserIds = [...new Set(posts.map((p: DbPostRow) => p.user_id))]
     const userPlans = new Map<string, PlanType>()
     for (const uid of uniqueUserIds) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('plan')
-        .eq('id', uid)
-        .single()
-      userPlans.set(uid, (profile?.plan as PlanType) || 'free')
+      const plan = await getUserPlan(uid)
+      userPlans.set(uid, plan)
     }
 
     // Split posts into auto-publish candidates and notify-only
