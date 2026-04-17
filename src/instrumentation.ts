@@ -6,6 +6,11 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === 'edge') {
     await import('../sentry.edge.config')
   }
+
+  if (process.env.NEXT_RUNTIME === 'nodejs' && process.env.SELF_HOSTED === 'true') {
+    const { startScheduler } = await import('./lib/scheduler')
+    startScheduler()
+  }
 }
 
 const SENSITIVE_HEADERS = ['authorization', 'cookie', 'x-api-key']
