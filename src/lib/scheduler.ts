@@ -11,25 +11,24 @@ export function startScheduler(): void {
 
   const headers = { Authorization: `Bearer ${cronSecret}` }
 
-  // Publish scheduled posts every 5 minutes
-  cron.schedule('*/5 * * * *', async () => {
-    try {
-      const res = await fetch(`${baseUrl}/api/cron/publish`, { headers })
-      if (!res.ok) console.error('[scheduler] Publish cron failed:', res.status)
-    } catch (err) {
-      console.error('[scheduler] Publish cron error:', err)
-    }
-  })
+  const jobs = [
+    { path: '/api/cron/publish', label: 'Publish' },
+    { path: '/api/cron/refresh-tokens', label: 'Token refresh' },
+  ]
 
-  // Refresh expiring tokens every 5 minutes
-  cron.schedule('*/5 * * * *', async () => {
-    try {
-      const res = await fetch(`${baseUrl}/api/cron/refresh-tokens`, { headers })
-      if (!res.ok) console.error('[scheduler] Token refresh cron failed:', res.status)
-    } catch (err) {
-      console.error('[scheduler] Token refresh cron error:', err)
-    }
-  })
+  for (const { path, label } of jobs) {
+    cron.schedule('*/5 * * * *', async () => {
+      try {
+        const res = await fetch(`${baseUrl}${path}`, { headers })
+        if (!res.ok) {
+          const body = await res.text().catch(() => '')
+          console.error(`[scheduler] ${label} cron failed: ${res.status}`, body)
+        }
+      } catch (err) {
+        console.error(`[scheduler] ${label} cron error:`, err)
+      }
+    })
+  }
 
   console.log('[scheduler] Internal cron started (publish + token refresh every 5 min)')
 }
