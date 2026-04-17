@@ -14,6 +14,11 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({ from: mockFrom })),
 }))
 
+const mockIsSelfHosted = vi.fn(() => false)
+vi.mock('@/lib/selfHosted', () => ({
+  isSelfHosted: () => mockIsSelfHosted(),
+}))
+
 // ---------------------------------------------------------------------------
 // Import the module under test AFTER mocks are registered
 // ---------------------------------------------------------------------------
@@ -73,6 +78,7 @@ beforeEach(() => {
   vi.stubEnv('REDDIT_CLIENT_SECRET', 'rd-secret')
   // Reset mock chains
   mockEq.mockReturnValue({ eq: mockEq, single: mockSingle })
+  mockIsSelfHosted.mockReturnValue(false)
 })
 
 // ---------------------------------------------------------------------------
@@ -284,5 +290,102 @@ describe('getValidAccessToken', () => {
 
     const token = await getValidAccessToken('acct-2')
     expect(token).toBe('fresh-token')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// refreshTokenIfNeeded — self-hosted Reddit password grant fallback
+// ---------------------------------------------------------------------------
+
+describe('refreshTokenIfNeeded - self-hosted Reddit password grant fallback', () => {
+  it('calls password grant, updates DB, and returns new tokens when self-hosted + Reddit + null refresh_token + expired', async () => {
+    mockIsSelfHosted.mockReturnValue(true)
+    vi.stubEnv('REDDIT_USERNAME', 'my-reddit-user')
+    vi.stubEnv('REDDIT_PASSWORD', 'my-reddit-pass')
+
+    const account = makeAccount({
+      provider: 'reddit',
+      refresh_token: null,
+      token_expires_at: new Date(Date.now() - 60_000).toISOString(),
+    })
+
+    mockSuccessfulRefresh({
+      access_token: 'pg-access-token',
+      refresh_token: null,
+      expires_in: 3600,
+    })
+
+    const result = await refreshTokenIfNeeded(account)
+
+    expect(result.accessToken).toBe('pg-access-token')
+    expect(result.refreshToken).toBeNull()
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://www.reddit.com/api/v1/access_token',
+      expect.objectContaining({ method: 'POST' })
+    )
+    expect(mockFrom).toHaveBeenCalledWith('social_accounts')
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        access_token: 'pg-access-token',
+        status: 'active',
+        status_error: null,
+      })
+    )
+  })
+
+  it('calls markAccountError and rethrows when password grant API fails', async () => {
+    mockIsSelfHosted.mockReturnValue(true)
+    vi.stubEnv('REDDIT_USERNAME', 'my-reddit-user')
+    vi.stubEnv('REDDIT_PASSWORD', 'my-reddit-pass')
+
+    const account = makeAccount({
+      provider: 'reddit',
+      refresh_token: null,
+      token_expires_at: new Date(Date.now() - 60_000).toISOString(),
+    })
+
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: 'invalid_grant', error_description: 'Bad credentials' }),
+    })
+
+    await expect(refreshTokenIfNeeded(account)).rejects.toThrow()
+    // markAccountError should have updated the account status
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: expect.stringMatching(/expired|error/),
+      })
+    )
+  })
+
+  it('falls through to "No refresh token" error when self-hosted but REDDIT_USERNAME is missing', async () => {
+    mockIsSelfHosted.mockReturnValue(true)
+    vi.stubEnv('REDDIT_USERNAME', '')
+    vi.stubEnv('REDDIT_PASSWORD', 'my-reddit-pass')
+
+    const account = makeAccount({
+      provider: 'reddit',
+      refresh_token: null,
+      token_expires_at: new Date(Date.now() - 60_000).toISOString(),
+    })
+
+    await expect(refreshTokenIfNeeded(account)).rejects.toThrow('No refresh token')
+    expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it('throws "No refresh token" for twitter with null refresh_token even in self-hosted mode', async () => {
+    mockIsSelfHosted.mockReturnValue(true)
+    vi.stubEnv('REDDIT_USERNAME', 'my-reddit-user')
+    vi.stubEnv('REDDIT_PASSWORD', 'my-reddit-pass')
+
+    const account = makeAccount({
+      provider: 'twitter',
+      refresh_token: null,
+      token_expires_at: new Date(Date.now() - 60_000).toISOString(),
+    })
+
+    await expect(refreshTokenIfNeeded(account)).rejects.toThrow('No refresh token')
+    expect(mockFetch).not.toHaveBeenCalled()
   })
 })

@@ -20,6 +20,23 @@ vi.mock('next/headers', () => ({
   ),
 }))
 
+const mockIsSelfHosted = vi.fn(() => false)
+vi.mock('@/lib/selfHosted', () => ({
+  isSelfHosted: () => mockIsSelfHosted(),
+}))
+
+const mockRefreshRedditViaPasswordGrant = vi.fn()
+vi.mock('@/lib/tokenRefresh', () => ({
+  refreshRedditViaPasswordGrant: (...args: unknown[]) => mockRefreshRedditViaPasswordGrant(...args),
+  REDDIT_USER_AGENT: 'web:bullhorn-scheduler:v1.0.0 (by /u/unknown)',
+}))
+
+const mockUpsert = vi.fn()
+const mockUpsertFrom = vi.fn(() => ({ upsert: mockUpsert }))
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: vi.fn(async () => ({ from: mockUpsertFrom })),
+}))
+
 import { GET } from './route'
 
 // eslint-disable-next-line max-lines-per-function
@@ -33,6 +50,7 @@ describe('GET /api/social-accounts/reddit/auth', () => {
       limit: 1,
       plan: 'free',
     })
+    mockIsSelfHosted.mockReturnValue(false)
     vi.stubEnv('REDDIT_CLIENT_ID', 'test-client-id')
     vi.stubEnv('NEXT_PUBLIC_APP_URL', 'http://localhost:3000')
   })
@@ -105,5 +123,40 @@ describe('GET /api/social-accounts/reddit/auth', () => {
     expect(url.searchParams.get('redirect_uri')).toBe(
       'http://localhost:3000/api/social-accounts/reddit/callback'
     )
+  })
+})
+
+describe('GET /api/social-accounts/reddit/auth — self-hosted delegation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockRequireAuth.mockResolvedValue({ userId: 'user-123' })
+    mockIsSelfHosted.mockReturnValue(true)
+    vi.stubEnv('REDDIT_USERNAME', 'script-user')
+    vi.stubEnv('REDDIT_PASSWORD', 'script-pass')
+    vi.stubEnv('REDDIT_CLIENT_ID', 'test-client-id')
+    vi.stubEnv('REDDIT_CLIENT_SECRET', 'test-client-secret')
+  })
+
+  it('delegates to connect route and returns { connected: true } when self-hosted with credentials', async () => {
+    mockRefreshRedditViaPasswordGrant.mockResolvedValue({
+      access_token: 'pg-token',
+      refresh_token: null,
+      expires_in: 3600,
+    })
+
+    const mockFetch = vi.fn()
+    vi.stubGlobal('fetch', mockFetch)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 'reddit-uid', name: 'script-user', icon_img: null }),
+    })
+
+    mockUpsert.mockResolvedValue({ error: null })
+
+    const res = await GET()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.connected).toBe(true)
+    expect(body).not.toHaveProperty('url')
   })
 })

@@ -16,6 +16,11 @@ vi.mock('@/lib/supabase/server', () => ({
   })),
 }))
 
+const mockIsSelfHosted = vi.fn(() => false)
+vi.mock('@/lib/selfHosted', () => ({
+  isSelfHosted: () => mockIsSelfHosted(),
+}))
+
 import {
   getUserPlan,
   enforceResourceLimit,
@@ -30,6 +35,7 @@ import { PLAN_LIMITS } from './limits'
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockIsSelfHosted.mockReturnValue(false)
 })
 
 /**
@@ -100,6 +106,14 @@ function setupProfileMock(plan: string | null) {
 // ---------------------------------------------------------------------------
 
 describe('getUserPlan', () => {
+  it('returns selfHosted when isSelfHosted() is true', async () => {
+    mockIsSelfHosted.mockReturnValue(true)
+    const plan = await getUserPlan('user-1')
+    expect(plan).toBe('selfHosted')
+    // Should not have queried the database
+    expect(mockFrom).not.toHaveBeenCalled()
+  })
+
   it('returns the plan from user profile', async () => {
     setupProfileMock('pro')
     const plan = await getUserPlan('user-1')

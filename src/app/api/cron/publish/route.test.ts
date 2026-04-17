@@ -96,6 +96,9 @@ beforeEach(async () => {
   // Default plan: 'free' — individual tests override as needed
   mockGetUserPlan.mockImplementation(async () => 'free' as import('@/lib/limits').PlanType)
 
+  // Default: SaaS mode — individual tests override as needed
+  mockIsSelfHosted.mockReturnValue(false)
+
   // Re-import to pick up fresh mocks
   vi.resetModules()
   const mod = await import('./route')
@@ -383,7 +386,68 @@ describe('GET /api/cron/publish — free user notify-only (7/8)', () => {
   })
 })
 
-describe('GET /api/cron/publish — Reddit skip (8/8)', () => {
+describe('GET /api/cron/publish — self-hosted auto-publish Reddit (8/9)', () => {
+  it('auto-publishes Reddit posts when self-hosted regardless of plan', async () => {
+    vi.stubEnv('CRON_SECRET', 'my-secret')
+
+    const { publishPost } = await import('@/lib/publishers')
+
+    const post = makeDbPost({
+      id: 'post-sh-reddit',
+      social_account_id: 'acc-reddit-sh',
+      user_id: 'any-user',
+      platform: 'reddit',
+    })
+
+    // self-hosted mode — plan is irrelevant
+    mockIsSelfHosted.mockReturnValue(true)
+
+    const postsLimit = vi.fn(() => Promise.resolve({ data: [post], error: null }))
+
+    const selectAfterMatch = vi.fn(() =>
+      Promise.resolve({ data: [{ id: 'post-sh-reddit' }], error: null })
+    )
+    const matchFn = vi.fn(() => ({ select: selectAfterMatch }))
+    const updateFn = vi.fn(() => ({ match: matchFn }))
+
+    mockCreateClient.mockReturnValue({
+      from: vi.fn((table: string) => {
+        if (table === 'posts') {
+          return {
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                lte: vi.fn(() => ({
+                  gte: vi.fn(() => ({
+                    order: vi.fn(() => ({ limit: postsLimit })),
+                  })),
+                })),
+              })),
+            })),
+            update: updateFn,
+          }
+        }
+        return { select: vi.fn(() => ({ eq: vi.fn() })) }
+      }),
+    })
+
+    vi.mocked(publishPost).mockResolvedValue({ success: true })
+
+    const req = makeRequest({ authorization: 'Bearer my-secret' })
+    const res = await GET(req)
+
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.autoPublished).toBe(1)
+
+    // Must have transitioned through 'publishing' state
+    expect(updateFn).toHaveBeenCalledWith(expect.objectContaining({ status: 'publishing' }))
+    expect(publishPost).toHaveBeenCalled()
+    // Must NOT have been routed to 'ready' (notify-only path)
+    expect(updateFn).not.toHaveBeenCalledWith(expect.objectContaining({ status: 'ready' }))
+  })
+})
+
+describe('GET /api/cron/publish — Reddit skip (9/9 SaaS)', () => {
   it('routes Reddit posts to notify-only even with social_account_id on pro', async () => {
     vi.stubEnv('CRON_SECRET', 'my-secret')
 
