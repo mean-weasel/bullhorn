@@ -8,6 +8,10 @@ vi.mock('@/lib/auth', () => ({
   requireAuth: vi.fn(),
 }))
 
+vi.mock('@/lib/planEnforcement', () => ({
+  getUserPlan: vi.fn(),
+}))
+
 const mockSingle = vi.fn()
 const mockEq = vi.fn(() => ({ eq: mockEq, single: mockSingle }))
 const mockSelect = vi.fn(() => ({ eq: mockEq }))
@@ -21,9 +25,11 @@ vi.mock('@/lib/supabase/server', () => ({
 
 import { GET } from './route'
 import { requireAuth } from '@/lib/auth'
-import { PLAN_LIMITS } from '@/lib/limits'
+import { PLAN_LIMITS, type PlanType } from '@/lib/limits'
+import { getUserPlan } from '@/lib/planEnforcement'
 
 const mockRequireAuth = vi.mocked(requireAuth)
+const mockGetUserPlan = vi.mocked(getUserPlan)
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -63,6 +69,9 @@ function setupMocks(opts: {
   launchPostCount?: number
   apiKeyCount?: number
 }) {
+  // getUserPlan is mocked — return the plan from the profile (or 'free' as fallback)
+  const profilePlan = (opts.profile?.plan || 'free') as PlanType
+  mockGetUserPlan.mockResolvedValue(profilePlan)
   // Reset mock implementations for each call
   // mockSingle is called once for the user_profiles query
   mockSingle.mockResolvedValue({

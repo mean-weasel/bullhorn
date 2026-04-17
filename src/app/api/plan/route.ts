@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/auth'
-import { PLAN_LIMITS, PLAN_FEATURES, type PlanType } from '@/lib/limits'
+import { PLAN_LIMITS, PLAN_FEATURES } from '@/lib/limits'
+import { getUserPlan } from '@/lib/planEnforcement'
 
 // Ensure this route is always dynamic (never cached by Next.js)
 export const dynamic = 'force-dynamic'
@@ -44,7 +45,7 @@ export async function GET() {
           .is('revoked_at', null),
       ])
 
-    const plan = (profileResult.data?.plan as PlanType) || 'free'
+    const plan = await getUserPlan(userId)
     const storageUsedBytes = profileResult.data?.storage_used_bytes || 0
     const planLimits = PLAN_LIMITS[plan]
 

@@ -31,7 +31,7 @@ export const PLAN_LIMITS = {
     socialAccountsPerProvider: Number.MAX_SAFE_INTEGER,
     storageBytes: Number.MAX_SAFE_INTEGER,
   },
-} as const
+} as const satisfies Record<PlanType, Record<string, number>>
 
 export type ResourceType = keyof typeof PLAN_LIMITS.free
 
@@ -45,7 +45,7 @@ export const PLAN_FEATURES = {
   selfHosted: {
     autoPublish: true,
   },
-} as const
+} as const satisfies Record<PlanType, Record<string, boolean>>
 
 export type FeatureType = keyof typeof PLAN_FEATURES.free
 
