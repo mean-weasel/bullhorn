@@ -1,127 +1,180 @@
 # Self-Hosting Guide
 
-Deploy your own instance of Bullhorn.
+Run Bullhorn entirely on your own infrastructure — no Vercel account, no cloud Supabase project, no third-party dependencies beyond the social platform APIs you want to use.
 
 ## Prerequisites
 
-- [Supabase](https://supabase.com) account (free tier works)
-- [Vercel](https://vercel.com) account (or any Node.js host)
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) (v2+)
 - Node.js 20+
+- npm
+- Git
 
-## One-Click Deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fmean-weasel%2Fbullhorn&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY&envDescription=Required%20Supabase%20credentials&envLink=https%3A%2F%2Fgithub.com%2Fmean-weasel%2Fbullhorn%2Fblob%2Fmain%2Fdocs%2Fenvironment-variables.md)
-
-You'll be prompted for your Supabase credentials during setup.
-
-## Manual Setup
-
-### 1. Fork and clone
+## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/bullhorn.git
+git clone https://github.com/neonwatty/bullhorn.git
 cd bullhorn
 npm install
+make self-host-init    # Clones Supabase Docker, creates env files
+# Edit self-hosted/.env with generated secrets
+# Edit .env.local with your platform API keys
+make self-host-up      # Start Supabase Docker stack
+make db-push           # Apply database migrations
+make self-host-dev     # Start Next.js with internal cron
 ```
 
-### 2. Create a Supabase project
+Open [http://localhost:3000](http://localhost:3000) and sign up for your first account.
 
-1. Go to [supabase.com/dashboard](https://supabase.com/dashboard) and create a new project
-2. Note your **Project URL**, **Anon Key**, and **Service Role Key** from Settings > API
+## Platform App Setup
 
-### 3. Apply database migrations
+Bullhorn needs OAuth apps registered with each social platform you want to publish to. Complete only the platforms you intend to use.
 
-Install the Supabase CLI, then:
+### Twitter / X
+
+1. Go to [https://developer.x.com/en/portal/dashboard](https://developer.x.com/en/portal/dashboard)
+2. Create a new **Project**, then create an **App** within it
+3. Under **User Authentication Settings**, enable **OAuth 2.0**
+4. Set **App permissions** to **Read and Write**
+5. Add a callback URL: `http://localhost:3000/api/social-accounts/twitter/callback`
+6. Set the website URL to: `http://localhost:3000`
+7. Copy **Client ID** and **Client Secret** to `.env.local`:
 
 ```bash
-npx supabase login
-npx supabase link --project-ref YOUR_PROJECT_REF
-npx supabase db push
+TWITTER_CLIENT_ID=your-client-id
+TWITTER_CLIENT_SECRET=your-client-secret
 ```
 
-This creates all required tables, RLS policies, and functions.
+### LinkedIn
 
-### 4. Configure environment variables
+1. Go to [https://www.linkedin.com/developers/apps](https://www.linkedin.com/developers/apps)
+2. Create a new app. You will need a LinkedIn Company Page — create a personal one if you do not already have one.
+3. Under **Products**, request access to:
+   - **Share on LinkedIn**
+   - **Sign In with LinkedIn using OpenID Connect**
+4. Under the **Auth** tab, add a redirect URL: `http://localhost:3000/api/social-accounts/linkedin/callback`
+5. Copy **Client ID** and **Client Secret** to `.env.local`:
 
 ```bash
-cp .env.example .env.local
+LINKEDIN_CLIENT_ID=your-client-id
+LINKEDIN_CLIENT_SECRET=your-client-secret
 ```
 
-Fill in at minimum:
+> Note: LinkedIn product access requests are reviewed manually and may take a day or two to approve.
+
+### Reddit
+
+Reddit self-hosted mode uses **script auth** (password grant) rather than OAuth, which means no redirect flow — your credentials are stored directly in `.env.local` and used to authenticate silently when you connect your account.
+
+1. Go to [https://www.reddit.com/prefs/apps](https://www.reddit.com/prefs/apps)
+2. Click **create another app...** at the bottom of the page
+3. Select **script** as the app type
+4. Set the redirect URI to `http://localhost:3000` (required by Reddit but not used for script auth)
+5. Click **create app**
+6. Copy the **Client ID** (shown under the app name, below "personal use script") and **Client Secret**
+7. Add all Reddit credentials to `.env.local`:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+REDDIT_CLIENT_ID=your-client-id
+REDDIT_CLIENT_SECRET=your-client-secret
+REDDIT_USERNAME=your-reddit-username
+REDDIT_PASSWORD=your-reddit-password
+REDDIT_USER_AGENT=web:bullhorn-scheduler:v1.0.0 (by /u/your-reddit-username)
 ```
 
-See [environment-variables.md](environment-variables.md) for the full list of required, recommended, and optional variables.
+> With script auth, connecting Reddit in the Settings page auto-authenticates immediately without any OAuth redirect.
 
-### 5. Configure authentication
+## Architecture
 
-In your Supabase dashboard under Authentication > Providers:
+Self-hosted mode runs everything locally in Docker:
 
-- **Email**: Enabled by default
-- **Google OAuth** (optional): Add your Google Cloud OAuth client ID and secret
+**Supabase Docker** (5 services managed by Docker Compose):
+- **PostgreSQL** — primary database
+- **GoTrue** — authentication service (email/password, OAuth)
+- **PostgREST** — auto-generated REST API over PostgreSQL
+- **Kong** — API gateway that routes requests to GoTrue and PostgREST
+- **Storage** — file and media storage
 
-### 6. Deploy
+**Next.js** runs with an internal cron scheduler powered by `node-cron`. Two jobs run every 5 minutes:
+- **Publish scheduler** — picks up posts whose scheduled time has passed and publishes them to their target platforms
+- **Token refresh** — proactively refreshes expiring OAuth tokens for connected social accounts
 
-**Vercel:**
+No external cron service (Vercel Crons, GitHub Actions, etc.) is required. The scheduler starts automatically when you run `make self-host-dev` or `make self-host-start`.
+
+**Plan enforcement is disabled** in self-hosted mode. All features are available without limits — no post quotas, no platform connection limits, no feature gating.
+
+## Environment Variables
+
+Two env files control the self-hosted stack:
+
+**`self-hosted/.env`** — Supabase Docker configuration (JWT secrets, database password, API keys for the local stack). Generated by `make self-host-init` with random secrets. You should not need to edit this unless you want to change ports or the Postgres password.
+
+**`.env.local`** — Next.js runtime configuration. Copy from `.env.self-hosted.example`:
+
 ```bash
-npx vercel
+cp .env.self-hosted.example .env.local
 ```
 
-**Other hosts:**
-```bash
-npm run build
-npm start
-```
+Key variables to set in `.env.local`:
 
-### 7. Set up cron jobs
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Local Supabase URL (e.g. `http://localhost:54321`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Anon key from `self-hosted/.env` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Service role key from `self-hosted/.env` |
+| `TWITTER_CLIENT_ID` / `TWITTER_CLIENT_SECRET` | Optional | Twitter OAuth app credentials |
+| `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET` | Optional | LinkedIn OAuth app credentials |
+| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | Optional | Reddit script app credentials |
+| `REDDIT_USERNAME` / `REDDIT_PASSWORD` | Optional | Reddit account for script auth |
+| `REDDIT_USER_AGENT` | Optional | Reddit API user agent string |
 
-Bullhorn uses scheduled jobs for background tasks. On Vercel, these are configured automatically via `vercel.json`:
+See `.env.self-hosted.example` for all available variables and `docs/environment-variables.md` for full descriptions.
 
-| Cron | Schedule | Purpose |
-|------|----------|---------|
-| `/api/cron/publish` | Every 5 minutes | Publish scheduled posts |
-| `/api/cron/retry-failed` | Every hour | Retry failed publications |
-| `/api/cron/refresh-tokens` | Every 6 hours | Refresh OAuth tokens |
-| `/api/cron/calendar-nudges` | Every 6 hours | Send calendar event nudges |
+## Connecting Accounts
 
-If not using Vercel, set up equivalent cron jobs that make GET requests to these paths. The requests must include a `CRON_SECRET` header for authentication.
+After starting the app:
 
-## Optional Services
+1. Open [http://localhost:3000/signup](http://localhost:3000/signup) and create your account
+2. Navigate to **Settings**
+3. **Connect Twitter** — click the button to be redirected to X for OAuth authorization
+4. **Connect LinkedIn** — click the button to be redirected to LinkedIn for OAuth authorization
+5. **Connect Reddit** — click the button; script auth runs silently using the credentials in `.env.local`, no redirect required
 
-These are not required but enable additional features:
-
-| Service | Purpose | Variables |
-|---------|---------|-----------|
-| [Upstash Redis](https://upstash.com) | Rate limiting (10 req/10s per IP) | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
-| [Sentry](https://sentry.io) | Error monitoring | `NEXT_PUBLIC_SENTRY_DSN` |
-| [Resend](https://resend.com) | Email notifications | `RESEND_API_KEY` |
-| Twitter API | Publish to Twitter | `TWITTER_*` vars |
-| LinkedIn API | Publish to LinkedIn | `LINKEDIN_*` vars |
-| Reddit API | Publish to Reddit | `REDDIT_*` vars |
-
-## iOS App (Optional)
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for iOS/Capacitor setup. You'll need your own Apple Developer account and must change the Bundle ID, Team ID, and Google Client IDs.
+Once connected, go to **New Post** and start scheduling.
 
 ## Updating
 
-Pull upstream changes and re-deploy:
+Pull the latest changes and re-apply any new migrations:
 
 ```bash
-git fetch upstream
-git merge upstream/main
+git pull
 npm install
-npx supabase db push   # Apply any new migrations
+make db-push
+make build
+```
+
+If the Docker stack is running, restart it after pulling:
+
+```bash
+make self-host-down
+make self-host-up
 ```
 
 ## Troubleshooting
 
-**Build fails with missing env vars**: Ensure all required variables from [environment-variables.md](environment-variables.md) are set.
+**Docker not running**
+Ensure Docker Desktop (or the Docker daemon) is running before executing `make self-host-up`. On Linux, run `sudo systemctl start docker` if needed.
 
-**Auth not working**: Check that your Supabase URL and keys are correct, and that email provider is enabled in Supabase Authentication settings.
+**Port conflicts**
+By default the Supabase stack uses ports 54321 (API), 54322 (Postgres), 54323 (Studio), and 54324 (inbucket). Next.js uses 3000. If any of these are occupied, stop the conflicting service or edit the port mappings in `self-hosted/docker-compose.yml`.
 
-**Cron jobs not running**: On Vercel, crons only run in production deployments. For other hosts, verify your cron scheduler is hitting the correct URLs with the `CRON_SECRET` header.
+**Reddit auth failures**
+Double-check that the app type is set to **script** (not "web app" or "installed app") in the Reddit app settings. Verify your `REDDIT_USERNAME` and `REDDIT_PASSWORD` values are correct and that your account does not have 2FA enabled (script auth does not support 2FA).
+
+**Token refresh errors**
+If a connected account shows a token error in Settings, disconnect and reconnect the account. OAuth tokens that expired before the refresh scheduler could rotate them require a fresh authorization grant.
+
+**Migration failures**
+If `make db-push` fails, check that the Supabase Docker stack is fully up (`make self-host-up` reports all services healthy) before pushing. You can also run `supabase db reset` against the local stack to start from a clean slate.
+
+**Supabase Studio**
+Access the local database UI at [http://localhost:54323](http://localhost:54323) to inspect tables, run queries, and debug data issues.
