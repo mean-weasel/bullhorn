@@ -219,10 +219,77 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+  e2e-self-hosted:
+    name: E2E Tests (Self-Hosted)
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase
+        run: |
+          supabase start
+          echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$(supabase status -o json | jq -r '.ANON_KEY')" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r '.SERVICE_ROLE_KEY')" >> $GITHUB_ENV
+
+      - name: Run migrations
+        run: supabase db push --local
+
+      - name: Download .next artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: next-build-e2e
+          path: .next
+
+      - name: Get Playwright version
+        id: pw-version
+        run: echo "version=$(npx playwright --version)" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        id: cache-playwright
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: v1-playwright-${{ runner.os }}-${{ steps.pw-version.outputs.version }}
+          restore-keys: |
+            v1-playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Run self-hosted e2e tests
+        run: npx playwright test e2e/self-hosted.spec.ts
+        env:
+          CI: true
+          E2E_TEST_MODE: 'true'
+          SELF_HOSTED: 'true'
+          TZ: UTC
+          NODE_OPTIONS: '--max-old-space-size=4096'
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report-self-hosted
+          path: playwright-report/
+          retention-days: 7
+
   release:
     name: Release
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [typecheck, unit-tests, e2e-tests, lint, knip, build]
+    needs: [typecheck, unit-tests, e2e-tests, e2e-self-hosted, lint, knip, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write

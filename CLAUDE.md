@@ -34,6 +34,10 @@ make db-push        # Push migrations to remote Supabase
 make db-reset       # Reset local database
 make clean          # Remove build artifacts
 make ci             # Run full CI checks locally (lint + typecheck + tests)
+make self-host-init # Clone Supabase Docker, create env files (first time)
+make self-host-up   # Start self-hosted Supabase Docker stack
+make self-host-down # Stop self-hosted Supabase Docker stack
+make self-host-dev  # Start Supabase Docker + Next.js with internal cron
 ```
 
 ## Architecture
@@ -93,6 +97,12 @@ src/components/
 | `theme.tsx` | Theme provider (light/dark) |
 | `supabase/server.ts` | Server-side Supabase client |
 | `supabase/client.ts` | Browser-side Supabase client |
+| `selfHosted.ts` | `isSelfHosted()` — runtime mode check for self-hosted vs SaaS |
+| `scheduler.ts` | `node-cron` scheduler for self-hosted mode (publish + token refresh) |
+| `tokenRefresh.ts` | OAuth token refresh + Reddit password grant (`refreshRedditViaPasswordGrant()`) |
+| `cronAuth.ts` | `verifyCronSecret()` — timing-safe cron endpoint auth |
+| `limits.ts` | `PlanType` (`free`, `pro`, `selfHosted`), `PLAN_LIMITS`, `PLAN_FEATURES` |
+| `planEnforcement.ts` | `getUserPlan()`, `enforceResourceLimit()`, `enforceStorageLimit()` |
 
 ### Custom Hooks (`src/hooks/`)
 
@@ -271,6 +281,7 @@ If the LSP tool is unavailable or returns errors, stop and inform the user. Eith
 
 - **Unit tests**: Vitest — files at `src/**/*.test.ts`
 - **E2E tests**: Playwright — files at `e2e/*.spec.ts`
+- **Self-hosted E2E**: `e2e/self-hosted.spec.ts` — runs with `SELF_HOSTED=true`, separate CI job
 - **Test mode**: `E2E_TEST_MODE=true` bypasses auth in non-production (uses test user `00000000-0000-0000-0000-000000000001`)
 - Run `make test-run` for CI, `make test` for watch mode, `make test-e2e` for E2E
 
@@ -347,6 +358,64 @@ Guidelines:
 | `playwright` | Browser automation for E2E testing |
 | `github` | GitHub API (PRs, issues, repos) |
 | `supabase` | Database queries, migrations, edge functions |
+## Self-Hosted Mode
+
+Bullhorn supports self-hosting with BYOK (Bring Your Own Keys). See [docs/self-hosting.md](docs/self-hosting.md) for the full setup guide.
+
+### How it works
+
+Self-hosted mode is activated by the runtime env var `SELF_HOSTED=true`. The single utility function `isSelfHosted()` in `src/lib/selfHosted.ts` gates all behavioral differences — no code forks, no separate build.
+
+### Key differences from SaaS mode
+
+| Behavior | SaaS | Self-Hosted |
+|----------|------|-------------|
+| Plan type | `free` or `pro` (from DB) | `selfHosted` (hardcoded, no DB query) |
+| Resource limits | Enforced per plan tier | All unlimited (`Number.MAX_SAFE_INTEGER`) |
+| Reddit auth | OAuth (authorization_code grant) | Script auth (password grant) — no browser redirect |
+| Cron scheduling | Vercel Cron (external) | `node-cron` in `instrumentation.ts` (internal) |
+| Auto-publish | Pro only, excludes Reddit | All platforms including Reddit |
+| Token refresh | Skips accounts without `refresh_token` | Falls back to password grant for Reddit |
+
+### Pattern: `isSelfHosted()` gate
+
+When adding self-hosted-specific behavior, always use the `isSelfHosted()` function — never check `process.env.SELF_HOSTED` directly:
+
+```typescript
+import { isSelfHosted } from '@/lib/selfHosted'
+
+if (isSelfHosted()) {
+  // Self-hosted behavior
+} else {
+  // SaaS behavior
+}
+```
+
+### Plan enforcement
+
+`getUserPlan()` in `planEnforcement.ts` short-circuits to `'selfHosted'` when `isSelfHosted()` is true, bypassing the DB query entirely. The `selfHosted` entry in `PLAN_LIMITS` uses `Number.MAX_SAFE_INTEGER` for all fields, so existing `enforceResourceLimit()` / `enforceStorageLimit()` calls work without modification.
+
+### Reddit script auth
+
+Self-hosted Reddit uses password grant instead of OAuth. Key files:
+- `src/app/api/social-accounts/reddit/connect/route.ts` — POST endpoint for password grant
+- `src/app/api/social-accounts/reddit/auth/route.ts` — delegates to connect when self-hosted + Reddit credentials set
+- `src/lib/tokenRefresh.ts` — `refreshRedditViaPasswordGrant()` shared between connect and token refresh
+
+### Internal cron scheduler
+
+`src/instrumentation.ts` starts `node-cron` when `SELF_HOSTED=true` and `CRON_SECRET` is set. Two jobs run every 5 minutes:
+- `/api/cron/publish` — auto-publishes due posts
+- `/api/cron/refresh-tokens` — rotates expiring OAuth tokens
+
+### E2E testing
+
+Self-hosted mode has a dedicated CI job (`e2e-self-hosted`) that runs `e2e/self-hosted.spec.ts` with `SELF_HOSTED=true`. It reuses the same `.next` build artifact as SaaS E2E tests because `SELF_HOSTED` is a server-side runtime env var (not `NEXT_PUBLIC_`). To run locally:
+
+```bash
+SELF_HOSTED=true npx playwright test e2e/self-hosted.spec.ts
+```
+
 ## iOS App (Capacitor)
 
 - **Mode**: Remote URL — WKWebView loads `bullhorn.to`, not a local bundle

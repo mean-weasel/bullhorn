@@ -83,6 +83,30 @@ export function PlanSection() {
     )
   }
 
+  // Self-hosted mode: no plan limits apply, show a minimal section
+  if (plan === 'selfHosted') {
+    return (
+      <div className="p-6 rounded-md border-[3px] border-border bg-card shadow-sticker mb-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground">
+            <Crown className="w-4 h-4 inline-block mr-1 -mt-0.5" /> Plan & Usage
+          </h2>
+          <span
+            className={cn(
+              'px-3 py-1 rounded-full text-xs font-bold border-2',
+              'bg-linear-to-r from-[hsl(var(--gold))] to-[hsl(var(--gold-dark))] text-primary-foreground border-[hsl(var(--gold-dark))]'
+            )}
+          >
+            Self-Hosted
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          All features and resources are unlimited in self-hosted mode.
+        </p>
+      </div>
+    )
+  }
+
   const resourceKeys: (GenericResource | 'apiKeys')[] = [
     'posts',
     'campaigns',
