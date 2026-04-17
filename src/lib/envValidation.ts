@@ -112,6 +112,26 @@ export function validateEnv(): void {
     })
     console.warn('[envValidation] ⚠️  Some features may be degraded. See docs for configuration.')
   }
+
+  // Self-hosted mode validation
+  if (process.env.SELF_HOSTED === 'true') {
+    console.log('[envValidation] ℹ️  Self-hosted mode enabled')
+
+    // Check Reddit OAuth configuration
+    if (process.env.REDDIT_CLIENT_ID && !process.env.REDDIT_USERNAME) {
+      console.warn('[envValidation] ⚠️  REDDIT_CLIENT_ID is set but REDDIT_USERNAME is missing')
+    }
+    if (process.env.REDDIT_CLIENT_ID && !process.env.REDDIT_PASSWORD) {
+      console.warn('[envValidation] ⚠️  REDDIT_CLIENT_ID is set but REDDIT_PASSWORD is missing')
+    }
+
+    // Check cron scheduler
+    if (!process.env.CRON_SECRET) {
+      console.warn(
+        '[envValidation] ⚠️  CRON_SECRET is not set. Internal cron scheduler will be disabled.'
+      )
+    }
+  }
 }
 
 // Run validation on module load in non-development environments
