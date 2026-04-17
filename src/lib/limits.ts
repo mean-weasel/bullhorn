@@ -1,4 +1,4 @@
-export type PlanType = 'free' | 'pro'
+export type PlanType = 'free' | 'pro' | 'selfHosted'
 
 export const PLAN_LIMITS = {
   free: {
@@ -21,6 +21,16 @@ export const PLAN_LIMITS = {
     socialAccountsPerProvider: 5,
     storageBytes: 2 * 1024 * 1024 * 1024,
   },
+  selfHosted: {
+    posts: Number.MAX_SAFE_INTEGER,
+    campaigns: Number.MAX_SAFE_INTEGER,
+    projects: Number.MAX_SAFE_INTEGER,
+    blogDrafts: Number.MAX_SAFE_INTEGER,
+    launchPosts: Number.MAX_SAFE_INTEGER,
+    apiKeys: Number.MAX_SAFE_INTEGER,
+    socialAccountsPerProvider: Number.MAX_SAFE_INTEGER,
+    storageBytes: Number.MAX_SAFE_INTEGER,
+  },
 } as const
 
 export type ResourceType = keyof typeof PLAN_LIMITS.free
@@ -30,6 +40,9 @@ export const PLAN_FEATURES = {
     autoPublish: false,
   },
   pro: {
+    autoPublish: true,
+  },
+  selfHosted: {
     autoPublish: true,
   },
 } as const

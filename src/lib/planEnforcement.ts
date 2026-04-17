@@ -6,6 +6,7 @@ import {
   type ResourceType,
   type FeatureType,
 } from './limits'
+import { isSelfHosted } from './selfHosted'
 
 /**
  * Check if a Supabase error is a plan limit violation from the DB trigger.
@@ -31,6 +32,7 @@ const TABLE_MAP: Record<GenericResource, { table: string; countCol: string }> = 
 }
 
 export async function getUserPlan(userId: string): Promise<PlanType> {
+  if (isSelfHosted()) return 'selfHosted'
   const supabase = await createClient()
   const { data: profile } = await supabase
     .from('user_profiles')
