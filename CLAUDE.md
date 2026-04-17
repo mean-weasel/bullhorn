@@ -399,12 +399,12 @@ if (isSelfHosted()) {
 
 Self-hosted Reddit uses password grant instead of OAuth. Key files:
 - `src/app/api/social-accounts/reddit/connect/route.ts` — POST endpoint for password grant
-- `src/app/api/social-accounts/reddit/auth/route.ts` — delegates to connect when self-hosted + Reddit credentials set
+- `src/app/api/social-accounts/reddit/auth/route.ts` — delegates to connect when self-hosted + `REDDIT_USERNAME` and `REDDIT_PASSWORD` are set
 - `src/lib/tokenRefresh.ts` — `refreshRedditViaPasswordGrant()` shared between connect and token refresh
 
 ### Internal cron scheduler
 
-`src/instrumentation.ts` starts `node-cron` when `SELF_HOSTED=true` and `CRON_SECRET` is set. Two jobs run every 5 minutes:
+`src/instrumentation.ts` starts `node-cron` when `SELF_HOSTED=true`. The scheduler itself requires `CRON_SECRET` to be set (checked in `scheduler.ts`). Two jobs run every 5 minutes:
 - `/api/cron/publish` — auto-publishes due posts
 - `/api/cron/refresh-tokens` — rotates expiring OAuth tokens
 
