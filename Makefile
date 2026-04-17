@@ -287,3 +287,44 @@ ci: check test-run ## Run CI checks locally
 start: dev ## Alias for 'make dev'
 stop: supabase-stop ## Alias for 'make supabase-stop'
 studio: supabase-studio ## Alias for 'make supabase-studio'
+
+# =============================================================================
+# Self-Hosted
+# =============================================================================
+
+.PHONY: self-host-init self-host-up self-host-down self-host-status self-host-logs self-host-dev
+
+## Start self-hosted Supabase (Docker)
+self-host-up:
+	cd self-hosted && docker compose up -d
+	@echo "Supabase running at http://localhost:8000"
+	@echo "Studio at http://localhost:3001 (if enabled)"
+
+## Stop self-hosted Supabase
+self-host-down:
+	cd self-hosted && docker compose down
+
+## Show self-hosted Supabase status
+self-host-status:
+	cd self-hosted && docker compose ps
+
+## Show self-hosted Supabase logs
+self-host-logs:
+	cd self-hosted && docker compose logs -f --tail=50
+
+## Initialize self-hosted setup (first time)
+self-host-init:
+	@bash self-hosted/setup.sh
+	@test -f .env.local || (cp .env.self-hosted.example .env.local && echo "Created .env.local — edit with your platform keys")
+	@echo ""
+	@echo "Next steps:"
+	@echo "  1. Edit self-hosted/.env with generated secrets"
+	@echo "  2. Edit .env.local with your platform API keys"
+	@echo "  3. Run: make self-host-up"
+	@echo "  4. Run: make db-push  (apply migrations)"
+	@echo "  5. Run: make self-host-dev"
+
+## Start self-hosted dev server (Supabase Docker + Next.js)
+self-host-dev: self-host-up
+	@sleep 3
+	$(MAKE) dev
