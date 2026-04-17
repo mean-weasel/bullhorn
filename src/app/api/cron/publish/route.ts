@@ -6,6 +6,7 @@ import { sendApnsToUser } from '@/lib/apnsSender'
 import { sendPostsReadyEmail } from '@/lib/emailSender'
 import { verifyCronSecret } from '@/lib/cronAuth'
 import { PLAN_LIMITS, PLAN_FEATURES, type PlanType } from '@/lib/limits'
+import { isSelfHosted } from '@/lib/selfHosted'
 import { publishPost } from '@/lib/publishers'
 import { transformPostFromDb } from '@/lib/utils'
 
@@ -221,8 +222,11 @@ export async function GET(request: NextRequest) {
     for (const post of posts) {
       const dbPost = post as DbPostRow
       const plan = userPlans.get(dbPost.user_id) || 'free'
-      const canAutoPublish =
-        dbPost.social_account_id && dbPost.platform !== 'reddit' && PLAN_FEATURES[plan].autoPublish
+      const canAutoPublish = isSelfHosted()
+        ? !!dbPost.social_account_id
+        : dbPost.social_account_id &&
+          dbPost.platform !== 'reddit' &&
+          PLAN_FEATURES[plan].autoPublish
       if (canAutoPublish) {
         autoPublishCandidates.push(dbPost)
       } else {
