@@ -117,7 +117,7 @@ export function validateEnv(): void {
   if (process.env.SELF_HOSTED === 'true') {
     console.log('[envValidation] ℹ️  Self-hosted mode enabled')
 
-    // Check Reddit OAuth configuration
+    // Check Reddit script auth configuration
     if (process.env.REDDIT_CLIENT_ID && !process.env.REDDIT_USERNAME) {
       console.warn('[envValidation] ⚠️  REDDIT_CLIENT_ID is set but REDDIT_USERNAME is missing')
     }
