@@ -104,7 +104,7 @@ test.describe('Self-Hosted Mode', () => {
       await expect(page.getByText('Plan & Usage')).toBeVisible({ timeout: 10000 })
 
       // Should show "Self-Hosted" badge
-      await expect(page.getByText('Self-Hosted')).toBeVisible()
+      await expect(page.getByText('Self-Hosted', { exact: true })).toBeVisible()
 
       // Should NOT show "Free" badge
       await expect(page.getByText('Free', { exact: true })).not.toBeVisible()

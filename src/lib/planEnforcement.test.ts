@@ -106,12 +106,20 @@ function setupProfileMock(plan: string | null) {
 // ---------------------------------------------------------------------------
 
 describe('getUserPlan', () => {
-  it('returns selfHosted when isSelfHosted() is true', async () => {
+  it('returns selfHosted when isSelfHosted() is true and syncs plan to DB', async () => {
     mockIsSelfHosted.mockReturnValue(true)
+    const mockNeq = vi.fn().mockResolvedValue({ error: null })
+    const mockEq = vi.fn(() => ({ neq: mockNeq }))
+    const mockUpdate = vi.fn(() => ({ eq: mockEq }))
+    mockFrom.mockReturnValue({ update: mockUpdate } as unknown as ReturnType<typeof mockFrom>)
+
     const plan = await getUserPlan('user-1')
     expect(plan).toBe('selfHosted')
-    // Should not have queried the database
-    expect(mockFrom).not.toHaveBeenCalled()
+    // Should have synced the plan column
+    expect(mockFrom).toHaveBeenCalledWith('user_profiles')
+    expect(mockUpdate).toHaveBeenCalledWith({ plan: 'selfHosted' })
+    expect(mockEq).toHaveBeenCalledWith('id', 'user-1')
+    expect(mockNeq).toHaveBeenCalledWith('plan', 'selfHosted')
   })
 
   it('returns the plan from user profile', async () => {

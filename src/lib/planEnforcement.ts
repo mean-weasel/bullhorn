@@ -32,7 +32,17 @@ const TABLE_MAP: Record<GenericResource, { table: string; countCol: string }> = 
 }
 
 export async function getUserPlan(userId: string): Promise<PlanType> {
-  if (isSelfHosted()) return 'selfHosted'
+  if (isSelfHosted()) {
+    // Sync the plan column so the DB-level BEFORE INSERT trigger also bypasses limits.
+    // The conditional UPDATE is a no-op when the plan is already 'selfHosted'.
+    const supabase = await createClient()
+    await supabase
+      .from('user_profiles')
+      .update({ plan: 'selfHosted' })
+      .eq('id', userId)
+      .neq('plan', 'selfHosted')
+    return 'selfHosted'
+  }
   const supabase = await createClient()
   const { data: profile } = await supabase
     .from('user_profiles')

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { isSelfHosted } from '@/lib/selfHosted'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,10 +59,10 @@ export async function POST() {
     // Batch 3: projects (depends on campaigns and project_accounts)
     await supabase.from('projects').delete().neq('id', '00000000-0000-0000-0000-000000000000')
 
-    // Reset plan to free and storage to 0 for E2E limit testing
+    // Reset plan and storage for E2E limit testing
     await supabase
       .from('user_profiles')
-      .update({ plan: 'free', storage_used_bytes: 0 })
+      .update({ plan: isSelfHosted() ? 'selfHosted' : 'free', storage_used_bytes: 0 })
       .eq('id', TEST_USER_ID)
 
     return NextResponse.json({ success: true })
