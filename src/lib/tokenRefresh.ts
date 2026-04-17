@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { isSelfHosted } from '@/lib/selfHosted'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,7 +22,7 @@ export interface TokenRefreshResult {
   expiresAt: Date
 }
 
-interface PlatformTokenResponse {
+export interface PlatformTokenResponse {
   access_token: string
   refresh_token?: string | null
   expires_in: number
@@ -32,7 +33,7 @@ interface PlatformTokenResponse {
 // ---------------------------------------------------------------------------
 
 const TOKEN_EXPIRY_BUFFER_SECONDS = 300 // 5 minutes
-const REDDIT_USER_AGENT =
+export const REDDIT_USER_AGENT =
   process.env.REDDIT_USER_AGENT || 'web:bullhorn-scheduler:v1.0.0 (by /u/unknown)'
 
 // ---------------------------------------------------------------------------
@@ -118,7 +119,7 @@ async function refreshRedditToken(refreshToken: string): Promise<PlatformTokenRe
   return handleRefreshResponse(res, 'reddit')
 }
 
-async function refreshRedditViaPasswordGrant(): Promise<PlatformTokenResponse> {
+export async function refreshRedditViaPasswordGrant(): Promise<PlatformTokenResponse> {
   const clientId = process.env.REDDIT_CLIENT_ID
   const clientSecret = process.env.REDDIT_CLIENT_SECRET
   const username = process.env.REDDIT_USERNAME
@@ -202,7 +203,7 @@ export async function refreshTokenIfNeeded(
     // In self-hosted mode, Reddit can re-auth via password grant
     if (
       account.provider === 'reddit' &&
-      process.env.SELF_HOSTED === 'true' &&
+      isSelfHosted() &&
       process.env.REDDIT_USERNAME &&
       process.env.REDDIT_PASSWORD
     ) {

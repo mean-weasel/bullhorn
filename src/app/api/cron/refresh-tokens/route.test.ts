@@ -11,7 +11,8 @@ vi.mock('@/lib/tokenRefresh', () => ({
 }))
 
 const mockSelect = vi.fn()
-const mockEq = vi.fn(() => ({ not: vi.fn(() => ({ limit: mockSelect })) }))
+const mockNot = vi.fn(() => ({ limit: mockSelect }))
+const mockEq = vi.fn(() => ({ not: mockNot, limit: mockSelect }))
 const mockFrom = vi.fn(() => ({
   select: vi.fn(() => ({ eq: mockEq })),
 }))
@@ -19,6 +20,9 @@ const mockFrom = vi.fn(() => ({
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({ from: mockFrom })),
 }))
+
+const mockIsSelfHosted = vi.fn(() => false)
+vi.mock('@/lib/selfHosted', () => ({ isSelfHosted: () => mockIsSelfHosted() }))
 
 import { GET } from './route'
 
@@ -47,6 +51,7 @@ function makeAccount(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockIsSelfHosted.mockReturnValue(false)
   vi.stubEnv('CRON_SECRET', 'test-secret')
   vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://x.supabase.co')
   vi.stubEnv('SUPABASE_SERVICE_ROLE_KEY', 'service-key')
@@ -206,8 +211,8 @@ describe('GET /api/cron/refresh-tokens (4/5)', () => {
 })
 
 describe('GET /api/cron/refresh-tokens (5/5)', () => {
-  it('skips accounts without refresh_token (filtered by DB)', async () => {
-    // DB query filters out null refresh_tokens, so empty result
+  it('excludes null refresh_token accounts via DB filter in SaaS mode', async () => {
+    // In SaaS mode isSelfHosted()=false so .not('refresh_token','is',null) is applied
     mockSelect.mockResolvedValue({ data: [], error: null })
 
     const req = createRequest('/api/cron/refresh-tokens', {
@@ -216,8 +221,31 @@ describe('GET /api/cron/refresh-tokens (5/5)', () => {
     const res = await GET(req)
     const body = await res.json()
     expect(body.processed).toBe(0)
-    expect(body.refreshed).toBe(0)
-    expect(body.failed).toBe(0)
-    expect(body.skipped).toBe(0)
+    expect(mockNot).toHaveBeenCalledWith('refresh_token', 'is', null)
+  })
+
+  it('includes null refresh_token accounts in self-hosted mode', async () => {
+    mockIsSelfHosted.mockReturnValue(true)
+    const nullRefreshAccount = makeAccount({
+      id: 'reddit-null-refresh',
+      provider: 'reddit',
+      refresh_token: null,
+      token_expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    })
+    mockSelect.mockResolvedValue({ data: [nullRefreshAccount], error: null })
+    mockRefreshTokenIfNeeded.mockResolvedValue({
+      accessToken: 'new-tok',
+      refreshToken: null,
+      expiresAt: new Date(Date.now() + 3600 * 1000).toISOString(),
+    })
+
+    const req = createRequest('/api/cron/refresh-tokens', {
+      authorization: 'Bearer test-secret',
+    })
+    const res = await GET(req)
+    const body = await res.json()
+    expect(body.processed).toBe(1)
+    expect(mockNot).not.toHaveBeenCalled()
+    expect(mockRefreshTokenIfNeeded).toHaveBeenCalledWith(nullRefreshAccount)
   })
 })

@@ -2,6 +2,7 @@ import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { refreshTokenIfNeeded, type SocialAccountWithTokens } from '@/lib/tokenRefresh'
 import { verifyCronSecret } from '@/lib/cronAuth'
+import { isSelfHosted } from '@/lib/selfHosted'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,13 +35,17 @@ function needsRefresh(provider: string, tokenExpiresAt: string | null): boolean 
 
 async function fetchAccountsToRefresh() {
   const supabase = createServiceClient()
-  const { data, error } = await supabase
+  let query = supabase
     .from('social_accounts')
     .select('id, provider, access_token, refresh_token, token_expires_at')
     .eq('status', 'active')
-    .not('refresh_token', 'is', null)
-    .limit(100)
 
+  if (!isSelfHosted()) {
+    // In SaaS mode, only fetch accounts with refresh tokens
+    query = query.not('refresh_token', 'is', null)
+  }
+
+  const { data, error } = await query.limit(100)
   if (error) throw new Error(`Failed to fetch accounts: ${error.message}`)
   return (data || []) as SocialAccountWithTokens[]
 }

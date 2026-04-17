@@ -2,11 +2,9 @@ import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { isSelfHosted } from '@/lib/selfHosted'
+import { refreshRedditViaPasswordGrant, REDDIT_USER_AGENT } from '@/lib/tokenRefresh'
 
 export const dynamic = 'force-dynamic'
-
-const REDDIT_USER_AGENT =
-  process.env.REDDIT_USER_AGENT || 'web:bullhorn-scheduler:v1.0.0 (by /u/unknown)'
 
 export async function POST() {
   try {
@@ -41,30 +39,15 @@ export async function POST() {
     }
 
     // Password grant to get access token
-    const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
-    const tokenRes = await fetch('https://www.reddit.com/api/v1/access_token', {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': REDDIT_USER_AGENT,
-      },
-      body: new URLSearchParams({
-        grant_type: 'password',
-        username,
-        password,
-      }),
-    })
-
-    if (!tokenRes.ok) {
-      const err = await tokenRes.json().catch(() => ({}))
+    let tokens: { access_token: string; refresh_token?: string | null; expires_in: number }
+    try {
+      tokens = await refreshRedditViaPasswordGrant()
+      if (!tokens.access_token) {
+        return NextResponse.json({ error: 'No access token in Reddit response' }, { status: 502 })
+      }
+    } catch (err) {
       console.error('Reddit password grant failed:', err)
       return NextResponse.json({ error: 'Reddit authentication failed' }, { status: 502 })
-    }
-
-    const tokens = await tokenRes.json()
-    if (!tokens.access_token) {
-      return NextResponse.json({ error: 'No access token in Reddit response' }, { status: 502 })
     }
 
     // Fetch Reddit user profile
@@ -96,6 +79,7 @@ export async function POST() {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token || null,
         token_expires_at: tokenExpiresAt,
+        // Script apps have all scopes implicitly; stored for parity with OAuth flow
         scopes: ['submit', 'read', 'identity', 'flair'],
         status: 'active',
         status_error: null,
