@@ -6,13 +6,12 @@ import * as api from './lib/api'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// ANSI colors
 const blue = (s: string) => `\x1b[34m${s}\x1b[0m`
 const green = (s: string) => `\x1b[32m${s}\x1b[0m`
 const red = (s: string) => `\x1b[31m${s}\x1b[0m`
 const dim = (s: string) => `\x1b[2m${s}\x1b[0m`
 
-function parseArgs() {
+function parseArgs(): { fixturePath: string; port: number; resetOnly: boolean } {
   const args = process.argv.slice(2)
   let fixturePath = path.resolve(__dirname, 'fixtures/default.yaml')
   let port = 3000
@@ -36,6 +35,8 @@ function parseArgs() {
   return { fixturePath, port, resetOnly }
 }
 
+const FAILED = '__FAILED__'
+
 async function main() {
   const { fixturePath, port, resetOnly } = parseArgs()
   const apiBase = `http://localhost:${port}/api`
@@ -50,7 +51,14 @@ async function main() {
     await api.resetDatabase(apiBase)
     console.log(green('  ✓ Database reset'))
   } catch (e) {
-    console.error(red(`  ✗ Reset failed: ${(e as Error).message}`))
+    const msg = String((e as Error).message || e)
+    if (msg.includes('fetch failed') || msg.includes('ECONNREFUSED')) {
+      console.error(
+        red(`  ✗ Cannot connect to ${apiBase}. Is the dev server running? (make qa-dev)`)
+      )
+    } else {
+      console.error(red(`  ✗ Reset failed: ${msg}`))
+    }
     process.exit(1)
   }
 
@@ -75,6 +83,20 @@ async function main() {
     return
   }
 
+  // Validate _name uniqueness across all entities
+  const allNames = [
+    ...(fixture.projects ?? []),
+    ...(fixture.campaigns ?? []),
+    ...(fixture.posts ?? []),
+    ...(fixture.blogDrafts ?? []),
+    ...(fixture.launchPosts ?? []),
+  ].map((e) => e._name)
+  const dupes = allNames.filter((n, i) => allNames.indexOf(n) !== i)
+  if (dupes.length) {
+    console.error(red(`  ✗ Duplicate _name values: ${[...new Set(dupes)].join(', ')}`))
+    process.exit(1)
+  }
+
   // Step 3: Seed projects
   if (fixture.projects?.length) {
     console.log(blue(`▸ Creating ${fixture.projects.length} projects...`))
@@ -88,6 +110,7 @@ async function main() {
       } catch (e) {
         errors.push(`Project "${raw.name}": ${(e as Error).message}`)
         console.error(red(`  ✗ ${raw.name}: ${(e as Error).message}`))
+        registry.set(raw._name, FAILED)
       }
     }
   }
@@ -105,13 +128,13 @@ async function main() {
       } catch (e) {
         errors.push(`Campaign "${raw.name}": ${(e as Error).message}`)
         console.error(red(`  ✗ ${raw.name}: ${(e as Error).message}`))
+        registry.set(raw._name, FAILED)
       }
     }
   }
 
   // Step 5: Seed posts, blog drafts, launch posts
-  const seedPosts = async () => {
-    if (!fixture.posts?.length) return
+  if (fixture.posts?.length) {
     console.log(blue(`▸ Creating ${fixture.posts.length} posts...`))
     for (const raw of fixture.posts) {
       try {
@@ -123,7 +146,6 @@ async function main() {
         counts.posts++
         console.log(dim(`  → ${raw.platform} ${raw.status || 'draft'} (${id.slice(0, 8)})`))
 
-        // Upload media if specified
         if (media?.length) {
           for (const m of media) {
             try {
@@ -143,8 +165,7 @@ async function main() {
     }
   }
 
-  const seedBlogDrafts = async () => {
-    if (!fixture.blogDrafts?.length) return
+  if (fixture.blogDrafts?.length) {
     console.log(blue(`▸ Creating ${fixture.blogDrafts.length} blog drafts...`))
     for (const raw of fixture.blogDrafts) {
       try {
@@ -160,8 +181,7 @@ async function main() {
     }
   }
 
-  const seedLaunchPosts = async () => {
-    if (!fixture.launchPosts?.length) return
+  if (fixture.launchPosts?.length) {
     console.log(blue(`▸ Creating ${fixture.launchPosts.length} launch posts...`))
     for (const raw of fixture.launchPosts) {
       try {
@@ -176,10 +196,6 @@ async function main() {
       }
     }
   }
-
-  await seedPosts()
-  await seedBlogDrafts()
-  await seedLaunchPosts()
 
   // Summary
   const elapsed = Date.now() - start

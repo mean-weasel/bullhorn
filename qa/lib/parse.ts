@@ -46,6 +46,8 @@ export function resolveRefs<T extends Record<string, unknown>>(
       const refName = value as string
       const id = registry.get(refName)
       if (!id) throw new Error(`Unresolved ref "${refName}" for field "${targetField}"`)
+      if (id === '__FAILED__')
+        throw new Error(`Skipped: depends on "${refName}" which failed to create`)
       resolved[targetField] = id
     } else if (key === 'scheduledAt' && typeof value === 'string' && value.startsWith('+')) {
       resolved[key] = resolveTimestamp(value)

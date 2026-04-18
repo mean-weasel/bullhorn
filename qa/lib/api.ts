@@ -19,6 +19,21 @@ async function fetchJson(
   return await res.json()
 }
 
+/** Create a resource via POST and return its ID from the response. */
+function createResource(
+  endpoint: string,
+  responseKey: string
+): (apiBase: string, data: Record<string, unknown>) => Promise<string> {
+  return async (apiBase, data) => {
+    const body = await fetchJson(`${apiBase}/${endpoint}`, 'POST', data)
+    return (body as Record<string, { id: string }>)[responseKey].id
+  }
+}
+
+/**
+ * Reset all QA data via /api/posts/reset. Deletes posts, campaigns,
+ * projects, blog drafts, and launch posts for the test user.
+ */
 export async function resetDatabase(apiBase: string): Promise<void> {
   const res = await fetch(`${apiBase}/posts/reset`, { method: 'POST' })
   if (!res.ok) {
@@ -27,42 +42,11 @@ export async function resetDatabase(apiBase: string): Promise<void> {
   }
 }
 
-export async function createProject(
-  apiBase: string,
-  data: Record<string, unknown>
-): Promise<string> {
-  const body = await fetchJson(`${apiBase}/projects`, 'POST', data)
-  return (body as { project: { id: string } }).project.id
-}
-
-export async function createCampaign(
-  apiBase: string,
-  data: Record<string, unknown>
-): Promise<string> {
-  const body = await fetchJson(`${apiBase}/campaigns`, 'POST', data)
-  return (body as { campaign: { id: string } }).campaign.id
-}
-
-export async function createPost(apiBase: string, data: Record<string, unknown>): Promise<string> {
-  const body = await fetchJson(`${apiBase}/posts`, 'POST', data)
-  return (body as { post: { id: string } }).post.id
-}
-
-export async function createBlogDraft(
-  apiBase: string,
-  data: Record<string, unknown>
-): Promise<string> {
-  const body = await fetchJson(`${apiBase}/blog-drafts`, 'POST', data)
-  return (body as { draft: { id: string } }).draft.id
-}
-
-export async function createLaunchPost(
-  apiBase: string,
-  data: Record<string, unknown>
-): Promise<string> {
-  const body = await fetchJson(`${apiBase}/launch-posts`, 'POST', data)
-  return (body as { launchPost: { id: string } }).launchPost.id
-}
+export const createProject = createResource('projects', 'project')
+export const createCampaign = createResource('campaigns', 'campaign')
+export const createPost = createResource('posts', 'post')
+export const createBlogDraft = createResource('blog-drafts', 'draft')
+export const createLaunchPost = createResource('launch-posts', 'launchPost')
 
 /** Upload a media file and attach it to a post's content. */
 export async function uploadAndAttachMedia(

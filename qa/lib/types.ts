@@ -1,5 +1,9 @@
 /** Raw YAML fixture shapes — before ref resolution */
 
+import type { Platform, PostStatus, CampaignStatus } from '../../src/lib/posts'
+import type { LaunchPlatform, LaunchPostStatus } from '../../src/lib/launchPosts'
+import type { BlogDraftStatus } from '../../src/lib/blogDrafts'
+
 export interface RawProject {
   _name: string
   name: string
@@ -13,16 +17,16 @@ export interface RawCampaign {
   _name: string
   name: string
   description?: string
-  status?: string
+  status?: CampaignStatus
   'ref:projectId'?: string
   [key: string]: unknown
 }
 
 export interface RawPost {
   _name: string
-  platform: 'twitter' | 'linkedin' | 'reddit'
+  platform: Platform
   content: Record<string, unknown>
-  status?: string
+  status?: PostStatus
   scheduledAt?: string
   notes?: string
   'ref:campaignId'?: string
@@ -34,7 +38,7 @@ export interface RawBlogDraft {
   _name: string
   title?: string
   content?: string
-  status?: string
+  status?: BlogDraftStatus
   notes?: string
   tags?: string[]
   'ref:campaignId'?: string
@@ -43,11 +47,12 @@ export interface RawBlogDraft {
 
 export interface RawLaunchPost {
   _name: string
-  platform: string
+  platform: LaunchPlatform
   title: string
   url?: string
   description?: string
   platformFields?: Record<string, unknown>
+  status?: LaunchPostStatus
   notes?: string
   'ref:campaignId'?: string
   [key: string]: unknown
