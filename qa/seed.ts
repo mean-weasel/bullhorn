@@ -20,7 +20,11 @@ function parseArgs() {
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--port' && args[i + 1]) {
-      port = parseInt(args[i + 1])
+      port = parseInt(args[i + 1], 10)
+      if (isNaN(port)) {
+        console.error(red(`Invalid port: "${args[i + 1]}"`))
+        process.exit(1)
+      }
       i++
     } else if (args[i] === '--reset-only') {
       resetOnly = true
@@ -105,7 +109,7 @@ async function main() {
     }
   }
 
-  // Step 5: Seed posts, blog drafts, launch posts in parallel
+  // Step 5: Seed posts, blog drafts, launch posts
   const seedPosts = async () => {
     if (!fixture.posts?.length) return
     console.log(blue(`▸ Creating ${fixture.posts.length} posts...`))
@@ -173,7 +177,9 @@ async function main() {
     }
   }
 
-  await Promise.all([seedPosts(), seedBlogDrafts(), seedLaunchPosts()])
+  await seedPosts()
+  await seedBlogDrafts()
+  await seedLaunchPosts()
 
   // Summary
   const elapsed = Date.now() - start

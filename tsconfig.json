@@ -40,6 +40,7 @@
   "include": [
     "src",
     "scripts",
+    "qa",
     ".next/types/**/*.ts"
   ],
   "references": [

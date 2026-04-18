@@ -6,7 +6,7 @@
 
 Test the organizational hierarchy: projects contain campaigns, campaigns group posts.
 
-**Note:** The test user is on the free plan (5 campaigns max). The fixture seeds 4 campaigns, leaving room for 1 new campaign. Steps 3 and 4 each create a campaign — delete one before creating the second, or delete a seeded campaign first.
+**Note:** The test user is on the free plan (5 campaigns max). The fixture seeds 4 campaigns, leaving room for 1 new campaign. Steps 3 and 6 each create a campaign — delete one before creating the second, or delete a seeded campaign first.
 
 ## Steps
 

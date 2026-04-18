@@ -6,6 +6,7 @@ export interface RawProject {
   description?: string
   hashtags?: string[]
   brandColors?: Record<string, string>
+  [key: string]: unknown
 }
 
 export interface RawCampaign {
@@ -14,6 +15,7 @@ export interface RawCampaign {
   description?: string
   status?: string
   'ref:projectId'?: string
+  [key: string]: unknown
 }
 
 export interface RawPost {
@@ -25,6 +27,7 @@ export interface RawPost {
   notes?: string
   'ref:campaignId'?: string
   media?: Array<{ path: string }>
+  [key: string]: unknown
 }
 
 export interface RawBlogDraft {
@@ -35,6 +38,7 @@ export interface RawBlogDraft {
   notes?: string
   tags?: string[]
   'ref:campaignId'?: string
+  [key: string]: unknown
 }
 
 export interface RawLaunchPost {
@@ -46,6 +50,7 @@ export interface RawLaunchPost {
   platformFields?: Record<string, unknown>
   notes?: string
   'ref:campaignId'?: string
+  [key: string]: unknown
 }
 
 export interface FixtureFile {

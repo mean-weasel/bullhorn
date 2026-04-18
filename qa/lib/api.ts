@@ -1,38 +1,22 @@
 import { readFileSync } from 'fs'
 import path from 'path'
 
-/** POST JSON to an endpoint, return parsed response. Throws on non-2xx. */
-async function postJson(
+/** Send JSON to an endpoint, return parsed response. Throws on non-2xx. */
+async function fetchJson(
   url: string,
+  method: 'POST' | 'PATCH',
   data: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
   const res = await fetch(url, {
-    method: 'POST',
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  const body = await res.json()
   if (!res.ok) {
-    throw new Error(`${res.status} ${url}: ${body.error || JSON.stringify(body)}`)
+    const body = await res.json().catch(() => null)
+    throw new Error(`${res.status} ${url}: ${body?.error || res.statusText}`)
   }
-  return body
-}
-
-/** PATCH JSON to an endpoint, return parsed response. */
-async function patchJson(
-  url: string,
-  data: Record<string, unknown>
-): Promise<Record<string, unknown>> {
-  const res = await fetch(url, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  })
-  const body = await res.json()
-  if (!res.ok) {
-    throw new Error(`${res.status} ${url}: ${body.error || JSON.stringify(body)}`)
-  }
-  return body
+  return await res.json()
 }
 
 export async function resetDatabase(apiBase: string): Promise<void> {
@@ -47,7 +31,7 @@ export async function createProject(
   apiBase: string,
   data: Record<string, unknown>
 ): Promise<string> {
-  const body = await postJson(`${apiBase}/projects`, data)
+  const body = await fetchJson(`${apiBase}/projects`, 'POST', data)
   return (body as { project: { id: string } }).project.id
 }
 
@@ -55,12 +39,12 @@ export async function createCampaign(
   apiBase: string,
   data: Record<string, unknown>
 ): Promise<string> {
-  const body = await postJson(`${apiBase}/campaigns`, data)
+  const body = await fetchJson(`${apiBase}/campaigns`, 'POST', data)
   return (body as { campaign: { id: string } }).campaign.id
 }
 
 export async function createPost(apiBase: string, data: Record<string, unknown>): Promise<string> {
-  const body = await postJson(`${apiBase}/posts`, data)
+  const body = await fetchJson(`${apiBase}/posts`, 'POST', data)
   return (body as { post: { id: string } }).post.id
 }
 
@@ -68,7 +52,7 @@ export async function createBlogDraft(
   apiBase: string,
   data: Record<string, unknown>
 ): Promise<string> {
-  const body = await postJson(`${apiBase}/blog-drafts`, data)
+  const body = await fetchJson(`${apiBase}/blog-drafts`, 'POST', data)
   return (body as { draft: { id: string } }).draft.id
 }
 
@@ -76,7 +60,7 @@ export async function createLaunchPost(
   apiBase: string,
   data: Record<string, unknown>
 ): Promise<string> {
-  const body = await postJson(`${apiBase}/launch-posts`, data)
+  const body = await fetchJson(`${apiBase}/launch-posts`, 'POST', data)
   return (body as { launchPost: { id: string } }).launchPost.id
 }
 
@@ -124,7 +108,7 @@ export async function uploadAndAttachMedia(
   const { post } = (await getRes.json()) as { post: { content: Record<string, unknown> } }
 
   const existingMedia = (post.content.mediaUrls as string[]) || []
-  await patchJson(`${apiBase}/posts/${postId}`, {
+  await fetchJson(`${apiBase}/posts/${postId}`, 'PATCH', {
     content: { ...post.content, mediaUrls: [...existingMedia, filename] },
   })
 }

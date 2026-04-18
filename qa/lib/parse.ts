@@ -5,8 +5,12 @@ import type { FixtureFile, RefRegistry } from './types'
 /** Read and parse a YAML fixture file. */
 export function readFixture(filePath: string): FixtureFile {
   const raw = readFileSync(filePath, 'utf-8')
-  const parsed = parse(raw) as FixtureFile | null
-  return parsed ?? {}
+  const parsed = parse(raw)
+  if (parsed === null || parsed === undefined) return {}
+  if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error(`Invalid fixture: expected a YAML mapping, got ${typeof parsed}`)
+  }
+  return parsed as FixtureFile
 }
 
 /**
