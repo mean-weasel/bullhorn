@@ -1,0 +1,3 @@
+# QA Fixture: Empty
+# No data — just reset the database.
+# Used for workflows that test empty states and first-time user experience.

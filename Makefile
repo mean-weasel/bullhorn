@@ -1,7 +1,7 @@
 # Bullhorn - Makefile
 # Run `make help` to see available commands
 
-.PHONY: help install install-hooks dev dev-full build test test-e2e lint typecheck knip format check fix clean all
+.PHONY: help install install-hooks dev dev-full build test test-e2e lint typecheck knip format check fix clean all qa-dev qa-seed qa-reset qa-seed-empty
 
 # Default target
 .DEFAULT_GOAL := help
@@ -27,6 +27,9 @@ help: ## Show this help message
 	@echo ""
 	@echo "$(YELLOW)Testing$(RESET)"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E 'test' | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(YELLOW)QA Testing$(RESET)"
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E 'qa-' | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(YELLOW)Code Quality$(RESET)"
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -E '(lint|type|format|check|knip)' | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
@@ -234,6 +237,31 @@ test-coverage: ## Run tests with coverage report
 	npx vitest run --coverage
 
 test-all: test-run test-e2e ## Run all tests (unit + e2e)
+
+# =============================================================================
+# QA Testing
+# =============================================================================
+
+QA_PORT ?= 3000
+QA_FIXTURE ?= qa/fixtures/default.yaml
+
+qa-dev: ## Start dev server in test mode for QA
+	@echo "$(BLUE)Starting QA dev server (test mode, port $(QA_PORT))...$(RESET)"
+	@echo "$(YELLOW)Auth bypassed — using test user$(RESET)"
+	@echo ""
+	CI=true E2E_TEST_MODE=true NEXT_PUBLIC_E2E_TEST_MODE=true PORT=$(QA_PORT) npm run dev
+
+qa-seed: ## Reset database and seed QA fixtures
+	@echo "$(BLUE)Seeding QA data from $(QA_FIXTURE)...$(RESET)"
+	CI=true E2E_TEST_MODE=true npx tsx qa/seed.ts $(QA_FIXTURE) --port $(QA_PORT)
+
+qa-reset: ## Reset QA database (no seeding)
+	@echo "$(BLUE)Resetting QA database...$(RESET)"
+	CI=true E2E_TEST_MODE=true npx tsx qa/seed.ts --reset-only --port $(QA_PORT)
+
+qa-seed-empty: ## Reset to empty state (for empty-state workflows)
+	@echo "$(BLUE)Resetting to empty state...$(RESET)"
+	CI=true E2E_TEST_MODE=true npx tsx qa/seed.ts qa/fixtures/empty.yaml --port $(QA_PORT)
 
 # =============================================================================
 # MCP Server

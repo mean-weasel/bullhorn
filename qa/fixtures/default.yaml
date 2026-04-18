@@ -1,0 +1,216 @@
+# QA Fixture: Default
+# Realistic dataset for smoke testing and QA workflows.
+# Cross-references use _name → ref:fieldName convention.
+# Timestamps use "+Nd HH:MM" (days from now at HH:MM UTC).
+
+projects:
+  - _name: bullhorn-launch
+    name: "Bullhorn Product Launch"
+    description: "Coordinating the public launch of Bullhorn across all channels"
+    hashtags:
+      - bullhorn
+      - launch
+      - socialmedia
+    brandColors:
+      primary: "#ce9a08"
+      secondary: "#ec4899"
+      accent: "#3b82f6"
+
+  - _name: content-calendar
+    name: "Q2 Content Calendar"
+    description: "Ongoing content strategy for Q2 2026"
+
+campaigns:
+  - _name: launch-week
+    name: "Launch Week"
+    description: "All posts for the launch week across platforms"
+    status: active
+    ref:projectId: bullhorn-launch
+
+  - _name: pre-launch-teasers
+    name: "Pre-Launch Teasers"
+    description: "Building anticipation before the big day"
+    status: active
+    ref:projectId: bullhorn-launch
+
+  - _name: weekly-tips
+    name: "Weekly Tips Series"
+    description: "Recurring tips and tricks content"
+    status: active
+    ref:projectId: content-calendar
+
+  - _name: archived-campaign
+    name: "Beta Feedback Round"
+    description: "Collecting beta tester feedback (completed)"
+    status: completed
+
+posts:
+  # -- Twitter posts --
+  - _name: launch-tweet
+    platform: twitter
+    content:
+      text: "We're live! Bullhorn is now available for everyone. Schedule your social media posts across Twitter, LinkedIn, and Reddit from one place. #bullhorn #launch"
+    status: scheduled
+    scheduledAt: "+1d 10:00"
+    ref:campaignId: launch-week
+
+  - _name: teaser-tweet
+    platform: twitter
+    content:
+      text: "Something big is coming next week... Stay tuned! #buildinpublic"
+    status: draft
+    notes: "Review copy before scheduling"
+    ref:campaignId: pre-launch-teasers
+
+  - _name: tip-tweet
+    platform: twitter
+    content:
+      text: "Pro tip: Use campaigns to group related posts together. Makes it easy to track your launch content across platforms."
+    status: draft
+    ref:campaignId: weekly-tips
+
+  - _name: published-tweet
+    platform: twitter
+    content:
+      text: "Just shipped a major update to the scheduling engine. Posts now auto-publish within 60 seconds of their scheduled time."
+    status: published
+    notes: "Published manually via Mark as Posted"
+
+  - _name: archived-tweet
+    platform: twitter
+    content:
+      text: "This was a test post that we decided not to publish."
+    status: archived
+
+  # -- LinkedIn posts --
+  - _name: launch-linkedin
+    platform: linkedin
+    content:
+      text: "Excited to announce the launch of Bullhorn — a social media scheduler built for indie hackers and small teams.\n\nAfter months of building in public, we're ready to share it with the world.\n\nKey features:\n- Schedule posts across Twitter, LinkedIn, and Reddit\n- Organize with campaigns and projects\n- Launch day coordination\n\nTry it free at bullhorn.to"
+    status: scheduled
+    scheduledAt: "+1d 11:00"
+    ref:campaignId: launch-week
+
+  - _name: tips-linkedin
+    platform: linkedin
+    content:
+      text: "3 things I learned launching a social media tool:\n\n1. Consistency beats virality\n2. Cross-posting saves hours every week\n3. Scheduling removes the pressure of \"when to post\"\n\nWhat's your biggest social media challenge?"
+    status: draft
+    ref:campaignId: weekly-tips
+
+  # -- Reddit posts --
+  - _name: launch-reddit
+    platform: reddit
+    content:
+      subreddit: "SideProject"
+      title: "I built Bullhorn - a social media scheduler for indie hackers"
+      body: "Hey everyone! After 6 months of building in public, I'm launching Bullhorn today.\n\nIt's a social media scheduler that lets you plan posts across Twitter, LinkedIn, and Reddit from one dashboard.\n\nWould love your feedback!"
+    status: scheduled
+    scheduledAt: "+2d 14:00"
+    ref:campaignId: launch-week
+
+  - _name: reddit-draft
+    platform: reddit
+    content:
+      subreddit: "webdev"
+      title: "Show r/webdev: Open source social media scheduler built with Next.js + Supabase"
+      body: "Built this over the past few months. Stack: Next.js 15, Supabase, Zustand, Tailwind CSS.\n\nFeedback welcome!"
+    status: draft
+    notes: "Check subreddit rules before posting"
+
+  # -- Post with media --
+  - _name: media-tweet
+    platform: twitter
+    content:
+      text: "Here's a sneak peek at the new dashboard design!"
+    status: draft
+    media:
+      - path: qa/fixtures/media/test-image.png
+
+blogDrafts:
+  - _name: launch-blog
+    title: "Introducing Bullhorn: Social Media Scheduling for Indie Hackers"
+    content: |
+      # Introducing Bullhorn
+
+      Today we're launching Bullhorn, a social media scheduler designed specifically for indie hackers and small teams.
+
+      ## Why we built this
+
+      Managing social media across multiple platforms is time-consuming. We wanted a tool that:
+
+      - Lets you schedule posts across Twitter, LinkedIn, and Reddit
+      - Organizes content with campaigns and projects
+      - Helps coordinate launch days
+
+      ## What's next
+
+      We're just getting started. Stay tuned for more features!
+    status: draft
+    notes: "Publish on launch day morning"
+    tags:
+      - Blog Post
+    ref:campaignId: launch-week
+
+  - _name: tips-blog
+    title: "5 Tips for Effective Social Media Scheduling"
+    content: |
+      # 5 Tips for Effective Social Media Scheduling
+
+      1. **Batch your content creation** — Write all your posts for the week in one sitting
+      2. **Use consistent posting times** — Your audience expects regularity
+      3. **Cross-post strategically** — Adapt content for each platform
+      4. **Track what works** — Review engagement data weekly
+      5. **Plan campaigns** — Group related posts for coordinated messaging
+    status: published
+    tags:
+      - Blog Post
+
+  - _name: draft-blog
+    title: "How to Plan a Product Launch on Social Media"
+    content: "Work in progress..."
+    status: draft
+
+  - _name: archived-blog
+    title: "Old Beta Announcement (Archived)"
+    content: "This post was archived after the beta ended."
+    status: archived
+
+launchPosts:
+  - _name: show-hn
+    platform: hacker_news_show
+    title: "Show HN: Bullhorn - Social media scheduler for indie hackers"
+    url: "https://bullhorn.to"
+    description: "Built with Next.js + Supabase. Open source."
+    notes: "Submit at 9am ET on launch day"
+    ref:campaignId: launch-week
+
+  - _name: product-hunt
+    platform: product_hunt
+    title: "Bullhorn - Schedule social posts across Twitter, LinkedIn & Reddit"
+    url: "https://bullhorn.to"
+    description: "Plan your social media content across multiple platforms from one dashboard"
+    platformFields:
+      tagline: "Social scheduling for indie hackers"
+      pricing: free
+      firstComment: "Hey Product Hunt! I've been building Bullhorn for the past 6 months..."
+    notes: "Launch at 12:01am PT"
+    ref:campaignId: launch-week
+
+  - _name: beta-list
+    platform: beta_list
+    title: "Bullhorn"
+    url: "https://bullhorn.to"
+    description: "Social media scheduling for indie hackers"
+    platformFields:
+      oneSentencePitch: "Schedule posts across Twitter, LinkedIn, and Reddit from one dashboard"
+    ref:campaignId: launch-week
+
+  - _name: dev-hunt
+    platform: dev_hunt
+    title: "Bullhorn"
+    url: "https://bullhorn.to"
+    description: "Open source social media scheduler"
+    platformFields:
+      githubUrl: "https://github.com/neonwatty/bullhorn"
+    ref:campaignId: launch-week

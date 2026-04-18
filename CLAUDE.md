@@ -358,6 +358,11 @@ Guidelines:
 | `playwright` | Browser automation for E2E testing |
 | `github` | GitHub API (PRs, issues, repos) |
 | `supabase` | Database queries, migrations, edge functions |
+
+### Browser Automation
+
+For all browser automation tasks (QA testing, smoke testing, UI verification), always use the **Playwright MCP server** tools (`mcp__playwright__*`) in **headless mode**. Do not use the Claude-in-Chrome extension tools (`mcp__claude-in-chrome__*`) for these tasks.
+
 ## Self-Hosted Mode
 
 Bullhorn supports self-hosting with BYOK (Bring Your Own Keys). See [docs/self-hosting.md](docs/self-hosting.md) for the full setup guide.
