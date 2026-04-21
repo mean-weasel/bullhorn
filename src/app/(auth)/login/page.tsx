@@ -96,7 +96,10 @@ export default function LoginPage() {
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -119,14 +122,16 @@ export default function LoginPage() {
                 </label>
                 <Link
                   href="/forgot-password"
-                  className="text-sm font-medium text-primary hover:text-primary/80"
+                  className="text-sm font-medium text-primary hover:text-primary/80 inline-block py-2"
                 >
                   Forgot password?
                 </Link>
               </div>
               <input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -207,18 +212,27 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-primary hover:text-primary/80 font-bold">
+            <Link
+              href="/signup"
+              className="text-primary hover:text-primary/80 font-bold inline-block py-2"
+            >
               Sign up
             </Link>
           </p>
 
           <p className="text-xs text-center text-muted-foreground mt-6">
             By signing in, you agree to our{' '}
-            <Link href="/terms" className="text-primary font-bold hover:underline">
+            <Link
+              href="/terms"
+              className="text-primary font-bold hover:underline inline-block py-2"
+            >
               Terms of Service
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" className="text-primary font-bold hover:underline">
+            <Link
+              href="/privacy"
+              className="text-primary font-bold hover:underline inline-block py-2"
+            >
               Privacy Policy
             </Link>
           </p>

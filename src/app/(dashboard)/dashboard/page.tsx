@@ -209,7 +209,7 @@ export default function DashboardPage() {
               >
                 {stats.scheduled}
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
                 📅 Scheduled
               </div>
             </div>
@@ -221,7 +221,7 @@ export default function DashboardPage() {
               >
                 {stats.drafts}
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
                 📝 Drafts
               </div>
             </div>
@@ -233,14 +233,14 @@ export default function DashboardPage() {
               >
                 {stats.published}
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
                 ✅ Published
               </div>
             </div>
             <div className="w-px h-8 bg-border hidden sm:block shrink-0" />
             <div className="text-center hidden sm:block shrink-0">
               <div className="text-2xl font-extrabold text-sticker-purple">{stats.projects}</div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+              <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
                 📁 Projects
               </div>
             </div>

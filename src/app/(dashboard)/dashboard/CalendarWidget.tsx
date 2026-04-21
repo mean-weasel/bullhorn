@@ -35,7 +35,6 @@ interface DayData {
   reminders: Reminder[]
 }
 
- 
 export function CalendarWidget({ posts, reminders, days = 7 }: CalendarWidgetProps) {
   const today = startOfDay(new Date())
 
@@ -129,7 +128,7 @@ export function CalendarWidget({ posts, reminders, days = 7 }: CalendarWidgetPro
               {hasItems && (
                 <span
                   className={cn(
-                    'text-[10px] font-bold tabular-nums shrink-0',
+                    'text-[11px] font-bold tabular-nums shrink-0',
                     day.isToday ? 'text-foreground' : 'text-muted-foreground'
                   )}
                 >

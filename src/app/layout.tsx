@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Providers } from './providers'
@@ -8,6 +8,13 @@ import { CookieConsent } from '@/components/ui/CookieConsent'
 import { PostHogProvider } from '@/lib/posthog'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bullhorn.to'
+
+// eslint-disable-next-line react-refresh/only-export-components -- viewport export is required by Next.js App Router
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
 
 // eslint-disable-next-line react-refresh/only-export-components -- metadata export is required by Next.js App Router
 export const metadata: Metadata = {

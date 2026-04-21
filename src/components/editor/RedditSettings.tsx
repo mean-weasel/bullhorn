@@ -25,7 +25,6 @@ interface RedditSettingsProps {
   onRemoveSubreddit: (subreddit: string) => void
 }
 
- 
 export const RedditSettings = ({
   post,
   onPostChange,
@@ -245,6 +244,7 @@ export const RedditSettings = ({
         </label>
         <input
           type="url"
+          inputMode="url"
           value={redditUrl}
           onChange={(e) => onRedditUrlChange(e.target.value)}
           placeholder="https://youtube.com/watch?v=... or any URL"

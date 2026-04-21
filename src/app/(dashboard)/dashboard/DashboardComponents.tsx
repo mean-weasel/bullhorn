@@ -161,7 +161,7 @@ export function DashboardCampaignCard({ campaign }: { campaign: Campaign }) {
         </div>
         <span
           className={cn(
-            'text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-md border-2',
+            'text-[11px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-md border-2',
             CAMPAIGN_STATUS_STYLES[campaign.status]
           )}
         >
