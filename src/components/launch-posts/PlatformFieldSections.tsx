@@ -321,6 +321,7 @@ export function DevHuntFieldsSection({
         <input
           id="github"
           type="url"
+          inputMode="url"
           value={getPlatformFieldString('githubUrl')}
           onChange={(e) => updatePlatformField('githubUrl', e.target.value)}
           placeholder="https://github.com/username/repo"

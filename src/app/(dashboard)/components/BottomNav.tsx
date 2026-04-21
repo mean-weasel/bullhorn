@@ -4,7 +4,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Home, Calendar, Plus, Settings, FileText } from 'lucide-react'
+import { Home, Calendar, Plus, Settings, FileText, ArrowLeft } from 'lucide-react'
 
 interface NavItem {
   icon: typeof Home
@@ -21,17 +21,41 @@ const navItems: NavItem[] = [
   { icon: Settings, label: 'More', path: '/settings' },
 ]
 
- 
 export function BottomNav() {
   const pathname = usePathname()
 
-  // Don't show on editor pages (they have their own back navigation)
+  // Show minimal nav on editor pages
   const isEditorPage =
     pathname?.startsWith('/new') ||
     pathname?.startsWith('/edit') ||
     pathname?.startsWith('/blog/new') ||
     pathname?.startsWith('/blog/edit')
-  if (isEditorPage) return null
+
+  if (isEditorPage) {
+    const backHref = pathname?.startsWith('/blog') ? '/blog' : '/posts'
+    return (
+      <nav
+        aria-label="Editor navigation"
+        className={cn(
+          'fixed bottom-0 left-0 right-0 z-50',
+          'bg-card/95 backdrop-blur-xl',
+          'border-t-[3px] border-border',
+          'md:hidden',
+          'pb-safe'
+        )}
+      >
+        <div className="flex items-center justify-center h-12">
+          <Link
+            href={backHref}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-muted-foreground active:scale-95 transition-all min-h-[44px]"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to {pathname?.startsWith('/blog') ? 'blog' : 'posts'}
+          </Link>
+        </div>
+      </nav>
+    )
+  }
 
   return (
     <nav
@@ -91,7 +115,7 @@ export function BottomNav() {
               <Icon className={cn('w-6 h-6', isActive && 'stroke-[2.5]')} />
               <span
                 className={cn(
-                  'text-[10px] mt-1 font-bold uppercase',
+                  'text-[11px] mt-1 font-bold uppercase',
                   isActive && 'text-foreground'
                 )}
               >

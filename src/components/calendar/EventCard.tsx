@@ -82,7 +82,7 @@ export function EventCard({ event, subscription, onSubscribe, onUnsubscribe }: E
           {PLATFORM_LABELS[event.platform] || event.platform}
         </span>
         {subscription && (
-          <span className="text-[10px] font-bold text-sticker-green uppercase tracking-wider">
+          <span className="text-[11px] font-bold text-sticker-green uppercase tracking-wider">
             Subscribed
           </span>
         )}
@@ -103,7 +103,7 @@ export function EventCard({ event, subscription, onSubscribe, onUnsubscribe }: E
           {event.tags.map((tag) => (
             <span
               key={tag}
-              className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border"
+              className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-secondary text-muted-foreground border border-border"
             >
               {tag}
             </span>

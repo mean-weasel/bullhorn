@@ -162,7 +162,10 @@ export default function SignUpPage() {
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -184,7 +187,9 @@ export default function SignUpPage() {
               </label>
               <input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -211,7 +216,9 @@ export default function SignUpPage() {
               </label>
               <input
                 id="confirmPassword"
+                name="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -293,7 +300,10 @@ export default function SignUpPage() {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:text-primary/80 font-bold">
+            <Link
+              href="/login"
+              className="text-primary hover:text-primary/80 font-bold inline-block py-2"
+            >
               Sign in
             </Link>
           </p>

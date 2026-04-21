@@ -274,13 +274,13 @@ function ReminderCard({
           {/* Linked post/campaign */}
           <div className="flex items-center gap-3 flex-wrap">
             {linkedPostName && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sticker-blue/10 text-sticker-blue border border-sticker-blue/30">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-sticker-blue/10 text-sticker-blue border border-sticker-blue/30">
                 <FileText className="w-3 h-3" />
                 {linkedPostName}
               </span>
             )}
             {linkedCampaignName && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sticker-orange/10 text-sticker-orange border border-sticker-orange/30">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-sticker-orange/10 text-sticker-orange border border-sticker-orange/30">
                 <FolderOpen className="w-3 h-3" />
                 {linkedCampaignName}
               </span>

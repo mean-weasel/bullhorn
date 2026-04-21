@@ -169,7 +169,7 @@ export default function PostsPage() {
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
           <h1 className="text-2xl md:text-3xl font-extrabold mb-1 tracking-tight">📋 All Posts</h1>
-          <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
+          <p className="text-sm md:text-base text-muted-foreground">
             Manage your drafts, scheduled, and published posts.
           </p>
           <div className="h-1 w-16 gradient-bar mt-2 rounded-full" />
@@ -180,7 +180,7 @@ export default function PostsPage() {
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                'p-2 rounded transition-all',
+                'p-2 rounded transition-all min-h-[44px] min-w-[44px] flex items-center justify-center',
                 viewMode === 'list'
                   ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-muted-foreground hover:text-foreground'
@@ -192,7 +192,7 @@ export default function PostsPage() {
             <button
               onClick={() => setViewMode('calendar')}
               className={cn(
-                'p-2 rounded transition-all',
+                'p-2 rounded transition-all min-h-[44px] min-w-[44px] flex items-center justify-center',
                 viewMode === 'calendar'
                   ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-muted-foreground hover:text-foreground'
@@ -247,7 +247,7 @@ export default function PostsPage() {
                 <button
                   onClick={() => setSearchQuery('')}
                   aria-label="Clear search"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <X className="w-4 h-4" />
                 </button>

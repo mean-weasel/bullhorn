@@ -75,7 +75,7 @@ export default function ProjectsPage() {
           <h1 className="text-2xl md:text-3xl font-display font-bold mb-1 tracking-tight">
             Projects
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
+          <p className="text-sm md:text-base text-muted-foreground">
             Organize campaigns and brand assets for different products or initiatives.
           </p>
           <div className="h-1 w-16 bg-linear-to-r from-[hsl(var(--gold))] to-transparent mt-2 rounded-full" />

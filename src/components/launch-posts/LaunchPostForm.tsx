@@ -249,6 +249,7 @@ export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
             <input
               id="url"
               type="url"
+              inputMode="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://your-product.com"

@@ -109,7 +109,7 @@ export function IOSSegmentedControl<T extends string = string>({
               <span
                 className={cn(
                   'bg-foreground/10 px-1.5 py-0.5 rounded-full',
-                  size === 'sm' ? 'text-[10px]' : 'text-xs',
+                  size === 'sm' ? 'text-[11px]' : 'text-xs',
                   isActive && 'bg-primary-foreground/20'
                 )}
               >

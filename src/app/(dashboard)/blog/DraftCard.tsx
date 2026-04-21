@@ -72,7 +72,7 @@ export function DraftCard({ draft }: { draft: BlogDraft }) {
                 <span
                   key={tag}
                   className={cn(
-                    'sticker-badge px-2 py-0.5 text-[10px] font-medium rounded-full',
+                    'sticker-badge px-2 py-0.5 text-[11px] font-medium rounded-full',
                     'bg-[hsl(var(--gold))]/15 text-[hsl(var(--gold-dark))] border-[hsl(var(--gold))]/30'
                   )}
                 >
