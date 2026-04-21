@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Nunito } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Providers } from './providers'
@@ -6,6 +7,13 @@ import '../index.css'
 import '@/lib/envValidation' // Validate env vars on startup
 import { CookieConsent } from '@/components/ui/CookieConsent'
 import { PostHogProvider } from '@/lib/posthog'
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  variable: '--font-nunito',
+})
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://bullhorn.to'
 
@@ -42,15 +50,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={nunito.variable} suppressHydrationWarning>
       <body className="font-sans">
         <PostHogProvider>
           <Providers>{children}</Providers>

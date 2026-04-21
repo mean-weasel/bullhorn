@@ -34,10 +34,13 @@ type TabType = 'campaigns' | 'settings'
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: paramId } = use(params)
   const router = useRouter()
-  const { fetchProjectWithCampaigns, fetchProjectAnalytics, updateProject, deleteProject } =
-    useProjectsStore()
-  const { addCampaign } = useCampaignsStore()
-  const { fetchConnections, getConnectionsByProject } = useAnalyticsStore()
+  const fetchProjectWithCampaigns = useProjectsStore((s) => s.fetchProjectWithCampaigns)
+  const fetchProjectAnalytics = useProjectsStore((s) => s.fetchProjectAnalytics)
+  const updateProject = useProjectsStore((s) => s.updateProject)
+  const deleteProject = useProjectsStore((s) => s.deleteProject)
+  const addCampaign = useCampaignsStore((s) => s.addCampaign)
+  const fetchConnections = useAnalyticsStore((s) => s.fetchConnections)
+  const getConnectionsByProject = useAnalyticsStore((s) => s.getConnectionsByProject)
 
   const [projectId, setProjectId] = useState<string | null>(null)
   const [project, setProject] = useState<Project | null>(null)

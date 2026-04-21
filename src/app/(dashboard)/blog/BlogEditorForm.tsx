@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Tag,
 } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useBlogDraftsStore, BlogDraft, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 import { IOSDateTimePicker } from '@/components/ui/IOSDateTimePicker'
@@ -41,7 +42,18 @@ export function BlogEditorForm({ draftId, newDraftRedirectPrefix }: BlogEditorFo
     deleteDraft,
     fetchDrafts,
     initialized,
-  } = useBlogDraftsStore()
+  } = useBlogDraftsStore(
+    useShallow((s) => ({
+      getDraft: s.getDraft,
+      addDraft: s.addDraft,
+      updateDraft: s.updateDraft,
+      archiveDraft: s.archiveDraft,
+      restoreDraft: s.restoreDraft,
+      deleteDraft: s.deleteDraft,
+      fetchDrafts: s.fetchDrafts,
+      initialized: s.initialized,
+    }))
+  )
 
   // Form state
   const [title, setTitle] = useState('')

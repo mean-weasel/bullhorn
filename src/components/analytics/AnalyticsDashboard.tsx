@@ -87,7 +87,9 @@ export function AnalyticsDashboard({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const { fetchReport, getReport, getConnection } = useAnalyticsStore()
+  const fetchReport = useAnalyticsStore((s) => s.fetchReport)
+  const getReport = useAnalyticsStore((s) => s.getReport)
+  const getConnection = useAnalyticsStore((s) => s.getConnection)
   const connection = getConnection(connectionId)
   const report = getReport(connectionId)
 

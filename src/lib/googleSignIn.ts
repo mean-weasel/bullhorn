@@ -1,25 +1,38 @@
-import { SocialLogin } from '@capgo/capacitor-social-login'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-let initialized = false
+let initPromise: Promise<Awaited<ReturnType<typeof loadSocialLogin>>> | null = null
+
+async function loadSocialLogin() {
+  try {
+    const { SocialLogin } = await import('@capgo/capacitor-social-login')
+    return SocialLogin
+  } catch {
+    throw new Error('Google Sign-In is unavailable. Please update the app and try again.')
+  }
+}
 
 async function ensureInitialized() {
-  if (initialized) return
-  await SocialLogin.initialize({
-    google: {
-      webClientId: process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
-      iOSClientId: process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '',
-      mode: 'online',
-    },
-  })
-  initialized = true
+  if (!initPromise) {
+    initPromise = (async () => {
+      const SocialLogin = await loadSocialLogin()
+      await SocialLogin.initialize({
+        google: {
+          webClientId: process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
+          iOSClientId: process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID || '',
+          mode: 'online',
+        },
+      })
+      return SocialLogin
+    })()
+  }
+  return initPromise
 }
 
 export async function nativeGoogleSignIn(
   supabase: SupabaseClient
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await ensureInitialized()
+    const SocialLogin = await ensureInitialized()
 
     const response = await SocialLogin.login({
       provider: 'google',

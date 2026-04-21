@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { Plus, Rocket, AlertCircle, RefreshCw, Filter } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import {
   useLaunchPostsStore,
   useLaunchPostsLoading,
@@ -20,7 +21,14 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 // eslint-disable-next-line max-lines-per-function
 export default function LaunchPostsPage() {
   const router = useRouter()
-  const { launchPosts, fetchLaunchPosts, initialized, deleteLaunchPost } = useLaunchPostsStore()
+  const { launchPosts, fetchLaunchPosts, initialized, deleteLaunchPost } = useLaunchPostsStore(
+    useShallow((s) => ({
+      launchPosts: s.launchPosts,
+      fetchLaunchPosts: s.fetchLaunchPosts,
+      initialized: s.initialized,
+      deleteLaunchPost: s.deleteLaunchPost,
+    }))
+  )
   const loading = useLaunchPostsLoading()
   const error = useLaunchPostsError()
 

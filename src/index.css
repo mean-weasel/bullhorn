@@ -57,8 +57,8 @@
   --radius-sm: 10px;
   --radius-pill: 50px;
 
-  --font-sans: Nunito, system-ui, sans-serif;
-  --font-display: Nunito, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+  --font-display: var(--font-nunito), system-ui, sans-serif;
   --font-mono: JetBrains Mono, SF Mono, monospace;
 
   --shadow-sticker: 4px 4px 0 hsl(var(--border));

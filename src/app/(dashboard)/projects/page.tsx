@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, FolderKanban, AlertCircle, RefreshCw } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useProjectsStore, useProjectsLoading, useProjectsError } from '@/lib/projects'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { cn } from '@/lib/utils'
@@ -15,8 +16,25 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 // eslint-disable-next-line max-lines-per-function
 export default function ProjectsPage() {
   const router = useRouter()
-  const { projects, fetchProjects, initialized, deleteProject } = useProjectsStore()
-  const { campaigns, fetchCampaigns, initialized: campaignsInitialized } = useCampaignsStore()
+  const { projects, fetchProjects, initialized, deleteProject } = useProjectsStore(
+    useShallow((s) => ({
+      projects: s.projects,
+      fetchProjects: s.fetchProjects,
+      initialized: s.initialized,
+      deleteProject: s.deleteProject,
+    }))
+  )
+  const {
+    campaigns,
+    fetchCampaigns,
+    initialized: campaignsInitialized,
+  } = useCampaignsStore(
+    useShallow((s) => ({
+      campaigns: s.campaigns,
+      fetchCampaigns: s.fetchCampaigns,
+      initialized: s.initialized,
+    }))
+  )
   const loading = useProjectsLoading()
   const error = useProjectsError()
   const [showCreateModal, setShowCreateModal] = useState(false)

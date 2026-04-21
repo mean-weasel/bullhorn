@@ -1,7 +1,8 @@
 'use client'
-/* eslint-disable max-lines -- large page component with extracted sub-components */
+/* eslint-disable max-lines -- custom hooks module with multiple related editor hooks */
 
 import { useState, useEffect, useRef } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { usePostsStore } from '@/lib/storage'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { useSocialAccountsStore } from '@/lib/socialAccounts'
@@ -35,17 +36,45 @@ interface UseEditorStateOptions {
   initialContent?: string
 }
 
-// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
+/* eslint-disable-next-line max-lines-per-function --
+   hook coordinates multiple store subscriptions and form state initialization */
 export function useEditorFormState(options: UseEditorStateOptions) {
   const { id, dateParam, campaignParam, initialContent = '' } = options
-  const { getPost, fetchPosts, initialized: postsInitialized } = usePostsStore()
-  const { campaigns, fetchCampaigns, initialized: campaignsInitialized } = useCampaignsStore()
+  const {
+    getPost,
+    fetchPosts,
+    initialized: postsInitialized,
+  } = usePostsStore(
+    useShallow((s) => ({
+      getPost: s.getPost,
+      fetchPosts: s.fetchPosts,
+      initialized: s.initialized,
+    }))
+  )
+  const {
+    campaigns,
+    fetchCampaigns,
+    initialized: campaignsInitialized,
+  } = useCampaignsStore(
+    useShallow((s) => ({
+      campaigns: s.campaigns,
+      fetchCampaigns: s.fetchCampaigns,
+      initialized: s.initialized,
+    }))
+  )
   const {
     getAccountsByProvider,
     fetchAccounts,
     getActiveAccount,
     initialized: accountsInitialized,
-  } = useSocialAccountsStore()
+  } = useSocialAccountsStore(
+    useShallow((s) => ({
+      getAccountsByProvider: s.getAccountsByProvider,
+      fetchAccounts: s.fetchAccounts,
+      getActiveAccount: s.getActiveAccount,
+      initialized: s.initialized,
+    }))
+  )
 
   const isNew = !id
   const existingPost = id ? getPost(id) : undefined

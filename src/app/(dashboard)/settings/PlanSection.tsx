@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { Crown } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { usePlanStore } from '@/lib/planStore'
 import { RESOURCE_LABELS } from '@/lib/limits'
 import { type GenericResource } from '@/lib/planEnforcement'
@@ -62,7 +63,16 @@ function UsageBar({
 
 // eslint-disable-next-line max-lines-per-function -- component JSX rendering, extraction would fragment UI
 export function PlanSection() {
-  const { plan, limits, storage, fetchPlan, initialized, loading } = usePlanStore()
+  const { plan, limits, storage, fetchPlan, initialized, loading } = usePlanStore(
+    useShallow((s) => ({
+      plan: s.plan,
+      limits: s.limits,
+      storage: s.storage,
+      fetchPlan: s.fetchPlan,
+      initialized: s.initialized,
+      loading: s.loading,
+    }))
+  )
 
   useEffect(() => {
     if (!initialized) {
