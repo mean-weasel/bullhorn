@@ -4,10 +4,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Check, AlertCircle, Key } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useTheme } from '@/lib/theme'
 import { useNotificationStore } from '@/lib/notifications'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
-import { useShallow } from 'zustand/react/shallow'
 import { useAnalyticsStore, useAnalyticsConnections } from '@/lib/analyticsStore'
 import {
   useSocialAccountsStore,
@@ -32,8 +32,8 @@ import {
 export default function SettingsPage() {
   const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
-  const { enabled: notificationsEnabled, setEnabled: setNotificationsEnabled } =
-    useNotificationStore()
+  const notificationsEnabled = useNotificationStore((s) => s.enabled)
+  const setNotificationsEnabled = useNotificationStore((s) => s.setEnabled)
   const [success, setSuccess] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 

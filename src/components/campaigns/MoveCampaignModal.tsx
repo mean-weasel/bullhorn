@@ -30,7 +30,7 @@ export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignMo
       initialized: s.initialized,
     }))
   )
-  const { moveCampaignToProject } = useCampaignsStore()
+  const moveCampaignToProject = useCampaignsStore((s) => s.moveCampaignToProject)
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     campaign.projectId || null
   )

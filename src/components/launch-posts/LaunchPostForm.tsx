@@ -15,7 +15,6 @@ import {
   getDefaultPlatformFields,
   useLaunchPostsStore,
 } from '@/lib/launchPosts'
-import { useShallow } from 'zustand/react/shallow'
 import { cn } from '@/lib/utils'
 import {
   ProductHuntFields,
@@ -33,9 +32,8 @@ interface LaunchPostFormProps {
 // eslint-disable-next-line max-lines-per-function
 export function LaunchPostForm({ post, campaignId }: LaunchPostFormProps) {
   const router = useRouter()
-  const { addLaunchPost, updateLaunchPost } = useLaunchPostsStore(
-    useShallow((s) => ({ addLaunchPost: s.addLaunchPost, updateLaunchPost: s.updateLaunchPost }))
-  )
+  const addLaunchPost = useLaunchPostsStore((s) => s.addLaunchPost)
+  const updateLaunchPost = useLaunchPostsStore((s) => s.updateLaunchPost)
   const titleRef = useRef<HTMLInputElement>(null)
 
   const isEditing = !!post

@@ -1,5 +1,5 @@
 'use client'
-/* eslint-disable max-lines -- large page component with extracted sub-components */
+/* eslint-disable max-lines -- custom hooks module with multiple related editor hooks */
 
 import { useState, useEffect, useRef } from 'react'
 import { useShallow } from 'zustand/react/shallow'
@@ -36,7 +36,8 @@ interface UseEditorStateOptions {
   initialContent?: string
 }
 
-// eslint-disable-next-line max-lines-per-function -- API handler requires auth+db in single try/catch
+/* eslint-disable-next-line max-lines-per-function --
+   hook coordinates multiple store subscriptions and form state initialization */
 export function useEditorFormState(options: UseEditorStateOptions) {
   const { id, dateParam, campaignParam, initialContent = '' } = options
   const {

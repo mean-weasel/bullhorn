@@ -49,7 +49,8 @@ function useCampaignStores() {
     if (!projectsInitialized) fetches.push(fetchProjects())
     if (!launchPostStore.initialized) fetches.push(launchPostStore.fetchLaunchPosts())
     if (fetches.length > 0) void Promise.all(fetches).catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- using specific Zustand store properties, not whole object
+    /* eslint-disable-next-line react-hooks/exhaustive-deps --
+       launchPostStore accessed by dot notation; Zustand guarantees stable refs */
   }, [
     postsInitialized,
     fetchPosts,
@@ -62,7 +63,7 @@ function useCampaignStores() {
 }
 
 function useCampaignData(id: string) {
-  const { getCampaignWithPosts } = useCampaignsStore()
+  const getCampaignWithPosts = useCampaignsStore((s) => s.getCampaignWithPosts)
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [campaignPosts, setCampaignPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)

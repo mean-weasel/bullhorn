@@ -16,7 +16,6 @@ import {
   Palette,
   Settings,
 } from 'lucide-react'
-import { useShallow } from 'zustand/react/shallow'
 import { useProjectsStore } from '@/lib/projects'
 import { useAnalyticsStore } from '@/lib/analyticsStore'
 import { AnalyticsConnection } from '@/lib/analytics.types'
@@ -35,22 +34,13 @@ type TabType = 'campaigns' | 'settings'
 export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: paramId } = use(params)
   const router = useRouter()
-  const { fetchProjectWithCampaigns, fetchProjectAnalytics, updateProject, deleteProject } =
-    useProjectsStore(
-      useShallow((s) => ({
-        fetchProjectWithCampaigns: s.fetchProjectWithCampaigns,
-        fetchProjectAnalytics: s.fetchProjectAnalytics,
-        updateProject: s.updateProject,
-        deleteProject: s.deleteProject,
-      }))
-    )
-  const { addCampaign } = useCampaignsStore()
-  const { fetchConnections, getConnectionsByProject } = useAnalyticsStore(
-    useShallow((s) => ({
-      fetchConnections: s.fetchConnections,
-      getConnectionsByProject: s.getConnectionsByProject,
-    }))
-  )
+  const fetchProjectWithCampaigns = useProjectsStore((s) => s.fetchProjectWithCampaigns)
+  const fetchProjectAnalytics = useProjectsStore((s) => s.fetchProjectAnalytics)
+  const updateProject = useProjectsStore((s) => s.updateProject)
+  const deleteProject = useProjectsStore((s) => s.deleteProject)
+  const addCampaign = useCampaignsStore((s) => s.addCampaign)
+  const fetchConnections = useAnalyticsStore((s) => s.fetchConnections)
+  const getConnectionsByProject = useAnalyticsStore((s) => s.getConnectionsByProject)
 
   const [projectId, setProjectId] = useState<string | null>(null)
   const [project, setProject] = useState<Project | null>(null)
