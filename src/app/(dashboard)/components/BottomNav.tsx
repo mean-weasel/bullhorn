@@ -21,6 +21,14 @@ const navItems: NavItem[] = [
   { icon: Settings, label: 'More', path: '/settings' },
 ]
 
+const navContainerClasses = cn(
+  'fixed bottom-0 left-0 right-0 z-50',
+  'bg-card/95 backdrop-blur-xl',
+  'border-t-[3px] border-border',
+  'md:hidden',
+  'pb-safe'
+)
+
 export function BottomNav() {
   const pathname = usePathname()
 
@@ -32,25 +40,16 @@ export function BottomNav() {
     pathname?.startsWith('/blog/edit')
 
   if (isEditorPage) {
-    const backHref = pathname?.startsWith('/blog') ? '/blog' : '/posts'
+    const isBlog = pathname?.startsWith('/blog')
     return (
-      <nav
-        aria-label="Editor navigation"
-        className={cn(
-          'fixed bottom-0 left-0 right-0 z-50',
-          'bg-card/95 backdrop-blur-xl',
-          'border-t-[3px] border-border',
-          'md:hidden',
-          'pb-safe'
-        )}
-      >
+      <nav aria-label="Editor navigation" className={navContainerClasses}>
         <div className="flex items-center justify-center h-12">
           <Link
-            href={backHref}
+            href={isBlog ? '/blog' : '/posts'}
             className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-muted-foreground active:scale-95 transition-all min-h-[44px]"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to {pathname?.startsWith('/blog') ? 'blog' : 'posts'}
+            Back to {isBlog ? 'blog' : 'posts'}
           </Link>
         </div>
       </nav>
@@ -58,16 +57,7 @@ export function BottomNav() {
   }
 
   return (
-    <nav
-      aria-label="Mobile navigation"
-      className={cn(
-        'fixed bottom-0 left-0 right-0 z-50',
-        'bg-card/95 backdrop-blur-xl',
-        'border-t-[3px] border-border',
-        'md:hidden',
-        'pb-safe'
-      )}
-    >
+    <nav aria-label="Mobile navigation" className={navContainerClasses}>
       {/* Colorful gradient bar at top */}
       <div className="h-1 gradient-bar" />
       <div className="flex items-center justify-around h-16">

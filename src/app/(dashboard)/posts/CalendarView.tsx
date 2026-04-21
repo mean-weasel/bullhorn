@@ -45,12 +45,16 @@ interface CalendarViewProps {
   onViewModeChange?: (mode: 'month' | 'week') => void
 }
 
+/** Shared base classes for calendar badge items (posts, reminders, events). */
+const calendarBadgeBase =
+  'flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold truncate border'
+
 /** Sticker-styled platform badge for a post in the calendar. */
 function PostBadge({ post, onClick }: { post: Post; onClick: (e: React.MouseEvent) => void }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold truncate border',
+        calendarBadgeBase,
         post.platform === 'twitter' && 'bg-twitter/10 text-twitter border-twitter/30',
         post.platform === 'linkedin' && 'bg-linkedin/10 text-linkedin border-linkedin/30',
         post.platform === 'reddit' && 'bg-reddit/10 text-reddit border-reddit/30'
@@ -68,7 +72,7 @@ function ReminderBadge({ reminder }: { reminder: CalendarReminder }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold truncate border',
+        calendarBadgeBase,
         'bg-accent/10 text-accent border-accent/30',
         reminder.isCompleted && 'opacity-50 line-through'
       )}
@@ -159,7 +163,7 @@ function EventDot({ name, platform }: { name: string; platform: string }) {
   return (
     <div
       className={cn(
-        'flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold truncate border',
+        calendarBadgeBase,
         'bg-sticker-purple/10 border-sticker-purple/30 text-sticker-purple',
         platform === 'twitter' && 'bg-twitter/5 border-twitter/20 text-twitter',
         platform === 'linkedin' && 'bg-linkedin/5 border-linkedin/20 text-linkedin',
