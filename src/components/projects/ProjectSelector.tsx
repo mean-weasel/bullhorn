@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { ChevronDown, FolderKanban, Layers, FolderX, Check } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useProjectsStore } from '@/lib/projects'
 import { Project } from '@/lib/posts'
 import { cn } from '@/lib/utils'
@@ -33,7 +34,14 @@ export function ProjectSelector({
 }: ProjectSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const { projects, fetchProjects, initialized, getProject } = useProjectsStore()
+  const { projects, fetchProjects, initialized, getProject } = useProjectsStore(
+    useShallow((s) => ({
+      projects: s.projects,
+      fetchProjects: s.fetchProjects,
+      initialized: s.initialized,
+      getProject: s.getProject,
+    }))
+  )
   const isMobile = useIsMobile()
 
   // Fetch projects on mount

@@ -16,6 +16,7 @@ import {
   Palette,
   Settings,
 } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useProjectsStore } from '@/lib/projects'
 import { useAnalyticsStore } from '@/lib/analyticsStore'
 import { AnalyticsConnection } from '@/lib/analytics.types'
@@ -35,9 +36,21 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
   const { id: paramId } = use(params)
   const router = useRouter()
   const { fetchProjectWithCampaigns, fetchProjectAnalytics, updateProject, deleteProject } =
-    useProjectsStore()
+    useProjectsStore(
+      useShallow((s) => ({
+        fetchProjectWithCampaigns: s.fetchProjectWithCampaigns,
+        fetchProjectAnalytics: s.fetchProjectAnalytics,
+        updateProject: s.updateProject,
+        deleteProject: s.deleteProject,
+      }))
+    )
   const { addCampaign } = useCampaignsStore()
-  const { fetchConnections, getConnectionsByProject } = useAnalyticsStore()
+  const { fetchConnections, getConnectionsByProject } = useAnalyticsStore(
+    useShallow((s) => ({
+      fetchConnections: s.fetchConnections,
+      getConnectionsByProject: s.getConnectionsByProject,
+    }))
+  )
 
   const [projectId, setProjectId] = useState<string | null>(null)
   const [project, setProject] = useState<Project | null>(null)

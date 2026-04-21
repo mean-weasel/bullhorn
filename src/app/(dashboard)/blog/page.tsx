@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { FileText, Plus, Search, X, Tag, AlertCircle, RefreshCw } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useBlogDraftsStore, BlogDraftStatus, BLOG_DRAFT_TAGS } from '@/lib/blogDrafts'
 import { cn } from '@/lib/utils'
 import { DraftCard, FilterTab } from './DraftCard'
@@ -34,7 +35,15 @@ export default function BlogDraftsPage() {
 
 // eslint-disable-next-line max-lines-per-function
 function BlogDraftsContent() {
-  const { drafts, loading, error, initialized, fetchDrafts } = useBlogDraftsStore()
+  const { drafts, loading, error, initialized, fetchDrafts } = useBlogDraftsStore(
+    useShallow((s) => ({
+      drafts: s.drafts,
+      loading: s.loading,
+      error: s.error,
+      initialized: s.initialized,
+      fetchDrafts: s.fetchDrafts,
+    }))
+  )
   const searchParams = useSearchParams()
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')

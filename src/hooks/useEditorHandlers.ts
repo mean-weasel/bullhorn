@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { useShallow } from 'zustand/react/shallow'
 import { usePostsStore } from '@/lib/storage'
 import { Post, Platform, PostStatus, PLATFORM_INFO, CHAR_LIMITS } from '@/lib/posts'
 import { copyToClipboard } from '@/lib/nativeClipboard'
@@ -312,7 +313,13 @@ export function usePlatformSwitch(
 // eslint-disable-next-line max-lines-per-function -- borderline, extraction would hurt readability
 export function usePostLifecycle(id: string | undefined) {
   const router = useRouter()
-  const { deletePost, archivePost, restorePost } = usePostsStore()
+  const { deletePost, archivePost, restorePost } = usePostsStore(
+    useShallow((s) => ({
+      deletePost: s.deletePost,
+      archivePost: s.archivePost,
+      restorePost: s.restorePost,
+    }))
+  )
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
 

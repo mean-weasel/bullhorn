@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Loader2, FolderKanban, Check, ArrowRight } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useProjectsStore } from '@/lib/projects'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { Campaign } from '@/lib/posts'
@@ -22,7 +23,13 @@ interface MoveCampaignModalProps {
 
 // eslint-disable-next-line max-lines-per-function
 export function MoveCampaignModal({ campaign, onClose, onMoved }: MoveCampaignModalProps) {
-  const { projects, fetchProjects, initialized } = useProjectsStore()
+  const { projects, fetchProjects, initialized } = useProjectsStore(
+    useShallow((s) => ({
+      projects: s.projects,
+      fetchProjects: s.fetchProjects,
+      initialized: s.initialized,
+    }))
+  )
   const { moveCampaignToProject } = useCampaignsStore()
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     campaign.projectId || null

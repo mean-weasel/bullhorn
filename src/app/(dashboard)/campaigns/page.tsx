@@ -12,6 +12,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { useProjectsStore } from '@/lib/projects'
 import { Campaign, CampaignStatus } from '@/lib/posts'
@@ -45,7 +46,17 @@ export default function CampaignsPage() {
   const error = useCampaignsStore((s) => s.error)
   const addCampaign = useCampaignsStore((s) => s.addCampaign)
   const deleteCampaign = useCampaignsStore((s) => s.deleteCampaign)
-  const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
+  const {
+    projects,
+    fetchProjects,
+    initialized: projectsInitialized,
+  } = useProjectsStore(
+    useShallow((s) => ({
+      projects: s.projects,
+      fetchProjects: s.fetchProjects,
+      initialized: s.initialized,
+    }))
+  )
   const [filter, setFilter] = useState<FilterStatus>('all')
   const [showNewModal, setShowNewModal] = useState(false)
   const [movingCampaign, setMovingCampaign] = useState<Campaign | null>(null)

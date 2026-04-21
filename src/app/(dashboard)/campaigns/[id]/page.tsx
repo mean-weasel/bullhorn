@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useShallow } from 'zustand/react/shallow'
 import { useCampaignsStore } from '@/lib/campaigns'
 import { usePostsStore } from '@/lib/storage'
 import { useProjectsStore } from '@/lib/projects'
@@ -17,8 +18,30 @@ import { AddLaunchPostModal } from './AddLaunchPostModal'
 
 function useCampaignStores() {
   const campaignStore = useCampaignsStore()
-  const { posts: allPosts, fetchPosts, initialized: postsInitialized, updatePost } = usePostsStore()
-  const { projects, fetchProjects, initialized: projectsInitialized } = useProjectsStore()
+  const {
+    posts: allPosts,
+    fetchPosts,
+    initialized: postsInitialized,
+    updatePost,
+  } = usePostsStore(
+    useShallow((s) => ({
+      posts: s.posts,
+      fetchPosts: s.fetchPosts,
+      initialized: s.initialized,
+      updatePost: s.updatePost,
+    }))
+  )
+  const {
+    projects,
+    fetchProjects,
+    initialized: projectsInitialized,
+  } = useProjectsStore(
+    useShallow((s) => ({
+      projects: s.projects,
+      fetchProjects: s.fetchProjects,
+      initialized: s.initialized,
+    }))
+  )
   const launchPostStore = useLaunchPostsStore()
   useEffect(() => {
     const fetches: Promise<void>[] = []

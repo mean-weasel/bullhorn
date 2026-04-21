@@ -1,10 +1,15 @@
-import { SocialLogin } from '@capgo/capacitor-social-login'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 let initialized = false
 
+async function getSocialLogin() {
+  const { SocialLogin } = await import('@capgo/capacitor-social-login')
+  return SocialLogin
+}
+
 async function ensureInitialized() {
   if (initialized) return
+  const SocialLogin = await getSocialLogin()
   await SocialLogin.initialize({
     google: {
       webClientId: process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID || '',
@@ -20,6 +25,7 @@ export async function nativeGoogleSignIn(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await ensureInitialized()
+    const SocialLogin = await getSocialLogin()
 
     const response = await SocialLogin.login({
       provider: 'google',

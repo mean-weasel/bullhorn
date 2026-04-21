@@ -3,12 +3,19 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { AlertTriangle, X } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { usePlanStore } from '@/lib/planStore'
 import { RESOURCE_LABELS } from '@/lib/limits'
 import { cn } from '@/lib/utils'
 
 export function UsageBanner() {
-  const { fetchPlan, initialized, isNearAnyLimit } = usePlanStore()
+  const { fetchPlan, initialized, isNearAnyLimit } = usePlanStore(
+    useShallow((s) => ({
+      fetchPlan: s.fetchPlan,
+      initialized: s.initialized,
+      isNearAnyLimit: s.isNearAnyLimit,
+    }))
+  )
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
