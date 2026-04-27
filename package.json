@@ -80,7 +80,7 @@
     "@capacitor/assets": "^3.0.5",
     "@commitlint/cli": "^20.4.3",
     "@commitlint/config-conventional": "^20.4.3",
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.59.1",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/github": "^12.0.6",
     "@semantic-release/release-notes-generator": "^14.1.0",
@@ -96,7 +96,7 @@
     "@typescript-eslint/eslint-plugin": "^8.57.0",
     "@typescript-eslint/parser": "^8.57.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/coverage-v8": "^4.1.5",
     "dotenv": "^17.3.1",
     "eslint": "^10.0.3",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -104,7 +104,7 @@
     "eslint-plugin-security": "^4.0.0",
     "gh-pages": "^6.3.0",
     "husky": "^9.1.7",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.1.0",
     "knip": "^5.86.0",
     "postcss": "^8.5.8",
     "prettier": "^3.7.4",
@@ -112,7 +112,7 @@
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vite": "^6.4.1",
-    "vitest": "^4.0.16",
+    "vitest": "^4.1.5",
     "yaml": "^2.8.3"
   }
 }
